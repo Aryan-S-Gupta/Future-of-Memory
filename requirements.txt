@@ -1,1 +1,6 @@
 Django>=4.0
+langchain
+langchain-community>=0.3.27
+sentence-transformers
+faiss-cpu # preferably use faiss-gpu if machine has GPU available
+pypdf
