@@ -1,42 +1,92 @@
 [
   {
     "year": 2035,
-    "story": "With the rise of NeuroCleanse™, more people are choosing to erase traumatic memories. Global debates erupt over the ethics of memory authenticity."
+    "background": "In 2035, society is shaken by a breakthrough memory-erasure technique that promises to eliminate traumatic memories within minutes.",
+    "question": "Should individuals be allowed to erase painful memories?",
+    "options": {
+      "yes": "You choose to erase your darkest memories, but find your identity becoming fractured as pieces of your past disappear.",
+      "no": "You keep your painful memories, growing stronger through them, but continue to struggle with emotional weight."
+    }
   },
   {
     "year": 2036,
-    "story": "The United Nations passes the Cognitive Intervention Regulation Act, requiring all memory edits to be officially recorded. Protests break out in several countries."
+    "background": "As memory-modification startups boom, governments scramble to regulate the rapidly evolving industry.",
+    "question": "Do you support government regulation of memory modification technologies?",
+    "options": {
+      "yes": "You advocate for strict oversight, ensuring ethical standards, but innovation slows under bureaucracy.",
+      "no": "You support free market innovation, but unregulated experiments lead to public distrust and scandals."
+    }
   },
   {
     "year": 2037,
-    "story": "MemoryCloud™, a global memory storage platform, launches permanent consciousness backup in exchange for behavioral data."
+    "background": "Cloud-based memory storage becomes mainstream, offering seamless recall and sharing.",
+    "question": "Would you upload your memories to the cloud in exchange for convenience?",
+    "options": {
+      "yes": "You enjoy perfect memory access and enhanced collaboration, but corporations begin tracking your thoughts.",
+      "no": "You keep your mind offline, but lose access to integrated systems others rely on."
+    }
   },
   {
     "year": 2038,
-    "story": "France conducts the first legal case using 'memory rewriting trial procedure' on a murder suspect, shocking the international legal community."
+    "background": "A global debate erupts over the use of memory rewriting in criminal justice systems.",
+    "question": "Should convicted criminals be required to undergo memory rewriting therapy?",
+    "options": {
+      "yes": "Crime rates drop, but activists warn of eroding personal identity and autonomy.",
+      "no": "You protect cognitive freedom, but violent offenders struggle to reform and reintegrate."
+    }
   },
   {
     "year": 2039,
-    "story": "The world's first 'designer babies' are implanted with artificial happy childhood memories, igniting fierce ethical debates."
+    "background": "Biotech companies begin offering memory-enhancement packages for newborns.",
+    "question": "Do you support memory customization in genetically engineered newborns?",
+    "options": {
+      "yes": "Engineered children outperform peers, but face immense pressure and societal division.",
+      "no": "You resist unnatural intervention, preserving individuality, but face accusations of limiting potential."
+    }
   },
   {
     "year": 2040,
-    "story": "Black market memory networks are exposed; hackers steal and auction private memories on the dark web."
+    "background": "Digital black markets emerge, trafficking in rare and exotic memories.",
+    "question": "Should the buying and selling of memories be banned?",
+    "options": {
+      "yes": "You push for legal bans and crackdowns, but demand drives the trade further underground.",
+      "no": "You advocate for legalization and taxation, accepting the risks of cognitive commodification."
+    }
   },
   {
     "year": 2041,
-    "story": "A global survey reveals 74% of people are willing to share childhood memories anonymously for educational use."
+    "background": "Historical institutions launch campaigns to collect real human childhood memories for educational archives.",
+    "question": "Would you share your childhood memories for public education purposes?",
+    "options": {
+      "yes": "You contribute your stories to help future generations understand the past, but feel exposed.",
+      "no": "You keep your memories private, but lose a chance to shape the collective narrative."
+    }
   },
   {
     "year": 2042,
-    "story": "The 'Truth Equals Memory' movement grows, calling for labels on altered individuals as 'virtual humans'."
+    "background": "Studies show altered memories influence behavior as strongly as real ones.",
+    "question": "Do you believe altered memories are still real?",
+    "options": {
+      "yes": "You embrace rewritten narratives as personal truth, blurring fact and fiction.",
+      "no": "You reject manipulated memories, clinging to verifiable history\u2014but struggle with uncertainty."
+    }
   },
   {
     "year": 2043,
-    "story": "Memory+ devices allow users to experience multiple simultaneous memory streams, but massive cognitive failures begin to emerge."
+    "background": "Memory devices are now vulnerable to sophisticated cyber attacks.",
+    "question": "If your memories could be hacked, would you still use enhanced memory devices?",
+    "options": {
+      "yes": "You install enhanced security and continue using devices, accepting the risk.",
+      "no": "You abandon enhancements, but struggle to compete in an augmented world."
+    }
   },
   {
     "year": 2044,
-    "story": "A radical proposal gains traction: allow adults to voluntarily erase all memories and restart life with a blank mind."
+    "background": "Neural reset protocols allow complete erasure of personal memory and identity.",
+    "question": "Should people be allowed to completely reset their memory and start life over?",
+    "options": {
+      "yes": "You advocate for total freedom of self-definition, despite the rise of identity fraud.",
+      "no": "You believe in continuity of self, preserving memory as the core of personhood."
+    }
   }
 ]

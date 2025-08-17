@@ -9,9 +9,8 @@ This repository contains the Django-based backend for the Memory Simulation narr
 
 - Django 4.x backend scaffolded and structured for local development
 - Static story content and yes/no questions (starting from year 2035)
-- Two working API endpoints:
-  - `/api/static-question` – returns a random yes/no question
-  - `/api/static-story?year=YYYY` – returns story background for that year
+- One working API endpoints:
+  - `/api/static-story?year=YYYY` – returns full round data (background, question, yes/no outcomes)
 - Modular folder structure for future components:
   - `rag/` for retrieval-augmented generation
   - `llm/` for local LLM integration
@@ -92,26 +91,24 @@ python manage.py runserver
 
 Then open your browser and test:
 
-- [http://127.0.0.1:8000/api/static-question](http://127.0.0.1:8000/api/static-question)
 - [http://127.0.0.1:8000/api/static-story?year=2035](http://127.0.0.1:8000/api/static-story?year=2035)
+
+This endpoint returns the full narrative content for the selected year, including the question and both branching outcomes.
 
 ---
 
 ## 🧪 Sample API Output
 
-### `GET /api/static-question`
-```json
-{
-  "year": 2037,
-  "question": "Would you upload your memories to the cloud in exchange for convenience?"
-}
-```
-
 ### `GET /api/static-story?year=2037`
 ```json
 {
   "year": 2037,
-  "story": "MemoryCloud™, a global memory storage platform, launches permanent consciousness backup in exchange for behavioral data."
+  "background": "MemoryCloud™, a global memory storage platform, launches permanent consciousness backup in exchange for behavioral data.",
+  "question": "Would you upload your memories to the cloud in exchange for convenience?",
+  "options": {
+    "yes": "You opt in to the service, gaining instant memory access, but also exposing your thoughts to corporate analytics.",
+    "no": "You reject the offer, choosing privacy over ease, but find yourself at odds with society’s new norms."
+  }
 }
 ```
 
