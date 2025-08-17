@@ -11,6 +11,7 @@ npm -v
 1. On MacOS: ```brew install node```. On another OS: follow the instructions on [Node's website](https://nodejs.org/en/download)
    
 Steps to follow everytime a new branch is pulled:
+
 2. clone the repository
 3.  ```cd frontend/src```
 4. ```npm install```
