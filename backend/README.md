@@ -113,9 +113,9 @@ Each round includes:
 ### 💻 Terminal Testing
 
 ```bash
-curl http://127.0.0.1:8000/api/storyline/start?year=2035
-curl http://127.0.0.1:8000/api/storyline/question?year=2035
-curl http://127.0.0.1:8000/api/storyline/choice?year=2035\&choice=no
+curl "http://127.0.0.1:8000/api/storyline/start?year=2035"
+curl "http://127.0.0.1:8000/api/storyline/question?year=2035"
+curl "http://127.0.0.1:8000/api/storyline/choice?year=2035\&choice=no"
 ```
 
 > Remember to escape `&` when using curl
