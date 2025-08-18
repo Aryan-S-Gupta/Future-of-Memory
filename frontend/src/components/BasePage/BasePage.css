@@ -75,14 +75,6 @@
   max-width: 800px;
   text-align: center;
 }
-/*.text-container h2 {
-    font-family: 'Kanit', sans-serif;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #ff58d0;
-    text-shadow: 1px 1px 6px rgba(25, 0, 255, 0.7);
-    margin-bottom: 1rem;
-} */
 .text-container p {
   color: #ffffff; /* keep text white for readability */
 }
