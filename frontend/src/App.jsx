@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainGameScreen from "./screens/MainGameScreen.jsx";
 import StoryScreen from "./screens/StoryScreen.jsx";
 import HowToScreen from "./screens/HowToScreen.jsx";
+import '@fontsource/kanit/400.css';
+import '@fontsource/kanit/500.css';
 
 
 function App() {

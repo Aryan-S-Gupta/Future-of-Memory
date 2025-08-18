@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap');
+
 .screen {
   position: fixed;
   inset: 0;
@@ -16,21 +18,21 @@
 
 /* Title styling */
 .title {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Kanit', sans-serif;
   font-size: 4rem;
-  font-weight: 800;
+  font-weight: 500;
   text-align: center;
-  color: #ffffff;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+  color: #e958b9;
+  text-shadow: 2px 2px 8px rgb(68, 26, 236);
   margin-bottom: 3rem;
 }
 .subheading {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Kanit', sans-serif;
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 500;
   text-align: center;
-  color: #39FF14;
-  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
+  color: #ff00aa;
+  text-shadow: 1px 1px 6px rgba(255, 0, 0, 0.7);
   margin: 1.5rem 0 0.5rem 0;  
 }
 
@@ -40,8 +42,8 @@
   font-size: 1.2rem;
   font-weight: 400;
   text-align: center;
-  color: #e0e0f0;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+  color: #f6ff00;
+  text-shadow: 1px 1px 4px rgb(0, 0, 0);
   max-width: 700px;         
   margin: 0 auto 2rem auto;
   line-height: 1.6;         
@@ -56,11 +58,11 @@
 }
 
 .text-container h2 {
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Kanit', sans-serif;
     font-size: 2.5rem;
     font-weight: 700;
-    color: #39FF14;
-    text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
+    color: #ff58d0;
+    text-shadow: 1px 1px 6px rgba(25, 0, 255, 0.7);
     margin-bottom: 1rem;
 } 
 .text-container p {
