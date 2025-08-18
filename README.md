@@ -1,6 +1,6 @@
 # Memory Futures Game
 
-This is the frontend for the Memory Simulation narrative game.
+Instructions on running the project
 
 ## ⚙️ Setup Instructions
 
@@ -17,10 +17,11 @@ npm -v
 brew install node
 ```
 
-### Then:
+1. On MacOS: ```brew install node```. On another OS: follow the instructions on [Node's website](https://nodejs.org/en/download)
+   
+Steps to follow everytime a new branch is pulled:
 
-1. Clone the repository  
-2. `cd frontend`  
-3. `npm install`  
-4. `npm install react-router-dom`  
-5. `npm run dev` — to actually run the game
+2. clone the repository
+3.  ```cd frontend/src```
+4. ```npm install```
+5. ```npm run dev``` -- to actually run the game
