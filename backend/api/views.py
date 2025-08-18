@@ -1,3 +1,7 @@
+"""
+API views for handling storyline-related requests.
+Provides endpoints to fetch story background, questions, and results based on user choices.
+"""
 import json
 import os
 from django.http import JsonResponse, HttpResponseBadRequest
@@ -9,6 +13,12 @@ with open(DATA_FILE, 'r', encoding='utf-8') as f:
     story_data = json.load(f)
 
 def get_story_background(request):
+
+    """
+    Retrieve the background information for a given year from the story data.
+    Expects a 'year' parameter in the GET request.
+    Returns a JSON response with the background or an error message.
+    """
     year = request.GET.get('year')
     if not year:
         return HttpResponseBadRequest("Missing 'year' parameter.")
@@ -24,6 +34,12 @@ def get_story_background(request):
 
 
 def get_story_question(request):
+
+    """
+    Retrieve the question for a given year from the story data.
+    Expects a 'year' parameter in the GET request.
+    Returns a JSON response with the question or an error message.
+    """
     year = request.GET.get('year')
     if not year:
         return HttpResponseBadRequest("Missing 'year' parameter.")
@@ -39,6 +55,12 @@ def get_story_question(request):
 
 
 def get_story_result_by_choice(request):
+
+    """
+    Retrieve the result of a user's choice for a given year from the story data.
+    Expects 'year' and 'choice' parameters in the GET request.
+    Returns a JSON response with the result, or an error message if not found.
+    """
     year = request.GET.get('year')
     choice = request.GET.get('choice')
     if not year or not choice:

@@ -1,3 +1,7 @@
+"""
+URL configuration for the API endpoints related to the storyline feature.
+Maps URL paths to their corresponding view functions.
+"""
 from django.urls import path
 from . import views
 
