@@ -24,3 +24,25 @@
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
   margin-bottom: 3rem;
 }
+.subheading {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  color: #39FF14; /* Electric lime for readability */
+  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
+  margin: 1.5rem 0 0.5rem 0;  
+}
+
+/* Body text */
+.text {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  text-align: center;
+  color: #e0e0f0;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+  max-width: 700px;         
+  margin: 0 auto 2rem auto;
+  line-height: 1.6;         
+}
