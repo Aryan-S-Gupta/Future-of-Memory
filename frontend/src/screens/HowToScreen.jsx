@@ -1,15 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import BasePage from "../components/BasePage/BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
-import "./HowToScreen.css";
 
 const HowToScreen = () => {
+  /* useNavigate hook allows navigation between screens*/
   const navigate = useNavigate();
 
+  /*
+    HowToScreen component provides instructions on how to play the game.
+  */
   return (
     <BasePage>
       <h1 className="title">Instructions</h1>
-      
       <div className="text-container">
       <p className="text"> Welcome! to The Future Of Memories. In this interactive experience, you will navigate a world shaped by your decisions on neurotechnology and ethics.</p>
         
@@ -28,6 +30,7 @@ const HowToScreen = () => {
         At the end of your journey, an AI-generated artwork visualizes the world you shaped, showing the cumulative effects of your decisions.
       </p>
      
+     /* Provides a button to navigate back to the main game screen */
       <div className="button-group">
         <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
       </div>
