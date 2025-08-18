@@ -160,7 +160,22 @@ curl http://127.0.0.1:8000/api/storyline/choice?year=2035\&choice=no
 - Please create a new branch before developing (e.g., `feature/rag-module`, `feature/llm-api`)
 - Make sure to pull latest changes before working
 - Don’t commit `venv/` or `.sqlite3` files — they’re excluded via `.gitignore`
-- Frontend or multiplayer team members can call these endpoints for mock data until dynamic generation is live
+
+---
+
+### 🌐 Frontend Integration Notes (CORS)
+
+CORS (Cross-Origin Resource Sharing) has been enabled via `django-cors-headers` in this backend.
+
+Frontend developers can now directly `fetch()` Django API endpoints from React, for example:
+
+```js
+fetch("http://127.0.0.1:8000/api/storyline/start?year=2035")
+  .then((res) => res.json())
+  .then((data) => console.log(data));
+```
+
+> No additional proxy settings are required for local development.
 
 ---
 
