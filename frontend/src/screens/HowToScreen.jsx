@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import BasePage from "../components/BasePage/BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
+import "./HowToScreen.css";
 
 const HowToScreen = () => {
   const navigate = useNavigate();
@@ -8,8 +9,9 @@ const HowToScreen = () => {
   return (
     <BasePage>
       <h1 className="title">Instructions</h1>
-
-      <t1 className="text"> Welcome! to The Future Of Memories. In this interactive experience, you will navigate a world shaped by your decisions on neurotechnology and ethics.</t1>
+      
+      <div className="text-container">
+      <p className="text"> Welcome! to The Future Of Memories. In this interactive experience, you will navigate a world shaped by your decisions on neurotechnology and ethics.</p>
         
       <h2 className="subheading">Read the Scenario</h2>
       <p className="text">
@@ -29,8 +31,8 @@ const HowToScreen = () => {
       <div className="button-group">
         <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
       </div>
+      </div>
     </BasePage>
   );
 };
-
-export default HowToScreen; 
+export default HowToScreen;
