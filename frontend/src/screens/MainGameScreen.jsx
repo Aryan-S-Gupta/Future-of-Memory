@@ -1,26 +1,18 @@
 import { useNavigate } from "react-router-dom";
-import backgroundImg from "../assets/background.jpg";
-import "./MainGameScreen.css";
+import BasePage from "../components/BasePage/BasePage.jsx";
+import Button from "../components/Button/Button.jsx";
 
 const MainGameScreen = () => {
   const navigate = useNavigate();
 
   return (
-    <div
-      className="main-screen"
-      style={{ backgroundImage: `url(${backgroundImg})` }}
-    >
+    <BasePage>
       <h1 className="title">Future of Memory</h1>
-
       <div className="button-group">
-        <button className="btn-primary" onClick={() => navigate("/story")}>
-          Start
-        </button>
-        <button className="btn-secondary" onClick={() => navigate("/how-to-play")}>
-          How to Play
-        </button>
+        <Button baseButton="btn-primary" action={() => navigate("/story")} title="Start" />
+        <Button baseButton="btn-secondary" action={() => navigate("/how-to-play")} title="How To Play"/>
       </div>
-    </div>
+    </BasePage>
   );
 };
 
