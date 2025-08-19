@@ -29,8 +29,6 @@ const HowToScreen = () => {
       <p className="text">
         At the end of your journey, an AI-generated artwork visualizes the world you shaped, showing the cumulative effects of your decisions.
       </p>
-     
-     /* Provides a button to navigate back to the main game screen */
       <div className="button-group">
         <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
       </div>
