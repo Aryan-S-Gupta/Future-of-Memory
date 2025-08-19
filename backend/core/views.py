@@ -11,6 +11,6 @@ def index(request):
         request: The HTTP request object
         
     Returns:
-        HttpResponse: A simple text response indicating the backend is running
+        HttpResponse: A simple text response indicating the backend is running with 200 OK status
     """
-    return HttpResponse("MemorySim backend is running.")
+    return HttpResponse("MemorySim backend is running.", status=200)
