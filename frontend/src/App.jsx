@@ -6,16 +6,19 @@ import HowToScreen from "./screens/HowToScreen.jsx";
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
 
+import BackgroundWrapper from "./components/BasePage/BasePage.jsx";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<MainGameScreen />} />
-        <Route path="/story" element={<StoryScreen />} />
-        <Route path="/how-to-play" element={<HowToScreen/>} />
-      </Routes>
-    </Router>
+    <BackgroundWrapper>
+      <Router>
+        <Routes>
+          <Route path="/" element={<MainGameScreen />} />
+          <Route path="/story" element={<StoryScreen />} />
+          <Route path="/how-to-play" element={<HowToScreen />} />
+        </Routes>
+      </Router>
+    </BackgroundWrapper>
   );
 }
 
