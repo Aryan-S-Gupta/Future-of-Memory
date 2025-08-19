@@ -1,6 +1,6 @@
 27 papers from the PubMed Central Open Access Subset. Retrieved 17 Aug 2025
 
-Search term: `"memory"[MeSH Terms] AND "neurotechnology"[All Fields] AND ("ethics"[Subheading] OR "ethics"[All Fields] OR "ethics"[MeSH Terms]) AND "future"[All Fields] AND ("humans"[MeSH Terms] OR "humans"[All Fields] OR "human"[All Fields]) AND "open access"[filter]`
+Search term: `"memory"[MeSH Terms] AND "neurotechnology"[All Fields] AND ("ethics"[Subheading] OR "ethics"[All Fields] OR "ethics"[MeSH Terms]) AND "future"[All Fields] AND ("humans"[MeSH Terms]) AND "open access"[filter]`
 
 [General URL](https://www.ncbi.nlm.nih.gov/pmc)
 
