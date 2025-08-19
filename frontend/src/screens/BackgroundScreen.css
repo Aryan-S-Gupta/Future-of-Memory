@@ -1,0 +1,34 @@
+.title2 {
+  font-family: 'Kanit', sans-serif;
+  font-size: 4rem;
+  font-weight: 800;
+  text-align: start;
+  color: #414042;
+  text-shadow: 2px 2px 8px rgb(0, 0, 0);
+  margin-bottom: 3rem;
+
+}
+
+.text-container2 {
+  background-color: rgba(0, 0, 0, 0.6); /* black with 60% opacity */
+  padding: 5rem; 
+  border-radius: 3px;
+  max-width: 800px;
+  text-align: center;
+}
+.text-container p {
+  color: #ffffff; /* keep text white for readability */
+}
+
+/* Body text */
+.text {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 2.75rem;
+  font-weight: 400;
+  text-align: center;
+  color: #ffffff;
+  text-shadow: 1px 1px 4px rgb(0, 0, 0);
+  max-width: 900px;         
+  margin: 0 auto;
+  line-height: 1.5;         
+}

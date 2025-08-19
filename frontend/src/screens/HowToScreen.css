@@ -1,0 +1,20 @@
+
+/* Body text */
+.text {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 1.0rem;
+  font-weight: 400;
+  text-align: center;
+  color: #ffffff;
+  text-shadow: 1px 1px 4px rgb(0, 0, 0);
+  max-width: 700px;         
+  margin: 0 auto;
+  line-height: 1.2;         
+}
+.text-container {
+  background-color: rgba(0, 0, 0, 0.6); /* black with 60% opacity */
+  padding: 3rem; 
+  border-radius: 10px;
+  max-width: 800px;
+  text-align: center;
+}

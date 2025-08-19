@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import BasePage from "../components/BasePage/BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
+import "./BackgroundScreen.css";
 
 
 const BackgroundScreen = () => {

@@ -27,17 +27,6 @@
   margin-bottom: 3rem;
 }
 
-.title2 {
-  font-family: 'Kanit', sans-serif;
-  font-size: 4rem;
-  font-weight: 800;
-  text-align: start;
-  color: #414042;
-  text-shadow: 2px 2px 8px rgb(0, 0, 0);
-  margin-bottom: 3rem;
-}
-
-
 .subheading {
   font-family: 'Kanit', sans-serif;
   font-size: 2rem;
@@ -46,37 +35,6 @@
   color: #ff00aa;
   text-shadow: 1px 1px 6px rgba(255, 0, 0, 0.7);
   margin: 1.5rem 0 0.5rem 0;  
-}
-
-/* Body text */
-.text {
-  font-family: 'Exo 2', sans-serif;
-  font-size: 1.0rem;
-  font-weight: 400;
-  text-align: center;
-  color: #ffffff;
-  text-shadow: 1px 1px 4px rgb(0, 0, 0);
-  max-width: 700px;         
-  margin: 0 auto;
-  line-height: 1.2;         
-}
-.text-container {
-  background-color: rgba(0, 0, 0, 0.6); /* black with 60% opacity */
-  padding: 3rem; 
-  border-radius: 5px;
-  max-width: 800px;
-  text-align: center;
-}
-
-.text-container2 {
-  background-color: rgba(0, 0, 0, 0.6); /* black with 60% opacity */
-  padding: 10rem; 
-  border-radius: 3px;
-  max-width: 800px;
-  text-align: center;
-}
-.text-container p {
-  color: #ffffff; /* keep text white for readability */
 }
 
 

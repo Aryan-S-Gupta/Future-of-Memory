@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import BasePage from "../components/BasePage/BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
-
+import "./HowToScreen.css";
 const HowToScreen = () => {
   /* useNavigate hook allows navigation between screens*/
   const navigate = useNavigate();
