@@ -46,6 +46,14 @@ This repository contains the Django-based backend for the Memory Simulation narr
 
 ## 🛠️ How to Run Locally
 
+First ensure you have Ollama installed - get it from https://ollama.com/download/. You may need to open the app the first time to install the command-line tools.
+
+Check that the CLI tools are installed properly: `ollama --version` should give a version number
+
+Pull the required model: `ollama pull tinyllama`
+
+Open the desktop app to start Ollama.
+
 ### ✅ Step 1: Clone the Repository
 
 ```bash
@@ -74,6 +82,8 @@ pip install -r requirements.txt
 ```
 
 ---
+
+Now make sure to `cd backend`
 
 ### ✅ Step 4: Run Migrations
 
