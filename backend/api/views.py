@@ -12,7 +12,12 @@ DATA_FILE = os.path.join(BASE_DIR, 'data', 'static_stories.json')
 with open(DATA_FILE, 'r', encoding='utf-8') as f:
     story_data = json.load(f)
 
-def get_story_background(request):
+# --- helper method ---
+def get_entry_by_year(year):
+    return next((item for item in story_data if str(item["year"]) == str(year)), None)
+
+
+def get_story_scenario(request):
 
     """
     Retrieve the background information for a given year from the story data.
@@ -23,13 +28,13 @@ def get_story_background(request):
     if not year:
         return HttpResponseBadRequest("Missing 'year' parameter.")
 
-    entry = next((item for item in story_data if str(item["year"]) == year), None)
+    entry = get_entry_by_year(year)
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
 
     return JsonResponse({
         "year": entry["year"],
-        "background": entry["background"]
+        "scenario": entry["background"]
     })
 
 
@@ -44,13 +49,14 @@ def get_story_question(request):
     if not year:
         return HttpResponseBadRequest("Missing 'year' parameter.")
 
-    entry = next((item for item in story_data if str(item["year"]) == year), None)
+    entry = get_entry_by_year(year)
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
 
     return JsonResponse({
         "year": entry["year"],
-        "question": entry["question"]
+        "question": entry["question"],
+        "options": entry["options"]
     })
 
 
@@ -62,21 +68,34 @@ def get_story_result_by_choice(request):
     Returns a JSON response with the result, or an error message if not found.
     """
     year = request.GET.get('year')
-    choice = request.GET.get('choice')
+    choice = request.GET.get('choice').get(choice.lower())
     if not year or not choice:
         return HttpResponseBadRequest("Missing 'year' or 'choice' parameter.")
 
-    entry = next((item for item in story_data if str(item["year"]) == year), None)
+    entry = get_entry_by_year(year)
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
     
-    result = entry.get("options", {}).get(choice.lower())
     if not result:
         return JsonResponse({"error": f"No result found for choice '{choice}'"}, status=404)
 
-    return JsonResponse({
-        "year": entry["year"],
-        "choice": choice,
-        "result": result,
-        "next_year": entry["year"] + 1
-    })
+    next_scenario = get_story_scenario(year + 1)
+    next_question = get_story_question(year + 1)
+
+
+def get_story_result(request):
+    """
+    Retrieves the user's selected choice for a given question. This is a post method 
+    which means this is directly retrived from the user input
+    """
+    if request.method == "POST":
+        data = json.loads(request.body)
+        year = data.get("year")
+        choice = data.get("choice")
+
+        return JsonResponse({
+            "year": year,
+            "choice": choice,
+        })
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
