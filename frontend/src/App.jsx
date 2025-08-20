@@ -2,7 +2,9 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainGameScreen from "./screens/MainGameScreen.jsx";
 import StoryScreen from "./screens/StoryScreen.jsx";
-import HowToPlayScreen from "./screens/HowToPlayScreen.jsx";
+import HowToScreen from "./screens/HowToScreen.jsx";
+import '@fontsource/kanit/400.css';
+import '@fontsource/kanit/500.css';
 
 
 function App() {
@@ -11,7 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainGameScreen />} />
         <Route path="/story" element={<StoryScreen />} />
-        <Route path="/how-to-play" element={<HowToPlayScreen/>} />
+        <Route path="/how-to-play" element={<HowToScreen/>} />
       </Routes>
     </Router>
   );
