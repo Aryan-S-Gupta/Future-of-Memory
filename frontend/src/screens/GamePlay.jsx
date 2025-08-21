@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { getQuestion } from "../../api/questionApi";
 import { getScenario } from "../../api/scenarioApi";
 import { submitChoice } from "../../api/answerApi";
+import Button from "../components/Button/Button";
+import { useNavigate } from "react-router-dom";
 
 const GamePlay = () => {
   const [year, setYear] = useState(2035);
@@ -30,15 +32,16 @@ const GamePlay = () => {
     setScreen("question");
   };
 
+  const navigate = useNavigate();
 
   return (
-    <div className="story-container">
+    <div className="screen">
+      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
       {/* Scenario screen UI*/}
       {screen === "scenario" && (
-        <div className="scenario-screen">
-          <h1>Year {year}</h1>
-          <p>{scenario}</p>
-          <button onClick={goToQuestion}>Continue</button>
+        <div className="text-container">
+          <h3>{scenario}</h3>
+          <Button baseButton="btn-primary" action={goToQuestion} title="Continue"/>
         </div>
       )}
     </div>
