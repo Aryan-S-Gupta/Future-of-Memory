@@ -17,7 +17,7 @@ def get_entry_by_year(year):
     return next((item for item in story_data if str(item["year"]) == str(year)), None)
 
 
-def get_story_scenario(request):
+def get_story_background(request):
 
     """
     Retrieve the background information for a given year from the story data.
@@ -59,7 +59,10 @@ def get_story_question(request):
         "options": entry["options"]
     })
 
-
+"""
+What is this function supposed to do??? 
+currently it is sending the same question back so not using it 
+"""
 def get_story_result_by_choice(request):
 
     """
@@ -68,19 +71,24 @@ def get_story_result_by_choice(request):
     Returns a JSON response with the result, or an error message if not found.
     """
     year = request.GET.get('year')
-    choice = request.GET.get('choice').get(choice.lower())
+    choice = request.GET.get('choice')
     if not year or not choice:
         return HttpResponseBadRequest("Missing 'year' or 'choice' parameter.")
 
-    entry = get_entry_by_year(year)
+    entry = next((item for item in story_data if str(item["year"]) == year), None)
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
     
+    result = entry.get("options", {}).get(choice.lower())
     if not result:
         return JsonResponse({"error": f"No result found for choice '{choice}'"}, status=404)
 
-    next_scenario = get_story_scenario(year + 1)
-    next_question = get_story_question(year + 1)
+    return JsonResponse({
+        "year": entry["year"],
+        "choice": choice,
+        "result": result,
+        "next_year": entry["year"] + 1
+    })
 
 
 def get_story_result(request):
