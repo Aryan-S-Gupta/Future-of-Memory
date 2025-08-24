@@ -14,7 +14,7 @@ const BackgroundScreen = () => {
     <BasePage>
       <h1 className="title">Background</h1>
       <div className="text-container2">
-      <p className="text"> 
+      <p className="text2"> 
         The year is 2040.
         Neurotechnology has advanced beyond imagination, allowing memories to be <br /> <br />
         edited, emotions regulated, and even consciousness shared. These breakthroughs have brought <br /> <br />
@@ -23,7 +23,7 @@ const BackgroundScreen = () => {
         neurotech and decide whether they should be encouraged, restricted, or banned. Every choice <br /> <br /> 
         you make will ripple outward, shaping how societies evolve, how people live, and how humanity <br /> <br />
         defines itself in this new age of the mind. Your task is not simple. Progress, profit, freedom, and <br /> <br />
-        control are all at stake. The future of human thought begins with your decisions.
+        control are all at stake. 
       </p>
       </div>
       <div className="button-group">

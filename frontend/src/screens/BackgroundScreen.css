@@ -5,18 +5,15 @@
   max-width: 800px;
   text-align: center;
 }
-.text-container p {
-  color: #ffffff; /* keep text white for readability */
-}
 
 /* Body text */
-.text {
+.text2 {
   font-family: 'Exo 2', sans-serif;
-  font-size: 2.75rem;
+  font-size: 1.05rem;
   font-weight: 400;
   text-align: center;
   color: #ffffff;
-  text-shadow: 1px 1px 4px rgb(0, 0, 0);
+  text-shadow: 1px 1px 4px rgb(247, 201, 201);
   max-width: 900px;         
   margin: 0 auto;
   line-height: 1.5;         
