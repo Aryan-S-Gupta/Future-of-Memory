@@ -22,7 +22,7 @@ const GamePlay = () => {
     enabled: screen === "scenario", 
   });
 
-  // Fetches questiosn everytime the scren chnges to questions screen
+  // Fetches questiosn everytime the scren chnges to questions
   const {
     data: questionData,
     isLoading: isQuestionLoading,
