@@ -50,7 +50,7 @@ First ensure you have Ollama installed - get it from https://ollama.com/download
 
 Check that the CLI tools are installed properly: `ollama --version` should give a version number
 
-Pull the required model: `ollama pull tinyllama`
+Pull the required model: `ollama pull phi3:mini`
 
 Open the desktop app to start Ollama.
 

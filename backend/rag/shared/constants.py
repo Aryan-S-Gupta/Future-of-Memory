@@ -1,4 +1,4 @@
 """Constants used across the backend.
 """
 
-OLLAMA_MODEL = "Phi3-mini"
+OLLAMA_MODEL = "phi3:mini"
