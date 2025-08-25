@@ -6,6 +6,8 @@ import json
 import os
 from django.http import JsonResponse, HttpResponseBadRequest
 
+from rag.retrieve import retrieve_chunks
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, 'data', 'static_stories.json')
 
@@ -80,3 +82,13 @@ def get_story_result_by_choice(request):
         "result": result,
         "next_year": entry["year"] + 1
     })
+
+@csrf_exempt
+def rag_retrieve(request):
+    query_text = request.GET.get('query_text')
+    if not query_text:
+        keywords = request.GET.get('keywords')
+        assert keywords, "Either 'query_text' or 'keywords' must be provided."
+        query_text = " ".join(keywords)
+    items = retrieve_chunks(query_text)
+    return JsonResponse({'items': items})

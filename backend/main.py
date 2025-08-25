@@ -1,3 +1,3 @@
-from rag.setup import setup
+from rag.data_cleaning.clean_xml import xml_to_txt
 
-setup()
+f = xml_to_txt()

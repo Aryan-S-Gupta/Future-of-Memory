@@ -24,4 +24,4 @@ def get_ollama_embeddings() -> OllamaEmbeddings:
             "Failed to initialise Ollama embeddings model. An exception occurred."
         )
         raise e
-    return OllamaEmbeddings
+    return embeddings
