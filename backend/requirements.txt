@@ -1,4 +1,7 @@
-Django>=4.0
+asgiref==3.9.1
+Django==5.2.5
+django-cors-headers==4.7.0
+sqlparse==0.5.3
 langchain
 langchain-community>=0.3.27
 sentence-transformers
