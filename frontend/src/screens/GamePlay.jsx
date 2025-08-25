@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { getQuestion } from "../../api/questionApi";
 import { getScenario } from "../../api/scenarioApi";
 import { submitChoice } from "../../api/answerApi";
@@ -7,41 +8,46 @@ import { useNavigate } from "react-router-dom";
 
 const GamePlay = () => {
   const [year, setYear] = useState(2035);
-  // "scenario" or "question" screen - by default it is always set to scenario 
-  const [screen, setScreen] = useState("scenario");
-  const [scenario, setScenario] = useState("");
-  const [question, setQuestion] = useState("");
-  const [choices, setChoices] = useState([]);
-  const [outcome, setOutcome] = useState("");
-  const [outcomeMap, setOutcomeMap] = useState({});
-  
-
-  // Load scenario whenever year changes and user has completed answering questions
-  useEffect(() => {
-    const loadScenario = async () => {
-      const s = await getScenario(year);
-      setScenario(s.scenario);
-    };
-    loadScenario();
-  }, [year]);
-
-  // helper function to change state to questions 
-  const goToQuestion = async () => {
-    const q = await getQuestion(year);
-    // need to add logic for questions screen here 
-    setScreen("question");
-  };
-
+  const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const navigate = useNavigate();
+
+  // Fetch scenarios everytim the screen changes to scenario
+  const {
+    data: scenarioData,
+    isLoading: isScenarioLoading,
+    error: scenarioError,
+  } = useQuery({
+    queryKey: ["scenario", year],
+    queryFn: () => getScenario(year),
+    enabled: screen === "scenario", 
+  });
+
+  // Fetches questiosn everytime the scren chnges to questions screen
+  const {
+    data: questionData,
+    isLoading: isQuestionLoading,
+    error: questionError,
+  } = useQuery({
+    queryKey: ["question", year],
+    queryFn: () => getQuestion(year),
+    enabled: screen === "question", // only fetch when we are on question screen
+  });
+
+  // --- UI Loading/Error States ---
+  if (isScenarioLoading && screen === "scenario") return <p>Loading scenario...</p>;
+  if (isQuestionLoading && screen === "question") return <p>Loading question...</p>;
+  if (scenarioError) return <p>Error loading scenario</p>;
+  if (questionError) return <p>Error loading question</p>;
 
   return (
     <div className="screen">
       <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
-      {/* Scenario screen UI*/}
-      {screen === "scenario" && (
+
+      {/* Scenario screen */}
+      {screen === "scenario" && scenarioData && (
         <div className="text-container">
-          <h3>{scenario}</h3>
-          <Button baseButton="btn-primary" action={goToQuestion} title="Continue"/>
+          <h3>{scenarioData.scenario}</h3>
+          <Button baseButton="btn-primary" action={() => setScreen("question")} title="Continue"/>
         </div>
       )}
     </div>
