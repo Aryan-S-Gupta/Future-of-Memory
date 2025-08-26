@@ -17,7 +17,7 @@ def get_entry_by_year(year):
     return next((item for item in story_data if str(item["year"]) == str(year)), None)
 
 
-def get_story_background(request):
+def get_story_scenario(request):
 
     """
     Retrieve the background information for a given year from the story data.
@@ -97,13 +97,15 @@ def get_story_result(request):
     which means this is directly retrived from the user input
     """
     if request.method == "POST":
-        data = json.loads(request.body)
-        year = data.get("year")
-        choice = data.get("choice")
+        year = request.get("year")
+        choice = request.get("choice")
 
-        return JsonResponse({
-            "year": year,
-            "choice": choice,
-        })
+    if not year or not choice:
+        return HttpResponseBadRequest("Missing 'year' or 'choice' parameter.")
 
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    return JsonResponse({
+        "year": year,
+        "choice": choice,
+    })
+
+

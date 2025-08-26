@@ -9,7 +9,7 @@ import api from "./api";
  */
 export const submitChoice = async (year, choice) => {
   try {
-    const response = await api.put("/storyline/result", {
+    const response = await api.post("/storyline/result", {
       params: { year, choice }
     });
     return response.data;
