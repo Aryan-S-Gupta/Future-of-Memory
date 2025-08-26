@@ -22,7 +22,7 @@ const GamePlay = () => {
     enabled: screen === "scenario", 
   });
 
-  // Fetches questiosn everytime the scren chnges to questions
+  // Fetches questions everytime the scren chnges to questions
   const {
     data: questionData,
     isLoading: isQuestionLoading,
@@ -48,6 +48,18 @@ const GamePlay = () => {
         <div className="text-container">
           <h3>{scenarioData.scenario}</h3>
           <Button baseButton="btn-primary" action={() => setScreen("question")} title="Continue"/>
+        </div>
+      )}
+      {/** Question Screen*/}
+      {screen === "question" && scenarioData && (
+        <div className="text-container">
+          <h3>{questionData.question}</h3>
+          {questionData.options.map((choice) => (
+            <button key={choice} onClick={() => handleChoice(choice)}>
+              {choice}
+            </button>
+          ))}
+          {outcome && <p>{outcome}</p>}
         </div>
       )}
     </div>
