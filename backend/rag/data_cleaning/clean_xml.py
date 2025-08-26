@@ -76,7 +76,7 @@ def xml_to_txt() -> dict[str, str]:
             # Find licence info
             licence_tag = article.find(LICENCE_XPATH)
             assert licence_tag is not None, "Article doesn't have licence"
-            licence = "".join(licence_tag.itertext())
+            licence = "".join(licence_tag.itertext()).strip()
             
             # Get and clean article body
             body = article.find("body")
@@ -89,7 +89,7 @@ def xml_to_txt() -> dict[str, str]:
             ) as txt_file:
                 txt_file.write(body_text)
             with open(os.path.join(LICENCE_PATH), "a") as licence_file:
-                licence_file.write(f"{article_title}\n{licence}\n\n")
+                licence_file.write(f"# {article_title}\n\n{licence}\n\n")
             # todo add article references, authors, etc.
 
     return paths_to_titles
