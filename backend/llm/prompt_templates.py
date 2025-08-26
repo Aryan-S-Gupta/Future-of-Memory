@@ -17,7 +17,7 @@ You are a narrative engine for a turn-based story.
 
 TASK
 1) Build a retrieval query to fetch 3–6 highly relevant factual snippets for grounding.
-2) Propose ONE clear, decision-driving question with EXACTLY two options (no yes/no). 
+2) Propose ONE clear, decision-driving question WITH EXACTLY TWO OPTIONS (no yes/no). 
    Each option must be short, mutually exclusive, and lead to meaningfully different outcomes.
 
 STORY FRAME
@@ -32,22 +32,37 @@ Previous Story Summary:
 Retrieved Context (if any, distilled):
 {context_block}
 {state_hint}
-CONSTRAINTS
+
+
+HARD CONSTRAINTS
+- Return ONLY valid JSON (no markdown, no code fences).
 - The question must be specific and consequential for the next plot turn.
-- The retrieval query must be standalone (<= 220 chars) and safe to send to RAG.
-- keywords are 3–6 lowercase tokens, no punctuation, no duplicates.
-- Options must be an array of exactly 2 strings. Avoid “Yes/No”.
+- "options": an array of EXACTLY 2 strings. Avoid “Yes/No”.
+- The retrieval query must be standalone (<= 110 chars) and safe to send to RAG.
+- keywords are 1–3 lowercase tokens, no punctuation, no duplicates.
+- Each option must be short (6–14 words), mutually exclusive, concrete, and must NOT repeat the question text.
+- Do NOT include labels like "A." or "B." inside option strings.
+- If you initially think of only one option, you MUST invent a second plausible alternative.
+- Options should be self-contained and understandable without repeating the whole question.
 
 OUTPUT FORMAT (STRICT)
 Return ONLY valid JSON with this exact schema:
 {{
-  "query_text": "<single concise sentence for retrieval>",
-  "keywords": ["<3-6 lowercase keywords>"],
+  "query_text": "<<=110 chars, standalone retrieval sentence>",
+  "keywords": ["<1-3 lowercase keywords>"],
   "question": "<one question ending with a question mark>",
-  "options": ["<option A>", "<option B>"]
+  "options": ["<concise option without labels>", "<second concise option without labels>"]
 }}
 
-NO extra commentary; JSON only.
+EXAMPLE (ONLY to learn the shape; DO NOT copy content):
+{{
+  "query_text": "clinical protocols for identity continuity in memory-editing pilots",
+  "keywords": ["consent", "identity", "protocols", "clinic"],
+  "question": "Which path should Lin choose before the pilot review?",
+  "options": ["Schedule a supervised integration session at the clinic", "Pause treatment to consult an external ethics counselor"]
+}}
+
+Return ONLY valid JSON. Do not include markdown, code fences, or commentary.
 """.strip()
 
 
@@ -127,7 +142,7 @@ Return ONLY valid JSON with this exact schema:
   }}
 }}
 
-NO extra commentary; JSON only.
+Return ONLY valid JSON. Do not include markdown, code fences, or commentary.
 """.strip()
 
 
