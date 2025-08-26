@@ -6,6 +6,7 @@ import json
 import os
 import logging
 from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
 
 from rag.retrieve import retrieve_chunks
 
@@ -18,7 +19,12 @@ DATA_FILE = os.path.join(BASE_DIR, 'data', 'static_stories.json')
 with open(DATA_FILE, 'r', encoding='utf-8') as f:
     story_data = json.load(f)
 
-def get_story_background(request):
+# --- helper method ---
+def get_entry_by_year(year):
+    return next((item for item in story_data if str(item["year"]) == str(year)), None)
+
+
+def get_story_scenario(request):
 
     """
     Retrieve the background information for a given year from the story data.
@@ -29,13 +35,13 @@ def get_story_background(request):
     if not year:
         return HttpResponseBadRequest("Missing 'year' parameter.")
 
-    entry = next((item for item in story_data if str(item["year"]) == year), None)
+    entry = get_entry_by_year(year)
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
 
     return JsonResponse({
         "year": entry["year"],
-        "background": entry["background"]
+        "scenario": entry["background"]
     })
 
 
@@ -50,16 +56,20 @@ def get_story_question(request):
     if not year:
         return HttpResponseBadRequest("Missing 'year' parameter.")
 
-    entry = next((item for item in story_data if str(item["year"]) == year), None)
+    entry = get_entry_by_year(year)
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
 
     return JsonResponse({
         "year": entry["year"],
-        "question": entry["question"]
+        "question": entry["question"],
+        "options": entry["options"]
     })
 
-
+"""
+What is this function supposed to do??? 
+currently it is sending the same question back so not using it 
+"""
 def get_story_result_by_choice(request):
 
     """
@@ -87,6 +97,26 @@ def get_story_result_by_choice(request):
         "next_year": entry["year"] + 1
     })
 
+
+def get_story_result(request):
+    """
+    Retrieves the user's selected choice for a given question. This is a post method 
+    which means this is directly retrived from the user input
+    """
+    if request.method == "POST":
+        year = request.get("year")
+        choice = request.get("choice")
+
+    if not year or not choice:
+        return HttpResponseBadRequest("Missing 'year' or 'choice' parameter.")
+
+    return JsonResponse({
+        "year": year,
+        "choice": choice,
+    })
+
+
+@csrf_exempt
 def rag_retrieve(request):
     
     default_query = "fatigue"
