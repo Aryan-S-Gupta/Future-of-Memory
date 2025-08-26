@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainGameScreen from "./screens/MainGameScreen.jsx";
 import BackgroundScreen from "./screens/BackgroundScreen.jsx";
 import HowToScreen from "./screens/HowToScreen.jsx";
+import GamePlay from "./screens/GamePlay.jsx";
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
 
@@ -16,7 +17,8 @@ function App() {
           <Route path="/" element={<MainGameScreen />} />
           <Route path="/story" element={<BackgroundScreen />} />
           <Route path="/how-to-play" element={<HowToScreen />} />
-        </Routes>
+          <Route path="/game-play" element={<GamePlay/>} />
+      </Routes>
       </Router>
     </BackgroundWrapper>
   );
