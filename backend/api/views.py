@@ -89,12 +89,18 @@ def get_story_result_by_choice(request):
 
 def rag_retrieve(request):
     
-    query_text = request.GET.get('query_text')
-    keywords = request.GET.get('keywords')
-    query = query_text or keywords
-    if not query:
-        logger.warning("No 'query_text' or 'keywords' parameter provided. Using default query instead")
-        query = "fatigue"
+    default_query = "fatigue"
+    query: str
+    if request.method != 'POST':
+        logger.warning("Non-POST request received. Using default query instead")
+        query = default_query
+    else:
+        query_text = request.POST.get('query_text')
+        keywords = request.POST.get('keywords')
+        query = query_text or keywords
+        if not query:
+            logger.warning("No 'query_text' or 'keywords' parameter provided. Using default query instead")
+            query = default_query
 
     items = retrieve_chunks(query)
     return JsonResponse({'items': items})
