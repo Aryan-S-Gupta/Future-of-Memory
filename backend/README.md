@@ -89,28 +89,16 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Then open your browser and test:
-
-- [http://127.0.0.1:8000/api/static-story?year=2035](http://127.0.0.1:8000/api/static-story?year=2035)
-
-This endpoint returns the full narrative content for the selected year, including the question and both branching outcomes.
+Then open your browser or use terminal tools like `curl` to test the following round-based endpoints:
 
 ---
 
-## 🧪 Sample API Output
+## 🧪 Pseudo API Endpoints (Round-by-Round)
 
-### `GET /api/static-story?year=2037`
-```json
-{
-  "year": 2037,
-  "background": "MemoryCloud™, a global memory storage platform, launches permanent consciousness backup in exchange for behavioral data.",
-  "question": "Would you upload your memories to the cloud in exchange for convenience?",
-  "options": {
-    "yes": "You opt in to the service, gaining instant memory access, but also exposing your thoughts to corporate analytics.",
-    "no": "You reject the offer, choosing privacy over ease, but find yourself at odds with society’s new norms."
-  }
-}
-```
+Each round includes:
+1. Year-based background story
+2. Ethical yes/no question
+3. Branching result based on player choice
 
 ---
 
@@ -119,7 +107,23 @@ This endpoint returns the full narrative content for the selected year, includin
 - Please create a new branch before developing (e.g., `feature/rag-module`, `feature/llm-api`)
 - Make sure to pull latest changes before working
 - Don’t commit `venv/` or `.sqlite3` files — they’re excluded via `.gitignore`
-- Frontend or multiplayer team members can call these endpoints for mock data until dynamic generation is live
+- For frontend testing instructions and API usage, see [WIKI API Usage Guide for Frontend](https://github.com/manya-k/DECO3801---Data-Busters/wiki/API-Usage-Guide-for-Frontend)
+
+---
+
+### 🌐 Frontend Integration Notes (CORS)
+
+CORS (Cross-Origin Resource Sharing) has been enabled via `django-cors-headers` in this backend.
+
+Frontend developers can now directly `fetch()` Django API endpoints from React, for example:
+
+```js
+fetch("http://127.0.0.1:8000/api/storyline/start?year=2035")
+  .then((res) => res.json())
+  .then((data) => console.log(data));
+```
+
+> No additional proxy settings are required for local development.
 
 ---
 
@@ -129,7 +133,6 @@ This endpoint returns the full narrative content for the selected year, includin
 - [ ] LLM story/question generation
 - [ ] Timeline & turn loop controller
 - [ ] AI image integration (ComfyUI or SD)
-- [ ] Multiplayer memory sync (Socket.io)
 
 ---
 
