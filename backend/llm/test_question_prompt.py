@@ -119,10 +119,10 @@ def ensure_valid_options(prompt: str) -> dict:
 if __name__ == "__main__":
     prompt = build_question_prompt(
         2035,
-        "In 2035, society pilots clinical memory editing under strict consent protocols.",
-        "(1) clinical consent forms require two-factor identity; (2) trials show mixed outcomes on identity continuity.",
-        "Lin located a clinic after a panic episode."
-    )
+        "In 2035, global regulations begin piloting clinical memory editing as part of mental health research.",
+        "(1) consent processes require strict multi-factor verification; (2) research reports show both benefits and risks for identity stability.",
+        "Public debate has intensified as clinics prepare to enroll participants in early programs."
+        )
     result = ensure_valid_options(prompt)
     print("Clean JSON:\n", json.dumps(result, ensure_ascii=False, indent=2))
     print("\nQuestion:", result["question"])

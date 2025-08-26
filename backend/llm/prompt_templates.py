@@ -44,6 +44,7 @@ HARD CONSTRAINTS
 - Do NOT include labels like "A." or "B." inside option strings.
 - If you initially think of only one option, you MUST invent a second plausible alternative.
 - Options should be self-contained and understandable without repeating the whole question.
+- Frame the question at the societal, policy, or community level (e.g., citizens, regulators, clinics, researchers).
 
 OUTPUT FORMAT (STRICT)
 Return ONLY valid JSON with this exact schema:
