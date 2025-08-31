@@ -21,8 +21,9 @@
 
 
 .crawl-container {
-  perspective: 1000px; /* creates the 3D effect */
+  perspective: 500px; /* creates the 3D effect */
   height: 400px; /* height of the visible area */
+  width: 500px;
   overflow: hidden;
   position: relative;
 }
@@ -55,4 +56,21 @@
   justify-content: center;
   gap: 1rem;
   margin-top: 2rem;
+}
+/* Start button fade-in */
+.start-fade-in {
+  opacity: 0; /* initially invisible */
+  animation: fadeIn 3s ease forwards;
+  animation-delay: 11s; /* wait until crawl is partly done */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px); /* subtle upward motion */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
