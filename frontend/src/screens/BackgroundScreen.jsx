@@ -13,21 +13,23 @@ const BackgroundScreen = () => {
   return (
     <BasePage>
       <h1 className="title">Background</h1>
-      <div className="text-container">
-        <p> 
-          The year is 2040.
-          Neurotechnology has advanced beyond imagination, allowing memories to be <br /> <br />
-          edited, emotions regulated, and even consciousness shared. These breakthroughs have brought <br /> <br />
-          progress, but also deep ethical uncertainty. You are a senior decision-maker at the Global <br /> <br />
-          Neurotechnology Regulation Authority (GNRA). Your responsibility: evaluate new applications of <br /> <br /> 
-          neurotech and decide whether they should be encouraged, restricted, or banned. Every choice <br /> <br /> 
-          you make will ripple outward, shaping how societies evolve, how people live, and how humanity <br /> <br />
-          defines itself in this new age of the mind. Your task is not simple. Progress, profit, freedom, and <br /> <br />
-          control are all at stake. 
-        </p>
-        <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
-        <Button baseButton="btn-primary" action={() => navigate("/game-play")} title="Start" />
+      <div className="crawl-container">
+        <div className="crawl-text">
+          <p> 
+            The year is 2040. Neurotechnology has shattered boundaries: <br /> <br />
+            memories can be rewritten, emotions dialed up or down, consciousness linked and shared across minds. <br /> <br />
+            At the Global Neurotechnology Regulation Authority, your decisions weigh heavy.  <br /> <br />
+            Every application you approve or deny shapes the way people live,<br /> 
+            the paths societies will take, and what humanity might become. <br /> <br />
+            Progress and profit drive innovation, but freedom collides with the need for control. <br /> <br />
+            Ethics blur in the face of possibilities. The world is watching, and every choice sends shockwaves into the future. <br /> <br />  
+          </p>
         </div>
+      </div>
+      <div className="button-container">
+      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
+      <Button baseButton="btn-primary" action={() => navigate("/game-play")} title="Start" />
+      </div>
       </BasePage>
     );
 };

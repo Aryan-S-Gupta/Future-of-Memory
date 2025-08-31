@@ -18,3 +18,41 @@
   margin: 0 auto;
   line-height: 1.5;         
 }
+
+
+.crawl-container {
+  perspective: 1000px; /* creates the 3D effect */
+  height: 400px; /* height of the visible area */
+  overflow: hidden;
+  position: relative;
+}
+
+.crawl-text {
+  position: absolute;
+  bottom: -100%; /* start below the container */
+  width: 100%;
+  font-size: 1.2rem;
+  text-align: center;
+  transform-origin: 50% 100%;
+  transform: rotateX(25deg); /* tilt the text backward */
+  animation: crawl 20s linear infinite;
+  color: rgb(255, 255, 255);
+  text-shadow: 0 0 5px #0088ff;
+}
+
+@keyframes crawl {
+  0% {
+    bottom: -100%;
+  }
+  100% {
+    bottom: 100%;
+  }
+}
+
+/* Optional: Style for buttons */
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
