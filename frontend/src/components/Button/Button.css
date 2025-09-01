@@ -53,10 +53,10 @@
               0 0 40px rgba(59, 130, 246, 0.8),
               inset 0 0 10px rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
-}
+} 
 
-
-/*.btn-primary {
+/*
+.btn-primary {
   padding: 1rem 3rem;
   font-size: 1.8rem;
   font-family: 'Orbitron', sans-serif;
@@ -81,6 +81,7 @@
               inset 0 0 10px rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
 } 
+
 */
 
 .btn-secondary {

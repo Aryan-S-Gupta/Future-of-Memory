@@ -28,7 +28,7 @@ const BackgroundScreen = () => {
         </div>
       <div className="button-container">
       <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
-      <Button baseButton="btn-primary start-fade-in" action={() => navigate("/game-play")} title="Start" />
+      <Button baseButton="btn-primary start-fade-in" action={() => navigate("/game-play")} title="Next" />
       </div>
       </BasePage>
     );
