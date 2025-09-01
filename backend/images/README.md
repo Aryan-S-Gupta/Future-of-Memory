@@ -10,3 +10,5 @@ refer to this flow:  https://drive.google.com/file/d/1q_IrXmkcIUu_zA0bwZvUXafetD
 # Good to know
 - before running the server, make sure you have at least 3 GB of free memory
 - the first launch is usually extremely slow and may take several minutes
+
+pip install cachetools

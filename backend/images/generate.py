@@ -131,7 +131,13 @@ EXPORTED_WORKFLOW = {
   }
 }
 
-# emojis TBD (if the llm could give emojis)
+# llm_description should be no longer than 70 words as stable 1.5 encoder only encode first 77 tokens
+def truncate_words(text: str, max_words: int = 70) -> str:
+    parts = text.split()
+    if len(parts) <= max_words:
+        return text
+    return ' '.join(parts[:max_words])
+
 def clean_llm_description(llm_description: str) -> str:
     """    
     Input:
@@ -139,20 +145,13 @@ def clean_llm_description(llm_description: str) -> str:
     Output:
         clean_prompt (str): A cleaned prompt string for node 6.
     """
-    # for llm response:
-    #   llm_description should be no longer than 70 words as stable 1.5 encoder only encode first 77 tokens
-
     if not llm_description or not llm_description.strip():
         raise ValueError("LLM description is empty.")
+    
+    # remove white spaces
+    normalized = re.sub(r'\s+', ' ', llm_description.strip())
 
-    trimmed_description = llm_description.strip()
-
-    # collapse newlines, tabs, and multiple spaces into a single space
-    normalized_description = re.sub(r'\s+', ' ', trimmed_description)
-
-    clean_prompt = normalized_description
-
-    return clean_prompt
+    return truncate_words(normalized, max_words=70)
 
 def build_prompt_payload(clean_prompt: str) -> Dict[str, Any]:
     """
@@ -186,16 +185,6 @@ def enqueue_render(prompt_payload: Dict[str, Any]) -> str:
         raise RuntimeError(f'/prompt response missing prompt_id.')
     return prompt_id
 
-def map_world_to_prompt(world_id: str, prompt_id: str) -> None:
-    
-    prompt_world_map[world_id] = prompt_id
-
-def get_prompt_id_for_world(world_id: str) -> str:
-    try:
-        return prompt_world_map[world_id]
-    except:
-        raise KeyError(f'unknown world_id: {world_id}')
-
 def get_image_location(prompt_id: str, 
                        timeout_seconds: int = POLL_TIMEOUT_LIMIT, 
                        interval_seconds: float = POLL_INTERVAL_LIMIT) -> ImageLocation:
@@ -211,7 +200,7 @@ def get_image_location(prompt_id: str,
 
         history_payload = response.json() or {}
 
-        entry = history_payload.get(prompt_id) or history_payload
+        entry = history_payload.get(prompt_id) or {}
         outputs_by_node = entry.get('outputs') or {}
 
         for node_id, node_output in outputs_by_node.items():
@@ -244,10 +233,27 @@ def fetch_png_bytes(image_location: ImageLocation) -> bytes:
     response.raise_for_status()
     return response.content
 
+# def map_world_to_prompt(world_id: str, prompt_id: str) -> None:
+    
+#     prompt_world_map[world_id] = prompt_id
 
+# def get_prompt_id_for_world(world_id: str) -> str:
+#     try:
+#         return prompt_world_map[world_id]
+#     except:
+#         raise KeyError(f'unknown world_id: {world_id}')
 
 # ---------------------- test -----------------------
-
+# setting, action, atomosphere, style
+# possible LLM prompt:
+# "Write a vivid speculative art prompt for an AI image generator. 
+# The setting is [FUTURE THEME or MEMORY-RELATED SCENARIO]. 
+# Describe:
+# 1. The environment and atmosphere,
+# 2. The people/objects and their actions, 
+# 3. Sensory details (light, color, movement, surreal effects),
+# 4. Style tags (e.g., symbolic, painterly, dreamlike, unsettling, futuristic). 
+# Keep it under 75 tokens."
 des = "           A speculative future city where memories are traded like currency: glowing neural marketplaces, " \
 "people exchanging    luminous memory orbs, brain-linked kiosks pulsing with circuits, surreal architecture shaped by thought. " \
 "Streets shimmer with fragments   of others' pasts drifting like holograms. Faces half-formed with borrowed recollections blur into fluid identities. " \
