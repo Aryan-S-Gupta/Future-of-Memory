@@ -79,14 +79,14 @@ def build_description_prompt(
     """
     STEP B: Given the player's selected option, produce the Scenario + Image brief + follow-up RAG query.
     OUTPUT must be STRICT JSON:
-    - scenario: one paragraph (no line breaks).
-    - image_brief: subject, scene, mood, style, keywords[] (3–8 compact tokens for the image pipeline).
+    - scenario: 5-8 sentences which is vivid and engaging.
+    - image_brief: subject, scene, mood, style, keywords[] (3–6 compact tokens for the image pipeline).
     - rag_query: query_text + keywords[] for the NEXT turn’s retrieval.
     """
     state_hint = f"\nState Memory (JSON):\n{state_json}\n" if state_json else ""
     return f"""
 You are continuing a turn-based story. Incorporate the selected option and produce:
-1) A concrete scenario paragraph (one natural paragraph).
+1) A concrete scenario with 5-8 sentences which is vivid and engaging.
 2) An image brief for the art pipeline (Stable Diffusion / ComfyUI).
 3) A focused follow-up retrieval query for the next turn.
 
@@ -108,35 +108,62 @@ Current Question:
 Selected Option:
 {selected_option}
 {state_hint}
+
 SCENARIO REQUIREMENTS
-- One paragraph (5–8 sentences), no line breaks.
-- Structure: Who → Did what → Result/Consequence (cause→effect).
-- Include at least one named entity (person/clinic/agency) and one setting detail (location/time/tech).
-- Stay consistent with the year and prior facts; be specific, not vague.
+- Output "scenario" as an array of sentences.
+- Exactly 5 sentences. Not 4. Not 6. Exactly 5.
+- Each sentence must contain 15–30 words (count words by spaces). If a sentence is shorter, expand with concrete details until it meets 15–30 words.
+- Focus on institutional actors (clinics, agencies, councils, governments, consortia). Do not center individual doctors or patients; avoid personal names.
+- Overall causal arc: an institutional actor takes an action → visible consequences or public reactions. You do not need to repeat this structure inside every sentence.
+- Use simple, everyday language suitable for museum visitors or high-school students.
+- Make it vivid and engaging: include sensory details (lights, sounds, crowds) and small dramatic contrasts; at least one sentence should invite reflection with a question.
+- Do not use arrows, symbols, headings, or labels like "result:"; write only natural sentences.
+- Consistency rule: "image_brief" and "rag_query" must only use entities/imagery already present in the "scenario". Do not invent new places or actors.
+
+ANTI-COPYING & VARIATION
+- Do not copy wording from any example. Use different phrasing and fresh details.
+- Avoid these phrases entirely: "brightly lit", "holograms", "bustling public square", "marble walls", "glowing buttons".
+- Use different cities/venues than any example; vary institutions and settings.
+
+EXAMPLE TEMPLATE (structure only, NOT content to copy):
+"scenario": [
+  "<Government/Agency/Clinic/Consortium> announces a policy/action in <specific venue and city>, explaining goals and safeguards while audiences react with curiosity and caution about identity and privacy.",
+  "<Regulatory body/Clinic network> demonstrates procedures under strict consent checks, describing verification steps and displaying results as visitors weigh potential benefits against possible risks they can easily imagine.",
+  "<Council/Agency> hosts a public session in <concrete setting and time>, where signage, ambient sounds, or screen visuals shape the mood and make complex ideas feel tangible to everyday people.",
+  "<Government/Consortium> coordinates with partners across regions, promising oversight and transparency, while passerby debates and news tickers amplify hopes for treatment alongside doubts about unintended consequences.",
+  "<Parliament/Ethics council> invites reflection with a clear question about values and trade-offs, encouraging citizens to consider what should be protected if memories become editable in daily life."
+]
+
+HARD REMINDER
+- If the "scenario" array is not exactly 5 items, regenerate until it is exactly 5.
+- If any sentence is not within 15–30 words, regenerate until all five sentences meet 15–30 words.
+- Never include banned phrases. Never introduce entities not present in "scenario" into "image_brief" or "rag_query".
 
 IMAGE BRIEF REQUIREMENTS
-- Fields:
-  - subject: main subject(s) (e.g., "lab technician reviewing synaptic imprint logs")
-  - scene: place/time/visual setting (e.g., "after-hours neuroclinic corridor, cool fluorescents")
-  - mood: emotional tone (e.g., "tense, procedural, sterile")
-  - style: visual style/camera hint (e.g., "documentary mid-shot, realistic")
-  - keywords: 3–8 terse tokens for the image model (e.g., ["neon signage","glass partition","ID badge","bokeh"])
-- Keep each field short and descriptive; no long sentences.
+- Provide a single short descriptive sentence (≤70 characters).
+- This description must summarize the main subject, setting, and mood of the scenario in one line.
+- Do not break into fields (no subject/scene/mood/style separation).
+- Do not output keywords or arrays.
+- Use simple, direct language suitable for an image generation model.
+- The description must directly reflect the scenario above; do not invent new places, actors, or details.
 
 FOLLOW-UP RAG QUERY
-- Target concrete entities/mechanisms raised by this option; provide 3–6 keywords.
+- Base the query strictly on entities, mechanisms, or ethical dilemmas explicitly raised in the scenario.
+- Do not introduce unrelated topics.
+- Provide 3–4 keywords separately, all extracted or derived from the scenario.
+- Each keyword should be a single lowercase token, no punctuation.
 
 OUTPUT FORMAT (STRICT)
 Return ONLY valid JSON with this exact schema:
 {{
-  "scenario": "<one paragraph, no line breaks>",
-  "image_brief": {{
-    "subject": "<short phrase>",
-    "scene": "<short phrase>",
-    "mood": "<short phrase>",
-    "style": "<short phrase>",
-    "keywords": ["<3-8 short tokens for image generation>"]
-  }},
+  "scenario": [
+    "<sentence 1>",
+    "<sentence 2>",
+    "<sentence 3>",
+    "<sentence 4>",
+    "<sentence 5>"
+  ],
+  "image_brief": "Short one-sentence description (≤70 characters, from scenario)",
   "rag_query": {{
     "query_text": "<single concise sentence (<= 220 chars)>",
     "keywords": ["<3-6 lowercase keywords>"]
