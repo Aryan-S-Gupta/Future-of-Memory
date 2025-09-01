@@ -9,9 +9,8 @@ import api from "./api";
  */
 export const submitChoice = async (year, choice) => {
   try {
-    const response = await api.post("/storyline/result", {
-      params: { year, choice }
-    });
+    const response = await api.post("/storyline/result", 
+    { year, choice });
     return response.data;
   } catch (error) {
     console.error("Error submitting choice:", error);

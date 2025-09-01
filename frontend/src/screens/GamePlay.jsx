@@ -5,13 +5,14 @@ import { getScenario } from "../../api/scenarioApi";
 import { submitChoice } from "../../api/answerApi";
 import Button from "../components/Button/Button";
 import { useNavigate } from "react-router-dom";
+import "./GamePlay.css";
 
 const GamePlay = () => {
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const navigate = useNavigate();
 
-  // Fetch scenarios everytim the screen changes to scenario
+  // Fetch scenarios everytime the screen changes to scenario
   const {
     data: scenarioData,
     isLoading: isScenarioLoading,
@@ -22,7 +23,7 @@ const GamePlay = () => {
     enabled: screen === "scenario", 
   });
 
-  // Fetches questiosn everytime the scren chnges to questions
+  // Fetches questions everytime the scren chnges to questions
   const {
     data: questionData,
     isLoading: isQuestionLoading,
@@ -33,6 +34,15 @@ const GamePlay = () => {
     enabled: screen === "question", // only fetch when we are on question screen
   });
 
+  const handleChoice = async (answer) => {
+    try {
+      submitChoice(year, answer);
+      setScreen("scenario");
+      setYear((year) => year + 1);
+    } catch (error) {
+      console.error("Error submitting choice:", error);
+    }
+  }
   // --- UI Loading/Error States ---
   if (isScenarioLoading && screen === "scenario") return <p>Loading scenario...</p>;
   if (isQuestionLoading && screen === "question") return <p>Loading question...</p>;
@@ -50,6 +60,25 @@ const GamePlay = () => {
           <Button baseButton="btn-primary" action={() => setScreen("question")} title="Continue"/>
         </div>
       )}
+      {/** Question Screen*/}
+      {screen === "question" && questionData && (
+        <div>
+          <div className="question-container">
+          <h3>{questionData.question}</h3>
+        </div>
+        <div className="choice-container">
+          {/*Displays the questions and the choices */}
+            {Object.entries(questionData.options).map(([key, value]) => (
+              <Button
+                baseButton="choice-btn"
+                key={key}
+                action={() => handleChoice(key)}
+                title={value} />
+            ))}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
