@@ -56,7 +56,7 @@ const GamePlay = () => {
       {/* Scenario screen */}
       {screen === "scenario" && scenarioData && (
         <div className="text-container">
-          <h3>{scenarioData.scenario}</h3>
+          <h2>{scenarioData.scenario}</h2>
           <Button baseButton="btn-primary" action={() => setScreen("question")} title="Continue"/>
         </div>
       )}
@@ -64,7 +64,7 @@ const GamePlay = () => {
       {screen === "question" && questionData && (
         <div>
           <div className="question-container">
-          <h3>{questionData.question}</h3>
+          <h2>{questionData.question}</h2>
         </div>
         <div className="choice-container">
           {/*Displays the questions and the choices */}

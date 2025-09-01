@@ -85,17 +85,20 @@
 */
 
 .btn-secondary {
-  padding: 1rem 2rem;
-  font-size: 1.25rem;
+  padding: 1rem 3rem;
+  font-size: 1.8rem;
   font-family: 'Orbitron', sans-serif;
-  font-weight: 600;
+  font-weight: bold;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(145deg, #18335a, #0e397e); 
-  color: #e5e7eb; 
+  border-radius: 14px;
+  background: linear-gradient(145deg, #1e40af, #3b82f6); 
+  color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 0 6px rgba(100, 116, 139, 0.6),
-              inset 0 0 4px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 12px rgba(73, 159, 239, 0.9), 
+              0 0 25px rgba(6, 41, 98, 0.7),
+              inset 0 0 8px rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 2px;
   transition: all 0.3s ease;
 }
 
