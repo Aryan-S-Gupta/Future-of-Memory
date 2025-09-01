@@ -44,15 +44,29 @@ This repository contains the Django-based backend for the Memory Simulation narr
 
 ---
 
+## ⚙️ Prerequisites (System-level Dependencies)
+
+These are OS-level packages required by document parsing libraries:
+
+### macOS (Homebrew)
+```bash
+brew update
+brew install libmagic
+# Recommended for robust PDF/Image parsing:
+brew install poppler tesseract
+```
+
+---
+
 ## 🛠️ How to Run Locally
 
 First ensure you have Ollama installed - get it from https://ollama.com/download/. You may need to open the app the first time to install the command-line tools.
 
 Check that the CLI tools are installed properly: `ollama --version` should give a version number
 
-Pull the required model: `ollama pull phi3:mini`
+Pull the required model: `ollama pull phi3:3.8b` and `ollama pull nomic-embed-text`
 
-Open the desktop app to start Ollama.
+Open the desktop app to start Ollama or `ollama server`
 
 ### ✅ Step 1: Clone the Repository
 
@@ -79,13 +93,64 @@ source venv/bin/activate         # Windows: venv\Scripts\activate
 
 ```bash
 pip install -r requirements.txt
+pip install -U pip wheel setuptools
+pip install "langchain-community>=0.2.0" "unstructured[pdf,docx,image]" python-magic
+```
+
+---
+
+### ✅ Step 4: Fix macOS Certificates & Download NLTK Data (first-time only)
+
+```bash
+/Applications/Python\ 3.12/Install\ Certificates.command
+python -m nltk.downloader punkt punkt_tab averaged_perceptron_tagger_eng
+```
+- Verify
+```bash
+python - <<'PY'
+from nltk.tokenize import sent_tokenize
+print(sent_tokenize("Hello world. This is a test."))
+print("NLTK OK")
+PY
+```
+
+---
+
+### ✅ Step 5: Build the Vector Store (First time or files changed) 
+
+Option A (recommended, inside backend) (This step might cost 1-2 mins)
+```bash
+python - <<'PY'
+from rag.setup import setup
+setup()
+print("RAG setup done")
+PY
+```
+
+Option B (from project root):
+```bash
+python backend/manage.py shell -c "from rag.setup import setup; setup(); print('RAG setup done')"
+```
+
+Check
+```bash
+ls -lah backend/rag/db/faiss_db
+# should contain index.faiss and index.pkl
+```
+
+Quick Retrieval Test
+```bash
+python manage.py shell -c "
+from rag.retrieve import retrieve_chunks;
+print(retrieve_chunks('sleep memory consolidation')[:1])
+"
 ```
 
 ---
 
 Now make sure to `cd backend`
 
-### ✅ Step 4: Run Migrations
+### ✅ Step 6: Run Migrations
 
 ```bash
 python manage.py migrate
@@ -93,7 +158,7 @@ python manage.py migrate
 
 ---
 
-### ✅ Step 5: Start the Development Server
+### ✅ Step 7: Start the Development Server
 
 ```bash
 python manage.py runserver
