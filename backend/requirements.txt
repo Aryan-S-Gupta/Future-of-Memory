@@ -3,3 +3,10 @@ Django==5.2.5
 django-cors-headers==4.7.0
 sqlparse==0.5.3
 requests==2.32.3
+langchain
+langchain-community>=0.3.27
+sentence-transformers
+faiss-cpu # preferably use faiss-gpu if machine has GPU available
+langchain_ollama
+langchain-text-splitters
+unstructured

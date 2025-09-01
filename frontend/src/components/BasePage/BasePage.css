@@ -1,38 +1,73 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap');
+/* Fonts actually used below */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+
+html, body, #root {
+  height: 100%;
+}
 
 .screen {
   position: fixed;
   inset: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100vh;          /* use 100dvh if you prefer mobile-safe viewport */
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-
+  overflow: hidden;       /* prevents scrollbars from background overflow */
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
 }
 
+/* Background container ensures LetterGlitch fills the screen and sits behind content */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;   /* clicks go to content layer */
+}
+
+/* In case LetterGlitch renders a <canvas>/<svg>/<div>, force it to fill */
+.bg-layer canvas,
+.bg-layer svg,
+.bg-layer > * {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Foreground content sits above the background */
+.content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
 
 /* Title styling */
 .title {
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Orbitron', sans-serif;
   font-size: 4rem;
-  font-weight: 500;
+  font-weight: 800;
   text-align: center;
-  color: #e958b9;
-  text-shadow: 2px 2px 8px rgb(23, 6, 255);
+  color: #ffffff;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
   margin-bottom: 3rem;
 }
 
 .subheading {
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Orbitron', sans-serif;
   font-size: 2rem;
   font-weight: 500;
   text-align: center;
-  color: #ff00aa;
+  color: #61dca3;
   text-shadow: 1px 1px 6px rgba(123, 0, 255, 0.7);
   margin: 1.5rem 0 0.5rem 0;  
 }
@@ -40,32 +75,47 @@
 /* Body text */
 .text {
   font-family: 'Exo 2', sans-serif;
-  font-size: 1.0rem;
+  font-size: 1rem;
   font-weight: 400;
   text-align: center;
   color: #ffffff;
   text-shadow: 1px 1px 4px rgb(0, 0, 0);
-  max-width: 700px;         
+  max-width: 700px;
   margin: 0 auto;
-  line-height: 1.2;         
+  line-height: 1.2;
 }
+
 .text-container {
-  background-color: rgba(0, 0, 0, 0.6); /* black with 60% opacity */
-  padding: 3rem; 
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 3rem;
   border-radius: 10px;
   max-width: 800px;
   text-align: center;
 }
 
 .text-container h2 {
-    font-family: 'Kanit', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #ff58d0;
-    text-shadow: 1px 1px 6px rgba(25, 0, 255, 0.7);
-    margin-bottom: 1rem;
-} 
+  font-family: 'Kanit', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ff58d0;
+  text-shadow: 1px 1px 6px rgba(25, 0, 255, 0.7);
+  margin-bottom: 1rem;
+}
 
 .text-container p {
+  font-family: 'Kanit', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 500;
+  text-align: center;
+  color: #ffffff;
+  text-shadow: 1px 1px 4px rgb(0, 0, 0);      
+  line-height: 1.2;  
+}
+
+.text-container h3 {
   color: #ffffff; 
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 1px 1px 6px rgba(25, 0, 255, 0.7);
+  margin-bottom: 2rem;
 }

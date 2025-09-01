@@ -13,23 +13,22 @@ const BackgroundScreen = () => {
   return (
     <BasePage>
       <h1 className="title">Background</h1>
-      <div className="text-container2">
-      <p className="text2"> 
-        The year is 2040.
-        Neurotechnology has advanced beyond imagination, allowing memories to be <br /> <br />
-        edited, emotions regulated, and even consciousness shared. These breakthroughs have brought <br /> <br />
-        progress, but also deep ethical uncertainty. You are a senior decision-maker at the Global <br /> <br />
-        Neurotechnology Regulation Authority (GNRA). Your responsibility: evaluate new applications of <br /> <br /> 
-        neurotech and decide whether they should be encouraged, restricted, or banned. Every choice <br /> <br /> 
-        you make will ripple outward, shaping how societies evolve, how people live, and how humanity <br /> <br />
-        defines itself in this new age of the mind. Your task is not simple. Progress, profit, freedom, and <br /> <br />
-        control are all at stake. 
-      </p>
-      </div>
-      <div className="button-group">
+      <div className="text-container">
+        <p> 
+          The year is 2040.
+          Neurotechnology has advanced beyond imagination, allowing memories to be <br /> <br />
+          edited, emotions regulated, and even consciousness shared. These breakthroughs have brought <br /> <br />
+          progress, but also deep ethical uncertainty. You are a senior decision-maker at the Global <br /> <br />
+          Neurotechnology Regulation Authority (GNRA). Your responsibility: evaluate new applications of <br /> <br /> 
+          neurotech and decide whether they should be encouraged, restricted, or banned. Every choice <br /> <br /> 
+          you make will ripple outward, shaping how societies evolve, how people live, and how humanity <br /> <br />
+          defines itself in this new age of the mind. Your task is not simple. Progress, profit, freedom, and <br /> <br />
+          control are all at stake. 
+        </p>
         <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
-      </div>
-    </BasePage>
-  );
+        <Button baseButton="btn-primary" action={() => navigate("/game-play")} title="Start" />
+        </div>
+      </BasePage>
+    );
 };
 export default BackgroundScreen;

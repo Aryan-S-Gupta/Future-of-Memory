@@ -4,7 +4,14 @@ Provides endpoints to fetch story background, questions, and results based on us
 """
 import json
 import os
+import logging
 from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
+
+from rag.retrieve import retrieve_chunks
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, 'data', 'static_stories.json')
@@ -12,7 +19,12 @@ DATA_FILE = os.path.join(BASE_DIR, 'data', 'static_stories.json')
 with open(DATA_FILE, 'r', encoding='utf-8') as f:
     story_data = json.load(f)
 
-def get_story_background(request):
+# --- helper method ---
+def get_entry_by_year(year):
+    return next((item for item in story_data if str(item["year"]) == str(year)), None)
+
+
+def get_story_scenario(request):
 
     """
     Retrieve the background information for a given year from the story data.
@@ -23,13 +35,13 @@ def get_story_background(request):
     if not year:
         return HttpResponseBadRequest("Missing 'year' parameter.")
 
-    entry = next((item for item in story_data if str(item["year"]) == year), None)
+    entry = get_entry_by_year(year)
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
 
     return JsonResponse({
         "year": entry["year"],
-        "background": entry["background"]
+        "scenario": entry["background"]
     })
 
 
@@ -44,16 +56,20 @@ def get_story_question(request):
     if not year:
         return HttpResponseBadRequest("Missing 'year' parameter.")
 
-    entry = next((item for item in story_data if str(item["year"]) == year), None)
+    entry = get_entry_by_year(year)
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
 
     return JsonResponse({
         "year": entry["year"],
-        "question": entry["question"]
+        "question": entry["question"],
+        "options": entry["options"]
     })
 
-
+"""
+What is this function supposed to do??? 
+currently it is sending the same question back so not using it 
+"""
 def get_story_result_by_choice(request):
 
     """
@@ -80,3 +96,41 @@ def get_story_result_by_choice(request):
         "result": result,
         "next_year": entry["year"] + 1
     })
+
+
+def get_story_result(request):
+    """
+    Retrieves the user's selected choice for a given question. This is a post method 
+    which means this is directly retrived from the user input
+    """
+    if request.method == "POST":
+        year = request.get("year")
+        choice = request.get("choice")
+
+    if not year or not choice:
+        return HttpResponseBadRequest("Missing 'year' or 'choice' parameter.")
+
+    return JsonResponse({
+        "year": year,
+        "choice": choice,
+    })
+
+
+@csrf_exempt
+def rag_retrieve(request):
+    
+    default_query = "fatigue"
+    query: str
+    if request.method != 'POST':
+        logger.warning("Non-POST request received. Using default query instead")
+        query = default_query
+    else:
+        query_text = request.POST.get('query_text')
+        keywords = request.POST.get('keywords')
+        query = query_text or keywords
+        if not query:
+            logger.warning("No 'query_text' or 'keywords' parameter provided. Using default query instead")
+            query = default_query
+
+    items = retrieve_chunks(query)
+    return JsonResponse({'items': items})
