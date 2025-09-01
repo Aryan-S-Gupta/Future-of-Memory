@@ -1,5 +1,7 @@
 
 /* Button container */
+
+
 .button-group {
   display: flex;
   flex-direction: column;
@@ -7,7 +9,7 @@
   pointer-events: auto;
 }
 
-/* Primary button */
+/*
 .btn-primary {
   padding: 1rem 2rem;
   font-size: 1.5rem;
@@ -15,7 +17,7 @@
   font-weight: bold;
   border: none;
   border-radius: 12px;
-  background-color: #1d4ed8; /* Blue */
+  background-color: #1d4ed8; 
   color: #ffffff;
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -25,8 +27,59 @@
 .btn-primary:hover {
   background-color: #2563eb;
   transform: translateY(-2px);
+} */
+
+/*.btn-primary {
+  padding: 1rem 3rem;
+  font-size: 1.25rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #009dff, #0c0fa4);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.9), 
+              0 0 25px rgba(59, 130, 246, 0.7),
+              inset 0 0 8px rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
 }
 
+.btn-primary:hover {
+  background: linear-gradient(145deg, #2563eb, #60a5fa);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 1),
+              0 0 40px rgba(59, 130, 246, 0.8),
+              inset 0 0 10px rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}*/
+
+.btn-primary {
+  padding: 1rem 3rem;
+  font-size: 1.8rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #0e530f, #009a38); /* neon green gradient */
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(4, 46, 9, 0.9),
+              0 0 25px rgba(13, 173, 15, 0.7),
+              inset 0 0 8px rgba(255, 255, 255, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(145deg, #094817, #1d8d15);
+  box-shadow: 0 0 20px rgb(97, 211, 52),
+              0 0 40px rgba(7, 65, 14, 0.8),
+              inset 0 0 10px rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
 /* Secondary button */
 .btn-secondary {
   padding: 1rem 2rem;
