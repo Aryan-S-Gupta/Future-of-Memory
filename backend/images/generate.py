@@ -13,7 +13,7 @@ CLIENT_ID = str(uuid.uuid4())
 POLL_INTERVAL_LIMIT = 1.0
 POLL_TIMEOUT_LIMIT = 120
 
-prompt_world_map = {}
+# prompt_world_map = {}
 
 @dataclass
 class ImageLocation:
@@ -244,21 +244,12 @@ def fetch_png_bytes(image_location: ImageLocation) -> bytes:
 #         raise KeyError(f'unknown world_id: {world_id}')
 
 # ---------------------- test -----------------------
-# setting, action, atomosphere, style
-# possible LLM prompt:
-# "Write a vivid speculative art prompt for an AI image generator. 
-# The setting is [FUTURE THEME or MEMORY-RELATED SCENARIO]. 
-# Describe:
-# 1. The environment and atmosphere,
-# 2. The people/objects and their actions, 
-# 3. Sensory details (light, color, movement, surreal effects),
-# 4. Style tags (e.g., symbolic, painterly, dreamlike, unsettling, futuristic). 
-# Keep it under 75 tokens."
-des = "           A speculative future city where memories are traded like currency: glowing neural marketplaces, " \
-"people exchanging    luminous memory orbs, brain-linked kiosks pulsing with circuits, surreal architecture shaped by thought. " \
-"Streets shimmer with fragments   of others' pasts drifting like holograms. Faces half-formed with borrowed recollections blur into fluid identities. " \
-"The scene is speculative, artistic, dreamlike—vivid yet unsettling, merging science and imagination in symbolic, painterly style."
 
+# des = "A glowing futuristic plaza with holographic stalls and flowing light, silhouettes trading radiant memory orbs, mood vibrant and optimistic, speculative art, cinematic, neon reflections, painterly surreal textures."
+# des = "A crumbling memory bazaar beneath a fractured sky, holograms flicker across ruined towers, shadowy figures wander exchanging fading light, mood tense and collapsing, dystopian speculative art, cinematic and surreal."
+# des = "A vast urban memory exchange hall under soft blue neon glow, crowds drift calmly, atmosphere balanced between wonder and unease, speculative art style, cinematic lighting, surreal painterly tones."
+# des = "A serene riverside city glowing with holographic blossoms, silhouettes exchange gentle streams of light, atmosphere calm and harmonious, speculative art, cinematic, surreal, painterly tones with warm radiant hues."
+des = "Envision a randomized perspective within a vibrant, futuristic museum displaying an array of odd, peculiar, and extraordinary art, alongside massive 3D sculptures and enormous paintings. The gallery boasts meticulous architecture characterized by photorealistic and maximalist designs, with each art piece illuminated by spotlights. The ambiance is heightened by surrealistic lighting, augmenting the immersive experience."
 cleaned_text = clean_llm_description(des)
 
 payload = build_prompt_payload(cleaned_text)
@@ -266,10 +257,10 @@ payload = build_prompt_payload(cleaned_text)
 # print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 prompt_id = enqueue_render(payload)
-# print(prompt_id)
+print("prompt_id is: ", prompt_id)
 
 imagelocation = get_image_location(prompt_id)
-print(imagelocation.filename, imagelocation.subfolder, imagelocation.type)
+print("image path is ", imagelocation.filename, imagelocation.subfolder, imagelocation.type)
 
 content = fetch_png_bytes(imagelocation)
-print(content[:8])
+print("png bytes: ", content[:8])

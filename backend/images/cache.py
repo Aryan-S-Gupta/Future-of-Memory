@@ -1,7 +1,7 @@
 from cachetools import TTLCache
 
 world_image_text_cache = TTLCache(maxsize=1, ttl=600) # stores 1 entry (current world description), expires 10 mins
-world_prompt_cache: TTLCache = TTLCache(maxsize=10, ttl=600)
+world_prompt_cache = TTLCache(maxsize=10, ttl=600) # mapping world_id to prompt_id
 
 def cache_world_image_text(world_id: str, image_text: str) -> None:
     world_image_text_cache[world_id] = image_text
