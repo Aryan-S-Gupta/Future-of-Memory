@@ -118,8 +118,6 @@ from backend.images.generate import (
     clean_llm_description,
     build_prompt_payload,
     enqueue_render,
-    map_world_to_prompt,
-    get_prompt_id_for_world,
     get_image_location,
     fetch_png_bytes,
 )
@@ -134,6 +132,7 @@ from backend.images.cache import (
 def call_llm_update_world(choice: str) -> dict:
     return {'display_text': str, 'image_text': str, 'world_id': str}
 
+# sudo function, modify world based on user choice, link llm with image generation, the get_story_result_by_choice() I guess?
 @require_POST
 def apply_choice(request):
     """
@@ -159,7 +158,7 @@ def apply_choice(request):
     payload = build_prompt_payload(cleaned)
     prompt_id = enqueue_render(payload)
 
-    # map world -> prompt_id for later lookup
+    # cache world -> prompt_id for later lookup
     map_world_to_prompt(world_id, prompt_id)
 
     # return to frontend
@@ -192,6 +191,7 @@ def render_image(request, world_id: str):
 
 
 # render/status/world_id, frontend continuously pools from the url, if status is ready, set the image src to image_url
+# avoid the case when timeout, the image is broken
 @require_GET
 def render_status(request, world_id: str):
     """
@@ -209,7 +209,7 @@ def render_status(request, world_id: str):
 
     try:
         location = get_image_location(prompt_id, timeout_seconds=1, interval_seconds=0.2)
-        return JsonResponse({'status': 'ready', 'image_url': f'/render/{world_id}'}, status=200)
+        return JsonResponse({'status': 'ready', 'image_url': f'/render/{world_id}'}, status=200) # if view gives the url, then no need there
     except TimeoutError:
         return JsonResponse({'status': 'pending'}, status=202)
     except Exception as e:
