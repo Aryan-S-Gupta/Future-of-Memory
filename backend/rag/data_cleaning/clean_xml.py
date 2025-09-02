@@ -85,10 +85,10 @@ def xml_to_txt() -> dict[str, str]:
 
             # Write txt and licence files
             with open(
-                os.path.join(TXT_PATH, f"{sanitised_article_title}.txt"), "w"
+                os.path.join(TXT_PATH, f"{sanitised_article_title}.txt"), "w" , encoding="utf-8"
             ) as txt_file:
                 txt_file.write(body_text)
-            with open(os.path.join(LICENCE_PATH), "a") as licence_file:
+            with open(os.path.join(LICENCE_PATH), "a", encoding="utf-8") as licence_file:
                 licence_file.write(f"# {article_title}\n\n{licence}\n\n")
             # todo add article references, authors, etc.
 
