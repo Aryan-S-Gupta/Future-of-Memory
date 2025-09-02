@@ -10,6 +10,8 @@ urlpatterns = [
     path('storyline/question', views.get_story_question, name='storyline_question'),
     path('storyline/choice', views.get_story_result_by_choice, name='storyline_choice'),
     path('storyline/result', views.get_story_result, name='storyline_result'),
+    path('rag/retrieve', views.rag_retrieve, name='rag_retrieve'),
+    path('storyline/result', views.get_story_result, name='storyline_result'),
     # frontend continuously check status
     path('render/status/<str:world_id>', views.render_status, name='image_status'),
     # image once ready, serve from this url
