@@ -11,6 +11,3 @@ venv/
 .vscode/
 .idea/
 .DS_Store
-
-# Ignore generated licenses file
-backend/rag/cleaned_data/licences/licenses.txt

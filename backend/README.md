@@ -123,12 +123,11 @@ ollama pull nomic-embed-text
 ### ✅ Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_TEAM_NAME/DECO3801---Data-Busters.git
+git clone https://github.com/manya-k/DECO3801---Data-Busters.git
 cd DECO3801---Data-Busters
 git checkout feature/backend-init
 ```
 
-> **Note**: Replace `YOUR_TEAM_NAME` with the actual GitHub username/organization name.  
 > Replace the branch name if using another branch.
 
 ---
