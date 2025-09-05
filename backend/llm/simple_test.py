@@ -87,10 +87,15 @@ def test_basic_functionality():
 def check_ollama():
     """Quick check if Ollama is accessible"""
     try:
-        import requests
+        import requests  # type: ignore
         response = requests.get("http://localhost:11434/api/tags", timeout=3)
         return response.status_code == 200
-    except:
+    except ImportError:
+        print("❌ requests library not found. Make sure you're in the virtual environment:")
+        print("   cd backend && source venv/bin/activate")
+        return False
+    except Exception as e:
+        print(f"⚠️  Connection error: {e}")
         return False
 
 if __name__ == "__main__":
