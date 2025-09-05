@@ -2,7 +2,8 @@
 """
 import os
 
-OLLAMA_MODEL = "phi3:mini"
+OLLAMA_LLM_MODEL   = "phi3:3.8b"         # for story generation
+OLLAMA_EMBED_MODEL = "nomic-embed-text"   # for text embedding
 
 # Directory containing RAG vector database files
 DB_PATH = os.path.abspath(os.path.join("rag", "db", "faiss_db"))
