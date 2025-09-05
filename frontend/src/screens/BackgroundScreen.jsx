@@ -15,14 +15,14 @@ const BackgroundScreen = () => {
       <h1 className="title">Background</h1>
         <div className="crawl-container">
           <div className="crawl-text">
-            <p> 
-              The year is 2040. Neurotechnology has shattered boundaries: <br /> <br />
-              memories can be rewritten, emotions dialed up or down, consciousness linked and shared across minds. <br /> <br />
-              At the Global Neurotechnology Regulation Authority, your decisions shapes the way people live,  <br /> <br />
-              the paths societies will take, and what humanity might become. <br /> <br />
-              Progress and profit drive innovation, but freedom collides with the need for control. <br /> <br />
-              Ethics blur in the face of possibilities. The world is watching! <br /> <br />
-              SO CHOOSE WISELY! <br /> <br />  
+            <p>
+              Welcome to 2040 <br /> <br />
+              Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /> <br />
+              You are the chosen voice of your people, standing between promise and peril.  <br /> <br />
+              Every law you shape will ripple through lives and futures, <br /> <br />
+              redefining what it means to be human.<br /> <br />
+              Will you shield your community, pursue progress, or uphold your ethics? <br /> <br />
+              The destiny of millions rests in your hands! <br /> <br />  
             </p>
           </div>
         </div>
