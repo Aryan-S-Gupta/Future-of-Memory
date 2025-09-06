@@ -68,12 +68,13 @@ def setup() -> None:
     index_files = ["index.faiss", "index.pkl"]
     if not all(os.path.exists(os.path.join(DB_PATH, f)) for f in index_files):
         logger.info("Vector DB not found, setting up RAG system...")
-        paths_to_titles = xml_to_txt()
-        logger.info("Set up txt source files")
+        pmc_file_metadata = xml_to_txt()
+        logger.info("Created PMC txt source files")
         documents = load_documents()
         for doc in documents:
-            article_title = paths_to_titles[doc.metadata["source"]]
-            doc.metadata["article_title"] = article_title
+            # todo test that this works (metadata recoded in vector store)
+            source_filename = doc.metadata["source"]
+            doc.metadata.extend(pmc_file_metadata[source_filename])
         logger.info("Loaded documents")
         create_vector_score(documents)
     else:

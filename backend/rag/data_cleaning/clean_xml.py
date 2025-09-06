@@ -14,30 +14,44 @@ RAG_DIR = os.path.abspath("rag")
 # Path to source_data folder
 SOURCE_DATA_PATH = os.path.join(RAG_DIR, "source_data")
 
-# Path to all XML files to parse
+# Path to all XML files to parse, relative to source data folder
 XML_PATHS = [os.path.join("pmc_2025_08_17", "pmc_result.xml")]
-
-# XPath (XML path) to license tag, relative to article tag (for XML files sourced from PMC)
-LICENCE_XPATH = "./front/article-meta/permissions/license//license-p"
-
-# XPath to article title tag, relative to article tag
-TITLE_XPATH = "./front/article-meta/title-group/article-title"
 
 # path for output txt files
 TXT_PATH = os.path.join(RAG_DIR, "cleaned_data")
 
-# where to put licence information
-LICENCE_PATH = os.path.join(TXT_PATH, "licences", "licenses.txt")
+# where to put article metadata
+METADATA_PATH = os.path.join(TXT_PATH, "metadata", "pmc_metadata.md")
 
 
-def clean_body_tag(body_tag: ET.Element) -> str:
+class XPath:
+    """XPaths (XML paths) for relevant article information in pmc_result.xml
+    """
+    
+    LICENCE = "./front/article-meta/permissions/license//license-p"
+    TITLE = "./front/article-meta/title-group/article-title"
+    AUTHOR = "./front/article-meta//contrib[@contrib-type='author']/name"
 
-    # Remove inline-formula elements from body to remove LaTeX content
-    tags_to_remove = {"inline-formula", "xref", "tex-math"}
+
+def clean_body_tag(body_tag: ET.Element, root: ET.Element) -> str:
+    """Extract textual content from an article body.
+
+    Args:
+        body_tag (ET.Element): The article's XML body tag.
+        root (ET.Element): The XML document's root.
+
+    Returns:
+        str: Cleaned text from the article body.
+    """
+
+    # Remove non-textual content (e.g. LaTeX content)
+    tags_to_remove = {"inline-formula", "xref", "tex-math", "ext-link", "fig"}
     for tag_to_remove in tags_to_remove:
         for parent in body_tag.findall(f".//{tag_to_remove}"):
             # Find each inline-formula element
             parent.text = ""
+            for child in parent:
+                parent.remove(child)
     
     text = ""
     for elem in body_tag.iter():
@@ -48,12 +62,12 @@ def clean_body_tag(body_tag: ET.Element) -> str:
     return text
 
 
-def xml_to_txt() -> dict[str, str]:
+def xml_to_txt() -> dict[str, dict]:
     """Parse all given PMC-sourced XML fils to text. Include licensing information and article
     titles as filenames.
     """
 
-    paths_to_titles: dict[str, str] = {}
+    file_metadata: dict[str, dict] = {}
 
     for xml_path in XML_PATHS:
         
@@ -62,34 +76,72 @@ def xml_to_txt() -> dict[str, str]:
         tree = ET.parse(xml_path)
         root = tree.getroot()
 
+        # Parse each article
         for article in root:
+            
+            article_metadata: dict[str, str | list] = {}
 
             # Find article title
-            title_elem = article.find(TITLE_XPATH)
+            title_elem = article.find(XPath.TITLE)
             assert (
                 title_elem is not None and title_elem.text is not None
             ), "Article doesn't have title"
             article_title = title_elem.text
             sanitised_article_title = sanitise_string(article_title)
-            paths_to_titles[sanitised_article_title + ".txt"] = article_title
+            filename = sanitised_article_title + ".txt"
+            article_metadata["title"] = article_title
 
             # Find licence info
-            licence_tag = article.find(LICENCE_XPATH)
-            assert licence_tag is not None, "Article doesn't have licence"
-            licence = "".join(licence_tag.itertext()).strip()
+            licence_tag = article.find(XPath.LICENCE)
+            licence: str
+            if licence_tag is not None:
+                licence = "".join(licence_tag.itertext()).strip()
+            else:
+                licence = "Not found"
+            article_metadata["licence"] = licence
+            
+            # Find authors
+            authors: list[str] = []
+            author_names = article.findall(XPath.AUTHOR)
+            if author_names is not None:
+                for author_name in author_names:
+                    given_names_text = ""
+                    surname_text = ""
+                    given_names = author_name.find("given-names")
+                    if given_names is not None and given_names.text is not None:
+                        given_names_text = given_names.text
+                    surname = author_name.find("surname")
+                    if surname is not None and surname.text is not None:
+                        surname_text = surname.text
+                    full_name = " ".join([given_names_text, surname_text]).strip()
+                    authors.append(full_name)
+            article_metadata["authors"] = authors
             
             # Get and clean article body
             body = article.find("body")
             assert body is not None, "Article doesn't have body"
-            body_text = clean_body_tag(body)
+            body_text = clean_body_tag(body, root)
 
-            # Write txt and licence files
+            # Write cleaned txt files
             with open(
                 os.path.join(TXT_PATH, f"{sanitised_article_title}.txt"), "w" , encoding="utf-8"
             ) as txt_file:
                 txt_file.write(body_text)
-            with open(os.path.join(LICENCE_PATH), "a", encoding="utf-8") as licence_file:
-                licence_file.write(f"# {article_title}\n\n{licence}\n\n")
-            # todo add article references, authors, etc.
+            
+            file_metadata[filename] = article_metadata
+    
+    # Write metadata
+    with open(os.path.join(METADATA_PATH), "a", encoding="utf-8") as licence_file:
+        for filename, meta in file_metadata.items():
+            licence_file.write(
+                f"# {meta['title']}\n\n"
+                f"Filename: {filename}\n\n"
+                f"Licence: {meta['licence']}\n\n"
+                f"Author/s: {', '.join(meta['authors'])}\n\n"
+            )
 
-    return paths_to_titles
+    return file_metadata
+
+
+if __name__ == "__main__":
+    xml_to_txt()

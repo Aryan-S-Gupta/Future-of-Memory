@@ -26,11 +26,6 @@ Changes that were statistically different from 0 are in bold.
 Significant contrasts in changes across sleep and across nap.
 Significant contrasts in changes across 12 hours (experiment 1) and 2 hours (experiment 2) of wakefulness.
 Across the retention interval, forgetting was greater for unrelated than for related word pairs (Relatedness: F1,58 = 46.32, P<0.001). The sleep group showed less forgetting than the wake group (Group: F1,58 = 20.67, P<0.001). This beneficial effect of nocturnal sleep was similar for both kinds of materials (Relatedness×Group interaction: F1,58 = 0.27, P = 0.60; ).
-Change in paired-associate performance across the retention interval. - (
-A
-) Forgetting of semantically related word pairs over a 12-hour retention interval was reduced by nocturnal sleep (black bar) relative to wakefulness during the day (white bar). In contrast, a daytime nap (black hatched bar) had no such effect on forgetting over a 2-hour retention interval compared to wakefulness (white hatched bar). (
-B
-) For semantically unrelated word pairs, both nocturnal sleep and daytime napping attenuated forgetting over the retention intervals. ** P<0.01; *** P<0.001.
 Experiment 2: daytime nap - Learning performance was better for related word pairs (Relatedness; F1,66 = 116.94, P<0.001), but was similar in the nap and the wake conditions (Condition: F1,32 = 0.13, P = 0.72; Relatedness×Condition interaction: F1,66 = 0.00, P = 0.98; ). Prior exposure to the task did not influence learning (Period: F1,32 = 1.97, P = 0.17).
 Forgetting across the retention interval was more prominent for unrelated word pairs (Relatedness: F1,66 = 11.67, P = 0.001; ). A post-learning nap alleviated the forgetting of unrelated word pairs (), but had no effect on related ones (Condition×Relatedness interaction: F1,66 = 7.76, P = 0.01; Condition: F1,32 = 2.17, P = 0.15; ). Forgetting was not affected by prior exposure to the task (Period: F1,66 = 0.01, P = 0.95).
 Post-learning nap lasted for 64.1 minutes on average and consisted mainly of Stage 2 sleep. Neither nap duration nor macrostructure was associated with performance change over the retention interval (P>0.38; ).
