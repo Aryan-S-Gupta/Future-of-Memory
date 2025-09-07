@@ -17,7 +17,7 @@ class Turn(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='turns')
     question_json = models.JSONField() # question with options
     user_choice = models.ForeignKey('Option', on_delete=models.SET_NULL, null=True, blank=True, related_name='chosen') # final choice
-    revealed_image_file_rel = models.CharField(max_length=512, blank=True) # revealed image rel path for this turn/question
+    displayed_image_rel = models.CharField(max_length=512, blank=True) # revealed image rel path for this turn/question
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -46,8 +46,8 @@ class ImageRender(models.Model):
     ]
     option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='renders') # 1-n for retries
     status = models.CharField(max_length=16, choices=STATUS_CHOICES, default='pending')
-    file_rel = models.CharField(max_length=512, blank=True)
-    last_render_file_rel = models.CharField(max_length=512, blank=True) # image of the last turn, as a fallback
+    image_rel = models.CharField(max_length=512, blank=True)
+    last_turn_image_rel = models.CharField(max_length=512, blank=True) # image of the last turn, as a fallback
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
