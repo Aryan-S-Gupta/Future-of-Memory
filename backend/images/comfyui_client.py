@@ -1,4 +1,3 @@
-# Image generation logic
 from dataclasses import dataclass
 import json
 import time
@@ -12,8 +11,6 @@ CLIENT_ID = str(uuid.uuid4())
 
 POLL_INTERVAL_LIMIT = 1.0
 POLL_TIMEOUT_LIMIT = 120
-
-# prompt_world_map = {}
 
 @dataclass
 class ImageLocation:
@@ -233,16 +230,6 @@ def fetch_png_bytes(image_location: ImageLocation) -> bytes:
     response = requests.get(f'{COMFYUI_BASE_URL}/view', params=params, stream=True)
     response.raise_for_status()
     return response.content
-
-# def map_world_to_prompt(world_id: str, prompt_id: str) -> None:
-    
-#     prompt_world_map[world_id] = prompt_id
-
-# def get_prompt_id_for_world(world_id: str) -> str:
-#     try:
-#         return prompt_world_map[world_id]
-#     except:
-#         raise KeyError(f'unknown world_id: {world_id}')
 
 # ---------------------- test -----------------------
 
