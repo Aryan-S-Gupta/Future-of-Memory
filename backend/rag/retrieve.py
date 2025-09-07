@@ -5,7 +5,7 @@ import logging
 from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
 
-from shared.constants import OLLAMA_MODEL, DB_PATH
+from shared.constants import OLLAMA_EMBED_MODEL, DB_PATH
 from shared.utils import get_ollama_embeddings
 from rag.setup import setup
 
