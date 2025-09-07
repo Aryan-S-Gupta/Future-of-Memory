@@ -10,7 +10,7 @@ from langchain_core.documents import Document
 
 from rag.data_cleaning.clean_xml import xml_to_txt
 from shared.utils import get_ollama_embeddings
-from shared.constants import DB_PATH
+from shared.constants import VECTOR_DB_PATH
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -55,18 +55,18 @@ def create_vector_score(documents: list[Document]) -> None:
     logger.info("FAISS vector store created successfully.")
 
     # Save the vector store
-    vectorstore.save_local(DB_PATH)
-    logger.info(f"Vector store saved to {DB_PATH}")
+    vectorstore.save_local(VECTOR_DB_PATH)
+    logger.info(f"Vector store saved to {VECTOR_DB_PATH}")
 
 
 def setup() -> None:
     """Set up the RAG system by
-    1. cleaning data
+    1. cleaning texual data
     2. creating the vector DB (if it doesn't already exist)
     """
 
     index_files = ["index.faiss", "index.pkl"]
-    if not all(os.path.exists(os.path.join(DB_PATH, f)) for f in index_files):
+    if not all(os.path.exists(os.path.join(VECTOR_DB_PATH, f)) for f in index_files):
         logger.info("Vector DB not found, setting up RAG system...")
         pmc_file_metadata = xml_to_txt()
         logger.info("Created PMC txt source files")
