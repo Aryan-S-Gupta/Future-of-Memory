@@ -33,7 +33,7 @@ class XPath:
     AUTHOR = "./front/article-meta//contrib[@contrib-type='author']/name"
 
 
-def clean_body_tag(body_tag: ET.Element, root: ET.Element) -> str:
+def clean_body_tag(body_tag: ET.Element) -> str:
     """Extract textual content from an article body.
 
     Args:
@@ -120,7 +120,7 @@ def xml_to_txt() -> dict[str, dict]:
             # Get and clean article body
             body = article.find("body")
             assert body is not None, "Article doesn't have body"
-            body_text = clean_body_tag(body, root)
+            body_text = clean_body_tag(body)
 
             # Write cleaned txt files
             with open(
