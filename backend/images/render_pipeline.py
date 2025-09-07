@@ -1,4 +1,3 @@
-# backend/images/render_pipeline.py
 from django.shortcuts import get_object_or_404
 from backend.shared.models import Session, Turn, Option, ImageRender
 from .comfyui_client import (
