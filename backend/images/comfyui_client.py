@@ -9,9 +9,6 @@ import re
 COMFYUI_BASE_URL = "http://127.0.0.1:8000"
 CLIENT_ID = str(uuid.uuid4())
 
-POLL_INTERVAL_LIMIT = 1.0
-POLL_TIMEOUT_LIMIT = 120
-
 @dataclass
 class ImageLocation:
     filename: str
@@ -184,11 +181,11 @@ def enqueue_render(prompt_payload: Dict[str, Any]) -> str:
 
 # originally copy image from local repo to MEDIA, now using history/ to get file path then retrieve png bytes
 def get_image_location(prompt_id: str, 
-                       timeout_seconds: int = POLL_TIMEOUT_LIMIT, 
-                       interval_seconds: float = POLL_INTERVAL_LIMIT) -> ImageLocation:
+                       max_wait_s: float = 30.0, 
+                       poll_every_s: float = 0.5) -> ImageLocation:
     
     history_url = f'{COMFYUI_BASE_URL}/history/{prompt_id}'
-    deadline = time.time() + timeout_seconds
+    deadline = time.time() + max_wait_s
 
     # continuously checking if image is generated
     while time.time() < deadline:
@@ -211,7 +208,7 @@ def get_image_location(prompt_id: str,
                     type=first_image.get('type', 'output')
                 )
 
-        time.sleep(interval_seconds)
+        time.sleep(poll_every_s)
 
     raise TimeoutError('Timed out while waiting for image.')
 
@@ -244,6 +241,22 @@ des7 = "A luminous dome-city suspended above quiet waters, radiant streams of da
 des8 = "A shadow-drenched sprawl where fading holograms sputter against cracked glass towers, crowds shuffle through dim corridors of fractured light, mood heavy and uncertain, dystopian speculative art, cinematic shadows, surreal atmospheric strokes."
 des = [des5, des6, des7, des8]
 
+cleaned_text = clean_llm_description(des7)
+
+payload = build_prompt_payload(cleaned_text)
+
+# print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+prompt_id = enqueue_render(payload)
+print("prompt_id is: ", prompt_id)
+
+imagelocation = get_image_location(prompt_id)
+print("image path is ", imagelocation.filename, imagelocation.subfolder, imagelocation.type)
+
+content = fetch_png_bytes(imagelocation)
+# http://127.0.0.1:8000/view?filename=ComfyUI_00037_.png&subfolder=&type=output
+print("png bytes: ", content[:8])
+
 def test(description):
     for des in description:    
       cleaned_text = clean_llm_description(des)
@@ -262,4 +275,4 @@ def test(description):
       # http://127.0.0.1:8000/view?filename=ComfyUI_00037_.png&subfolder=&type=output
       print("png bytes: ", content[:8])
 
-test(des) # each image took about 20s to generate, 1min30s for question reading and consideration might be okay
+# test(des) # each image took about 20s to generate, 1min30s for question reading and consideration might be okay

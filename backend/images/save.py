@@ -22,5 +22,5 @@ def save_png_to_media(rel_path: str, png_bytes: bytes) -> str:
     
     target = Path(settings.MEDIA_ROOT) / rel_path
     target.parent.mkdir(parents=True, exist_ok=True) # create parent dir "comfyui/output"
-    target.write_bytes(png_bytes)  # overwrite if re-rendered
+    target.write_bytes(png_bytes)
     return rel_path
