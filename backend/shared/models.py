@@ -22,10 +22,10 @@ class Session(models.Model):
 class Turn(models.Model):
     """
     Core model: stores all data for a specific turn/year in the game.
-    Uses year as primary key for easy lookup.
+    Uses (session, year) as composite primary key to support multiple parallel sessions.
     """
-    year = models.IntegerField(primary_key=True) # Year as primary key (e.g., 2035, 2036...)
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='turns')
+    year = models.IntegerField() # Year within this session (e.g., 2035, 2036...)
     
     # Question phase data
     question = models.TextField(blank=True) # Generated question text
@@ -40,16 +40,17 @@ class Turn(models.Model):
     context_block = models.TextField(blank=True) # RAG retrieved context
     
     # User interaction (for shared session voting/consensus)
-    user_choice = models.CharField(max_length=1, blank=True) # A, B, C, or D - final chosen option
+    user_choice = models.ForeignKey('Option', on_delete=models.SET_NULL, null=True, blank=True, related_name='chosen_by_turns') # Reference to the chosen option
     
     # Image management (preserved from teammate's design)
     displayed_image_rel = models.CharField(max_length=512, blank=True) # revealed image rel path for this turn/question
 
     class Meta:
-        ordering = ['year']
+        ordering = ['session', 'year']
+        unique_together = ['session', 'year'] # Composite primary key: each (session, year) is unique
 
     def __str__(self):
-        return f'Turn {self.year} (Session {self.session_id})'
+        return f'Turn {self.year} (Session {self.session.id})'
 
 class Option(models.Model):
     """
@@ -60,6 +61,7 @@ class Option(models.Model):
     label = models.CharField(max_length=1) # A, B, C, D
     option_text = models.TextField(blank=True) # The actual option text displayed to user (may be empty initially)
     image_text = models.TextField(blank=True) # LLM generated prompt for image generation (added later)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['label']
@@ -80,7 +82,7 @@ class ImageRender(models.Model):
     option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='renders')
     status = models.CharField(max_length=16, choices=STATUS_CHOICES, default='pending')
     image_rel = models.CharField(max_length=512, blank=True)
-    last_turn_image_rel = models.CharField(max_length=512, blank=True) # image of the last turn, as a fallback
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'Render {self.id} ({self.status}) for Option {self.option.label}'
