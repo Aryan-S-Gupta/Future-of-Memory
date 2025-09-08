@@ -25,3 +25,21 @@
   from { opacity: 0; transform: translateY(15px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* Start button fade-in */
+.start-fade-in {
+  opacity: 0; /* initially invisible */
+  animation: fadeIn 3s ease forwards;
+  animation-delay: 4s; 
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px); /* subtle upward motion */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

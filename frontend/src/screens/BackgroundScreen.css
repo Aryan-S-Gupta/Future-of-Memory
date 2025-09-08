@@ -50,13 +50,7 @@
   }
 }
 
-/* Optional: Style for buttons */
-.button-container {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
-}
+
 /* Start button fade-in */
 .start-fade-in {
   opacity: 0; /* initially invisible */
