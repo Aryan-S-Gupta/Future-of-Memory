@@ -12,8 +12,8 @@
   font-size: 1.05rem;
   font-weight: 400;
   text-align: center;
-  color: #ffffff;
-  text-shadow: 1px 1px 4px rgb(247, 201, 201);
+  color: #61dca3;
+  text-shadow: 1px 1px 6px rgba(123, 0, 255, 0.7);
   max-width: 900px;         
   margin: 0 auto;
   line-height: 1.5;         
@@ -37,8 +37,8 @@
   transform-origin: 50% 100%;
   transform: rotateX(25deg); /* tilt the text backward */
   animation: crawl 30s linear infinite;
-  color: rgb(255, 255, 255);
-  text-shadow: 0 0 5px #ff00b3;
+  color: #ffffff;
+  text-shadow: 1px 1px 4px rgb(7, 142, 106);
 }
 
 @keyframes crawl {
@@ -50,12 +50,37 @@
   }
 }
 
+.btn-next {
+  padding: 1rem 3rem;
+  font-size: 1.0rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #1e40af, #3b82f6); 
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(73, 159, 239, 0.9), 
+              0 0 25px rgba(6, 41, 98, 0.7),
+              inset 0 0 8px rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
+}
 
-/* Start button fade-in */
+.btn-next:hover {
+  background: linear-gradient(145deg, #0b2b6f, #60dbfa);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 1),
+              0 0 40px rgba(59, 130, 246, 0.8),
+              inset 0 0 10px rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+} 
+
+/* next button fade-in */
 .start-fade-in {
   opacity: 0; /* initially invisible */
   animation: fadeIn 3s ease forwards;
-  animation-delay: 20s; /* wait until crawl is partly done */
+  animation-delay: 10000s; /* wait until crawl is partly done */
 }
 
 @keyframes fadeIn {
