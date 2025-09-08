@@ -74,7 +74,7 @@ def setup() -> None:
         for doc in documents:
             # todo test that this works (metadata recoded in vector store)
             source_filename = doc.metadata["source"]
-            doc.metadata.extend(pmc_file_metadata[source_filename])
+            doc.metadata.update(pmc_file_metadata[source_filename])
         logger.info("Loaded documents")
         create_vector_score(documents)
     else:
