@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class WorldBackground(models.Model):
     """
@@ -22,7 +23,8 @@ class Session(models.Model):
 class Turn(models.Model):
     """
     Core model: stores all data for a specific turn/year in the game.
-    Uses (session, year) as composite primary key to support multiple parallel sessions.
+    Uses (session, year) as composite unique key to support multiple parallel sessions.
+    Each Turn has Django's auto-generated 'id' as primary key.
     """
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='turns')
     year = models.IntegerField() # Year within this session (e.g., 2035, 2036...)
@@ -47,7 +49,7 @@ class Turn(models.Model):
 
     class Meta:
         ordering = ['session', 'year']
-        unique_together = ['session', 'year'] # Composite primary key: each (session, year) is unique
+        unique_together = ['session', 'year'] # Composite key: each (session, year) is unique
 
     def __str__(self):
         return f'Turn {self.year} (Session {self.session.id})'
@@ -61,7 +63,7 @@ class Option(models.Model):
     label = models.CharField(max_length=1) # A, B, C, D
     option_text = models.TextField(blank=True) # The actual option text displayed to user (may be empty initially)
     image_text = models.TextField(blank=True) # LLM generated prompt for image generation (added later)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ['label']
@@ -82,7 +84,7 @@ class ImageRender(models.Model):
     option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='renders')
     status = models.CharField(max_length=16, choices=STATUS_CHOICES, default='pending')
     image_rel = models.CharField(max_length=512, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f'Render {self.id} ({self.status}) for Option {self.option.label}'
