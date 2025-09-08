@@ -12,16 +12,17 @@ npm -v
 ```
 
 ### If versions are fine, run:
-
 ```bash
 brew install node
 ```
 
-1. On MacOS: ```brew install node```. On another OS: follow the instructions on [Node's website](https://nodejs.org/en/download)
+1. On MacOS run```brew install node```. 
+On another OS: follow the instructions on [Node's website](https://nodejs.org/en/download)
    
 Steps to follow everytime a new branch is pulled:
 
-2. clone the repository
-3.  ```cd frontend/src```
+2. clone the repository if not already cloned: 
+```https://github.com/manya-k/DECO3801---Data-Busters.git```
+3. ```cd frontend/src```
 4. ```npm install```
 5. ```npm run dev``` -- to actually run the game
