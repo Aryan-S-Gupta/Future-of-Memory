@@ -1,23 +1,21 @@
-from typing import List, Optional
+from typing import List
 
 def build_question_prompt(
     year: int,
     background: str,
     context_block: str,
     last_description: str,
-    state_json: Optional[str] = None,
 ) -> str:
     """
-    STEP A: Ask the model to return a RAG query AND a multiple-choice style question with two options.
-    OUTPUT must be STRICT JSON with fields: query_text, question, options[2]
+    STEP A: Ask the model to return a RAG query AND a multiple-choice style question with four options.
+    OUTPUT must be STRICT JSON with fields: query_text, question, options[4]
     """
-    state_hint = f"\nState Memory (JSON):\n{state_json}\n" if state_json else ""
     return f"""
 You are a narrative engine for a turn-based story.
 
 TASK
 1) Build a retrieval query to fetch 3–6 highly relevant factual snippets for grounding.
-2) Propose ONE clear, decision-driving question WITH EXACTLY TWO OPTIONS (no yes/no). 
+2) Propose ONE clear, decision-driving question WITH EXACTLY FOUR OPTIONS (A, B, C, D). 
    Each option must be short, mutually exclusive, and lead to meaningfully different outcomes.
 
 STORY FRAME
@@ -31,17 +29,16 @@ Previous Story Summary:
 
 Retrieved Context (if any, distilled):
 {context_block}
-{state_hint}
 
 
 HARD CONSTRAINTS
 - Return ONLY valid JSON (no markdown, no code fences).
 - The question must be specific and consequential for the next plot turn.
-- "options": an array of EXACTLY 2 strings. Avoid “Yes/No”.
+- "options": an array of EXACTLY 4 strings. Avoid “Yes/No”.
 - The retrieval query must be standalone (<= 110 chars) and safe to send to RAG.
 - Each option must be short (6–14 words), mutually exclusive, concrete, and must NOT repeat the question text.
 - Do NOT include labels like "A." or "B." inside option strings.
-- If you initially think of only one option, you MUST invent a second plausible alternative.
+- If you initially think of only four options, you MUST ensure they are all distinct and plausible alternatives.
 - Options should be self-contained and understandable without repeating the whole question.
 - Frame the question at the societal, policy, or community level (e.g., citizens, regulators, clinics, researchers).
 
@@ -50,14 +47,14 @@ Return ONLY valid JSON with this exact schema:
 {{
   "query_text": "<<=110 chars, standalone retrieval sentence>",
   "question": "<one question ending with a question mark>",
-  "options": ["<concise option without labels>", "<second concise option without labels>"]
+  "options": ["<option A>", "<option B>", "<option C>", "<option D>"]
 }}
 
 EXAMPLE (ONLY to learn the shape; DO NOT copy content):
 {{
   "query_text": "clinical protocols for identity continuity in memory-editing pilots",
-  "question": "Which path should Lin choose before the pilot review?",
-  "options": ["Schedule a supervised integration session at the clinic", "Pause treatment to consult an external ethics counselor"]
+  "question": "Which approach should the regulatory committee prioritize?",
+  "options": ["Establish mandatory waiting periods for all procedures", "Create independent patient advocate programs", "Require clinic self-regulation with professional guidelines", "Form community-based review boards for approvals"]
 }}
 
 Return ONLY valid JSON. Do not include markdown, code fences, or commentary.
@@ -71,21 +68,17 @@ def build_description_prompt(
     last_description: str,
     current_question: str,
     selected_option: str,   # one of the strings from the options array
-    state_json: Optional[str] = None,
 ) -> str:
     """
-    STEP B: Given the player's selected option, produce the Scenario + Image brief + follow-up RAG query.
+    STEP B: Given the player's selected option, produce the Scenario + follow-up RAG query.
     OUTPUT must be STRICT JSON:
-    - scenario: 5-8 sentences which is vivid and engaging.
-    - image_brief: subject, scene, mood, style, keywords[] (3–6 compact tokens for the image pipeline).
-    - rag_query: query_text for the NEXT turn's retrieval.
+    - scenario: 5 sentences which is vivid and engaging.
+    - query_text: query_text for the NEXT turn's retrieval.
     """
-    state_hint = f"\nState Memory (JSON):\n{state_json}\n" if state_json else ""
     return f"""
 You are continuing a turn-based story. Incorporate the selected option and produce:
-1) A concrete scenario with 5-8 sentences which is vivid and engaging.
-2) An image brief for the art pipeline (Stable Diffusion / ComfyUI).
-3) A focused follow-up retrieval query for the next turn.
+1) A concrete scenario with exactly 5 sentences which is vivid and engaging.
+2) A focused follow-up retrieval query for the next turn.
 
 STORY FRAME
 Current Year: {year}
@@ -104,7 +97,6 @@ Current Question:
 
 Selected Option:
 {selected_option}
-{state_hint}
 
 SCENARIO REQUIREMENTS
 - Output "scenario" as an array of sentences.
@@ -115,7 +107,6 @@ SCENARIO REQUIREMENTS
 - Use simple, everyday language suitable for museum visitors or high-school students.
 - Make it vivid and engaging: include sensory details (lights, sounds, crowds) and small dramatic contrasts; at least one sentence should invite reflection with a question.
 - Do not use arrows, symbols, headings, or labels like "result:"; write only natural sentences.
-- Consistency rule: "image_brief" and "rag_query" must only use entities/imagery already present in the "scenario". Do not invent new places or actors.
 
 ANTI-COPYING & VARIATION
 - Do not copy wording from any example. Use different phrasing and fresh details.
@@ -134,19 +125,12 @@ EXAMPLE TEMPLATE (structure only, NOT content to copy):
 HARD REMINDER
 - If the "scenario" array is not exactly 5 items, regenerate until it is exactly 5.
 - If any sentence is not within 15–30 words, regenerate until all five sentences meet 15–30 words.
-- Never include banned phrases. Never introduce entities not present in "scenario" into "image_brief" or "rag_query".
-
-IMAGE BRIEF REQUIREMENTS
-- Provide a single short descriptive sentence (≤70 characters).
-- This description must summarize the main subject, setting, and mood of the scenario in one line.
-- Do not break into fields (no subject/scene/mood/style separation).
-- Do not output keywords or arrays.
-- Use simple, direct language suitable for an image generation model.
-- The description must directly reflect the scenario above; do not invent new places, actors, or details.
+- Never include banned phrases.
 
 FOLLOW-UP RAG QUERY
 - Base the query strictly on entities, mechanisms, or ethical dilemmas explicitly raised in the scenario.
 - Do not introduce unrelated topics.
+
 OUTPUT FORMAT (STRICT)
 Return ONLY valid JSON with this exact schema:
 {{
@@ -157,7 +141,6 @@ Return ONLY valid JSON with this exact schema:
     "<sentence 4>",
     "<sentence 5>"
   ],
-  "image_brief": "Short one-sentence description (≤70 characters, from scenario)",
   "query_text": "<single concise sentence (<= 220 chars)>"
 }}
 
@@ -165,17 +148,48 @@ Return ONLY valid JSON. Do not include markdown, code fences, or commentary.
 """.strip()
 
 
-# Optional helper: turn ContextItem[] into a compact block for the prompts
-def compose_context_block_from_items(items: List[dict]) -> str:
+def build_image_text_prompt(
+    year: int,
+    background: str,
+    last_description: str,
+    question: str,
+    option_text: str,
+) -> str:
     """
-    Convert a list of ContextItem-like dicts into compact lines.
-    Each item may have: text, meta{title, source, year}.
+    Build a prompt to generate an image description for a specific option.
+    This predicts what the visual scene would look like if this option is chosen.
     """
-    lines = []
-    for i, it in enumerate(items[:8], 1):
-        meta = it.get("meta", {})
-        lines.append(
-            f"({i}) {it.get('text','').strip()} "
-            f"[title:{meta.get('title')}, source:{meta.get('source')}, year:{meta.get('year')}]"
-        )
-    return "\\n".join(lines)
+    return f"""
+You are helping generate speculative art style image prompts for an AI image generation model.
+
+The current world state is: {background}
+
+Previous events: {last_description}
+
+Current situation (Year {year}): {question}
+
+If this option is chosen: {option_text}
+
+Your task: Write one single detailed image prompt that captures the atmosphere of this world after choosing this specific option.
+
+STRICT REQUIREMENTS:
+- Output EXACTLY ONE sentence (no line breaks, no multiple sentences)
+- Maximum 70 words (count your words carefully)
+- Maximum 350 characters including spaces
+- Use concrete, visual language only
+- No quotes, no explanations, no meta-commentary
+- No instruction acknowledgments (do not say "Here's" or "I'll create")
+
+Focus on:
+- The environment and overall scene (urban, rural, futuristic, dystopian, natural, etc.)
+- The emotional mood (hopeful, doomed, neutral, chaotic, peaceful, tense, etc.) 
+- The artistic style (speculative art, cinematic, surreal, painterly textures, neon lighting)
+
+Do not describe exact numbers of people or micro actions. Instead, describe the overall crowd impression and the vibe of the world.
+
+EXAMPLES (for structure reference only, create original content):
+- "A cinematic government facility bathed in cold fluorescent lighting with officials reviewing documents at sterile desks"
+- "Speculative art scene of a bustling clinic courtyard with hopeful citizens waiting under warm sunset lighting"
+
+CRITICAL: Output only the final image prompt as one complete sentence. No additional text, explanations, or commentary.
+""".strip()
