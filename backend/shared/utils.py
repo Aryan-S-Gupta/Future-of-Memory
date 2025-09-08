@@ -5,7 +5,7 @@ import logging
 
 from langchain_ollama import OllamaEmbeddings
 
-from shared.constants import OLLAMA_MODEL
+from shared.constants import OLLAMA_EMBED_MODEL
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -17,7 +17,7 @@ def get_ollama_embeddings() -> OllamaEmbeddings:
     logger.debug("Initialising Ollama embedding model...")
     embeddings: OllamaEmbeddings
     try:
-        embeddings = OllamaEmbeddings(model=OLLAMA_MODEL)
+        embeddings = OllamaEmbeddings(model=OLLAMA_EMBED_MODEL)
         logger.info("Ollama embeddings model initialised successfully.")
     except Exception as e:
         logger.critical(
