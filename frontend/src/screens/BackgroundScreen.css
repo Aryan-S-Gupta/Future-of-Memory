@@ -61,7 +61,7 @@
 .start-fade-in {
   opacity: 0; /* initially invisible */
   animation: fadeIn 3s ease forwards;
-  animation-delay: 11s; /* wait until crawl is partly done */
+  animation-delay: 20s; /* wait until crawl is partly done */
 }
 
 @keyframes fadeIn {
