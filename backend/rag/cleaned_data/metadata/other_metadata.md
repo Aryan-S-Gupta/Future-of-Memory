@@ -69,3 +69,13 @@ Licence: Open Access - This article is licensed under a Creative Commons Attribu
 Author/s: Odile C. van Stuijvenberg, Marike L. D. Broekman, Samantha E. C. Wolff, Annelien L. Bredenoord, Karin R. Jongsma
 
 Source: [Scientific Reports article](https://www.nature.com/articles/s41598-024-58535-4)
+
+# Media, technology, and the sins of memory
+
+Filename: Media_technology_and_the_sins_of_memory.txt
+
+Licence: This is an Open Access article, distributed under the terms of the Creative Commons Attribution licence (http://creativecommons.org/licenses/by/4.0), which permits unrestricted re-use, distribution and reproduction, provided the original article is properly cited.
+
+Author/s: Daniel L. Schacter
+
+Source: [Cambridge Core article](https://www.cambridge.org/core/journals/memory-mind-and-media/article/media-technology-and-the-sins-of-memory/4F169E671DFA95639E971B43B5E4D57A)
