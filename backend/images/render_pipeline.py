@@ -5,8 +5,6 @@ from .comfyui_client import (
 )
 from .save import build_image_relpath, save_png_to_media
 
-INITIAL_WORLD_IMAGE_REL= "static/fallback_first_turn.png"
-
 def render_option_to_media(image_text: str, rel_path: str) -> str:
     """
     image_text -> clean -> /prompt -> /history -> /view?... -> save under rel_path
@@ -18,6 +16,7 @@ def render_option_to_media(image_text: str, rel_path: str) -> str:
     png = fetch_png_bytes(loc)
     return save_png_to_media(rel_path, png)
 
+# this needs to be run in the background
 def generate_four_images_blocking(session_id: int, turn_id: int) -> dict:
     """
     For each of the 4 options of this turn:
@@ -33,7 +32,6 @@ def generate_four_images_blocking(session_id: int, turn_id: int) -> dict:
     if len(options) != 4:
         raise ValueError('Expected 4 options for this turn.')
 
-    fallback_rel = prev_turn_displayed_image_rel(turn)
     results = {}
 
     for opt in options:
@@ -42,38 +40,20 @@ def generate_four_images_blocking(session_id: int, turn_id: int) -> dict:
             final_rel = render_option_to_media(opt.image_text, rel_path)
             # no need for last_turn_image_rel now? now tracked in turn displayed_image_rel
             ImageRender.objects.create(
-                option=opt, status='ready', image_rel=final_rel, last_turn_image_rel=''
+                option=opt, status='ready', image_rel=final_rel
             )
             results[opt.id] = {
                 'status': 'ready',
-                'image_rel': final_rel,
-                'fallback_rel': None,
-                'shown': final_rel,
+                'image_rel': final_rel
             }
         except Exception:
             ImageRender.objects.create(
-                option=opt, status='failed', image_rel='', last_turn_image_rel=fallback_rel
+                option=opt, status='failed', image_rel=''
             )
             results[opt.id] = {
                 'status': 'failed',
-                'image_rel': None,
-                'fallback_rel': fallback_rel,
-                'shown': fallback_rel,
+                'image_rel': None
             }
 
     return {'turnId': turn_id, 'image_rels': results}
-
-def prev_turn_displayed_image_rel(turn: Turn) -> str:
-    """
-    return previous turn's revealed image if present, else the first-turn fallback.
-    """
-    prev_turn = (Turn.objects
-            .filter(session_id=turn.session_id, id__lt=turn.id)
-            .order_by('-id')
-            .first())
-    
-    if (prev_turn and prev_turn.displayed_image_rel):
-        return prev_turn.displayed_image_rel
-    
-    return INITIAL_WORLD_IMAGE_REL
 

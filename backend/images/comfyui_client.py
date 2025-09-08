@@ -230,22 +230,19 @@ def fetch_png_bytes(image_location: ImageLocation) -> bytes:
 
 # ---------------------- test -----------------------
 
-des1 = "A glowing futuristic plaza with holographic stalls and flowing light, silhouettes trading radiant memory orbs, mood vibrant and optimistic, speculative art, cinematic, neon reflections, painterly surreal textures."
-des2 = "A crumbling memory bazaar beneath a fractur`ed sky, holograms flicker across ruined towers, shadowy figures wander exchanging fading light, mood tense and collapsing, dystopian speculative art, cinematic and surreal."
-des3 = "A vast urban memory exchange hall under soft blue neon glow, crowds drift calmly, atmosphere balanced between wonder and unease, speculative art style, cinematic lighting, surreal painterly tones."
-des4 = "A serene riverside city glowing with holographic blossoms, silhouettes exchange gentle streams of light, atmosphere calm and harmonious, speculative art, cinematic, surreal, painterly tones with warm radiant hues."
+# des1 = "A glowing futuristic plaza with holographic stalls and flowing light, silhouettes trading radiant memory orbs, mood vibrant and optimistic, speculative art, cinematic, neon reflections, painterly surreal textures."
+# des2 = "A crumbling memory bazaar beneath a fractur`ed sky, holograms flicker across ruined towers, shadowy figures wander exchanging fading light, mood tense and collapsing, dystopian speculative art, cinematic and surreal."
+# des3 = "A vast urban memory exchange hall under soft blue neon glow, crowds drift calmly, atmosphere balanced between wonder and unease, speculative art style, cinematic lighting, surreal painterly tones."
+# des4 = "A serene riverside city glowing with holographic blossoms, silhouettes exchange gentle streams of light, atmosphere calm and harmonious, speculative art, cinematic, surreal, painterly tones with warm radiant hues."
 
-des5 = "A twilight metropolis where translucent towers shimmer with fragments of forgotten memories, citizens drift through glowing currents of light, mood contemplative and bittersweet, speculative art, cinematic haze, surreal painterly reflections."
-des6 = "A fractured canyon city pulsing with unstable neon veins, memory shards float chaotically above crowded alleys, figures move in restless patterns, atmosphere volatile and uneasy, speculative art style, cinematic intensity, surreal textures."
-des7 = "A luminous dome-city suspended above quiet waters, radiant streams of data flow like auroras across the sky, silhouettes share glowing fragments calmly, mood hopeful and serene, speculative art, cinematic framing, surreal painterly tones."
-des8 = "A shadow-drenched sprawl where fading holograms sputter against cracked glass towers, crowds shuffle through dim corridors of fractured light, mood heavy and uncertain, dystopian speculative art, cinematic shadows, surreal atmospheric strokes."
-des = [des5, des6, des7, des8]
-
-cleaned_text = clean_llm_description(des7)
+# des5 = "A twilight metropolis where translucent towers shimmer with fragments of forgotten memories, citizens drift through glowing currents of light, mood contemplative and bittersweet, speculative art, cinematic haze, surreal painterly reflections."
+# des6 = "A fractured canyon city pulsing with unstable neon veins, memory shards float chaotically above crowded alleys, figures move in restless patterns, atmosphere volatile and uneasy, speculative art style, cinematic intensity, surreal textures."
+# des7 = "A luminous dome-city suspended above quiet waters, radiant streams of data flow like auroras across the sky, silhouettes share glowing fragments calmly, mood hopeful and serene, speculative art, cinematic framing, surreal painterly tones."
+# des8 = "A shadow-drenched sprawl where fading holograms sputter against cracked glass towers, crowds shuffle through dim corridors of fractured light, mood heavy and uncertain, dystopian speculative art, cinematic shadows, surreal atmospheric strokes."
+des = "broad environmental view with implied silhouettes, mood [single mood word], balanced palette and atmospheric lighting; speculative art, cinematic composition, surreal painterly textures, coherent scale, soft depth cues, volumetric light."
+cleaned_text = clean_llm_description(des)
 
 payload = build_prompt_payload(cleaned_text)
-
-# print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 prompt_id = enqueue_render(payload)
 print("prompt_id is: ", prompt_id)
@@ -256,23 +253,3 @@ print("image path is ", imagelocation.filename, imagelocation.subfolder, imagelo
 content = fetch_png_bytes(imagelocation)
 # http://127.0.0.1:8000/view?filename=ComfyUI_00037_.png&subfolder=&type=output
 print("png bytes: ", content[:8])
-
-def test(description):
-    for des in description:    
-      cleaned_text = clean_llm_description(des)
-
-      payload = build_prompt_payload(cleaned_text)
-
-      # print(json.dumps(payload, indent=2, ensure_ascii=False))
-
-      prompt_id = enqueue_render(payload)
-      print("prompt_id is: ", prompt_id)
-
-      imagelocation = get_image_location(prompt_id)
-      print("image path is ", imagelocation.filename, imagelocation.subfolder, imagelocation.type)
-
-      content = fetch_png_bytes(imagelocation)
-      # http://127.0.0.1:8000/view?filename=ComfyUI_00037_.png&subfolder=&type=output
-      print("png bytes: ", content[:8])
-
-# test(des) # each image took about 20s to generate, 1min30s for question reading and consideration might be okay

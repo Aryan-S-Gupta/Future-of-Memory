@@ -6,10 +6,10 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent # /backend
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"  # image be stored here
+MEDIA_ROOT = BASE_DIR / "media"  # image be stored in backend/media/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # TODO: Move this to environment variables in production
