@@ -124,6 +124,7 @@ def get_story_result(request):
 
 
 @csrf_exempt
+@require_POST
 def rag_retrieve(request):
     
     default_query = "fatigue"
@@ -132,8 +133,10 @@ def rag_retrieve(request):
         logger.warning("Non-POST request received. Using default query instead")
         query = default_query
     else:
-        query_text = request.POST.get('query_text')
-        keywords = request.POST.get('keywords')
+        data = json.loads(request.body.decode("utf-8"))
+        query_text = data.get('query_text')
+        keywords = data.get('keywords')
+        logger.debug(f"Incoming RAG retrieval API request, {query_text = }, {keywords = }")
         query = query_text or keywords
         if not query:
             logger.warning("No 'query_text' or 'keywords' parameter provided. Using default query instead")

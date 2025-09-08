@@ -297,6 +297,17 @@ Each round includes:
 2. Ethical yes/no question
 3. Branching result based on player choice
 
+## Testing the RAG retrieval API
+
+MacOS/Linux: Try this `curl` query to test the RAG chunk retrieval API once the backend is running.
+
+```bash
+curl --header "Content-Type: application/json" \
+--request POST \
+--data '{ "query_text": "what is the future of memory", "keywords": ["future", "memory"]}' \
+http://127.0.0.1:8000/api/rag/retrieve
+```
+
 ---
 
 ## 👥 For Collaborators
