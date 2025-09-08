@@ -1,5 +1,5 @@
 # How the image generation works?
-refer to this flow:  https://drive.google.com/file/d/1q_IrXmkcIUu_zA0bwZvUXafetD6O8bDr/view?usp=sharing
+refer to this flow:  https://drive.google.com/file/d/1hW3yEeM5DpvwQmuXlTeUSz6Swl356o-m/view?usp=drive_link
 
 # Prerequisites
 - download ComfyUI https://www.comfy.org/download

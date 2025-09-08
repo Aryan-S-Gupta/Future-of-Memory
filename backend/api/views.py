@@ -139,7 +139,7 @@ import json
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST, require_GET
 
-from backend.images.generate import (
+from backend.images.comfyui_client import (
     clean_llm_description,
     build_prompt_payload,
     enqueue_render,
