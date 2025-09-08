@@ -22,8 +22,8 @@
 
 .crawl-container {
   perspective: 500px; /* creates the 3D effect */
-  height: 400px; /* height of the visible area */
-  width: 600px;
+  height: 500px; /* height of the visible area */
+  width: 800px;
   overflow: hidden;
   position: relative;
 }
@@ -31,20 +31,19 @@
 .crawl-text {
   font-family: 'Kanit', sans-serif;
   position: absolute;
-  bottom: -100%; /* start below the container */
   width: 100%;
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   text-align: center;
   transform-origin: 50% 100%;
   transform: rotateX(25deg); /* tilt the text backward */
-  animation: crawl 20s linear infinite;
+  animation: crawl 30s linear infinite;
   color: rgb(255, 255, 255);
   text-shadow: 0 0 5px #ff00b3;
 }
 
 @keyframes crawl {
   0% {
-    bottom: -100%;
+    bottom: -200%;
   }
   100% {
     bottom: 100%;

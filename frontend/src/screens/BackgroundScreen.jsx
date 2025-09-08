@@ -19,7 +19,7 @@ const BackgroundScreen = () => {
               Welcome to 2040 <br /> <br />
               Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /> <br />
               You are the chosen voice of your people, standing between promise and peril.  <br /> <br />
-              Every law you shape will ripple through lives and futures, <br /> <br />
+              Every law you shape will ripple through lives and futures,              
               redefining what it means to be human.<br /> <br />
               Will you shield your community, pursue progress, or uphold your ethics? <br /> <br />
               The destiny of millions rests in your hands! <br /> <br />  
