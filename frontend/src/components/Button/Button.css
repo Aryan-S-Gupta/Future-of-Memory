@@ -1,7 +1,5 @@
 
 /* Button container */
-
-
 .button-group {
   display: flex;
   flex-direction: column;
