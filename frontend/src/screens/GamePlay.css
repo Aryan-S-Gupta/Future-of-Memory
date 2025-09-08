@@ -8,11 +8,38 @@
   text-align: center;
 
 }
-.question-container h3 {
+.question-container h2 {
     font-family: 'Kanit', sans-serif;
     font-size: 3rem;
     font-weight: 600;
     color: #ffffff;
 
     margin-bottom: 1rem;
+}
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 1.2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Start button fade-in */
+.choice-fade-in {
+  opacity: 0; /* initially invisible */
+  animation: choicefadeIn 2s ease forwards;
+  animation-delay: 2s; 
+}
+
+@keyframes choicefadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px); /* subtle upward motion */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
