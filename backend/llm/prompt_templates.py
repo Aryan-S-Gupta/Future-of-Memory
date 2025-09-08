@@ -80,6 +80,13 @@ You are continuing a turn-based story. Incorporate the selected option and produ
 1) A concrete scenario with exactly 5 sentences which is vivid and engaging.
 2) A focused follow-up retrieval query for the next turn.
 
+CRITICAL VALIDATION REQUIREMENTS (Your response will be automatically validated):
+1. MUST return valid JSON format (no extra text before/after)
+2. MUST include "scenario" field as an array/list
+3. MUST include exactly 5 items in the "scenario" array (not 4, not 6)
+4. MUST include "query_text" field as a string
+5. If any of these requirements are not met, your response will be rejected and retried
+
 STORY FRAME
 Current Year: {year}
 
@@ -132,6 +139,13 @@ FOLLOW-UP RAG QUERY
 - Do not introduce unrelated topics.
 
 OUTPUT FORMAT (STRICT)
+CRITICAL: Your response will be validated automatically. It MUST pass these checks:
+1. Valid JSON format (starts with {{ and ends with }})
+2. Contains "scenario" field as an array
+3. "scenario" array has EXACTLY 5 items (will be counted automatically)
+4. Contains "query_text" field as a string
+5. No extra text outside the JSON structure
+
 Return ONLY valid JSON with this exact schema:
 {{
   "scenario": [
@@ -144,6 +158,7 @@ Return ONLY valid JSON with this exact schema:
   "query_text": "<single concise sentence (<= 220 chars)>"
 }}
 
+REMINDER: If you return anything other than exactly 5 scenario items, your response will be rejected.
 Return ONLY valid JSON. Do not include markdown, code fences, or commentary.
 """.strip()
 

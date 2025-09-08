@@ -1,9 +1,20 @@
 #!/usr/bin/env python3
+# cd /Users/iris/Documents/GitHub/DECO3801---Data-Busters/backend
+# python llm/test_rag_integration.py
 """Test complete integration between RAG and LLM systems"""
 
 import sys
 import os
 import django
+import logging
+
+logging.getLogger().setLevel(logging.ERROR)
+logging.getLogger('rag').setLevel(logging.ERROR)
+logging.getLogger('shared').setLevel(logging.ERROR)
+logging.getLogger('httpcore').setLevel(logging.ERROR)
+logging.getLogger('httpx').setLevel(logging.ERROR)
+logging.getLogger('urllib3').setLevel(logging.ERROR)
+logging.getLogger('faiss').setLevel(logging.ERROR)
 
 # Django setup
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -17,18 +28,19 @@ from llm.rag_adapter import get_rag_context, format_rag_context_for_llm
 
 def test_rag_retrieval():
     """Test RAG document retrieval functionality"""
-    print("=== Testing RAG Retrieval ===")
+    print("Testing RAG document retrieval...")
     query = "memory consolidation sleep"
     
     try:
-        # Direct test of RAG retrieval
         chunks = retrieve_chunks(query)
-        print(f"Retrieved {len(chunks)} document chunks")
+        print(f"Successfully retrieved {len(chunks)} relevant document chunks")
         
-        for i, chunk in enumerate(chunks):
-            print(f"\n--- Chunk {i+1} ---")
-            print(f"Title: {chunk.get('meta', {}).get('title', 'Unknown')}")
-            print(f"Content preview: {chunk.get('text', '')[:200]}...")
+        # Show brief info for first 2 results only
+        for i, chunk in enumerate(chunks[:2]):
+            title = chunk.get('meta', {}).get('title', 'Unknown')
+            content_preview = chunk.get('text', '')[:100] + "..."
+            print(f"   Document {i+1}: {title}")
+            print(f"      Preview: {content_preview}")
             
         return chunks
     except Exception as e:
@@ -38,26 +50,26 @@ def test_rag_retrieval():
 
 def test_rag_adapter():
     """Test RAG adapter functionality"""
-    print("\n=== Testing RAG Adapter ===")
+    print("\nTesting RAG adapter...")
     
-    # Test generate_question output
     try:
+        # Generate question
         question_result = generate_question(
             year=2024,
             background="A study about memory and sleep",
             context_block="Research context about sleep and memory",
             last_description="Previous research findings"
         )
-        print(f"LLM generation result: {question_result}")
+        print(f"LLM generated question: {question_result['question']}")
         
         # Use adapter to get RAG context
         rag_context = get_rag_context(question_result)
         print(f"RAG query text: {rag_context}")
         
-        # Retrieve relevant documents
+        # Retrieve relevant documents and format
         chunks = retrieve_chunks(rag_context)
         formatted_context = format_rag_context_for_llm(chunks)
-        print(f"Formatted RAG context:\n{formatted_context}")
+        print(f"Formatted RAG context length: {len(formatted_context)} characters")
         
         return True
     except Exception as e:
@@ -67,28 +79,28 @@ def test_rag_adapter():
 
 def test_full_integration():
     """Test complete RAG-LLM integration workflow"""
-    print("\n=== Testing Full Integration Workflow ===")
+    print("\nTesting complete RAG-LLM integration workflow...")
     
     try:
         # 1. Generate question
-        print("1. Generating question...")
+        print("   Step 1: Generating question...")
         question_result = generate_question(
             year=2024,
             background="Memory research study about sleep and consolidation",
             context_block="Scientific research context",
             last_description="Initial research setup"
         )
-        print(f"Generated question: {question_result}")
+        print(f"      Question: {question_result['question']}")
         
         # 2. Get RAG context
-        print("\n2. Getting RAG context...")
+        print("   Step 2: Getting RAG context...")
         query_text = get_rag_context(question_result)
         chunks = retrieve_chunks(query_text)
         rag_context = format_rag_context_for_llm(chunks)
-        print(f"RAG context length: {len(rag_context)} characters")
+        print(f"      RAG context length: {len(rag_context)} characters")
         
         # 3. Generate description based on RAG context
-        print("\n3. Generating description...")
+        print("   Step 3: Generating scenario description...")
         description_result = generate_description(
             year=2024,
             background="Memory research study",
@@ -97,9 +109,10 @@ def test_full_integration():
             current_question="Should policy be influenced by the latest research findings?",
             selected_option="Implement new guidelines for post-sleep activities at clinics"
         )
-        print(f"Generated description: {description_result}")
+        print(f"      Generated {len(description_result['scenario'])} scenario segments")
+        print(f"      Example scenario: {description_result['scenario'][0]}")
         
-        print("\n✅ Full integration test successful!")
+        print("\nFull integration test successful!")
         return True
         
     except Exception as e:
@@ -124,10 +137,10 @@ if __name__ == "__main__":
             integration_ok = test_full_integration()
             
             if integration_ok:
-                print("\n🎉 All tests passed! RAG-LLM integration working properly.")
+                print("\nAll tests passed! RAG-LLM integration working properly.")
             else:
-                print("\n❌ Full integration test failed")
+                print("\nFull integration test failed")
         else:
-            print("\n❌ RAG adapter test failed")
+            print("\nRAG adapter test failed")
     else:
-        print("\n❌ RAG retrieval test failed")
+        print("\nRAG retrieval test failed")

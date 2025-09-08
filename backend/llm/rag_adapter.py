@@ -38,7 +38,8 @@ def format_rag_context_for_llm(rag_chunks: List[Dict]) -> str:
     
     formatted_chunks = []
     for i, chunk in enumerate(rag_chunks, 1):
-        title = chunk.get("meta", {}).get("title", "Unknown Source")
+        meta = chunk.get("meta", {})
+        title = meta.get("title") or meta.get("article_title", "Unknown Source") # Change after rag-2 merged
         text = chunk.get("text", "")
         formatted_chunks.append(f"[{i}] {title}: {text}")
     
