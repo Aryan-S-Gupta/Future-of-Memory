@@ -249,7 +249,7 @@ Should contain `index.faiss` and `index.pkl`
 ```bash
 python manage.py shell -c "
 from rag.retrieve import retrieve_chunks;
-print(retrieve_chunks('sleep memory consolidation')[:1])
+print('\n---\n'.join(chunk['text'] for chunk in retrieve_chunks('sleep memory consolidation')))
 "
 ```
 

@@ -74,7 +74,9 @@ def setup_rag_system() -> None:
         for doc in documents:
             # todo test that this works (metadata recoded in vector store)
             source_filename = doc.metadata["source"]
-            doc.metadata.update(pmc_file_metadata[source_filename])
+            if source_filename in pmc_file_metadata:
+                # todo add document metadata for documents not sourced from PMC
+                doc.metadata.update(pmc_file_metadata[source_filename])
         logger.info("Loaded documents")
         create_vector_score(documents)
     else:

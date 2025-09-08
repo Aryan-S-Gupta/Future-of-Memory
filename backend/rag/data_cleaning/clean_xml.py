@@ -25,9 +25,8 @@ METADATA_PATH = os.path.join(TXT_PATH, "metadata", "pmc_metadata.md")
 
 
 class XPath:
-    """XPaths (XML paths) for relevant article information in pmc_result.xml
-    """
-    
+    """XPaths (XML paths) for relevant article information in pmc_result.xml"""
+
     LICENCE = "./front/article-meta/permissions/license//license-p"
     TITLE = "./front/article-meta/title-group/article-title"
     AUTHOR = "./front/article-meta//contrib[@contrib-type='author']/name"
@@ -48,29 +47,30 @@ def clean_body_tag(body_tag: ET.Element) -> str:
     tags_to_remove = {"inline-formula", "xref", "tex-math", "ext-link", "fig"}
     for tag_to_remove in tags_to_remove:
         for parent in body_tag.findall(f".//{tag_to_remove}"):
-            # Find each inline-formula element
             parent.text = ""
             for child in parent:
                 parent.remove(child)
-    
+
     text = ""
     for elem in body_tag.iter():
         if elem.tag not in {"title", "p"}:
             continue
-        text += "".join(elem.itertext()).strip() + (" - " if elem.tag == "title" else "\n")
+        text += "".join(elem.itertext()).strip() + (
+            " - " if elem.tag == "title" else "\n"
+        )
 
     return text
 
 
 def xml_to_txt() -> dict[str, dict]:
-    """Parse all given PMC-sourced XML fils to text. Include licensing information and article
-    titles as filenames.
+    """Parse all given PMC-sourced XML fils to text. Return a dict mapping filename to metadata
+    (article title, author/s, licence info).
     """
 
     file_metadata: dict[str, dict] = {}
 
     for xml_path in XML_PATHS:
-        
+
         xml_path = os.path.join(SOURCE_DATA_PATH, xml_path)
         logger.debug(f"Parsing {xml_path} to txt...")
         tree = ET.parse(xml_path)
@@ -78,7 +78,7 @@ def xml_to_txt() -> dict[str, dict]:
 
         # Parse each article
         for article in root:
-            
+
             article_metadata: dict[str, str | list] = {}
 
             # Find article title
@@ -99,7 +99,7 @@ def xml_to_txt() -> dict[str, dict]:
             else:
                 licence = "Not found"
             article_metadata["licence"] = licence
-            
+
             # Find authors
             authors: list[str] = []
             author_names = article.findall(XPath.AUTHOR)
@@ -116,7 +116,7 @@ def xml_to_txt() -> dict[str, dict]:
                     full_name = " ".join([given_names_text, surname_text]).strip()
                     authors.append(full_name)
             article_metadata["authors"] = authors
-            
+
             # Get and clean article body
             body = article.find("body")
             assert body is not None, "Article doesn't have body"
@@ -124,16 +124,18 @@ def xml_to_txt() -> dict[str, dict]:
 
             # Write cleaned txt files
             with open(
-                os.path.join(TXT_PATH, f"{sanitised_article_title}.txt"), "w" , encoding="utf-8"
+                os.path.join(TXT_PATH, f"{sanitised_article_title}.txt"),
+                "w",
+                encoding="utf-8",
             ) as txt_file:
                 txt_file.write(body_text)
-            
+
             file_metadata[filename] = article_metadata
-    
+
     # Write metadata
-    with open(os.path.join(METADATA_PATH), "a", encoding="utf-8") as licence_file:
+    with open(os.path.join(METADATA_PATH), "w", encoding="utf-8") as metadata_file:
         for filename, meta in file_metadata.items():
-            licence_file.write(
+            metadata_file.write(
                 f"# {meta['title']}\n\n"
                 f"Filename: {filename}\n\n"
                 f"Licence: {meta['licence']}\n\n"
