@@ -4,9 +4,14 @@ Provides endpoints to fetch story background, questions, and results based on us
 """
 import json
 import os
+import logging
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+
+from rag.retrieve import retrieve_chunks
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, 'data', 'static_stories.json')
@@ -116,3 +121,21 @@ def get_story_result(request):
     })
 
 
+@csrf_exempt
+def rag_retrieve(request):
+    
+    default_query = "fatigue"
+    query: str
+    if request.method != 'POST':
+        logger.warning("Non-POST request received. Using default query instead")
+        query = default_query
+    else:
+        query_text = request.POST.get('query_text')
+        keywords = request.POST.get('keywords')
+        query = query_text or keywords
+        if not query:
+            logger.warning("No 'query_text' or 'keywords' parameter provided. Using default query instead")
+            query = default_query
+
+    items = retrieve_chunks(query)
+    return JsonResponse({'items': items})
