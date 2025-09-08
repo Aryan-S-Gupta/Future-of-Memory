@@ -220,7 +220,6 @@ def generate_question(
     Returns:
         Dict[str, Any]: Question result with keys:
             - query_text: RAG query for retrieving relevant information
-            - keywords: List of keywords for search
             - question: The generated question
             - options: List of exactly two option strings
             
@@ -265,7 +264,6 @@ def generate_question(
     # Ultimate fallback
     return {
         "query_text": "memory editing ethical considerations",
-        "keywords": ["memory", "ethics", "policy"],
         "question": "How should society proceed with memory editing technology?",
         "options": [
             "Take an action that advances the situation forward",
@@ -305,7 +303,7 @@ def generate_description(
         Dict[str, Any]: Description result with keys:
             - scenario: List of exactly 5 scenario sentences
             - image_brief: Brief description for image generation
-            - rag_query: Object with query_text and keywords for next turn
+            - query_text: RAG query string for next turn
             
     Raises:
         Exception: If generation fails after all retries
@@ -338,8 +336,5 @@ def generate_description(
             "The path forward remains uncertain, but the choice has been made and will shape future developments."
         ],
         "image_brief": "Meeting room with people discussing policy decisions",
-        "rag_query": {
-            "query_text": "policy implementation and social consequences of memory editing decisions",
-            "keywords": ["policy", "implementation", "consequences", "society"]
-        }
+        "query_text": "policy implementation and social consequences of memory editing decisions"
     }

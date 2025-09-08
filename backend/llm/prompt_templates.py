@@ -9,7 +9,7 @@ def build_question_prompt(
 ) -> str:
     """
     STEP A: Ask the model to return a RAG query AND a multiple-choice style question with two options.
-    OUTPUT must be STRICT JSON with fields: query_text, keywords[], question, options[2]
+    OUTPUT must be STRICT JSON with fields: query_text, question, options[2]
     """
     state_hint = f"\nState Memory (JSON):\n{state_json}\n" if state_json else ""
     return f"""
@@ -39,7 +39,6 @@ HARD CONSTRAINTS
 - The question must be specific and consequential for the next plot turn.
 - "options": an array of EXACTLY 2 strings. Avoid “Yes/No”.
 - The retrieval query must be standalone (<= 110 chars) and safe to send to RAG.
-- keywords are 1–3 lowercase tokens, no punctuation, no duplicates.
 - Each option must be short (6–14 words), mutually exclusive, concrete, and must NOT repeat the question text.
 - Do NOT include labels like "A." or "B." inside option strings.
 - If you initially think of only one option, you MUST invent a second plausible alternative.
@@ -50,7 +49,6 @@ OUTPUT FORMAT (STRICT)
 Return ONLY valid JSON with this exact schema:
 {{
   "query_text": "<<=110 chars, standalone retrieval sentence>",
-  "keywords": ["<1-3 lowercase keywords>"],
   "question": "<one question ending with a question mark>",
   "options": ["<concise option without labels>", "<second concise option without labels>"]
 }}
@@ -58,7 +56,6 @@ Return ONLY valid JSON with this exact schema:
 EXAMPLE (ONLY to learn the shape; DO NOT copy content):
 {{
   "query_text": "clinical protocols for identity continuity in memory-editing pilots",
-  "keywords": ["consent", "identity", "protocols", "clinic"],
   "question": "Which path should Lin choose before the pilot review?",
   "options": ["Schedule a supervised integration session at the clinic", "Pause treatment to consult an external ethics counselor"]
 }}
@@ -81,7 +78,7 @@ def build_description_prompt(
     OUTPUT must be STRICT JSON:
     - scenario: 5-8 sentences which is vivid and engaging.
     - image_brief: subject, scene, mood, style, keywords[] (3–6 compact tokens for the image pipeline).
-    - rag_query: query_text + keywords[] for the NEXT turn’s retrieval.
+    - rag_query: query_text for the NEXT turn's retrieval.
     """
     state_hint = f"\nState Memory (JSON):\n{state_json}\n" if state_json else ""
     return f"""
@@ -150,9 +147,6 @@ IMAGE BRIEF REQUIREMENTS
 FOLLOW-UP RAG QUERY
 - Base the query strictly on entities, mechanisms, or ethical dilemmas explicitly raised in the scenario.
 - Do not introduce unrelated topics.
-- Provide 3–4 keywords separately, all extracted or derived from the scenario.
-- Each keyword should be a single lowercase token, no punctuation.
-
 OUTPUT FORMAT (STRICT)
 Return ONLY valid JSON with this exact schema:
 {{
@@ -164,10 +158,7 @@ Return ONLY valid JSON with this exact schema:
     "<sentence 5>"
   ],
   "image_brief": "Short one-sentence description (≤70 characters, from scenario)",
-  "rag_query": {{
-    "query_text": "<single concise sentence (<= 220 chars)>",
-    "keywords": ["<3-6 lowercase keywords>"]
-  }}
+  "query_text": "<single concise sentence (<= 220 chars)>"
 }}
 
 Return ONLY valid JSON. Do not include markdown, code fences, or commentary.
