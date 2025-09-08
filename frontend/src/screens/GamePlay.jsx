@@ -49,14 +49,17 @@ const GamePlay = () => {
   if (scenarioError) return <p>Error loading scenario</p>;
   if (questionError) return <p>Error loading question</p>;
 
+
   return (
     <div className="screen">
+    
+
       <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
 
       {/* Scenario screen */}
       {screen === "scenario" && scenarioData && (
         <div className="text-container">
-          <h3>{scenarioData.scenario}</h3>
+          <h2 className="fade-in">{scenarioData.scenario}</h2>
           <Button baseButton="btn-primary" action={() => setScreen("question")} title="Continue"/>
         </div>
       )}
@@ -64,13 +67,13 @@ const GamePlay = () => {
       {screen === "question" && questionData && (
         <div>
           <div className="question-container">
-          <h3>{questionData.question}</h3>
+          <h2 className="fade-in">{questionData.question}</h2>
         </div>
         <div className="choice-container">
           {/*Displays the questions and the choices */}
             {Object.entries(questionData.options).map(([key, value]) => (
               <Button
-                baseButton="choice-btn"
+                baseButton="choice-btn choice-fade-in"
                 key={key}
                 action={() => handleChoice(key)}
                 title={value} />

@@ -13,21 +13,23 @@ const BackgroundScreen = () => {
   return (
     <BasePage>
       <h1 className="title">Background</h1>
-      <div className="text-container">
-        <p> 
-          The year is 2040.
-          Neurotechnology has advanced beyond imagination, allowing memories to be <br /> <br />
-          edited, emotions regulated, and even consciousness shared. These breakthroughs have brought <br /> <br />
-          progress, but also deep ethical uncertainty. You are a senior decision-maker at the Global <br /> <br />
-          Neurotechnology Regulation Authority (GNRA). Your responsibility: evaluate new applications of <br /> <br /> 
-          neurotech and decide whether they should be encouraged, restricted, or banned. Every choice <br /> <br /> 
-          you make will ripple outward, shaping how societies evolve, how people live, and how humanity <br /> <br />
-          defines itself in this new age of the mind. Your task is not simple. Progress, profit, freedom, and <br /> <br />
-          control are all at stake. 
-        </p>
-        <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
-        <Button baseButton="btn-primary" action={() => navigate("/game-play")} title="Start" />
+        <div className="crawl-container">
+          <div className="crawl-text">
+            <p>
+              Welcome to 2040 <br /> <br />
+              Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /> <br />
+              You are the chosen voice of your people, standing between promise and peril.  <br /> <br />
+              Every law you shape will ripple through lives and futures,              
+              redefining what it means to be human.<br /> <br />
+              Will you shield your community, pursue progress, or uphold your ethics? <br /> <br />
+              The destiny of millions rests in your hands! <br /> <br />  
+            </p>
+          </div>
         </div>
+      <div className="button-container">
+      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
+      <Button baseButton="btn-next next-fade-in" action={() => navigate("/game-play")} title="Next" />
+      </div>
       </BasePage>
     );
 };
