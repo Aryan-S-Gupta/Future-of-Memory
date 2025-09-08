@@ -27,13 +27,13 @@
 }
 
 /* Start button fade-in */
-.start-fade-in {
+.choice-fade-in {
   opacity: 0; /* initially invisible */
-  animation: fadeIn 3s ease forwards;
-  animation-delay: 4s; 
+  animation: choicefadeIn 2s ease forwards;
+  animation-delay: 2s; 
 }
 
-@keyframes fadeIn {
+@keyframes choicefadeIn {
   from {
     opacity: 0;
     transform: translateY(20px); /* subtle upward motion */

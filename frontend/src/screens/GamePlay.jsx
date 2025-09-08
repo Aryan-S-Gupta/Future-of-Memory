@@ -73,7 +73,7 @@ const GamePlay = () => {
           {/*Displays the questions and the choices */}
             {Object.entries(questionData.options).map(([key, value]) => (
               <Button
-                baseButton="choice-btn start-fade-in"
+                baseButton="choice-btn choice-fade-in"
                 key={key}
                 action={() => handleChoice(key)}
                 title={value} />

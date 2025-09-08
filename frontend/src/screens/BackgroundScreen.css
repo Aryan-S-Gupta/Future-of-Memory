@@ -77,13 +77,13 @@
 } 
 
 /* next button fade-in */
-.start-fade-in {
+.next-fade-in {
   opacity: 0; /* initially invisible */
-  animation: fadeIn 3s ease forwards;
-  animation-delay: 10000s; /* wait until crawl is partly done */
+  animation: nextfadeIn 3s ease forwards;
+  animation-delay: 15s; /* wait until crawl is partly done */
 }
 
-@keyframes fadeIn {
+@keyframes nextfadeIn {
   from {
     opacity: 0;
     transform: translateY(20px); /* subtle upward motion */
