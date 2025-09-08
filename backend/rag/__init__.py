@@ -7,7 +7,7 @@ from langchain_community.vectorstores import FAISS
 from shared.constants import VECTOR_DB_PATH
 
 from shared.utils import get_ollama_embeddings
-from rag.setup import setup
+from rag.setup import setup_rag_system
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # Number of chunks to retrieve per query
 NUM_CHUNKS_PER_QUERY = 6
 
-setup()
+setup_rag_system()
 embeddings = get_ollama_embeddings()
 
 logger.debug(f"Loading vector store from {VECTOR_DB_PATH}...")

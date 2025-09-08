@@ -59,7 +59,7 @@ def create_vector_score(documents: list[Document]) -> None:
     logger.info(f"Vector store saved to {VECTOR_DB_PATH}")
 
 
-def setup() -> None:
+def setup_rag_system() -> None:
     """Set up the RAG system by
     1. cleaning texual data
     2. creating the vector DB (if it doesn't already exist)
