@@ -210,27 +210,27 @@ python -c "from nltk.tokenize import sent_tokenize; print(sent_tokenize('Hello w
 **macOS/Linux:**
 ```bash
 python - <<'PY'
-from rag.setup import setup
-setup()
+from rag.setup import setup_rag_system
+setup_rag_system()
 print("RAG setup done")
 PY
 ```
 
 **Windows Command Prompt:**
 ```cmd
-python -c "from rag.setup import setup; setup(); print('RAG setup done')"
+python -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
 ```
 
 #### Option B (from project root)
 
 **macOS/Linux:**
 ```bash
-python backend/manage.py shell -c "from rag.setup import setup; setup(); print('RAG setup done')"
+python backend/manage.py shell -c "from rag.setup import setup; setup_rag_system(); print('RAG setup done')"
 ```
 
 **Windows:**
 ```cmd
-python backend\manage.py shell -c "from rag.setup import setup; setup(); print('RAG setup done')"
+python backend\manage.py shell -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
 ```
 
 #### Verify Setup (All Platforms)
