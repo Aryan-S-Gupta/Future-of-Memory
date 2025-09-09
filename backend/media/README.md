@@ -1,0 +1,1 @@
+<!-- where the image is served -->
