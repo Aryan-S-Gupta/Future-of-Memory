@@ -1,11 +1,11 @@
 
-# 🧠 Memory Simulation Backend
+# Memory Simulation Backend
 
 This repository contains the Django-based backend for the Memory Simulation narrative game. It provides REST API endpoints for retrieving static story questions and paragraphs, and serves as the foundation for future integration of RAG, LLM, and image generation modules.
 
 ---
 
-## 🚀 Features
+## Features
 
 - Django 4.x backend scaffolded and structured for local development
 - Static story content and yes/no questions (starting from year 2035)
@@ -19,7 +19,7 @@ This repository contains the Django-based backend for the Memory Simulation narr
 
 ---
 
-## 🧩 Project Structure
+##  Project Structure
 
 ```
 ├── api/                    # API endpoints and static data
@@ -44,20 +44,86 @@ This repository contains the Django-based backend for the Memory Simulation narr
 
 ---
 
+## Prerequisites (System-level Dependencies)
+
+These are OS-level packages required by document parsing libraries:
+
+### macOS (Homebrew)
+```bash
+brew update
+brew install libmagic
+# Recommended for robust PDF/Image parsing:
+brew install poppler tesseract
+```
+
+### Windows
+
+#### Option 1: Using Chocolatey (Recommended)
+```cmd
+# Install Chocolatey if not already installed (run as Administrator)
+# Visit https://chocolatey.org/install for installation instructions
+
+# Install required packages
+choco install python3
+choco install poppler
+choco install tesseract
+```
+
+#### Option 2: Manual Installation
+1. **Python**: Download from https://www.python.org/downloads/windows/
+2. **Poppler**: Download from https://github.com/oschwartz10612/poppler-windows/releases/
+   - Extract to `C:\Program Files\poppler-xx\` and add `C:\Program Files\poppler-xx\Library\bin\` to PATH
+3. **Tesseract**: Download from https://github.com/UB-Mannheim/tesseract/wiki
+   - Install and add installation directory to PATH (usually `C:\Program Files\Tesseract-OCR\`)
+4. **libmagic**: Will be automatically installed via pip when running `pip install -r requirements.txt`
+
+#### Verify Installation (Windows)
+```cmd
+python --version
+pdftoppm -h
+tesseract --version
+```
+
+---
+
 ## 🛠️ How to Run Locally
 
-First ensure you have Ollama installed - get it from https://ollama.com/download/. You may need to open the app the first time to install the command-line tools.
+### Ollama Installation & Setup
 
-Check that the CLI tools are installed properly: `ollama --version` should give a version number
+First ensure you have Ollama installed:
 
-Pull the required model: `ollama pull phi3:mini`
+#### macOS/Linux
+- Download from https://ollama.com/download/
+- You may need to open the app the first time to install the command-line tools
 
-Open the desktop app to start Ollama.
+#### Windows  
+- Download the Windows installer from https://ollama.com/download/
+- Run the installer and follow the setup wizard
+- The CLI tools will be automatically added to your PATH
 
-### ✅ Step 1: Clone the Repository
+#### Verify Installation (All Platforms)
+Check that the CLI tools are installed properly:
+```bash
+ollama --version
+```
+Should display a version number.
+
+#### Download Required Models
+```bash
+ollama pull phi3:3.8b
+ollama pull nomic-embed-text
+```
+
+#### Start Ollama Server
+- **Desktop App**: Open the Ollama desktop application, or
+- **Command Line**: Run `ollama serve` in terminal/command prompt
+
+
+
+### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_TEAM_NAME/DECO3801---Data-Busters.git
+git clone https://github.com/manya-k/DECO3801---Data-Busters.git
 cd DECO3801---Data-Busters
 git checkout feature/backend-init
 ```
@@ -66,26 +132,147 @@ git checkout feature/backend-init
 
 ---
 
-### ✅ Step 2: Set Up a Python Virtual Environment
+### Step 2: Set Up a Python Virtual Environment
 
+#### macOS/Linux
 ```bash
 python3 -m venv venv
-source venv/bin/activate         # Windows: venv\Scripts\activate
+source venv/bin/activate
 ```
+
+#### Windows
+```cmd
+# Using Command Prompt
+python -m venv venv
+venv\Scripts\activate
+
+# Using PowerShell
+python -m venv venv
+venv\Scripts\Activate.ps1
+```
+
+> **Note for Windows**: If you encounter execution policy issues in PowerShell, run:
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
 
 ---
 
-### ✅ Step 3: Install Dependencies
+### Step 3: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
+pip install -U pip wheel setuptools
+```
+
+> **Note**: The `requirements.txt` file automatically installs the correct `python-magic` package for your platform:
+> - **macOS/Linux**: `python-magic` 
+> - **Windows**: `python-magic-bin` (includes required libmagic binaries)
+
+---
+
+### Step 4: Download NLTK Data & Setup (first-time only)
+
+#### macOS
+```bash
+# Fix certificates
+/Applications/Python\ 3.12/Install\ Certificates.command
+# Download NLTK data
+python -m nltk.downloader punkt punkt_tab averaged_perceptron_tagger_eng
+```
+
+#### Windows
+```cmd
+# Download NLTK data (no certificate fixing needed)
+python -m nltk.downloader punkt punkt_tab averaged_perceptron_tagger_eng
+```
+
+#### Verify NLTK Installation (All Platforms)
+```bash
+python - <<'PY'
+from nltk.tokenize import sent_tokenize
+print(sent_tokenize("Hello world. This is a test."))
+print("NLTK OK")
+PY
+```
+
+**For Windows Command Prompt users**, use this alternative verification:
+```cmd
+python -c "from nltk.tokenize import sent_tokenize; print(sent_tokenize('Hello world. This is a test.')); print('NLTK OK')"
 ```
 
 ---
 
-Now make sure to `cd backend`
+### Step 5: Build the Vector Store (First time or files changed) 
 
-### ✅ Step 4: Run Migrations
+#### Option A (recommended, inside backend) (This step might cost 1-2 mins)
+
+**macOS/Linux:**
+```bash
+python - <<'PY'
+from rag.setup import setup
+setup()
+print("RAG setup done")
+PY
+```
+
+**Windows Command Prompt:**
+```cmd
+python -c "from rag.setup import setup; setup(); print('RAG setup done')"
+```
+
+#### Option B (from project root)
+
+**macOS/Linux:**
+```bash
+python backend/manage.py shell -c "from rag.setup import setup; setup(); print('RAG setup done')"
+```
+
+**Windows:**
+```cmd
+python backend\manage.py shell -c "from rag.setup import setup; setup(); print('RAG setup done')"
+```
+
+#### Verify Setup (All Platforms)
+```bash
+# macOS/Linux
+ls -lah backend/rag/db/faiss_db
+
+# Windows
+dir backend\rag\db\faiss_db
+```
+Should contain `index.faiss` and `index.pkl`
+
+#### Quick Retrieval Test
+
+**macOS/Linux:**
+```bash
+python manage.py shell -c "
+from rag.retrieve import retrieve_chunks;
+print(retrieve_chunks('sleep memory consolidation')[:1])
+"
+```
+
+**Windows:**
+```cmd
+python manage.py shell -c "from rag.retrieve import retrieve_chunks; print(retrieve_chunks('sleep memory consolidation')[:1])"
+```
+
+---
+
+Now make sure to navigate to the backend directory:
+
+**macOS/Linux:**
+```bash
+cd backend
+```
+
+**Windows:**
+```cmd
+cd backend
+```
+
+### Step 6: Run Migrations
 
 ```bash
 python manage.py migrate
@@ -93,7 +280,7 @@ python manage.py migrate
 
 ---
 
-### ✅ Step 5: Start the Development Server
+### Step 7: Start the Development Server
 
 ```bash
 python manage.py runserver
@@ -103,7 +290,7 @@ Then open your browser or use terminal tools like `curl` to test the following r
 
 ---
 
-## 🧪 Pseudo API Endpoints (Round-by-Round)
+## Pseudo API Endpoints (Round-by-Round)
 
 Each round includes:
 1. Year-based background story
@@ -112,7 +299,7 @@ Each round includes:
 
 ---
 
-## 👥 For Collaborators
+## For Collaborators
 
 - Please create a new branch before developing (e.g., `feature/rag-module`, `feature/llm-api`)
 - Make sure to pull latest changes before working
@@ -121,7 +308,7 @@ Each round includes:
 
 ---
 
-### 🌐 Frontend Integration Notes (CORS)
+### Frontend Integration Notes (CORS)
 
 CORS (Cross-Origin Resource Sharing) has been enabled via `django-cors-headers` in this backend.
 
@@ -137,7 +324,7 @@ fetch("http://127.0.0.1:8000/api/storyline/start?year=2035")
 
 ---
 
-## 📌 To-Do (Backend Roadmap)
+## To-Do (Backend Roadmap)
 
 - [ ] RAG embedding + chunk loader
 - [ ] LLM story/question generation
@@ -146,6 +333,6 @@ fetch("http://127.0.0.1:8000/api/storyline/start?year=2035")
 
 ---
 
-## 📬 Contact
+## Contact
 
-For questions, contact `@Iris` in Discord or check the `feature/backend-init` branch for updates.
+For questions, contact `@Iris` in Discord
