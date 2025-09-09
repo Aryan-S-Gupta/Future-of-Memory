@@ -1,11 +1,11 @@
 
-# 🧠 Memory Simulation Backend
+# Memory Simulation Backend
 
 This repository contains the Django-based backend for the Memory Simulation narrative game. It provides REST API endpoints for retrieving static story questions and paragraphs, and serves as the foundation for future integration of RAG, LLM, and image generation modules.
 
 ---
 
-## 🚀 Features
+## Features
 
 - Django 4.x backend scaffolded and structured for local development
 - Static story content and yes/no questions (starting from year 2035)
@@ -19,7 +19,7 @@ This repository contains the Django-based backend for the Memory Simulation narr
 
 ---
 
-## 🧩 Project Structure
+##  Project Structure
 
 ```
 ├── api/                    # API endpoints and static data
@@ -44,7 +44,7 @@ This repository contains the Django-based backend for the Memory Simulation narr
 
 ---
 
-## ⚙️ Prerequisites (System-level Dependencies)
+## Prerequisites (System-level Dependencies)
 
 These are OS-level packages required by document parsing libraries:
 
@@ -120,7 +120,7 @@ ollama pull nomic-embed-text
 
 
 
-### ✅ Step 1: Clone the Repository
+### Step 1: Clone the Repository
 
 ```bash
 git clone https://github.com/manya-k/DECO3801---Data-Busters.git
@@ -132,7 +132,7 @@ git checkout feature/backend-init
 
 ---
 
-### ✅ Step 2: Set Up a Python Virtual Environment
+### Step 2: Set Up a Python Virtual Environment
 
 #### macOS/Linux
 ```bash
@@ -158,7 +158,7 @@ venv\Scripts\Activate.ps1
 
 ---
 
-### ✅ Step 3: Install Dependencies
+### Step 3: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -171,7 +171,7 @@ pip install -U pip wheel setuptools
 
 ---
 
-### ✅ Step 4: Download NLTK Data & Setup (first-time only)
+### Step 4: Download NLTK Data & Setup (first-time only)
 
 #### macOS
 ```bash
@@ -203,34 +203,34 @@ python -c "from nltk.tokenize import sent_tokenize; print(sent_tokenize('Hello w
 
 ---
 
-### ✅ Step 5: Build the Vector Store (First time or files changed) 
+### Step 5: Build the Vector Store (First time or files changed) 
 
 #### Option A (recommended, inside backend) (This step might cost 1-2 mins)
 
 **macOS/Linux:**
 ```bash
 python - <<'PY'
-from rag.setup import setup
-setup()
+from rag.setup import setup_rag_system
+setup_rag_system()
 print("RAG setup done")
 PY
 ```
 
 **Windows Command Prompt:**
 ```cmd
-python -c "from rag.setup import setup; setup(); print('RAG setup done')"
+python -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
 ```
 
 #### Option B (from project root)
 
 **macOS/Linux:**
 ```bash
-python backend/manage.py shell -c "from rag.setup import setup; setup(); print('RAG setup done')"
+python backend/manage.py shell -c "from rag.setup import setup; setup_rag_system(); print('RAG setup done')"
 ```
 
 **Windows:**
 ```cmd
-python backend\manage.py shell -c "from rag.setup import setup; setup(); print('RAG setup done')"
+python backend\manage.py shell -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
 ```
 
 #### Verify Setup (All Platforms)
@@ -249,7 +249,7 @@ Should contain `index.faiss` and `index.pkl`
 ```bash
 python manage.py shell -c "
 from rag.retrieve import retrieve_chunks;
-print(retrieve_chunks('sleep memory consolidation')[:1])
+print('\n---\n'.join(chunk['text'] for chunk in retrieve_chunks('sleep memory consolidation')))
 "
 ```
 
@@ -272,15 +272,18 @@ cd backend
 cd backend
 ```
 
-### ✅ Step 6: Run Migrations
+### Step 6: Run Migrations
 
 ```bash
+python manage.py makemigrations
 python manage.py migrate
+python manage.py createsuperuser
 ```
+then follow the instructions, you need to set name, email and pwd for db access
 
 ---
 
-### ✅ Step 7: Start the Development Server
+### Step 7: Start the Development Server
 
 ```bash
 python manage.py runserver
@@ -290,16 +293,27 @@ Then open your browser or use terminal tools like `curl` to test the following r
 
 ---
 
-## 🧪 Pseudo API Endpoints (Round-by-Round)
+## Pseudo API Endpoints (Round-by-Round)
 
 Each round includes:
 1. Year-based background story
 2. Ethical yes/no question
 3. Branching result based on player choice
 
+## Testing the RAG retrieval API
+
+MacOS/Linux: Try this `curl` query to test the RAG chunk retrieval API once the backend is running.
+
+```bash
+curl --header "Content-Type: application/json" \
+--request POST \
+--data '{ "query_text": "what is the future of memory", "keywords": ["future", "memory"]}' \
+http://127.0.0.1:8000/api/rag/retrieve
+```
+
 ---
 
-## 👥 For Collaborators
+## For Collaborators
 
 - Please create a new branch before developing (e.g., `feature/rag-module`, `feature/llm-api`)
 - Make sure to pull latest changes before working
@@ -308,7 +322,7 @@ Each round includes:
 
 ---
 
-### 🌐 Frontend Integration Notes (CORS)
+### Frontend Integration Notes (CORS)
 
 CORS (Cross-Origin Resource Sharing) has been enabled via `django-cors-headers` in this backend.
 
@@ -324,7 +338,7 @@ fetch("http://127.0.0.1:8000/api/storyline/start?year=2035")
 
 ---
 
-## 📌 To-Do (Backend Roadmap)
+## To-Do (Backend Roadmap)
 
 - [ ] RAG embedding + chunk loader
 - [ ] LLM story/question generation
@@ -333,6 +347,6 @@ fetch("http://127.0.0.1:8000/api/storyline/start?year=2035")
 
 ---
 
-## 📬 Contact
+## Contact
 
-For questions, contact `@Iris` in Discord or check the `feature/backend-init` branch for updates.
+For questions, contact `@Iris` in Discord
