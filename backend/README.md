@@ -275,8 +275,11 @@ cd backend
 ### Step 6: Run Migrations
 
 ```bash
+python manage.py makemigrations
 python manage.py migrate
+python manage.py createsuperuser
 ```
+then follow the instructions, you need to set name, email and pwd for db access
 
 ---
 
