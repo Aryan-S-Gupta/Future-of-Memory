@@ -1,0 +1,27 @@
+What better way to build smarter computer chips than to mimic nature’s most perfect computer – the human brain?
+Being able to store, delete and process information is crucial for computing, and the brain does this extremely efficiently.
+Our new electronic chip uses light to create and modify memories, moving us closer towards artificial intelligence (AI) that can replicate the human brain’s sophistication.
+To develop this, we drew inspiration from a new technique called optogenetics, to develop a device that replicates the way the brain stores (and loses) information. Optogenetics involves using light to control cells in living tissue, typically nerve cells (neurons).
+This area of science allows us to delve into the body’s electrical system with incredible precision, using light to manipulate neurons so they can be turned on or off. So what if we applied the same approach to designing computer chips?
+Using light to make memories
+Neural connections happen in the brain through electrical impulses. When tiny energy spikes reach a certain threshold voltage, the neurons bind together - and you’ve started creating a memory.
+Our new chip, details of which are published in the journals Small and Advanced Functional Materials, aims to do the same thing using electronics.
+It is based on an ultrathin material that changes electrical resistance in response to different wavelengths of light. This enables it to mimic the way neurons work to store and delete information in the brain.
+This means we can simulate the brain’s inner workings simply by shining different colours onto our chip.
+We have also demonstrated that the chip can perform basic information processing - involving simple logic operations in which several inputs can be combined to produce a particular output. This ticks yet another box for brain-like functionality.
+How the chip works
+Shining a light onto the chip generates an electric current in the chip’s light-sensitive material. Switching between colours causes the current to reverse direction from positive to negative.
+This direction switch is equivalent to the binding and breaking of connections between neurons in the brain, a mechanism that enables neurons to connect (and form new memories) or disconnect (and forget them again).
+In optogenetics, light-induced modification of neurons causes them to turn on or off, enabling or inhibiting connections to the next neuron in the chain. This light-based process is what our chip can mimic.
+To develop the technology, we used a material called black phosphorus, with a slightly deformed molecular structure due to missing atoms. Defects like this are typically viewed as a problem for electronics, but we have exploited it to our advantage. The defects allow us to manipulate the material’s behaviour to mimic both neural connections and disconnections, depending on the wavelength of light shining on it.
+Thinking ahead
+Our new chip takes us further on the path towards fast, efficient and secure light-based computing.
+It also brings us an important step closer to creating a bionic brain that can learn from its environment just like we do.
+Being able to replicate neural behaviour on an electronic chip also offers exciting avenues for research to better understand the brain and how it is affected by disorders that disrupt neural connections, such as Alzheimer’s disease and other forms of dementia.
+The human brain is made up of billions of neurons in connected networks. They communicate with each other by using a sequence of electrical signals to express different behaviours, such as learning through sensory organs or more complicated processes like emotions and memory.
+Any disruption to these signalling sequences can lead to a loss of these vital neural connections, potentially causing memory loss and dementia.
+Curing these disorders would require identifying the faulty neurons and restoring their signalling routine, without affecting the functioning of other neurons in the network.
+So by having a computer model of the brain, neuroscientists would be able to simulate brain functions and abnormalities, and work towards cures, without the need for living test subjects.
+Our technology could also potentially be incorporated into wearable electronics, bionic prosthetics, or smart gadgets imbued with artificial intelligence.
+But there are still several hurdles to clear before this technology can be commercialised. And needless to say, we still have a long way to go to build a network as large and complex as a human brain, or even a segment of it that could be useful to neuroscientists.
+But we hope ultimately that this technology could interface with living tissues, giving rise to bionic devices such as retinal implants. The human retina contains cells that are sensitive to different wavelengths of light, generating a signal that the brain interprets as different colours. As our chip also responds differently to different wavelengths, it could potentially one day be used to make artificial retinas.
