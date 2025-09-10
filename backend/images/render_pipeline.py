@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from backend.shared.models import Session, Turn, Option, ImageRender
 from .comfyui_client import (
@@ -16,7 +17,13 @@ def render_option_to_media(image_text: str, rel_path: str) -> str:
     png = fetch_png_bytes(loc)
     return save_png_to_media(rel_path, png)
 
-# this needs to be run in the background
+# this needs to be run in the background, later in view
+# import threading
+# threading.Thread(
+#         target=generate_four_images_blocking,
+#         args=(turn.session_id, turn.id),
+#         daemon=True
+#     ).start()
 def generate_four_images_blocking(session_id: int, turn_id: int) -> dict:
     """
     For each of the 4 options of this turn:
@@ -35,25 +42,34 @@ def generate_four_images_blocking(session_id: int, turn_id: int) -> dict:
     results = {}
 
     for opt in options:
-        rel_path = build_image_relpath(session_id, turn_id, opt.label)
+        with transaction.atomic():
+            # lock the option so only one thread claims it at a time
+            opt_locked = Option.objects.select_for_update().get(pk=opt.pk)
+
+            ir = (ImageRender.objects
+                  .filter(option=opt_locked)
+                  .order_by('-created_at')
+                  .first())
+
+            if ir and ir.status in ('pending', 'ready', 'failed'):
+                # already generating or finished -> no rendering needed for this thread
+                results[opt.id] = {'status': ir.status, 'image_rel': ir.image_rel or None}
+                continue
+
+            # no ir yet
+            ir = ImageRender.objects.create(option=opt_locked, status='pending', image_rel='')
+            ir_pk = ir.pk
+
         try:
+            rel_path = build_image_relpath(session_id, turn_id, opt.label)
             final_rel = render_option_to_media(opt.image_text, rel_path)
-            # no need for last_turn_image_rel now? now tracked in turn displayed_image_rel
-            ImageRender.objects.create(
-                option=opt, status='ready', image_rel=final_rel
-            )
-            results[opt.id] = {
-                'status': 'ready',
-                'image_rel': final_rel
-            }
+
+            ImageRender.objects.filter(pk=ir_pk).update(status='ready', image_rel=final_rel)
+            results[opt.id] = {'status': 'ready', 'image_rel': final_rel}
+
         except Exception:
-            ImageRender.objects.create(
-                option=opt, status='failed', image_rel=''
-            )
-            results[opt.id] = {
-                'status': 'failed',
-                'image_rel': None
-            }
+            ImageRender.objects.filter(pk=ir_pk).update(status='failed')
+            results[opt.id] = {'status': 'failed', 'image_rel': None}
 
     return {'turnId': turn_id, 'image_rels': results}
 
