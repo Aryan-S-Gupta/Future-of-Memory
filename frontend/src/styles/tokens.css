@@ -210,9 +210,13 @@
 
     /* Vignette ramps */
     --vignette-outer-clear: rgba(0, 0, 0, 0);
-    --vignette-outer-opaque: rgba(0, 0, 0, 1);
-    --vignette-center-opaque: rgba(0, 0, 0, 0.8);
+    --vignette-outer-opaque: rgba(0, 0, 0, 0.95);
+    --vignette-center-opaque: rgba(0, 0, 0, 0.65);
     --vignette-center-clear: rgba(0, 0, 0, 0);
+
+    --vignette-outer-bg: radial-gradient(circle,
+            var(--vignette-outer-clear) 60%,
+            var(--vignette-outer-opaque) 100%);
 
     --vignette-bg: radial-gradient(circle,
             var(--vignette-center-opaque) 0%,
@@ -229,7 +233,11 @@
     --vignette-center-opaque: rgba(0, 0, 0, 0.2);
     --vignette-center-clear: rgba(0, 0, 0, 0.0);
     --vignette-outer-clear: rgba(255, 255, 255, 0.15);
-    /* soft fade out */
+
+    --vignette-outer-bg: radial-gradient(circle,
+            var(--vignette-outer-clear) 60%,
+            var(--vignette-outer-opaque) 100%);
+
     --vignette-bg: radial-gradient(circle,
             var(--vignette-center-opaque) 40%,
             var(--vignette-center-clear) 55%);
@@ -244,10 +252,13 @@
     /* vignettes unchanged */
 
     --vignette-center-opaque: rgba(0, 0, 0, 0.4);
-    /* soft darkening */
     --vignette-center-clear: rgba(0, 0, 0, 0.0);
     --vignette-outer-clear: rgba(255, 255, 255, 0.05);
-    /* faint haze around */
+
+    --vignette-outer-bg: radial-gradient(circle,
+            var(--vignette-outer-clear) 60%,
+            var(--vignette-outer-opaque) 100%);
+
     --vignette-bg: radial-gradient(circle,
             var(--vignette-center-opaque) 40%,
             var(--vignette-center-clear) 55%);

@@ -13,11 +13,6 @@ const readGlitchPalette = (fallback) => {
     return [c1, c2, c3];
 };
 
-// Read themed outer vignette gradient (still used)
-const readVignetteOuter = () =>
-    `radial-gradient(circle, ${cssVar("--vignette-outer-clear") || "rgba(0,0,0,0)"
-    } 60%, ${cssVar("--vignette-outer-opaque") || "rgba(0,0,0,1)"} 100%)`;
-
 const LetterGlitch = ({
     glitchColors,
     className = "",
@@ -318,7 +313,7 @@ const LetterGlitch = ({
         width: "100%",
         height: "100%",
         pointerEvents: "none",
-        background: readVignetteOuter(),
+        background: "var(--vignette-outer-bg)",
     };
 
     const centerVignetteStyle = {
