@@ -194,3 +194,62 @@
             rgba(173, 216, 255, 0.22) 45%,
             rgba(255, 255, 255, 0.0) 80%);
 }
+
+/* ===== Glitch & Background tokens (no visual change now) ===== */
+:root {
+    /* Canvas base behind the glitch */
+    --bg-canvas: #000000;
+
+    /* Glitch glyph palette (hex for interpolation) */
+    --glitch-1: #2b4539;
+    /* deep green */
+    --glitch-2: #61dca3;
+    /* mint */
+    --glitch-3: #61b3dc;
+    /* cyan */
+
+    /* Vignette ramps */
+    --vignette-outer-clear: rgba(0, 0, 0, 0);
+    --vignette-outer-opaque: rgba(0, 0, 0, 1);
+    --vignette-center-opaque: rgba(0, 0, 0, 0.8);
+    --vignette-center-clear: rgba(0, 0, 0, 0);
+
+    --vignette-bg: radial-gradient(circle,
+            var(--vignette-center-opaque) 0%,
+            var(--vignette-center-clear) 50%);
+}
+
+/* Theme overrides (adjust to taste later) */
+:root[data-theme="light"] {
+    --bg-canvas: #f6f9fc;
+    --glitch-1: #e9eff6;
+    --glitch-2: #cfd9e8;
+    --glitch-3: #aabbd3;
+
+    --vignette-center-opaque: rgba(0, 0, 0, 0.2);
+    --vignette-center-clear: rgba(0, 0, 0, 0.0);
+    --vignette-outer-clear: rgba(255, 255, 255, 0.15);
+    /* soft fade out */
+    --vignette-bg: radial-gradient(circle,
+            var(--vignette-center-opaque) 40%,
+            var(--vignette-center-clear) 55%);
+}
+
+:root[data-theme="dark"] {
+    --bg-canvas: #000000;
+    /* same as current */
+    --glitch-1: #2b4539;
+    --glitch-2: #61dca3;
+    --glitch-3: #61b3dc;
+    /* vignettes unchanged */
+
+    --vignette-center-opaque: rgba(0, 0, 0, 0.4);
+    /* soft darkening */
+    --vignette-center-clear: rgba(0, 0, 0, 0.0);
+    --vignette-outer-clear: rgba(255, 255, 255, 0.05);
+    /* faint haze around */
+    --vignette-bg: radial-gradient(circle,
+            var(--vignette-center-opaque) 40%,
+            var(--vignette-center-clear) 55%);
+
+}

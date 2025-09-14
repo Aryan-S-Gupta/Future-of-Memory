@@ -6,7 +6,7 @@ import { submitChoice } from "../../api/answerApi";
 import Button from "../components/Button/Button";
 import { useNavigate } from "react-router-dom";
 import "../styles/GamePlay.css";
-
+import BasePage from "./BasePage.jsx";
 /**
  * GamePlay component
  *
@@ -37,7 +37,7 @@ const GamePlay = () => {
   } = useQuery({
     queryKey: ["scenario", year],
     queryFn: () => getScenario(year),
-    enabled: screen === "scenario", 
+    enabled: screen === "scenario",
   });
 
   // --- Question Query ---
@@ -51,7 +51,7 @@ const GamePlay = () => {
     queryFn: () => getQuestion(year),
     enabled: screen === "question", // only fetch when we are on question screen
   });
-  
+
   /**
    * Handles a player's choice when answering a question.
    *
@@ -74,8 +74,7 @@ const GamePlay = () => {
 
 
   return (
-    <div className="screen">
-    
+    <BasePage>
 
       <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
 
@@ -83,17 +82,17 @@ const GamePlay = () => {
       {screen === "scenario" && scenarioData && (
         <div className="text-container">
           <h2 className="fade-in">{scenarioData.scenario}</h2>
-          <Button baseButton="btn-primary" action={() => setScreen("question")} title="Continue"/>
+          <Button baseButton="btn-primary" action={() => setScreen("question")} title="Continue" />
         </div>
       )}
       {/** Question Screen*/}
       {screen === "question" && questionData && (
         <div>
           <div className="question-container">
-          <h2 className="fade-in">{questionData.question}</h2>
-        </div>
-        <div className="choice-container">
-          {/*Displays the questions and the choices */}
+            <h2 className="fade-in">{questionData.question}</h2>
+          </div>
+          <div className="choice-container">
+            {/*Displays the questions and the choices */}
             {Object.entries(questionData.options).map(([key, value]) => (
               <Button
                 baseButton="choice-btn choice-fade-in"
@@ -105,7 +104,7 @@ const GamePlay = () => {
         </div>
       )}
 
-    </div>
+    </BasePage>
   );
 };
 

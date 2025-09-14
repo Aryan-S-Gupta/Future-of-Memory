@@ -1,8 +1,8 @@
 // frontend/src/components/TopBar/GlobalToolbar.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useBgm } from "../../audio/AudioProvider";
 import "../../styles/GlobalToolbar.css";
-import { toggleTheme, getStoredTheme, getSystemTheme } from "../../theme/theme";
+import { toggleTheme, getEffectiveTheme, getAttrTheme, onSystemThemeChange } from "../../theme/theme";
 
 
 /* --- Inline icon set (stroke-based, futuristic, no fonts/emojis) --- */
@@ -53,6 +53,15 @@ const IconTheme = () => (
 export default function GlobalToolbar() {
     const { isMuted, volume, play, pause, mute, unmute, setVolume } = useBgm();
     const onToggleMute = () => (isMuted ? unmute() : mute());
+    const [effectiveTheme, setEffectiveTheme] = useState(getEffectiveTheme());
+
+    // When user is in AUTO (no data-theme), reflect system changes in the icon:
+    useEffect(() => {
+        const off = onSystemThemeChange((sys) => {
+            if (!getAttrTheme()) setEffectiveTheme(sys);
+        });
+        return off;
+    }, []);
 
     return (
         <div className="gtb" role="toolbar" aria-label="Global toolbar">
@@ -121,12 +130,20 @@ export default function GlobalToolbar() {
                     className="gtb-btn"
                     aria-label="Toggle theme"
                     title="Toggle theme"
-                    onClick={() => {
-                        const next = toggleTheme();
-                        console.log("Theme switched to:", next);
-                    }}
+                    onClick={() => setEffectiveTheme(toggleTheme())} // flips what you SEE now; first-click works
                 >
-                    <IconTheme />
+                    {effectiveTheme === "dark" ? (
+                        // Moon (dark)
+                        <svg className="gtb-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                        </svg>
+                    ) : (
+                        // Sun (light)
+                        <svg className="gtb-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                            <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.8" />
+                        </svg>
+                    )}
                 </button>
 
             </div>

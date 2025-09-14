@@ -1,43 +1,40 @@
-const STORAGE_KEY = "theme"; // 'light' | 'dark'
+// frontend/src/theme/theme.js
+const KEY = "theme"; // 'light' | 'dark' | null
+const isTheme = (v) => v === "light" || v === "dark";
+const root = document.documentElement;
+const mqd = window.matchMedia?.("(prefers-color-scheme: dark)");
 
-export function getStoredTheme() {
-  try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
-}
-export function storeTheme(value) {
-  try { localStorage.setItem(STORAGE_KEY, value); } catch {}
-}
+const getSystem = () => (mqd?.matches ? "dark" : "light");
+export const getAttrTheme = () => root.getAttribute("data-theme");              // 'light' | 'dark' | null
+export const getEffectiveTheme = () => getAttrTheme() || getSystem();           // what’s visible now
 
-export function getSystemTheme() {
-  if (typeof window === "undefined" || !window.matchMedia) return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
+const applyAttr = (v) => (isTheme(v) ? root.setAttribute("data-theme", v)
+    : root.removeAttribute("data-theme"));    // null => AUTO
 
-/** Apply a theme to <html data-theme="..."> */
-export function applyTheme(theme) {
-  const root = document.documentElement;
-  if (!theme) { root.removeAttribute("data-theme"); return; } // falls back to tokens + @media auto
-  root.setAttribute("data-theme", theme);
-}
+const readStore = () => {
+    try { const v = localStorage.getItem(KEY); return isTheme(v) ? v : null; } catch { return null; }
+};
+const writeStore = (v) => { try { isTheme(v) ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch { } };
 
-/** Initialize at app start: use stored theme or system preference */
-export function initTheme() {
-  const stored = getStoredTheme();
-  const theme = stored || null; // if null → no data-theme → your @media dark kicks in
-  applyTheme(theme);
-}
+export const setTheme = (v /* 'light'|'dark'|null */) => { applyAttr(v); writeStore(v); return v ?? "auto"; };
 
-/** Toggle between 'light' and 'dark' explicitly */
-export function toggleTheme() {
-  const root = document.documentElement;
-  const current = root.getAttribute("data-theme"); // 'light' | 'dark' | null
-  const next = current === "dark" ? "light" : "dark";
-  applyTheme(next);
-  storeTheme(next);
-  return next;
-}
+export const toggleTheme = () => {
+    const next = getEffectiveTheme() === "dark" ? "light" : "dark";
+    applyAttr(next); writeStore(next); return next;
+};
 
-/** Optional: follow system if user clears preference */
-export function clearThemePreference() {
-  storeTheme("");
-  applyTheme(null); // removes data-theme
-}
+export const cycleTheme = () => {
+    const a = getAttrTheme();
+    const next = a === null ? "dark" : a === "dark" ? "light" : null;
+    applyAttr(next); writeStore(next);
+    return { explicit: next, effective: next || getSystem(), mode: next || "auto" };
+};
+
+export const initTheme = () => applyAttr(readStore()); // call once on load if you want to restore
+
+export const onSystemThemeChange = (cb /* ( 'dark'|'light' ) => void */) => {
+    if (!mqd) return () => { };
+    const h = () => cb(mqd.matches ? "dark" : "light");
+    mqd.addEventListener?.("change", h) || mqd.addListener?.(h);
+    return () => mqd.removeEventListener?.("change", h) || mqd.removeListener?.(h);
+};

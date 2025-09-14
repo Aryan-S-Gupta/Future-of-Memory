@@ -1,7 +1,25 @@
 import { useRef, useEffect } from "react";
 
+// Helper: read a CSS variable from :root and trim spaces
+const cssVar = (name) =>
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+// Read theme-driven glitch palette as hex (for your hex/rgb interpolation)
+const readGlitchPalette = (fallback) => {
+    if (Array.isArray(fallback) && fallback.length) return fallback;
+    const c1 = cssVar("--glitch-1") || "#2b4539";
+    const c2 = cssVar("--glitch-2") || "#61dca3";
+    const c3 = cssVar("--glitch-3") || "#61b3dc";
+    return [c1, c2, c3];
+};
+
+// Read themed outer vignette gradient (still used)
+const readVignetteOuter = () =>
+    `radial-gradient(circle, ${cssVar("--vignette-outer-clear") || "rgba(0,0,0,0)"
+    } 60%, ${cssVar("--vignette-outer-opaque") || "rgba(0,0,0,1)"} 100%)`;
+
 const LetterGlitch = ({
-    glitchColors = ["#2b4539", "#61dca3", "#61b3dc"],
+    glitchColors,
     className = "",
     glitchSpeed = 50,
     centerVignette = false,
@@ -14,6 +32,7 @@ const LetterGlitch = ({
     const grid = useRef({ columns: 0, rows: 0 });
     const context = useRef(null);
     const lastGlitchTime = useRef(Date.now());
+    const paletteRef = useRef(null);
 
     const fontSize = 16;
     const charWidth = 10;
@@ -87,7 +106,8 @@ const LetterGlitch = ({
     };
 
     const getRandomColor = () => {
-        return glitchColors[Math.floor(Math.random() * glitchColors.length)];
+        const palette = paletteRef.current || glitchColors;
+        return palette[Math.floor(Math.random() * palette.length)];
     };
 
     const hexToRgb = (hex) => {
@@ -238,6 +258,9 @@ const LetterGlitch = ({
         const canvas = canvasRef.current;
         if (!canvas) return;
 
+        // Resolve theme-driven values once per (re)mount/resize
+        paletteRef.current = readGlitchPalette(glitchColors);
+
         context.current = canvas.getContext("2d");
         resizeCanvas();
         animate();
@@ -248,25 +271,37 @@ const LetterGlitch = ({
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 cancelAnimationFrame(animationRef.current);
+                // Re-resolve palette on resize too (safe + cheap)
+                paletteRef.current = readGlitchPalette(glitchColors);
                 resizeCanvas();
                 animate();
             }, 100);
         };
+
+        // Listen for theme changes (when user toggles, re-paint)
+        const themeObserver = new MutationObserver(() => {
+            paletteRef.current = readGlitchPalette(glitchColors);
+            // Re-seed all letters with the new palette for an immediate color swap
+            initializeLetters(grid.current.columns, grid.current.rows);
+            drawLetters()
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
         window.addEventListener("resize", handleResize);
 
         return () => {
             cancelAnimationFrame(animationRef.current);
             window.removeEventListener("resize", handleResize);
+            themeObserver.disconnect();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [glitchSpeed, smooth]);
+    }, [glitchSpeed, smooth, glitchColors]);
 
     const containerStyle = {
         position: "relative",
         width: "100%",
         height: "100%",
-        backgroundColor: "#000000",
+        backgroundColor: "var(--bg-canvas)",
         overflow: "hidden",
     };
 
@@ -283,8 +318,7 @@ const LetterGlitch = ({
         width: "100%",
         height: "100%",
         pointerEvents: "none",
-        background:
-            "radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,1) 100%)",
+        background: readVignetteOuter(),
     };
 
     const centerVignetteStyle = {
@@ -294,8 +328,7 @@ const LetterGlitch = ({
         width: "100%",
         height: "100%",
         pointerEvents: "none",
-        background:
-            "radial-gradient(circle, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%)",
+        background: "var(--vignette-bg)",
     };
 
     return (
