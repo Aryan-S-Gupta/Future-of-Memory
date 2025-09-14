@@ -1,5 +1,6 @@
 import "../BasePage/BasePage.css";
 import LetterGlitch from "../Dynamic Background/LetterGlitch";
+import GlobalToolbar from "../TopBar/GlobalToolbar";
 
 /**
  * BasePage component
@@ -28,6 +29,9 @@ export default function BasePage({ children }) {
           smooth={false}
         />
       </div>
+
+      {/* Global top-right toolbar*/}
+      <GlobalToolbar />
 
       {/* Foreground content container where page-specific children are rendered */}
       <div className="content">

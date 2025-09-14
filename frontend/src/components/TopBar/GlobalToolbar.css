@@ -1,0 +1,174 @@
+/* ===== GlobalToolbar (scoped, theme-ready) ===== */
+
+.gtb {
+  /* theme tokens (override via :root[data-theme="dark"] .gtb {...}) */
+  --gtb-bg: rgba(18, 20, 28, 0.55);   /* glass card */
+  --gtb-fg: #ffffff;                  /* icon/text */
+  --gtb-fg-muted: rgba(255,255,255,0.75);
+  --gtb-track: rgba(255,255,255,0.35);
+  --gtb-track-bg: rgba(255,255,255,0.25);
+  --gtb-hover: rgba(255,255,255,0.12);
+  --gtb-ring: rgba(255,255,255,0.35);
+  --gtb-shadow: 0 4px 18px rgba(0,0,0,0.25);
+
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+
+  padding: 8px 10px;
+  border-radius: 16px;
+  z-index: 9999;
+
+  background: var(--gtb-bg);
+  box-shadow: var(--gtb-shadow);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  user-select: none;
+  transform: translateZ(0);
+  color: var(--gtb-fg);
+}
+
+/* Light & Dark support (no change to your existing CSS) */
+:root[data-theme="light"] .gtb {
+  --gtb-bg: rgba(245, 248, 255, 0.6);
+  --gtb-fg: #0f172a;
+  --gtb-fg-muted: rgba(15, 23, 42, 0.75);
+  --gtb-track: rgba(15, 23, 42, 0.5);
+  --gtb-track-bg: rgba(15, 23, 42, 0.25);
+  --gtb-hover: rgba(0,0,0,0.07);
+  --gtb-ring: rgba(15, 23, 42, 0.35);
+}
+
+:root[data-theme="dark"] .gtb {
+  --gtb-bg: rgba(12, 14, 20, 0.62);
+  --gtb-fg: #ffffff;
+  --gtb-fg-muted: rgba(255,255,255,0.75);
+  --gtb-track: rgba(255,255,255,0.4);
+  --gtb-track-bg: rgba(255,255,255,0.2);
+  --gtb-hover: rgba(255,255,255,0.12);
+  --gtb-ring: rgba(255,255,255,0.35);
+}
+
+/* If you want auto-dark until you wire the toggle: */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .gtb {
+    --gtb-bg: rgba(12, 14, 20, 0.62);
+    --gtb-fg: #ffffff;
+    --gtb-fg-muted: rgba(255,255,255,0.75);
+    --gtb-track: rgba(255,255,255,0.4);
+    --gtb-track-bg: rgba(255,255,255,0.2);
+    --gtb-hover: rgba(255,255,255,0.12);
+    --gtb-ring: rgba(255,255,255,0.35);
+  }
+}
+
+.gtb-group {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.gtb-btn {
+  border: none;
+  background: transparent;
+  color: var(--gtb-fg);
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  min-width: 36px;
+  min-height: 36px;
+  line-height: 0; /* tighter icon alignment */
+}
+
+.gtb-btn:hover,
+.gtb-btn:focus-visible {
+  outline: none;
+  background: var(--gtb-hover);
+}
+
+.gtb-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--gtb-ring);
+}
+
+.gtb-btn:active { transform: translateY(1px); }
+
+.gtb-btn[disabled],
+.gtb-btn.gtb-btn-placeholder {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Icon sizing & look */
+.gtb-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  color: var(--gtb-fg);
+  /* Subtle futuristic glow */
+  filter: drop-shadow(0 0 6px rgba(97, 220, 163, 0.15));
+}
+
+/* Slider */
+.gtb-slider-label { display: inline-flex; align-items: center; }
+.gtb-slider {
+  width: 110px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--gtb-track-bg);
+  outline: none;
+  appearance: none;
+}
+
+/* WebKit */
+.gtb-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--gtb-track);
+}
+.gtb-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--gtb-fg);
+  margin-top: -6px;
+  box-shadow: 0 0 8px rgba(97, 220, 163, 0.35);
+  cursor: pointer;
+}
+
+/* Firefox */
+.gtb-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--gtb-track);
+}
+.gtb-slider::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--gtb-fg);
+  box-shadow: 0 0 8px rgba(97, 220, 163, 0.35);
+  border: none;
+  cursor: pointer;
+}
+
+/* Screen-reader only */
+.sr-only {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap; border: 0; padding: 0; margin: -1px;
+}
+
+/* Responsive */
+@media (max-width: 420px) {
+  .gtb { gap: 8px; padding: 6px 8px; }
+  .gtb-btn { padding: 6px; min-width: 32px; min-height: 32px; }
+  .gtb-slider { width: 90px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gtb-btn:active { transform: none; }
+}
