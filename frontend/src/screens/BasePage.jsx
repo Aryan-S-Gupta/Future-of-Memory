@@ -1,6 +1,6 @@
-import "../BasePage/BasePage.css";
-import LetterGlitch from "../Dynamic Background/LetterGlitch";
-import GlobalToolbar from "../TopBar/GlobalToolbar";
+import "../styles/BasePage.css";
+import LetterGlitch from "../components/Dynamic Background/LetterGlitch";
+import GlobalToolbar from "../components/TopBar/GlobalToolbar";
 
 /**
  * BasePage component
@@ -21,7 +21,7 @@ export default function BasePage({ children }) {
     <div className="screen">
       {/* Background layer with glitch animation effect.
           Positioned absolutely to fill the entire screen behind content. */}
-      <div className="bg-layer" aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1 }}>
+      <div className="bg-layer" aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
         <LetterGlitch
           glitchSpeed={0}
           centerVignette={true}

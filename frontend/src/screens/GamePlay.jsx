@@ -5,7 +5,7 @@ import { getScenario } from "../../api/scenarioApi";
 import { submitChoice } from "../../api/answerApi";
 import Button from "../components/Button/Button";
 import { useNavigate } from "react-router-dom";
-import "./GamePlay.css";
+import "../styles/GamePlay.css";
 
 /**
  * GamePlay component
