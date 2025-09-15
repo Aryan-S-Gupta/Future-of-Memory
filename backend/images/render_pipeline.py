@@ -17,13 +17,6 @@ def render_option_to_media(image_text: str, rel_path: str) -> str:
     png = fetch_png_bytes(loc)
     return save_png_to_media(rel_path, png)
 
-# this needs to be run in the background, later in view
-# import threading
-# threading.Thread(
-#         target=generate_four_images_blocking,
-#         args=(turn.session_id, turn.id),
-#         daemon=True
-#     ).start()
 def generate_four_images_blocking(session_id: int, turn_id: int) -> dict:
     """
     For each of the 4 options of this turn:

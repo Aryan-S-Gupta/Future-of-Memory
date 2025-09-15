@@ -40,7 +40,6 @@ class Turn(models.Model):
     # RAG and LLM interaction data
     query_text = models.TextField(blank=True) # Latest query_text (updated in description phase)
     context_block = models.TextField(blank=True) # RAG retrieved context
-    
     # User interaction (for shared session voting/consensus)
     user_choice = models.ForeignKey('Option', on_delete=models.SET_NULL, null=True, blank=True, related_name='chosen_by_turns') # Reference to the chosen option
     

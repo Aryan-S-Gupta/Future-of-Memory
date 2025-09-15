@@ -125,8 +125,8 @@ EXPORTED_WORKFLOW = {
   }
 }
 
-# llm_description should be no longer than 70 words as stable 1.5 encoder only encode first 77 tokens
-def truncate_words(text: str, max_words: int = 70) -> str:
+# llm_description should be no longer than 60 words as stable 1.5 encoder only encode first 77 tokens
+def truncate_words(text: str, max_words: int = 60) -> str:
     parts = text.split()
     if len(parts) <= max_words:
         return text
@@ -145,7 +145,7 @@ def clean_llm_description(llm_description: str) -> str:
     # remove white spaces
     normalized = re.sub(r'\s+', ' ', llm_description.strip())
 
-    return truncate_words(normalized, max_words=70)
+    return truncate_words(normalized, max_words=60)
 
 def build_prompt_payload(clean_prompt: str) -> Dict[str, Any]:
     """
@@ -173,13 +173,13 @@ def enqueue_render(prompt_payload: Dict[str, Any]) -> str:
     """
     body = {'prompt': prompt_payload['prompt'], 'client_id': CLIENT_ID}
     response = requests.post(f'{COMFYUI_BASE_URL}/prompt', json = body)
+    response.raise_for_status()
     data = response.json()
     prompt_id = data.get('prompt_id')
     if not prompt_id:
         raise RuntimeError(f'/prompt response missing prompt_id.')
     return prompt_id
 
-# originally copy image from local repo to MEDIA, now using history/ to get file path then retrieve png bytes
 def get_image_location(prompt_id: str, 
                        max_wait_s: float = 30.0, 
                        poll_every_s: float = 0.5) -> ImageLocation:
@@ -190,8 +190,6 @@ def get_image_location(prompt_id: str,
     # continuously checking if image is generated
     while time.time() < deadline:
         response = requests.get(history_url)
-        if response.status_code != 200:
-            raise RuntimeError(f'failed to GET history/')
 
         history_payload = response.json() or {}
 
