@@ -1,6 +1,6 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from backend.shared.models import Session, Turn, Option, ImageRender
+from shared.models import Session, Turn, Option, ImageRender
 from .comfyui_client import (
     clean_llm_description, build_prompt_payload, enqueue_render, get_image_location, fetch_png_bytes,
 )
@@ -54,7 +54,7 @@ def generate_four_images_blocking(session_id: int, turn_id: int) -> dict:
             ir_pk = ir.pk
 
         try:
-            rel_path = build_image_relpath(session_id, turn_id, opt.label)
+            rel_path = build_image_relpath(session_id, turn_id, opt.label) # comfyui/output/xxx.png
             final_rel = render_option_to_media(opt.image_text, rel_path)
 
             ImageRender.objects.filter(pk=ir_pk).update(status='ready', image_rel=final_rel)

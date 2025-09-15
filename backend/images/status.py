@@ -1,6 +1,6 @@
 import time
 from typing import Literal, Tuple, Optional
-from backend.shared.models import ImageRender
+from shared.models import ImageRender
 
 def get_image_status(option_id: int, max_wait_s: float = 25.0, 
                      poll_every_s: float = 0.5,) -> Tuple[Literal["ready","failed","timeout"], Optional[str]]:

@@ -277,7 +277,7 @@ cd backend
 ```bash
 python manage.py makemigrations
 python manage.py migrate
-python manage.py createsuperuser
+python manage.py createsuperuser # only if you want to access the db interface
 ```
 then follow the instructions, you need to set name, email and pwd for db access
 

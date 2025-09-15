@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'core',
     # Shared models and utilities
     'shared',
+    'images',
+    
 ]
 
 # Middleware stack - processes requests and responses in order

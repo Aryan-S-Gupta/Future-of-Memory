@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from backend.shared.models import Turn, Option
+from shared.models import Turn, Option
 from .status import get_image_status
 
 INITIAL_WORLD_IMAGE_REL= "static/fallback_first_turn.png"
