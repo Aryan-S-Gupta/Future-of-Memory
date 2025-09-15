@@ -16,7 +16,6 @@
   box-shadow: var(--gtb-shadow);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
-  user-select: none;
   transform: translateZ(0);
   color: var(--gtb-fg);
 }
@@ -43,20 +42,6 @@
 .gtb-btn:focus-visible {
   outline: none;
   background: var(--gtb-hover);
-}
-
-.gtb-btn:focus-visible {
-  box-shadow: 0 0 0 2px var(--gtb-ring);
-}
-
-.gtb-btn:active {
-  transform: translateY(1px);
-}
-
-.gtb-btn[disabled],
-.gtb-btn.gtb-btn-placeholder {
-  opacity: 0.55;
-  cursor: not-allowed;
 }
 
 /* Icon sizing & glow */
@@ -97,61 +82,7 @@
   height: var(--gtb-slider-thumb);
   border-radius: 50%;
   background: var(--gtb-fg);
-  margin-top: calc(-1 * (var(--gtb-slider-thumb) / 2));
+  margin-top: calc(-0.9 * (var(--gtb-slider-thumb) / 2));
   box-shadow: var(--gtb-thumb-glow);
   cursor: pointer;
-}
-
-/* Firefox */
-.gtb-slider::-moz-range-track {
-  height: var(--gtb-slider-h);
-  border-radius: 999px;
-  background: var(--gtb-track);
-}
-
-.gtb-slider::-moz-range-thumb {
-  width: var(--gtb-slider-thumb);
-  height: var(--gtb-slider-thumb);
-  border-radius: 50%;
-  background: var(--gtb-fg);
-  box-shadow: var(--gtb-thumb-glow);
-  border: none;
-  cursor: pointer;
-}
-
-/* Screen-reader only */
-.sr-only {
-  position: absolute !important;
-  height: 1px;
-  width: 1px;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
-  white-space: nowrap;
-  border: 0;
-  padding: 0;
-  margin: -1px;
-}
-
-/* Responsive */
-@media (max-width: 420px) {
-  .gtb {
-    gap: 8px;
-    padding: 6px 8px;
-  }
-
-  .gtb-btn {
-    padding: 6px;
-    min-width: 32px;
-    min-height: 32px;
-  }
-
-  .gtb-slider {
-    width: 90px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .gtb-btn:active {
-    transform: none;
-  }
 }
