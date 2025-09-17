@@ -17,7 +17,7 @@ def render_option_to_media(image_text: str, rel_path: str) -> str:
     png = fetch_png_bytes(loc)
     return save_png_to_media(rel_path, png)
 
-def generate_four_images_blocking(session_id: int, turn_id: int) -> dict:
+def generate_two_images_blocking(session_id: int, turn_id: int) -> dict:
     """
     For each of the 2 options of this turn:
       - build rel_path
