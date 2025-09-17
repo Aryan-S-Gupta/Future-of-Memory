@@ -27,6 +27,8 @@ class Migration(migrations.Migration):
                 ('label', models.CharField(max_length=1)),
                 ('option_text', models.TextField(blank=True)),
                 ('image_text', models.TextField(blank=True)),
+                ('scenario', models.TextField(blank=True)),
+                ('scenario_query_text', models.TextField(blank=True)),
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
             ],
             options={
@@ -66,8 +68,7 @@ class Migration(migrations.Migration):
                 ('question_generated_at', models.DateTimeField(blank=True, null=True)),
                 ('description', models.TextField(blank=True)),
                 ('description_generated_at', models.DateTimeField(blank=True, null=True)),
-                ('query_text', models.TextField(blank=True)),
-                ('context_block', models.TextField(blank=True)),
+                ('question_query_text', models.TextField(blank=True)),
                 ('displayed_image_rel', models.CharField(blank=True, max_length=512)),
                 ('session', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='turns', to='shared.session')),
                 ('user_choice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='chosen_by_turns', to='shared.option')),

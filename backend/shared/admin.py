@@ -23,7 +23,7 @@ class SessionAdmin(admin.ModelAdmin):
 class TurnAdmin(admin.ModelAdmin):
     list_display = ['year', 'session', 'has_question', 'has_description', 'user_choice', 'question_generated_at', 'description_generated_at']
     list_filter = ['session', 'user_choice', 'question_generated_at', 'description_generated_at']
-    search_fields = ['question', 'description', 'query_text']
+    search_fields = ['question', 'description', 'question_query_text']
     ordering = ['year']
     
     fieldsets = (
@@ -39,7 +39,7 @@ class TurnAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('RAG & LLM Data', {
-            'fields': ('query_text', 'context_block'),
+            'fields': ('question_query_text',),
             'classes': ('collapse',)
         }),
         ('Image Management', {
@@ -60,9 +60,9 @@ class TurnAdmin(admin.ModelAdmin):
 
 @admin.register(Option)
 class OptionAdmin(admin.ModelAdmin):
-    list_display = ['turn_year', 'label', 'has_option_text', 'has_image_text', 'render_count']
+    list_display = ['turn_year', 'label', 'has_option_text', 'has_image_text', 'has_scenario', 'render_count']
     list_filter = ['label', 'turn__session']
-    search_fields = ['option_text', 'image_text', 'turn__year']
+    search_fields = ['option_text', 'image_text', 'scenario', 'scenario_query_text', 'turn__year']
     ordering = ['turn__year', 'label']
     
     def turn_year(self, obj):
@@ -78,6 +78,11 @@ class OptionAdmin(admin.ModelAdmin):
         return bool(obj.image_text)
     has_image_text.boolean = True
     has_image_text.short_description = 'Has Image Prompt'
+    
+    def has_scenario(self, obj):
+        return bool(obj.scenario)
+    has_scenario.boolean = True
+    has_scenario.short_description = 'Has Scenario'
     
     def render_count(self, obj):
         return obj.renders.count()
