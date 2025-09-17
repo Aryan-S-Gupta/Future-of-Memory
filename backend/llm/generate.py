@@ -434,7 +434,7 @@ def generate_option_descriptions(
     *,
     year: int,
     background: str,
-    context_block: str,
+    context_blocks: list,  # List of 2 context blocks, one for each option
     last_description: str,
     current_question: str,
     options: list,  # List of 2 option texts
@@ -449,7 +449,7 @@ def generate_option_descriptions(
     Args:
         year: The current year in the story timeline
         background: The overall story background/setting
-        context_block: Retrieved context information for grounding
+        context_blocks: List of 2 context blocks, each corresponding to one option's RAG query
         last_description: Previous story summary/description
         current_question: The question that was presented to the player
         options: List of exactly 2 option texts [A, B]
@@ -462,10 +462,13 @@ def generate_option_descriptions(
             - query_text: RAG query string for next turn
             
     Raises:
-        ValueError: If options list doesn't contain exactly 2 items
+        ValueError: If options or context_blocks lists don't contain exactly 2 items
     """
     if len(options) != 2:
         raise ValueError(f"Expected exactly 2 options, got {len(options)}")
+    
+    if len(context_blocks) != 2:
+        raise ValueError(f"Expected exactly 2 context blocks, got {len(context_blocks)}")
     
     option_labels = ['A', 'B']
     option_descriptions = {}
@@ -483,7 +486,7 @@ def generate_option_descriptions(
         "scientific research and empirical evidence"
     ]
     
-    for i, (label, option_text) in enumerate(zip(option_labels, options)):
+    for i, (label, option_text, context_block) in enumerate(zip(option_labels, options, context_blocks)):
         success = False
         
         for attempt in range(max_retries):

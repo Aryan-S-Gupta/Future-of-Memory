@@ -18,7 +18,10 @@ def test_option_descriptions():
     test_data = {
         "year": 2030,
         "background": "In a world where memory editing technology has become widespread, society faces unprecedented ethical and practical challenges.",
-        "context_block": "Recent studies show that memory editing can help treat PTSD and depression, but concerns about identity manipulation and consent have emerged. Government agencies are developing regulatory frameworks while tech companies push for innovation.",
+        "context_blocks": [
+            "Recent studies show that memory editing can help treat PTSD and depression, with government agencies developing regulatory frameworks for clinical applications. Oversight requirements focus on patient safety and consent procedures in medical settings.",
+            "Tech companies are pushing for innovation in memory editing while concerns about identity manipulation have emerged. Market-driven development emphasizes commercial applications and minimal regulatory interference for research advancement."
+        ],
         "last_description": "The memory editing debate has reached a critical juncture as various stakeholders prepare to make decisions that will shape the future of human consciousness.",
         "current_question": "How should society approach the regulation of memory editing technology?",
         "options": [
@@ -42,7 +45,7 @@ def test_option_descriptions():
         results_json = generate_option_descriptions(
             year=test_data["year"],
             background=test_data["background"],
-            context_block=test_data["context_block"],
+            context_blocks=test_data["context_blocks"],
             last_description=test_data["last_description"],
             current_question=test_data["current_question"],
             options=test_data["options"]

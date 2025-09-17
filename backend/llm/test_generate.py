@@ -134,7 +134,10 @@ def test_generate_option_descriptions():
         result_json = generate_option_descriptions(
             year=2035,
             background="In 2035, global regulations begin piloting clinical memory editing as part of mental health research.",
-            context_block="(1) consent processes require strict multi-factor verification; (2) research reports show both benefits and risks for identity stability.",
+            context_blocks=[
+                "(1) consent processes require strict multi-factor verification; (2) research reports show both benefits and risks for identity stability with comprehensive safety protocols.",
+                "(1) research timeline concerns and data collection requirements; (2) scientific methodology standards and evidence-based decision making for postponing implementation."
+            ],
             last_description="Public debate has intensified as clinics prepare to enroll participants in early programs.",
             current_question="Should the government allow memory editing for clinical trials?",
             options=test_options
@@ -266,7 +269,10 @@ def run_full_workflow_test():
         option_descriptions_result_json = generate_option_descriptions(
             year=2035,
             background="In 2035, global regulations begin piloting clinical memory editing as part of mental health research.",
-            context_block="(1) consent processes require strict multi-factor verification; (2) research reports show both benefits and risks for identity stability.",
+            context_blocks=[
+                "(1) consent processes require strict multi-factor verification; (2) research reports show both benefits and risks for identity stability with government oversight protocols.",
+                "(1) clinical research methodology and timeline requirements; (2) scientific evidence standards and regulatory approval processes for professional self-regulation."
+            ],
             last_description="Public debate has intensified as clinics prepare to enroll participants in early programs.",
             current_question=question_result['question'],
             options=test_options
