@@ -41,8 +41,6 @@ INSTALLED_APPS = [
     'api',
     # Core app for basic functionality
     'core',
-    # Shared models and utilities
-    'shared',
 ]
 
 # Middleware stack - processes requests and responses in order

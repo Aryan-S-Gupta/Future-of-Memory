@@ -2,7 +2,6 @@
 API views for handling storyline-related requests.
 Provides endpoints to fetch story background, questions, and results based on user choices.
 """
-
 import json
 import os
 import logging
@@ -17,11 +16,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE_DIR, "data", "static_stories.json")
+DATA_FILE = os.path.join(BASE_DIR, 'data', 'static_stories.json')
 
-with open(DATA_FILE, "r", encoding="utf-8") as f:
+with open(DATA_FILE, 'r', encoding='utf-8') as f:
     story_data = json.load(f)
-
 
 # --- helper method ---
 def get_entry_by_year(year):
@@ -29,12 +27,13 @@ def get_entry_by_year(year):
 
 
 def get_story_scenario(request):
+
     """
     Retrieve the background information for a given year from the story data.
     Expects a 'year' parameter in the GET request.
     Returns a JSON response with the background or an error message.
     """
-    year = request.GET.get("year")
+    year = request.GET.get('year')
     if not year:
         return HttpResponseBadRequest("Missing 'year' parameter.")
 
@@ -42,16 +41,20 @@ def get_story_scenario(request):
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
 
-    return JsonResponse({"year": entry["year"], "scenario": entry["background"]})
+    return JsonResponse({
+        "year": entry["year"],
+        "scenario": entry["background"]
+    })
 
 
 def get_story_question(request):
+
     """
     Retrieve the question for a given year from the story data.
     Expects a 'year' parameter in the GET request.
     Returns a JSON response with the question or an error message.
     """
-    year = request.GET.get("year")
+    year = request.GET.get('year')
     if not year:
         return HttpResponseBadRequest("Missing 'year' parameter.")
 
@@ -59,57 +62,48 @@ def get_story_question(request):
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
 
-    return JsonResponse(
-        {
-            "year": entry["year"],
-            "question": entry["question"],
-            "options": entry["options"],
-        }
-    )
-
+    return JsonResponse({
+        "year": entry["year"],
+        "question": entry["question"],
+        "options": entry["options"]
+    })
 
 """
 What is this function supposed to do??? 
 currently it is sending the same question back so not using it 
 """
-
-
 def get_story_result_by_choice(request):
+
     """
     Retrieve the result of a user's choice for a given year from the story data.
     Expects 'year' and 'choice' parameters in the GET request.
     Returns a JSON response with the result, or an error message if not found.
     """
-    year = request.GET.get("year")
-    choice = request.GET.get("choice")
+    year = request.GET.get('year')
+    choice = request.GET.get('choice')
     if not year or not choice:
         return HttpResponseBadRequest("Missing 'year' or 'choice' parameter.")
 
     entry = next((item for item in story_data if str(item["year"]) == year), None)
     if not entry:
         return JsonResponse({"error": "Year not found."}, status=404)
-
+    
     result = entry.get("options", {}).get(choice.lower())
     if not result:
-        return JsonResponse(
-            {"error": f"No result found for choice '{choice}'"}, status=404
-        )
+        return JsonResponse({"error": f"No result found for choice '{choice}'"}, status=404)
 
-    return JsonResponse(
-        {
-            "year": entry["year"],
-            "choice": choice,
-            "result": result,
-            "next_year": entry["year"] + 1,
-        }
-    )
-
+    return JsonResponse({
+        "year": entry["year"],
+        "choice": choice,
+        "result": result,
+        "next_year": entry["year"] + 1
+    })
 
 @csrf_exempt
 @require_POST
 def get_story_result(request):
     """
-    Retrieves the user's selected choice for a given question. This is a post method
+    Retrieves the user's selected choice for a given question. This is a post method 
     which means this is directly retrived from the user input
     """
     try:
@@ -119,40 +113,31 @@ def get_story_result(request):
 
     year = body.get("year")
     choice = body.get("choice")
-
+  
     if not year or not choice:
         return HttpResponseBadRequest("Missing 'year' or 'choice' parameter.")
 
-    return JsonResponse(
-        {
-            "year": year,
-            "choice": choice,
-        }
-    )
+    return JsonResponse({
+        "year": year,
+        "choice": choice,
+    })
 
 
 @csrf_exempt
-@require_POST
 def rag_retrieve(request):
-
+    
     default_query = "fatigue"
     query: str
-    if request.method != "POST":
+    if request.method != 'POST':
         logger.warning("Non-POST request received. Using default query instead")
         query = default_query
     else:
-        data = json.loads(request.body.decode("utf-8"))
-        query_text = data.get("query_text")
-        keywords = data.get("keywords")
-        logger.debug(
-            f"Incoming RAG retrieval API request, {query_text = }, {keywords = }"
-        )
+        query_text = request.POST.get('query_text')
+        keywords = request.POST.get('keywords')
         query = query_text or keywords
         if not query:
-            logger.warning(
-                "No 'query_text' or 'keywords' parameter provided. Using default query instead"
-            )
+            logger.warning("No 'query_text' or 'keywords' parameter provided. Using default query instead")
             query = default_query
 
     items = retrieve_chunks(query)
-    return JsonResponse({"items": items})
+    return JsonResponse({'items': items})
