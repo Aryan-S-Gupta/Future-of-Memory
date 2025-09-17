@@ -6,7 +6,11 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent # /backend
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"  # image be stored in backend/media/
+ABSOLUTE_BASE_URL = "http://127.0.0.1:9000" # backend runs at port 9000
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # TODO: Move this to environment variables in production
@@ -43,6 +47,8 @@ INSTALLED_APPS = [
     'core',
     # Shared models and utilities
     'shared',
+    'images',
+    
 ]
 
 # Middleware stack - processes requests and responses in order
