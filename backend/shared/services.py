@@ -20,6 +20,7 @@ from llm.generate import generate_question
 # Import RAG functionality
 from rag.retrieve import retrieve_chunks
 from llm.rag_adapter import format_rag_context_for_llm
+from images.render_pipeline import generate_four_images_blocking
 
 logger = logging.getLogger(__name__)
 
@@ -604,7 +605,7 @@ def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int]
         logger.info(f"Image text generation completed in {step_duration:.2f}s")
         
         # TODO: Reserved space for image generation function
-        # image_generation_result = generate_and_save_images(session_id, turn_id, target_year)
+        generate_four_images_blocking(session_id, turn_id)
         
     except Exception as e:
         logger.error(f"Image text generation failed: {e}")
