@@ -5,7 +5,7 @@ Test script for the generate.py module
 This script tests all three main generation functions:
 - generate_question: Creates questions with multiple choice options
 - generate_option_image_texts: Creates image descriptions for each option
-- generate_description: Creates scenario descriptions
+- generate_option_descriptions: Creates scenario descriptions for both options (paragraph format, 80-150 words)
 
 Prerequisites:
 1. Ollama should be running on localhost:11434
@@ -26,7 +26,7 @@ import requests
 from typing import Dict, Any, List
 
 # Import the functions we want to test
-from generate import generate_question, generate_option_image_texts, generate_description
+from generate import generate_question, generate_option_image_texts, generate_option_descriptions
 
 
 def print_separator(title: str):
@@ -51,12 +51,15 @@ def test_generate_question():
     print("\nTest Case 1: Basic Memory Editing Scenario")
     
     try:
-        result = generate_question(
+        result_json = generate_question(
             year=2035,
             background="In 2035, global regulations begin piloting clinical memory editing as part of mental health research.",
             context_block="(1) consent processes require strict multi-factor verification; (2) research reports show both benefits and risks for identity stability.",
             last_description="Public debate has intensified as clinics prepare to enroll participants in early programs."
         )
+        
+        # Parse the JSON string to get the actual result
+        result = json.loads(result_json)
         
         print("Question generation succeeded!")
         print_result(result, "Question Result")
@@ -77,24 +80,25 @@ def test_generate_option_image_texts():
     """Test the generate_option_image_texts function with sample data"""
     print_separator("TESTING GENERATE_OPTION_IMAGE_TEXTS")
     
-    print("Test Case: Image Text Generation for Four Options")
+    print("Test Case: Image Text Generation for Two Options")
     
     try:
         # Sample options that would come from generate_question
         options = [
             "Establish strict government oversight with mandatory waiting periods",
-            "Allow clinics to self-regulate with professional guidelines", 
-            "Require independent patient advocates in all procedures",
-            "Create community-based review boards for approval decisions"
+            "Allow clinics to self-regulate with professional guidelines"
         ]
         
-        result = generate_option_image_texts(
+        result_json = generate_option_image_texts(
             year=2035,
             background="In 2035, global regulations begin piloting clinical memory editing as part of mental health research.",
             last_description="Public debate has intensified as clinics prepare to enroll participants in early programs.",
             question="How should memory editing consent procedures be implemented?",
             options=options
         )
+        
+        # Parse the JSON string to get the actual result
+        result = json.loads(result_json)
         
         print("Image text generation succeeded!")
         print_result(result, "Image Texts Result")
@@ -112,35 +116,59 @@ def test_generate_option_image_texts():
     return True
 
 
-def test_generate_description():
-    """Test the generate_description function with sample data"""
-    print_separator("TESTING GENERATE_DESCRIPTION")
+def test_generate_option_descriptions():
+    """Test the generate_option_descriptions function with sample data"""
+    print_separator("TESTING GENERATE_OPTION_DESCRIPTIONS")
     
-    # Test case 1: Basic description generation
-    print("\nTest Case 1: Basic Description Generation")
+    # Test case 1: Basic option descriptions generation (paragraph format for both options)
+    print("\nTest Case 1: Option Descriptions Generation (Paragraph Format)")
     
     try:
-        result = generate_description(
+        # Sample options for testing
+        test_options = [
+            "Allow memory editing with comprehensive safety protocols",
+            "Postpone implementation until more research is completed"
+        ]
+        
+        result_json = generate_option_descriptions(
             year=2035,
             background="In 2035, global regulations begin piloting clinical memory editing as part of mental health research.",
             context_block="(1) consent processes require strict multi-factor verification; (2) research reports show both benefits and risks for identity stability.",
             last_description="Public debate has intensified as clinics prepare to enroll participants in early programs.",
             current_question="Should the government allow memory editing for clinical trials?",
-            selected_option="The government should allow memory editing for clinical trials with strict safeguards"
+            options=test_options
         )
         
-        print("Description generation succeeded!")
-        print_result(result, "Description Result")
+        # Parse the JSON string to get the actual result
+        result = json.loads(result_json)
         
-        # Since the API guarantees valid results, we just show the content
-        print("\nGenerated scenario sentences:")
-        scenario = result.get("scenario", [])
-        for i, sentence in enumerate(scenario):
-            print(f"{i+1}: {sentence}")
-            print(f"   Length: {len(sentence.split())} words")
+        print("Option descriptions generation succeeded!")
+        print_result(result, "Option Descriptions Result")
+        
+        # Validate both option descriptions
+        print("\nGenerated option scenarios:")
+        option_labels = ['A', 'B']
+        
+        for label in option_labels:
+            if label in result:
+                option_data = result[label]
+                scenario = option_data.get("scenario", "")
+                
+                if scenario and isinstance(scenario, str):
+                    word_count = len(scenario.split())
+                    validation = 'PASS' if 80 <= word_count <= 150 else 'FAIL'
+                    
+                    print(f"\nOption {label}:")
+                    print(f"  Word count: {word_count} ({validation})")
+                    print(f"  Query: {option_data.get('query_text', 'N/A')}")
+                    print(f"  Content preview: {scenario[:100]}{'...' if len(scenario) > 100 else ''}")
+                else:
+                    print(f"\nOption {label}: Invalid scenario format")
+            else:
+                print(f"\nOption {label}: Missing from results")
             
     except Exception as e:
-        print(f"Description generation failed: {e}")
+        print(f"Option descriptions generation failed: {e}")
         return False
     
     return True
@@ -189,12 +217,15 @@ def run_full_workflow_test():
     try:
         # Step 1: Generate question
         print("\nStep 1: Generating question...")
-        question_result = generate_question(
+        question_result_json = generate_question(
             year=2035,
             background="In 2035, global regulations begin piloting clinical memory editing as part of mental health research.",
             context_block="(1) consent processes require strict multi-factor verification; (2) research reports show both benefits and risks for identity stability.",
             last_description="Public debate has intensified as clinics prepare to enroll participants in early programs."
         )
+        
+        # Parse the JSON string to get the actual result
+        question_result = json.loads(question_result_json)
         
         # Since the API guarantees valid results, just check basic structure
         if not question_result or 'question' not in question_result:
@@ -204,16 +235,14 @@ def run_full_workflow_test():
         print(f"Generated question: {question_result['question']}")
         print(f"Options: {question_result.get('options', [])}")
         
-        # Step 2: Generate image texts (using the same 4 options structure)
+        # Step 2: Generate image texts (using the same 2 options structure)
         print("\nStep 2: Generating image texts...")
         test_options = [
             "Establish strict government oversight with mandatory waiting periods",
-            "Allow clinics to self-regulate with professional guidelines", 
-            "Require independent patient advocates in all procedures",
-            "Create community-based review boards for approval decisions"
+            "Allow clinics to self-regulate with professional guidelines"
         ]
         
-        image_result = generate_option_image_texts(
+        image_result_json = generate_option_image_texts(
             year=2035,
             background="In 2035, global regulations begin piloting clinical memory editing as part of mental health research.",
             last_description="Public debate has intensified as clinics prepare to enroll participants in early programs.",
@@ -221,30 +250,53 @@ def run_full_workflow_test():
             options=test_options
         )
         
+        # Parse the JSON string to get the actual result
+        image_result = json.loads(image_result_json)
+        
         # Since the API guarantees valid results, just check basic structure
-        if not image_result or len(image_result) != 4:
+        if not image_result or len(image_result) != 2:
             print("Image text generation returned invalid structure")
             return False
         
-        print("Generated image texts for all 4 options")
+        print("Generated image texts for both options")
         
-        # Step 3: Generate description (using first option)
-        print("\nStep 3: Generating description...")
-        description_result = generate_description(
+        # Step 3: Generate option descriptions for both options
+        print("\nStep 3: Generating option descriptions...")
+        option_descriptions_result_json = generate_option_descriptions(
             year=2035,
             background="In 2035, global regulations begin piloting clinical memory editing as part of mental health research.",
             context_block="(1) consent processes require strict multi-factor verification; (2) research reports show both benefits and risks for identity stability.",
             last_description="Public debate has intensified as clinics prepare to enroll participants in early programs.",
             current_question=question_result['question'],
-            selected_option=test_options[0]
+            options=test_options
         )
         
+        # Parse the JSON string to get the actual result
+        option_descriptions_result = json.loads(option_descriptions_result_json)
+        
         # Since the API guarantees valid results, just check basic structure
-        if not description_result or 'scenario' not in description_result:
-            print("Description generation returned invalid structure")
+        if not option_descriptions_result or len(option_descriptions_result) != 2:
+            print("Option descriptions generation returned invalid structure")
             return False
         
-        print("Generated complete scenario description")
+        # Validate both option descriptions
+        valid_count = 0
+        for label in ['A', 'B']:
+            if label in option_descriptions_result:
+                scenario = option_descriptions_result[label].get('scenario', "")
+                if scenario and isinstance(scenario, str):
+                    word_count = len(scenario.split())
+                    if 80 <= word_count <= 150:
+                        valid_count += 1
+                        
+        print(f"Generated option descriptions: {valid_count}/2 options passed validation")
+        if valid_count != 2:
+            print("Option descriptions validation: FAIL")
+            return False
+        else:
+            print("Option descriptions validation: PASS")
+        
+        print("Generated complete option descriptions for both choices")
         
         print("\nComplete workflow test passed!")
         print("All three generation functions work correctly and produce valid outputs")
@@ -286,12 +338,12 @@ def main():
     elif args.image_only:
         success &= test_generate_option_image_texts()
     elif args.description_only:
-        success &= test_generate_description()
+        success &= test_generate_option_descriptions()
     else:
         # Run all tests by default
         success &= test_generate_question()
         success &= test_generate_option_image_texts()
-        success &= test_generate_description()
+        success &= test_generate_option_descriptions()
         success &= run_full_workflow_test()
     
     # Summary
