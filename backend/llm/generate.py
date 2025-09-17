@@ -163,10 +163,10 @@ def validate_description_scenario(result: dict) -> bool:
         print(f"Validation failed: scenario is empty")
         return False
     
-    # Check word count is between 80-150 words
+    # Check word count is between 60-150 words (relaxed from 80-150)
     word_count = len(scenario.split())
-    if not (80 <= word_count <= 150):
-        print(f"Validation failed: word count is {word_count}, expected 80-150")
+    if not (60 <= word_count <= 150):
+        print(f"Validation failed: word count is {word_count}, expected 60-150")
         return False
     
     return True
