@@ -19,7 +19,7 @@ def render_option_to_media(image_text: str, rel_path: str) -> str:
 
 def generate_four_images_blocking(session_id: int, turn_id: int) -> dict:
     """
-    For each of the 4 options of this turn:
+    For each of the 2 options of this turn:
       - build rel_path
       - render and save into MEDIA_ROOT
       - create ImageRender
@@ -29,8 +29,8 @@ def generate_four_images_blocking(session_id: int, turn_id: int) -> dict:
         raise ValueError('Session/turn mismatch.')
 
     options = list(Option.objects.filter(turn=turn).order_by('label'))
-    if len(options) != 4:
-        raise ValueError('Expected 4 options for this turn.')
+    if len(options) != 2:
+        raise ValueError('Expected 2 options for this turn.')
 
     results = {}
 
