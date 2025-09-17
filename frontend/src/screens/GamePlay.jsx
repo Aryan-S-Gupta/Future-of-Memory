@@ -7,12 +7,29 @@ import Button from "../components/Button/Button";
 import { useNavigate } from "react-router-dom";
 import "./GamePlay.css";
 
+/**
+ * GamePlay component
+ *
+ * This screen drives the main gameplay loop. It alternates between:
+ * - Displaying a **scenario** for the given year.
+ * - Displaying a **decision-making question** with multiple choices.
+ *
+ * Features:
+ * - Uses React Query to fetch scenario/question data from backend APIs.
+ * - Tracks the current year (`year`) and current screen (`screen`).
+ * - Handles user choices and progresses the game timeline forward.
+ * - Provides navigation back to the home screen.
+ *
+ * @component
+ * @returns {JSX.Element} The interactive gameplay screen with scenario/question flow.
+ */
 const GamePlay = () => {
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const navigate = useNavigate();
 
-  // Fetch scenarios everytime the screen changes to scenario
+  // --- Scenario Query ---
+  // Fetches the scenario whenever we are on the "scenario" screen.
   const {
     data: scenarioData,
     isLoading: isScenarioLoading,
@@ -23,7 +40,8 @@ const GamePlay = () => {
     enabled: screen === "scenario", 
   });
 
-  // Fetches questions everytime the scren chnges to questions
+  // --- Question Query ---
+  // Fetches the question whenever we are on the "question" screen.
   const {
     data: questionData,
     isLoading: isQuestionLoading,
@@ -33,7 +51,12 @@ const GamePlay = () => {
     queryFn: () => getQuestion(year),
     enabled: screen === "question", // only fetch when we are on question screen
   });
-
+  
+  /**
+   * Handles a player's choice when answering a question.
+   *
+   * @param {string} answer - The key of the chosen option.
+   */
   const handleChoice = async (answer) => {
     try {
       submitChoice(year, answer);

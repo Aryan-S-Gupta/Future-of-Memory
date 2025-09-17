@@ -7,12 +7,25 @@ import "./BackgroundScreen.css";
 const BackgroundScreen = () => {
   const navigate = useNavigate();
 
-  /*
-    HowToScreen component provides instructions on how to play the game.
-  */
+/**
+ * BackgroundScreen component
+ *
+ * This screen introduces the narrative background of the game.
+ * It provides immersive story context before gameplay begins, 
+ * styled with a "crawl" effect (scrolling text).
+ *
+ * Features:
+ * - Narrative text explaining the year 2040 and the player's role.
+ * - A "Back" button to return to the home screen.
+ * - A "Next" button to proceed into the GamePlay screen.
+ *
+ * @component
+ * @returns {JSX.Element} A styled introductory background screen with story text and navigation.
+ */
   return (
     <BasePage>
       <h1 className="title">Background</h1>
+        {/* Story crawl container with immersive narrative */}
         <div className="crawl-container">
           <div className="crawl-text">
             <p>
@@ -26,6 +39,7 @@ const BackgroundScreen = () => {
             </p>
           </div>
         </div>
+      {/* Navigation buttons (Back to home, Next to gameplay) */}
       <div className="button-container">
       <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
       <Button baseButton="btn-next next-fade-in" action={() => navigate("/game-play")} title="Next" />
