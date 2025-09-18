@@ -283,10 +283,22 @@ then follow the instructions, you need to set name, email and pwd for db access
 
 ---
 
-### Step 7: Start the Development Server
+### Step 7: Start the ComfyUI Server
+- download ComfyUI https://www.comfy.org/download
+- download dreamshaper model ver 7 https://civitai.com/models/4384?modelVersionId=109123
+- put the model under `ComfyUI/models/checkpoints`
+- starts ComfyUI server, make sure it is running at port 8080, if default not 8080, run it from terminal, switch to port 8080
+    ```bash
+    cd /path/to/ComfyUI
+    python main.py --port 8080
+    ```
+
+---
+
+### Step 8: Start the Development Server at prot 9000
 
 ```bash
-python manage.py runserver
+python manage.py runserver 9000
 ```
 
 Then open your browser or use terminal tools like `curl` to test the following round-based endpoints:
