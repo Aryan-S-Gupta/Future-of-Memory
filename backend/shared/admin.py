@@ -81,9 +81,9 @@ class OptionAdmin(admin.ModelAdmin):
 
 @admin.register(ImageRender)
 class ImageRenderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'option_info', 'status', 'has_image', 'has_fallback']
+    list_display = ['id', 'option_info', 'status', 'has_image']
     list_filter = ['status', 'option__turn__session', 'option__label']
-    search_fields = ['image_rel', 'last_turn_image_rel']
+    search_fields = ['image_rel']   # removed last_turn_image_rel
     
     def option_info(self, obj):
         return f"Year {obj.option.turn.year} - Option {obj.option.label}"
