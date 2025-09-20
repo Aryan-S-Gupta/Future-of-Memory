@@ -86,3 +86,17 @@
   box-shadow: var(--gtb-thumb-glow);
   cursor: pointer;
 }
+
+.gtb-textsize {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gtb-gap);
+}
+
+.gtb-textsize .gtb-btn {
+  min-width: 36px;
+  /* matches --gtb-btn-min feel */
+  font-weight: 700;
+  font-family: var(--btn-font-display, var(--font-display, sans-serif));
+  line-height: 1;
+}

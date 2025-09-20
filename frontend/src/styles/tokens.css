@@ -43,6 +43,15 @@
     --fs-question: 3rem;
     --fs-btn: 1rem;
 
+    /* Text zoom tokens */
+    --text-zoom: 1;
+    /* live value set by JS */
+    --text-zoom-min: 0.85;
+    /* lower bound */
+    --text-zoom-max: 1.35;
+    /* upper bound (keeps UI stable) */
+    --text-zoom-capped: clamp(var(--text-zoom-min), var(--text-zoom), var(--text-zoom-max));
+
     /* Spacing / radii */
     --space-xxl: 3rem;
     --space-xl: 2rem;
@@ -57,6 +66,10 @@
     --dur-choice-fade: 2s;
     --dur-next-fade: 3s;
     --dur-crawl: 30s;
+}
+
+html {
+    font-size: calc(16px * var(--text-zoom-capped));
 }
 
 /* ===== GlobalToolbar tokens ===== */
@@ -209,18 +222,17 @@
     /* cyan */
 
     /* Vignette ramps */
-    --vignette-outer-clear: rgba(0, 0, 0, 0);
-    --vignette-outer-opaque: rgba(0, 0, 0, 0.95);
-    --vignette-center-opaque: rgba(0, 0, 0, 0.65);
-    --vignette-center-clear: rgba(0, 0, 0, 0);
+    --vignette-center-opaque: rgba(0, 0, 0, 0.7);
+    --vignette-center-clear: rgba(0, 0, 0, 0.5);
+    --vignette-outer-clear: rgba(255, 255, 255, 0.05);
 
     --vignette-outer-bg: radial-gradient(circle,
             var(--vignette-outer-clear) 60%,
             var(--vignette-outer-opaque) 100%);
 
     --vignette-bg: radial-gradient(circle,
-            var(--vignette-center-opaque) 0%,
-            var(--vignette-center-clear) 50%);
+            var(--vignette-center-opaque) 40%,
+            var(--vignette-center-clear) 55%);
 }
 
 /* Theme overrides (adjust to taste later) */
@@ -230,8 +242,8 @@
     --glitch-2: #cfd9e8;
     --glitch-3: #aabbd3;
 
-    --vignette-center-opaque: rgba(0, 0, 0, 0.2);
-    --vignette-center-clear: rgba(0, 0, 0, 0.0);
+    --vignette-center-opaque: rgba(0, 0, 0, 0.3);
+    --vignette-center-clear: rgba(0, 0, 0, 0.5);
     --vignette-outer-clear: rgba(255, 255, 255, 0.15);
 
     --vignette-outer-bg: radial-gradient(circle,
@@ -251,8 +263,8 @@
     --glitch-3: #61b3dc;
     /* vignettes unchanged */
 
-    --vignette-center-opaque: rgba(0, 0, 0, 0.4);
-    --vignette-center-clear: rgba(0, 0, 0, 0.0);
+    --vignette-center-opaque: rgba(0, 0, 0, 0.7);
+    --vignette-center-clear: rgba(0, 0, 0, 0.5);
     --vignette-outer-clear: rgba(255, 255, 255, 0.05);
 
     --vignette-outer-bg: radial-gradient(circle,

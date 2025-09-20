@@ -23,7 +23,7 @@ export default function BasePage({ children }) {
           Positioned absolutely to fill the entire screen behind content. */}
       <div className="bg-layer" aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
         <LetterGlitch
-          glitchSpeed={0}
+          glitchSpeed={100}
           centerVignette={true}
           outerVignette={true}
           smooth={false}
