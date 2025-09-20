@@ -85,10 +85,22 @@ const GamePlay = () => {
     setVolume(Math.max(0, Math.min(1, volume * duckFactor)));
 
     const utter = new SpeechSynthesisUtterance(String(text));
-    utter.rate = 1;
-    utter.pitch = 1;
-    // Let TTS be clearly audible regardless; we already lowered BGM
-    utter.volume = 1;
+    // --- choose voice here ---
+    const voices = synthRef.current.getVoices();
+    const prefs = [
+      /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i, // Edge (neural)
+      /Microsoft Jenny Online \(Natural\).*English \(United States\)/i,  // Edge (neural)
+      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i,                    // macOS built-ins
+      /Google UK English Female/i                                        // Chrome fallback
+    ];
+    const picked = prefs
+      .map(rx => voices.find(v => rx.test(v.name)))
+      .find(Boolean) || voices[0];
+    utter.voice = picked;
+    // tweak for more “majestic” feel
+    utter.rate = 0.90;  // slower = more weighty
+    utter.pitch = 1.12;  // deeper
+    utter.volume = 1;   // full, since we ducked bgm
 
     utter.onend = utter.onerror = () => {
       // Restore BGM volume
