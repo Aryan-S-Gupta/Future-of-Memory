@@ -19,6 +19,9 @@ export default function AudioProvider({ children, routeAudioMap, initialVolume =
     const [isMuted, setIsMuted] = useState(false);
     const [currentSrc, setCurrentSrc] = useState(null);
 
+    // NEW: simple “is audio playing?” state (kept minimal)
+    const [isPlaying, setIsPlaying] = useState(false);
+
     // Flag - if user interacted (true for autoplay) - can be changed
     const hasUserInteracted = true;
 
@@ -28,13 +31,19 @@ export default function AudioProvider({ children, routeAudioMap, initialVolume =
         el.preload = "auto"; //Avoid delayer
         el.loop = true;
         el.volume = clamp01(initialVolume); //use volume set
+
+        // Minimal event wiring for play/pause status
+        el.addEventListener("play", () => setIsPlaying(true));
+        el.addEventListener("pause", () => setIsPlaying(false));
+        el.addEventListener("ended", () => setIsPlaying(false));
+
         audioRef.current = el; //Save reference
     }
 
     // Decide what music to play for the current route
     const trackFor = useMemo(() => { //cache - optimize
         const entries = Object.entries(routeAudioMap || {});
-        return (p) => 
+        return (p) =>
             // Check for exact path
             (entries.find(([k]) => k === p)?.[1]) ??
             // Globally - fallback
@@ -75,16 +84,28 @@ export default function AudioProvider({ children, routeAudioMap, initialVolume =
 
     // Common control for all pages
     const controls = useMemo(() => ({
-        play: () => audioRef.current?.play().catch(() => { }), // Manually start music
-        pause: () => audioRef.current?.pause(), // Manually pause music
-        setVolume: (v) => setVolume(clamp01(v)), // Change loudness (0 = silent, 1 = max)
-        mute: () => setIsMuted(true), // Instantly mute
-        unmute: () => setIsMuted(false), // Instantly unmute
+        // Manually start music
+        play: () => {
+            const r = audioRef.current?.play().catch(() => { });
+            // NEW: dispatch a tiny event so screens can “replay narration” on Play press
+            try { window.dispatchEvent(new CustomEvent("bgm-play")); } catch { }
+            return r;
+        },
+        // Manually pause music
+        pause: () => audioRef.current?.pause(),
+        // Change loudness (0 = silent, 1 = max)
+        setVolume: (v) => setVolume(clamp01(v)),
+        // Instantly mute/unmute
+        mute: () => setIsMuted(true),
+        unmute: () => setIsMuted(false),
+
         isMuted,// Current mute state (true/false)
         volume, // Current volume (number between 0–1)
         currentSrc, // File currently playing
         hasUserInteracted, // Always true here, left for consistency
-    }), [isMuted, volume, currentSrc]);
+        // NEW: expose playing state
+        isPlaying,
+    }), [isMuted, volume, currentSrc, isPlaying]);
 
     // Give access to these controls to the rest of the app (wrapper)
     return <BgmContext.Provider value={controls}>{children}</BgmContext.Provider>;
