@@ -8,7 +8,7 @@ from . import views
 urlpatterns = [
     path("create", views.create_multiplayer_room),
     path("join", views.join_multiplayer_room),
-    path("rooms", views.join_multiplayer_room),
+    path("rooms", views.get_room_codes),
     path("sync", views.sync_state),
     path("state/<str:room_code>", views.get_current_state),
 ]

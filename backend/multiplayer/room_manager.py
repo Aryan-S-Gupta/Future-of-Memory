@@ -1,4 +1,5 @@
 
+
 rooms = {}  
 
 def create_room(host_name):
@@ -10,8 +11,11 @@ def create_room(host_name):
     }
     return room_code
 
-def get_rooms():
+def get_room_codes():
     return rooms.keys()
+
+def get_rooms():
+    return rooms
 
 def get_players(room_code):
     return rooms[room_code]["players"]

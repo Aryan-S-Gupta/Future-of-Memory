@@ -10,7 +10,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # API endpoints - routes to api app
     path('api/', include('api.urls')),
-    path("api/multiplayer/", include("api.multiplayer.urls")),
+    path("multiplayer/", include("multiplayer.urls")),
     # Root path and other core functionality - routes to core app
     path('', include('core.urls')),
 ]

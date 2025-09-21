@@ -30,6 +30,8 @@ def create_multiplayer_room(request):
     except json.JSONDecodeError:
         return HttpResponseBadRequest("Invalid JSON")
 
+def get_room_codes(request):
+    return JsonResponse(get_room_codes())
 
 @csrf_exempt
 def join_multiplayer_room(request):
