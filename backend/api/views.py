@@ -156,3 +156,63 @@ def rag_retrieve(request):
 
     items = retrieve_chunks(query)
     return JsonResponse({"items": items})
+
+
+
+
+from shared.models import Session
+
+# home page
+@require_POST
+def create_session(request):
+    """
+    Create a new Session and return its ID as JSON.
+    """
+    session = Session.objects.create()
+    return JsonResponse({'session_id': session.id}, status=201)
+
+# intro page
+from shared.services import generate_complete_turn
+def start_prerendering(request, session_id, year):
+    return generate_complete_turn(session_id, year) # replace by start_turn_pipeline.send()
+
+
+def display_question_and_options(request, session_id, turn_id):
+    # llm funtion?
+    return
+
+# display page
+from shared.services import display_world_view
+@require_POST
+def display_scenario_and_image(request, session_id, turn_id, year, option_id):
+    """
+    Display the world view after user makes a choice.
+    """
+    try:
+        world_view_data = display_world_view(session_id, turn_id, year, option_id)
+
+        if world_view_data.get('success'):
+            next_year = int(year) + 1
+            try:
+                # start generating next turn in background
+                generate_complete_turn(session_id, next_year) # start_turn_pipeline.send()
+                logger.info(f"Started generating next turn (year {next_year}) in background")
+            except Exception as e:
+                logger.warning(f"Failed to start next turn generation: {e}")
+        
+        return JsonResponse(world_view_data)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Failed to display world view: {str(e)}'
+        }, status=500)
+
+
+
+# bg manager
+from shared.services import start_turn_pipeline
+
+def start_prerendering(request, session_id, year):
+    start_turn_pipeline.send(session_id, year)
+    return JsonResponse({'status': 'generation_started'})

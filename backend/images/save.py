@@ -7,6 +7,7 @@ def build_image_relpath(session_id: int, turn_id: int, label: str) -> str:
     Output: 'comfyui/output/session{sid}_turn{tid}_option_{label}_world.png'
     """
     filename = f"session{session_id}_turn{turn_id}_option_{label}_world.png"
+    # filename = f"option_{label}_world.png"
     rel = PurePosixPath("comfyui") / "output" / filename # image will be stored under comfyui/output/
     return rel.as_posix()
 
