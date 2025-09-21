@@ -12,7 +12,7 @@ def create_room(host_name):
     return room_code
 
 def get_room_codes():
-    return rooms.keys()
+    return list(rooms.keys())
 
 def get_rooms():
     return rooms

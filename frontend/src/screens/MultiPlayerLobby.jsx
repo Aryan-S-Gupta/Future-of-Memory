@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/GameFlowApi.js";
+import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/RoomManagementApi.js";
 import "./GamePlay.css";
 import Button from "../components/Button/Button.jsx";
 
-const MultiplayerLobby = () => {
+export const MultiplayerLobby = () => {
     const [rooms, setRooms] = useState([]);
     const [playerName, setPlayerName] = useState("");
     const [roomCode, setRoomCode] = useState("");
@@ -60,15 +60,13 @@ const MultiplayerLobby = () => {
 
       <h3>Available Rooms</h3>
       <ul>
-          {Object.entries(roomList).map((room) => (
-          <li key={room.code}>
-            {room.code} ({room.players.length} players)
-            <button onClick={() => handleJoinRoom(room.code)}>Join</button>
-          </li>
-            ))}
+      {roomList?.rooms?.map((code) => (
+        <li key={code}>
+          {code}
+          <button onClick={() => handleJoinRoom(code)}>Join</button>
+        </li>
+      ))}
       </ul>
     </div>
   );
 };
-
-export default MultiplayerLobby;
