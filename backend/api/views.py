@@ -6,14 +6,15 @@ Provides endpoints to fetch story background, questions, and results based on us
 import json
 import os
 import logging
+import multiplayer.room_manager as rm
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
-
+from django.views.decorators.http import require_POST
 from rag.retrieve import retrieve_chunks
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-from django.views.decorators.http import require_POST
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data", "static_stories.json")
@@ -67,10 +68,6 @@ def get_story_question(request):
     )
 
 
-"""
-What is this function supposed to do??? 
-currently it is sending the same question back so not using it 
-"""
 
 
 def get_story_result_by_choice(request):
@@ -103,6 +100,38 @@ def get_story_result_by_choice(request):
         }
     )
 
+@csrf_exempt
+def submit_choice(request):
+    data = json.loads(request.body.decode("utf-8"))
+    mode = data.get("mode")
+
+    if mode == "single":
+        get_singleplayer_result(request)
+
+    elif mode == "multi":
+        get_multiplayer_result(request)
+
+
+def get_multiplayer_result(data):
+        room_code = data.get("room_code")
+        player_name = data.get("player_name")
+        choice = data.get("choice")
+
+        room = rm.get_rooms[room_code]
+        player = room["players"].get[player_name]
+        player.last_choice = choice
+        player.save()
+
+        # check if all players have submitted
+        all_answered = all(p.last_choice for p in room.players.all())
+        outcome = None
+        if all_answered:
+            from collections import Counter
+            votes = [p.last_choice for p in room.players.all()]
+            outcome = Counter(votes).most_common(1)[0][0]
+            room.current_year += 1
+            room.save()
+        return JsonResponse({"all_answered": all_answered, "outcome": outcome})
 
 @csrf_exempt
 @require_POST
