@@ -5,17 +5,17 @@ import api from "./api";
  * @returns {Promise<object[]>} Array of room objects.
  */
 export const listRooms = async () => {
-  const response = await api.get("/multiplayer/rooms");
+  const response = await api.get("/rooms");
   return response.data;
 };
 
 /**
  * Create a new room with the given player as host.
- * @param {string} playerName - The name of the player creating the room.
+ * @param {string} host - The name of the player creating the room.
  * @returns {Promise<object>} Newly created room data.
  */
-export const createRoom =  async (playerName) => {
-  const response = await api.post("/multiplayer/create", { playerName });
+export const createRoom =  async (host) => {
+  const response = await api.post("/create", { host });
   return response.data
 };
 
@@ -26,7 +26,7 @@ export const createRoom =  async (playerName) => {
  * @returns {Promise<object>} Room state after joining.
  */
 export const joinRoom = async (roomCode, playerName) => {
-  const response = await api.post(`/multiplayer/${roomCode}/join`, { playerName });
+  const response = await api.post(`/join`, { roomCode, playerName });
   return response.data;
 };
 
@@ -36,6 +36,6 @@ export const joinRoom = async (roomCode, playerName) => {
  * @returns {Promise<object>} Room state.
  */
 export const getRoomState = async (roomCode) => {
-  const response = await api.get(`/multiplayer/${roomCode}/state`);
+  const response = await api.get(`/${roomCode}/state`);
   return response.data;
 };

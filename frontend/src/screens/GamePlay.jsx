@@ -21,7 +21,7 @@ import "./GamePlay.css";
  * @component
  * @returns {JSX.Element} The interactive gameplay screen with scenario/question flow.
  */
-export const GamePlay = () => {
+const GamePlay = () => {
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const navigate = useNavigate();
@@ -107,3 +107,4 @@ export const GamePlay = () => {
   );
 };
 
+export default GamePlay;

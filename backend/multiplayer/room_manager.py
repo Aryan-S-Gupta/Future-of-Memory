@@ -1,9 +1,7 @@
-
-
 rooms = {}  
 
 def create_room(host_name):
-    room_code = str(len(rooms) + 1)
+    room_code = str(len(rooms) + 1).zfill(4)
     rooms[room_code] = {
         "host": host_name,
         "players": [host_name], 

@@ -5,8 +5,7 @@ import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/RoomManag
 import "./GamePlay.css";
 import Button from "../components/Button/Button.jsx";
 
-export const MultiplayerLobby = () => {
-    const [rooms, setRooms] = useState([]);
+const MultiplayerLobby = () => {
     const [playerName, setPlayerName] = useState("");
     const [roomCode, setRoomCode] = useState("");
     const navigate = useNavigate();
@@ -24,25 +23,32 @@ export const MultiplayerLobby = () => {
         if (!playerName) {
             return alert("Please Enter a NickName");
         }
-        
-      const response = await createRoom(playerName);
-      setRoomCode(response.data.room_code);
+      const data = await createRoom(playerName);
+      setRoomCode(data.room_code);
       console.log(roomCode);
       // Navigate to multiplayer room screen
-      navigate(`/multiplayer-room/${response.data.room_code}?playerName=${playerName}`);
+      navigate(`/multiplayer-room/${data.room_code}?playerName=${playerName}`);
       console.log("navigated")
     };
 
   const handleJoinRoom = async (code) => {
-    if (!playerName) {
-      return alert("Enter your name first!");
+    const name = window.prompt("Enter your name to join the room:");
+    if (!name) {
+      alert("Sorry");
     }
-    const response = await joinRoom(code, playerName);
-    if (response.data.success){
-      setRoomCode(code);
-      navigate(`/multiplayer-room/${code}?playerName=${playerName}`);
-    } else {
-      <div> We are Sorry, We are unable to add you to the requested room. Please Try again</div>
+    setRoomCode(code);
+    setPlayerName(name); 
+    try {
+      const data = await joinRoom(code, name);
+      if (data.success == "True") {
+        navigate(`/multiplayer-room/${code}?playerName=${name}`);
+        console.log("navigated")
+      } else {
+        alert("Sorry, unable to join the room. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error joining room. Please try again.");
     }
   };
 
@@ -70,3 +76,5 @@ export const MultiplayerLobby = () => {
     </div>
   );
 };
+
+export default MultiplayerLobby;
