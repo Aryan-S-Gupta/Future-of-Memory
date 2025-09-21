@@ -1,7 +1,7 @@
 import api from "./api";
 
 
-export const createRoom = (host) => api.post("multiplayer/create", { host });
+export const createRoom = (name) => api.post("multiplayer/create", { name });
 export const listRooms = () => mpApi.get("multiplayer/rooms");
 export const joinRoom = (roomCode, playerName) =>
   api.post("multiplayer/join", { room_code: roomCode, name: playerName });
