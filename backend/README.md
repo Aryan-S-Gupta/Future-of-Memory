@@ -319,10 +319,11 @@ redis-server
 ```
 
 ### Step 10: create 3 worker (each from a different terminal)
-- python manage.py rundramatiq --queues default
-- python manage.py rundramatiq --queues image_queue
-- python manage.py rundramatiq --queues llm_queue
-
+``` bash
+python manage.py rundramatiq --queues default --processes 1 --threads 1
+python manage.py rundramatiq --queues image_queue --processes 1 --threads 1
+python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1
+```
 
 ### Step 11: Start the ComfyUI Server
 - download ComfyUI https://www.comfy.org/download
@@ -380,7 +381,7 @@ CORS (Cross-Origin Resource Sharing) has been enabled via `django-cors-headers` 
 Frontend developers can now directly `fetch()` Django API endpoints from React, for example:
 
 ```js
-fetch("http://127.0.0.1:8000/api/storyline/start?year=2035")
+fetch("http://127.0.0.1:9000/api/storyline/start?year=2035")
   .then((res) => res.json())
   .then((data) => console.log(data));
 ```

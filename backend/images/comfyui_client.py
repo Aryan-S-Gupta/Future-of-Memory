@@ -181,7 +181,7 @@ def enqueue_render(prompt_payload: Dict[str, Any]) -> str:
     return prompt_id
 
 def get_image_location(prompt_id: str, 
-                       max_wait_s: float = 30.0, 
+                       max_wait_s: float = 50.0, 
                        poll_every_s: float = 0.5) -> ImageLocation:
     
     history_url = f'{COMFYUI_BASE_URL}/history/{prompt_id}'
