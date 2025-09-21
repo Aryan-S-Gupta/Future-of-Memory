@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { getQuestion } from "../../api/questionApi";
-import { getScenario } from "../../api/scenarioApi";
-import { submitChoice } from "../../api/answerApi";
+import { useQuery } from "@tanstack/react-query";
+import { getScenario, getQuestion, getImage, submitChoice } from "../../api/GameApi";
 import Button from "../components/Button/Button";
 import { useNavigate } from "react-router-dom";
 import "./GamePlay.css";
