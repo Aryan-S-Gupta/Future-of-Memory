@@ -30,7 +30,7 @@ const MainGameScreen = () => {
       <div className="button-group">
         <Button baseButton="btn-primary" action={() => navigate("/story")} title="Start" />
         <Button baseButton="btn-secondary" action={() => navigate("/how-to-play")} title="How To Play" />
-        <Button baseButton="btn-secondary" action={() => navigate("/multiplayer")} title="Multiplayer" />
+        <Button baseButton="btn-secondary" action={() => navigate("/multiplayer-lobby")} title="Multiplayer" />
       </div>
     </BasePage>
   );

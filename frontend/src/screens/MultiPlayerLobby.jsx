@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { listRooms, createRoom, joinRoom } from "../../api/MultiPlayerApi";
+import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/GameFlowApi.js";
+import "./GamePlay.css";
+import Button from "../components/Button/Button.jsx";
 
 const MultiplayerLobby = () => {
     const [rooms, setRooms] = useState([]);
@@ -10,7 +12,7 @@ const MultiplayerLobby = () => {
     const navigate = useNavigate();
 
     const {
-        data: listRooms,
+        data: roomList,
         isLoading: isRoomsLoading,
         error: roomError,
     } = useQuery({
@@ -25,15 +27,17 @@ const MultiplayerLobby = () => {
         
       const response = await createRoom(playerName);
       setRoomCode(response.data.room_code);
+      console.log(roomCode);
       // Navigate to multiplayer room screen
       navigate(`/multiplayer-room/${response.data.room_code}?playerName=${playerName}`);
+      console.log("navigated")
     };
 
   const handleJoinRoom = async (code) => {
     if (!playerName) {
       return alert("Enter your name first!");
     }
-    const response = await joinRoom(roomCode, playerName);
+    const response = await joinRoom(code, playerName);
     if (response.data.success){
       setRoomCode(code);
       navigate(`/multiplayer-room/${code}?playerName=${playerName}`);
@@ -44,6 +48,7 @@ const MultiplayerLobby = () => {
 
   return (
     <div>
+      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
       <h2>Multiplayer Lobby</h2>
       <input
         type="text"
@@ -55,12 +60,12 @@ const MultiplayerLobby = () => {
 
       <h3>Available Rooms</h3>
       <ul>
-        {rooms.map((room) => (
+          {Object.entries(roomList).map((room) => (
           <li key={room.code}>
             {room.code} ({room.players.length} players)
             <button onClick={() => handleJoinRoom(room.code)}>Join</button>
           </li>
-        ))}
+            ))}
       </ul>
     </div>
   );
