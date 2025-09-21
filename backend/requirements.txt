@@ -25,3 +25,10 @@ pillow>=10.0.0
 
 # Local HTTP client
 httpx>=0.27.0
+
+# db
+psycopg2-binary>=2.9
+
+# bg manager
+redis>=5.0
+dramatiq==1.18.0

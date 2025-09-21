@@ -1,10 +1,11 @@
-# bg manager
-# sequence: step 1: question + options --> step2: image_texts --> step 3a: image + step 3b: scenario
 import dramatiq
 from images.render_pipeline import generate_two_images_blocking
-from .models import Session
+from .models import Session, Turn 
 from .services import generate_and_save_image_text, generate_and_save_scenario, generate_and_save_question
 from images.render_pipeline import generate_two_images_blocking
+
+# bg manager
+# sequence: step 1: question + options --> step2: image_texts --> step 3a: image + step 3b: scenario
 
 @dramatiq.actor(queue_name="llm_queue")
 def step1_generate_question(session_id: int, year: int):
@@ -14,9 +15,9 @@ def step1_generate_question(session_id: int, year: int):
     
     # trigger step 2
     step2_generate_image_texts.send(session_id, turn_id, year)
-    return result
+    return result # turn_id
 
-@dramatiq.actor(queue_name="llm_queue") 
+@dramatiq.actor(queue_name="llm_queue")
 def step2_generate_image_texts(session_id: int, turn_id: int, year: int):
     """Step 2: Generate image descriptions"""
     result = generate_and_save_image_text(session_id, turn_id, year)

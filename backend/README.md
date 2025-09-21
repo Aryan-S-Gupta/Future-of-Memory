@@ -272,18 +272,59 @@ cd backend
 cd backend
 ```
 
-### Step 6: Run Migrations
+### Step 6: Set up database
 
+**macOS/Linux:**
 ```bash
+brew install postgresql
+brew services start postgresql
+```
+**Windows:**
+- Download from: https://www.postgresql.org/download/windows/
+- Use default setup and remember username/password, enable pgadmin
+
+### Step 7: Create DB user
+```bash
+psql -U postgres
+# inside the shell, enter
+CREATE DATABASE memorysim_db;
+CREATE USER memorysim_user WITH PASSWORD 'password123';
+GRANT ALL PRIVILEGES ON DATABASE memorysim_db TO memorysim_user;
+\q
+```
+
+### Step 8: Run migration
+
+``` bash
 python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser # only if you want to access the db interface
 ```
-then follow the instructions, you need to set name, email and pwd for db access
+then follow the instructions, you need to set name, email and pwd for admin access, later you can visit http://127.0.0.1:9000/admin/, login and view data
 
----
+### Step 9: Set up bg manager
 
-### Step 7: Start the ComfyUI Server
+**macOS/Linux:**
+``` bash
+brew install redis
+```
+
+**Windows:**
+- Download Redis from this community-maintained build: https://github.com/microsoftarchive/redis/releases
+- Choose Redis-x64-3.2.100.msi and install
+
+**both run**
+``` bash
+redis-server
+```
+
+### Step 10: create 3 worker (each from a different terminal)
+- python manage.py rundramatiq --queues default
+- python manage.py rundramatiq --queues image_queue
+- python manage.py rundramatiq --queues llm_queue
+
+
+### Step 11: Start the ComfyUI Server
 - download ComfyUI https://www.comfy.org/download
 - download dreamshaper model ver 7 https://civitai.com/models/4384?modelVersionId=109123
 - put the model under `ComfyUI/models/checkpoints`
@@ -293,9 +334,7 @@ then follow the instructions, you need to set name, email and pwd for db access
     python main.py --port 8080
     ```
 
----
-
-### Step 8: Start the Development Server at prot 9000
+### Step 12: Start the Development Server at port 9000
 
 ```bash
 python manage.py runserver 9000

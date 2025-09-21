@@ -48,8 +48,25 @@ INSTALLED_APPS = [
     # Shared models and utilities
     'shared',
     'images',
-    
+    'django_dramatiq',
 ]
+
+# dramatiq
+DRAMATIQ_BROKER = {
+    "BROKER": "dramatiq.brokers.redis.RedisBroker",
+    "OPTIONS": {
+        "url": "redis://localhost:6379/0",
+    },
+    "MIDDLEWARE": [
+        "dramatiq.middleware.TimeLimit",
+        "dramatiq.middleware.Retries",
+        "django_dramatiq.middleware.DbConnectionsMiddleware",
+        "django_dramatiq.middleware.AdminMiddleware",
+    ]
+}
+
+DRAMATIQ_TASKS_DATABASE = "default"
+
 
 # Middleware stack - processes requests and responses in order
 MIDDLEWARE = [
@@ -98,10 +115,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'memory_sim.wsgi.application'
 
 # Database configuration (using SQLite for development)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'memorysim_db',
+        'USER': 'memorysim_user',
+        'PASSWORD': 'password123',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

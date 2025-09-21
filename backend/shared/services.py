@@ -512,7 +512,7 @@ def generate_and_save_image_text(session_id: int, turn_id: int, year: int) -> Di
     logger.info(f"Image text generation completed successfully for session {session_id}, year {year}")
     return result
 
-# this will be replaced by start_turn_pipeline
+# this is refactored by start_turn_pipeline in tasks.py
 @transaction.atomic
 def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int] = None) -> Dict[str, Any]:
     """
@@ -664,7 +664,6 @@ def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int]
     
     return result
 
-
 def get_session_status(session_id: int) -> Dict[str, Any]:
     """
     Get the current status and progress of a game session.
@@ -748,7 +747,7 @@ def display_world_view(session_id: int, turn_id: int, year: int, option_id: int)
         Dict containing scenario text and image info as JSON
     """
     
-    # Step 1: Get the scenario text from the selected option --> any LLM function?
+    # Step 1: Get the scenario text from the selected option
     try:
         turn = Turn.objects.get(id=turn_id, session=session_id)
         option = Option.objects.get(id=option_id, turn=turn)
@@ -789,7 +788,6 @@ def display_world_view(session_id: int, turn_id: int, year: int, option_id: int)
         "image": {
             "status": image_info.get("status", "unknown"),
             "url": image_info.get("image_url", ""),
-            "option_id": image_info.get("option_id", option_id)
         },
     }
     
