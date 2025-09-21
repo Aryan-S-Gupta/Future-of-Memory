@@ -10,5 +10,9 @@ urlpatterns = [
     path("join", views.join_multiplayer_room),
     path("rooms", views.list_room_codes),
     path("sync", views.sync_state),
+    path('storyline/start', views.get_story_scenario, name='storyline_background'),
+    path('storyline/question', views.get_story_question, name='storyline_question'),
+    path('storyline/choice', views.get_story_result_by_choice, name='storyline_choice'),
+    path('storyline/result', views.get_story_result, name='storyline_result'),
     path("state/<str:room_code>", views.get_current_state),
 ]
