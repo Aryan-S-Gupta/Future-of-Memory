@@ -107,7 +107,7 @@ const MultiplayerLobby = () => {
       {roomList?.rooms?.map((code) => (
         <li key={code} className="room-item">
           <span className="room-code">{code}</span>
-          <button className="btn-join-room" onClick={() => handleJoinRoom(code)}>Join</button>
+          <button className="btn-create-room" onClick={() => handleJoinRoom(code)}>Join</button>
         </li>
         ))}
     </ul>

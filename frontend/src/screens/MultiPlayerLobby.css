@@ -76,34 +76,37 @@
   box-shadow: 0 0 12px rgba(96, 219, 250, 0.6);
 }
 
-/* Room list */
+/* Room list container */
 .room-list {
   list-style: none;
-  padding: 0;
-  margin: 2rem auto;
-  width: 100%;
-  max-width: 400px;
+  padding: 1rem;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.75); /* dark backdrop for readability */
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  min-width: 280px;
 }
 
+/* Each room item */
 .room-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  margin: 0.75rem 0;
-  padding: 0.75rem 1rem;
+  background: rgba(20, 30, 40, 0.8);
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.8rem;
   border-radius: 8px;
-
-  background: rgba(17, 24, 39, 0.8);
-  color: #0052f5;
-
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  transition: background 0.3s ease;
 }
 
+.room-item:hover {
+  background: rgba(96, 219, 250, 0.15);
+}
+
+/* Room code styling */
 .room-code {
   font-family: 'Orbitron', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #60dbfa;
+  font-size: 1.1rem;
+  color: #ffffff;
+  text-shadow: 0 0 5px #00f7ff;
 }
