@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/RoomManagementApi.js";
-import "./GamePlay.css";
+import "./MultiplayerLobby.css"; // Import CSS for styling
 import Button from "../components/Button/Button.jsx";
+import BasePage from "../components/BasePage/BasePage.jsx";
 
 /**
  * MultiplayerLobby Component
@@ -86,27 +87,35 @@ const MultiplayerLobby = () => {
   };
 
   return (
-    <div>
-      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
-      <h2>Multiplayer Lobby</h2>
-      <input
-        type="text"
-        placeholder="Your Name"
-        value={playerName}
-        onChange={(e) => setPlayerName(e.target.value)}
-      />
-      <button onClick={handleCreateRoom}>Create Room</button>
-
-      <h3>Available Rooms</h3>
-      <ul>
+    <BasePage>
+    <div className="multiplayer-lobby">
+    <h2 className="title">Multiplayer Lobby</h2>
+      <div className="room-input-container">
+        <input
+          className="player-input"
+          type="text"
+          placeholder="Enter your name"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+        />
+        <button className="btn-create-room" onClick={handleCreateRoom}>
+          Create Room
+        </button>
+      </div>
+    <h3 className="subheading">Available Rooms</h3>
+    <ul className="room-list">
       {roomList?.rooms?.map((code) => (
-        <li key={code}>
-          {code}
-          <button onClick={() => handleJoinRoom(code)}>Join</button>
+        <li key={code} className="room-item">
+          <span className="room-code">{code}</span>
+          <button className="btn-join-room" onClick={() => handleJoinRoom(code)}>Join</button>
         </li>
-      ))}
-      </ul>
+        ))}
+    </ul>
+    <div className="button-container">
+      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
     </div>
+  </div>
+  </BasePage>
   );
 };
 
