@@ -32,3 +32,4 @@ psycopg2-binary>=2.9
 # bg manager
 redis>=5.0
 dramatiq==1.18.0
+django_dramatiq>=0.14.0

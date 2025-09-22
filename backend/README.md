@@ -284,8 +284,17 @@ brew services start postgresql
 - Use default setup and remember username/password, enable pgadmin
 
 ### Step 7: Create DB user
+
+**macOS/Linux:**
+```bash
+psql postgres
+```
+**Windows:**
 ```bash
 psql -U postgres
+```
+
+```bash
 # inside the shell, enter
 CREATE DATABASE memorysim_db;
 CREATE USER memorysim_user WITH PASSWORD 'password123';
@@ -301,6 +310,16 @@ python manage.py migrate
 python manage.py createsuperuser # only if you want to access the db interface
 ```
 then follow the instructions, you need to set name, email and pwd for admin access, later you can visit http://127.0.0.1:9000/admin/, login and view data
+
+Initialize Database Content (First-time only, after database migration, populate initial content)
+```bash
+# Create world background story
+python create_background.py
+
+# Load default query keywords (if keywords file exists)
+python load_keywords_script.py
+```
+
 
 ### Step 9: Set up bg manager
 
@@ -318,7 +337,7 @@ brew install redis
 redis-server
 ```
 
-### Step 10: create 3 worker (each from a different terminal)
+### Step 10: create 3 worker (each from a different terminal and 'cd backend' in the (venv))
 ``` bash
 python manage.py rundramatiq --queues default --processes 1 --threads 1
 python manage.py rundramatiq --queues image_queue --processes 1 --threads 1
