@@ -19,7 +19,7 @@ export const startPrerender = async (session_id, year) => {
  * - Returns only the response data.
  *
  * @async
- * @function getScenario
+ * @function getScenarioAndImage
  * @param {number} year - The current year for which to fetch the scenario.
  * @returns {Promise<object>} The scenario object containing scenario text and metadata.
  *
