@@ -4,7 +4,7 @@ import axios from "axios";
  * Axios API instance
  *
  * Creates a pre-configured Axios instance (`api`) that can be reused
- * across the frontend to communicate with the backend for multiplayer game
+ * across the frontend to communicate with the backend.
  *
  * Configuration:
  * - `baseURL`: points to the backend API root (default: http://127.0.0.1:8000/api).
