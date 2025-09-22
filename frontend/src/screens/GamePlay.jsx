@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { getQuestion } from "../../api/questionApi";
-import { getScenario } from "../../api/scenarioApi";
-import { submitChoice } from "../../api/answerApi";
+import { useQuery } from "@tanstack/react-query";
+import { getScenario, getQuestion, getImage, submitChoice } from "../../api/single-player/GameApi";
 import Button from "../components/Button/Button";
 import { useNavigate } from "react-router-dom";
 import "./GamePlay.css";
@@ -11,12 +9,12 @@ import "./GamePlay.css";
  * GamePlay component
  *
  * This screen drives the main gameplay loop. It alternates between:
- * - Displaying a **scenario** for the given year.
- * - Displaying a **decision-making question** with multiple choices.
+ * - Displaying a scenario for the given year.
+ * - Displaying a decision-making question** with multiple choices.
  *
  * Features:
  * - Uses React Query to fetch scenario/question data from backend APIs.
- * - Tracks the current year (`year`) and current screen (`screen`).
+ * - Tracks the current year ('year') and current screen ('screen').
  * - Handles user choices and progresses the game timeline forward.
  * - Provides navigation back to the home screen.
  *

@@ -14,7 +14,6 @@ from rag.retrieve import retrieve_chunks
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

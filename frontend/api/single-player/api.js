@@ -4,7 +4,7 @@ import axios from "axios";
  * Axios API instance
  *
  * Creates a pre-configured Axios instance (`api`) that can be reused
- * across the frontend to communicate with the backend.
+ * across the frontend to communicate with the backend for single player game.
  *
  * Configuration:
  * - `baseURL`: points to the backend API root (default: http://127.0.0.1:8000/api).
@@ -20,8 +20,10 @@ import axios from "axios";
  * @module api
  * @returns {AxiosInstance} A configured Axios instance for making HTTP requests.
  */
+const baseURL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api", // adjust if backend URL changes
+  baseURL:  `${baseURL}/api`,
+
   headers: {
     "Content-Type": "application/json",
   },
