@@ -164,7 +164,6 @@ def rag_retrieve(request):
 from shared.models import Session, Option, Turn
 
 # home page
-@require_POST
 def create_session(request):
     """
     Create a new Session and return its ID as JSON.
