@@ -7,6 +7,7 @@ import GamePlay from "./screens/GamePlay.jsx";
 import MultiplayerLobby from "./screens/MultiPlayerLobby.jsx";
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
+import GamePlayMulti from "./screens/GamePlayMulti.jsx";
 
 import BackgroundWrapper from "./components/BasePage/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
