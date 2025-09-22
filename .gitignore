@@ -11,3 +11,9 @@ venv/
 .vscode/
 .idea/
 .DS_Store
+
+# Ignore image repo
+backend/media/
+
+# Add static repo back
+!backend/media/static/

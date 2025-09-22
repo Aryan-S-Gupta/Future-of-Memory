@@ -20,9 +20,9 @@ from llm.generate import generate_question
 # Import RAG functionality
 from rag.retrieve import retrieve_chunks
 from llm.rag_adapter import format_rag_context_for_llm
+from images.render_pipeline import generate_two_images_blocking
 
 logger = logging.getLogger(__name__)
-
 
 @transaction.atomic
 def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
@@ -113,7 +113,7 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         else:
             context_block = ""
         
-        last_description = "This is the beginning of your memory editing journey."
+        last_description = "This is the beginning of your memory editing journey." # is this not supposed to be the initial world view???
     
     # Step 6: Call LLM generation
     logger.info("Calling LLM question generation...")
@@ -512,7 +512,7 @@ def generate_and_save_image_text(session_id: int, turn_id: int, year: int) -> Di
     logger.info(f"Image text generation completed successfully for session {session_id}, year {year}")
     return result
 
-
+# this is refactored by start_turn_pipeline in tasks.py
 @transaction.atomic
 def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int] = None) -> Dict[str, Any]:
     """
@@ -541,6 +541,8 @@ def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int]
     start_time = timezone.now()
     
     # Step 1: Handle session creation/validation
+    # Brynn: I do not think session should be created here, it should be at the home page view
+    # is there any year limit?
     try:
         if session_id is None:
             # Create new session
@@ -604,7 +606,7 @@ def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int]
         logger.info(f"Image text generation completed in {step_duration:.2f}s")
         
         # TODO: Reserved space for image generation function
-        # image_generation_result = generate_and_save_images(session_id, turn_id, target_year)
+        generate_two_images_blocking(session_id, turn_id)
         
     except Exception as e:
         logger.error(f"Image text generation failed: {e}")
@@ -644,10 +646,9 @@ def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int]
                 'image_texts': image_result['image_texts'],
                 'generated_at': image_result['generated_at']
             },
-            # 'images': {
-            #     'success': True,
-            #     'generated_at': 'reserved for future implementation'
-            # },
+            'images': {
+                'success': True,
+            },
             'scenarios': {
                 'success': True,
                 'scenarios': scenario_result['scenarios'],
@@ -662,7 +663,6 @@ def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int]
     logger.info(f"Total duration: {total_duration:.2f}s")
     
     return result
-
 
 def get_session_status(session_id: int) -> Dict[str, Any]:
     """
@@ -728,3 +728,69 @@ def record_user_choice(turn_id: int, option_id: int) -> Dict[str, Any]:
     except (Turn.DoesNotExist, Option.DoesNotExist) as e:
         logger.error(f"Failed to record user choice: {e}")
         return {'error': str(e), 'success': False}
+
+from images.display import display_by_option
+def display_world_view(session_id: int, turn_id: int, year: int, option_id: int) -> Dict[str, Any]:
+    """
+    Display the world view after user makes a choice.
+    
+    Returns both the scenario text and image info for the selected option.
+    This is called after user clicks on an option to show the consequences.
+    
+    Args:
+        session_id: The game session ID
+        turn_id: The current turn ID 
+        year: The current year (for validation)
+        option_id: The option the user selected
+        
+    Returns:
+        Dict containing scenario text and image info as JSON
+    """
+    
+    # Step 1: Get the scenario text from the selected option
+    try:
+        turn = Turn.objects.get(id=turn_id, session=session_id)
+        option = Option.objects.get(id=option_id, turn=turn)
+        
+        # Get the scenario text that was generated for this option
+        scenario_to_display = option.scenario or ""
+        
+        logger.info(f"Retrieved scenario for option {option.label}: {len(scenario_to_display)} characters")
+        
+    except (Turn.DoesNotExist, Option.DoesNotExist) as e:
+        logger.error(f"Failed to get scenario: {e}")
+        return {
+            "error": f"Turn or Option not found: {e}",
+            "success": False
+        }
+    
+    # Step 2: Get the image info
+    try:
+        image_info = display_by_option(session_id, turn_id, option_id)
+        logger.info(f"Retrieved image info: {image_info.get('status', 'unknown')}")
+        
+    except Exception as e:
+        logger.error(f"Failed to get image info: {e}")
+        return {
+            "error": f"Failed to get image info: {e}",
+            "success": False
+        }
+    
+    # Step 3: Combine everything into a JSON response
+    world_view_response = {
+        "success": True,
+        "session_id": session_id,
+        "turn_id": turn_id,
+        "year": year,
+        "scenario": {
+            "text": scenario_to_display,
+        },
+        "image": {
+            "status": image_info.get("status", "unknown"),
+            "url": image_info.get("image_url", ""),
+        },
+    }
+    
+    logger.info(f"World view display completed for session {session_id}, turn {turn_id}, option {option.label}")
+    
+    return world_view_response
