@@ -22,10 +22,10 @@ import { useSession } from "../../SessionContext.jsx";
  */
 const BackgroundScreen = () => {
   const navigate = useNavigate();
-  const { session } = useSession();
+  const { sessionId } = useSession();
 
   const pre_render = async () => {
-    await startPrerender(session, "2035");
+    await startPrerender(sessionId, "2035");
     navigate("/game-play");
   }
   return (

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getQuestion, submitChoice } from "../../api/single-player/GameApi";
 import Button from "../components/Button/Button";
 import { useNavigate } from "react-router-dom";
-import { useSession } from "../../SessionContext";
+import { useSession } from "../../SessionContext.jsx";
 import "./GamePlay.css";
 import { useMutation } from "@tanstack/react-query";
 
@@ -52,19 +52,20 @@ const GamePlay = () => {
   } = useQuery({
     queryKey: ["question", sessionId],
     queryFn: () => getQuestion(sessionId),
-    enabled: screen === "question" && !!sessionId,
+    enabled: screen === "question",
     refetchInterval: 2000,
     onSuccess: (res) => {
       console.log("Question response:", res);
 
       setCurrentTurn(res.data.data); // maybe should be just res instead of res.data
     }
+
   });
 
   // --- Submit Choice Mutation ---
   const choiceMutation = useMutation({
     mutationFn: ({ turn_id, year, option_id }) =>
-      submitChoice(sessionId, turn_id, year, option_id),
+      submitChoice(session, turn_id, year, option_id),
     onSuccess: (res) => {
       console.log("Submit choice response:", res);
       setScenarioData(res); // { scenario, image, ... }
@@ -82,13 +83,6 @@ const GamePlay = () => {
     });
   };
 
-  // --- UI Loading/Error States ---
-  if (isQuestionLoading || !questionData) return <p>Waiting for question to be generated...</p>;
-  if (isQuestionLoading && screen === "question") return <p>Loading question...</p>;
-  if (questionError) return <p>Error loading question</p>;
-  if (choiceMutation.isLoading) return <p>Submitting choice...</p>;
-
-
   return (
     <div className="screen">
       <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
@@ -103,12 +97,9 @@ const GamePlay = () => {
         <Button
           baseButton="btn-primary"
           action={() => {
-            console.log("Fetching question for session:");
             setScreen("question");
-            console.log("Fetching question for session:");
+            console.log("Session ID:", session);
 
-            query.refetch(); // force query to run when entering question screen
-            console.log("Fetching question for session:");
           }}
           title="Continue"
         />

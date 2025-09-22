@@ -24,10 +24,12 @@ const MainGameScreen = () => {
   const navigate = useNavigate();
   const {sessionId, setSessionId} = useSession();
 
+
   const start_single_session = async () => {
     try {
       const response = await createSession();
-      setSessionId(response.sessionId); 
+      setSessionId(response.session_id); 
+      console.log("session is" + sessionId);
       navigate("/story");
     } catch (error) {
       console.error("Error creating single session:", error);

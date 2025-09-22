@@ -164,6 +164,7 @@ def create_session(request):
     Create a new Session and return its ID as JSON.
     """
     session = Session.objects.create()
+    logger.debug(f'session id created: {session.id}')
     return JsonResponse({'session_id': session.id}, status=201)
 
 # intro page
