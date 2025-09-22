@@ -14,6 +14,7 @@ from rag.retrieve import retrieve_chunks
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -66,13 +67,6 @@ def get_story_question(request):
             "options": entry["options"],
         }
     )
-
-
-"""
-What is this function supposed to do??? 
-currently it is sending the same question back so not using it 
-"""
-
 
 def get_story_result_by_choice(request):
     """
@@ -163,6 +157,8 @@ def rag_retrieve(request):
 from shared.models import Session, Option, Turn
 
 # home page
+
+# need to call this somewhere - as soon as the game is created
 def create_session(request):
     """
     Create a new Session and return its ID as JSON.
@@ -171,15 +167,25 @@ def create_session(request):
     return JsonResponse({'session_id': session.id}, status=201)
 
 # intro page
+
+# need a call in background page - it starts gebnerating question and options and images and scenario
 from shared.tasks import start_turn_pipeline
-def start_prerendering(request, session_id, year):
+def start_prerendering(request):
+    year = request.GET.get("year")
+    session_id = request.GET.get("session_id")
+
     start_turn_pipeline.send(session_id, year)
+    logger.debug("start_turn_pipeline.send() called")
     return JsonResponse({'status': 'generation_started'})
 
 # question and options display page
+
+# send the existing work
 def display_question_and_options(request, session_id):
     # get session
+    logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
+    logger.debug(f"Found session: {existing_session}")
 
     # find the latest turn for this session
     latest_turn = (
@@ -189,11 +195,13 @@ def display_question_and_options(request, session_id):
         .first()
     )
     if latest_turn is None:
+        logger.warning("No turn found for this session")
         return JsonResponse({'error': 'No turn found for this session'}, status=404)
-
+    logger.debug(f"Latest turn for session: {latest_turn}")
     # use the latest turn's id to fetch its question and related options
     question_text = latest_turn.question or ''  # ensure a string
     options = Option.objects.filter(turn_id=latest_turn.id).order_by('label')
+    logger.debug(f"Options for turn {latest_turn.id}: {list(options)}")
 
     # serialize the options as exactly: option_id, label, option_text
     options_payload = [
@@ -212,7 +220,7 @@ def display_question_and_options(request, session_id):
         'question': question_text,
         'options': options_payload,
     }
-
+    logger.debug(f"Payload to return: {response_payload}")
     return JsonResponse({'message': 'ok', 'data': response_payload}, status=200)
 
 # scenario and image display page
