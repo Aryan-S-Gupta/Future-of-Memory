@@ -25,7 +25,7 @@ const BackgroundScreen = () => {
   const { sessionId } = useSession();
 
   const pre_render = async () => {
-    await startPrerender(sessionId, "2035");
+    await startPrerender(sessionId);
     navigate("/game-play");
   }
   return (
@@ -54,3 +54,4 @@ const BackgroundScreen = () => {
     );
 };
 export default BackgroundScreen;
+``

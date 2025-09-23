@@ -53,8 +53,11 @@ export const getScenarioAndImage = async (session_id, turn_id, year, option_id) 
 export const getQuestion = async (session_id) => {
   console.log("called question api for session:", session_id);
   const res = await api.get(`/storyline/${session_id}/question`);
-  console.log("got output");
-  return res.data; // { message, data: { turn_id, year, question, options } }
+  console.log("got output:", res.data);  // prints the actual object
+  console.log("question:", res.data.data.question);
+  console.log("options:", res.data.data.options);
+
+  return res.data.data; // { message, data: { turn_id, year, question, options } }
 };
 
 
@@ -86,7 +89,7 @@ export const getImage = async () => {
  * @returns {Promise<object>} The result and next scenario/question
  */
 export const submitChoice = async (session_id, turn_id, year, option_id) => {
-  const res = await api.post(
+  const res = await api.get(
     `/storyline/start/${session_id}/${turn_id}/${year}/${option_id}`
   );
 }

@@ -174,7 +174,7 @@ from shared.tasks import start_turn_pipeline
 def start_prerendering(request):
     year = request.GET.get("year")
     session_id = request.GET.get("session_id")
-
+    logger.debug("start_turn_pipeline.send() called")
     start_turn_pipeline.send(session_id, year)
     logger.debug("start_turn_pipeline.send() called")
     return JsonResponse({'status': 'generation_started'})
@@ -226,7 +226,8 @@ def display_question_and_options(request, session_id):
 
 # scenario and image display page
 from shared.services import display_world_view
-@require_POST
+
+
 def display_scenario_and_image(request, session_id, turn_id, year, option_id):
     """
     Display the world view after user makes a choice.

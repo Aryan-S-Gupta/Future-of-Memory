@@ -45,22 +45,33 @@ const GamePlay = () => {
 
   // --- Scenario Query ---
   // Fetches the scenario whenever we are on the "scenario" screen.
-  const {
-    data: questionData,
-    isLoading: isQuestionLoading,
-    error: questionError,
-  } = useQuery({
-    queryKey: ["question", sessionId],
-    queryFn: () => getQuestion(sessionId),
-    enabled: screen === "question",
-    refetchInterval: 2000,
-    onSuccess: (res) => {
-      console.log("Question response:", res);
-
-      setCurrentTurn(res.data.data); // maybe should be just res instead of res.data
+const {
+  data: questionData,
+  isLoading: isQuestionLoading,
+  error: questionError,
+  status,
+} = useQuery({
+  queryKey: ["question", sessionId],
+  queryFn: async () => {
+    console.log("queryFn running for", sessionId);
+    const result = await getQuestion(sessionId);
+    console.log("queryFn result:", result);
+    setCurrentTurn(result)
+    return result;
+  },
+  enabled: screen === "question",
+  refetchInterval: (data) => {
+    // stop refetching once data is available
+    if (data?.data?.question) {
+      return false; // stop polling
     }
+    return 2000; // keep polling every 2s until question arrives
+  },
+  onError: (err) => {
+    console.error("onError:", err);
+  }
+});
 
-  });
 
   // --- Submit Choice Mutation ---
   const choiceMutation = useMutation({
@@ -74,13 +85,12 @@ const GamePlay = () => {
   });
 
   // handle choice click
-  const handleChoice = (option_id) => {
+  const handleChoice = async (option_id) => {
     if (!currentTurn) return;
-    choiceMutation.mutate({
-      turn_id: currentTurn.turn_id,
-      year: currentTurn.year,
-      option_id,
-    });
+    const out = await submitChoice(sessionId, currentTurn.turn_id, currentTurn.year, option_id)
+        console.log("Submit choice response:", res);
+      setScenarioData(res); // { scenario, image, ... }
+      setScreen("scenario");
   };
 
   return (
@@ -105,8 +115,6 @@ const GamePlay = () => {
         />
         </div>
       )}
-
-      {/* Question Screen */}
       {screen === "question" && currentTurn && (
         <div>
           <div className="question-container">
@@ -118,12 +126,13 @@ const GamePlay = () => {
                 baseButton="choice-btn choice-fade-in"
                 key={opt.option_id}
                 action={() => handleChoice(opt.option_id)}
-                title={`${opt.label}: ${opt.option_text}`}
+                title={`${opt.label}. ${opt.option_text}`}
               />
             ))}
           </div>
         </div>
       )}
+
     </div>
   );
 };
