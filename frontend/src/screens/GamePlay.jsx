@@ -66,24 +66,18 @@ const {
 });
 
 
-  // --- Submit Choice Mutation ---
-  const choiceMutation = useMutation({
-    mutationFn: ({ turn_id, year, option_id }) =>
-      submitChoice(session, turn_id, year, option_id),
-    onSuccess: (res) => {
-      console.log("Submit choice response:", res);
-      setScenarioData(res); // { scenario, image, ... }
-      setScreen("scenario");
-    },
-  });
-
   // handle choice click
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
-    const out = await submitChoice(sessionId, currentTurn.turn_id, currentTurn.year, option_id)
-        console.log("Submit choice response:", res);
-      setScenarioData(res); // { scenario, image, ... }
-      setScreen("scenario");
+    const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id)
+        const mapped = {
+    scenario: out.scenario.text,
+    image: out.image.url
+  };
+  console.log("Submit choice response:", mapped);
+  setScenarioData(mapped);
+  setScreen("scenario");
+  setYear(year + 1);
   };
 
   return (
@@ -101,7 +95,7 @@ const {
           baseButton="btn-primary"
           action={() => {
             setScreen("question");
-            console.log("Session ID:", session);
+            console.log("Session ID:", sessionId);
 
           }}
           title="Continue"

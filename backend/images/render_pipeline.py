@@ -27,10 +27,11 @@ def generate_two_images_blocking(session_id: int, turn_id: int) -> dict:
       - create ImageRender
     """
     turn = get_object_or_404(Turn, id=turn_id)
-    if turn.session_id != session_id:
-        logging.debug(f'Session/turn mismatch: {session_id} vs {turn.session_id}')
-        
-        raise ValueError('Session/turn mismatch.')
+    print(f'Session: {session_id} vs {turn.session_id} vs {turn.id} vs {turn}')
+    if int(turn.session_id) != int(session_id):
+        print(f'Session/turn mismatch: {session_id} vs {turn.session_id}')
+        return {}
+        #raise ValueError('Session/turn mismatch.')
 
     options = list(Option.objects.filter(turn=turn).order_by('label'))
     if len(options) != 2:
@@ -42,7 +43,7 @@ def generate_two_images_blocking(session_id: int, turn_id: int) -> dict:
         with transaction.atomic():
             # lock the option so only one thread claims it at a time
             opt_locked = Option.objects.select_for_update().get(pk=opt.pk)
-
+            print("line 46")
             ir = (ImageRender.objects
                   .filter(option=opt_locked)
                   .order_by('-created_at')
@@ -58,15 +59,16 @@ def generate_two_images_blocking(session_id: int, turn_id: int) -> dict:
             ir_pk = ir.pk
 
         try:
+            print("line 64")
             rel_path = build_image_relpath(session_id, turn_id, opt.label) # comfyui/output/xxx.png
             final_rel = render_option_to_media(opt.image_text, rel_path)
-
+            print("line 68")
             ImageRender.objects.filter(pk=ir_pk).update(status='ready', image_rel=final_rel)
             results[opt.id] = {'status': 'ready', 'image_rel': final_rel}
-
+            print("line 70")
         except Exception:
             ImageRender.objects.filter(pk=ir_pk).update(status='failed')
             results[opt.id] = {'status': 'failed', 'image_rel': None}
-
+    print("line 71")
     return {'turnId': turn_id, 'image_rels': results}
 

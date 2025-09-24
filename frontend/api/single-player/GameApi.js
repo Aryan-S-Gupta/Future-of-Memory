@@ -92,4 +92,5 @@ export const submitChoice = async (session_id, turn_id, year, option_id) => {
   const res = await api.get(
     `/storyline/start/${session_id}/${turn_id}/${year}/${option_id}`
   );
+  return res.data; // { scenario, image, ...
 }
