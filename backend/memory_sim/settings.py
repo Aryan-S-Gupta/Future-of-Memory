@@ -6,7 +6,11 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent # /backend
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"  # image be stored in backend/media/
+ABSOLUTE_BASE_URL = "http://127.0.0.1:9000" # backend runs at port 9000
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # TODO: Move this to environment variables in production
@@ -43,7 +47,26 @@ INSTALLED_APPS = [
     'core',
     # Shared models and utilities
     'shared',
+    'images',
+    'django_dramatiq',
 ]
+
+# dramatiq
+DRAMATIQ_BROKER = {
+    "BROKER": "dramatiq.brokers.redis.RedisBroker",
+    "OPTIONS": {
+        "url": "redis://localhost:6379/0",
+    },
+    "MIDDLEWARE": [
+        "dramatiq.middleware.TimeLimit",
+        "dramatiq.middleware.Retries",
+        "django_dramatiq.middleware.DbConnectionsMiddleware",
+        "django_dramatiq.middleware.AdminMiddleware",
+    ]
+}
+
+DRAMATIQ_TASKS_DATABASE = "default"
+
 
 # Middleware stack - processes requests and responses in order
 MIDDLEWARE = [
@@ -92,10 +115,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'memory_sim.wsgi.application'
 
 # Database configuration (using SQLite for development)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'memorysim_db',
+        'USER': 'memorysim_user',
+        'PASSWORD': 'password123',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

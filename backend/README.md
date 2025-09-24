@@ -272,21 +272,73 @@ cd backend
 cd backend
 ```
 
-### Step 6: Run Migrations
+### Step 6: Set up database
 
+**macOS/Linux:**
 ```bash
+brew install postgresql
+brew services start postgresql
+```
+**Windows:**
+- Download from: https://www.postgresql.org/download/windows/
+- Use default setup and remember username/password, enable pgadmin
+
+### Step 7: Create DB user
+```bash
+psql -U postgres
+# inside the shell, enter
+CREATE DATABASE memorysim_db;
+CREATE USER memorysim_user WITH PASSWORD 'password123';
+GRANT ALL PRIVILEGES ON DATABASE memorysim_db TO memorysim_user;
+\q
+```
+
+### Step 8: Run migration
+
+``` bash
 python manage.py makemigrations
 python manage.py migrate
-python manage.py createsuperuser
+python manage.py createsuperuser # only if you want to access the db interface
 ```
-then follow the instructions, you need to set name, email and pwd for db access
+then follow the instructions, you need to set name, email and pwd for admin access, later you can visit http://127.0.0.1:9000/admin/, login and view data
 
----
+### Step 9: Set up bg manager
 
-### Step 7: Start the Development Server
+**macOS/Linux:**
+``` bash
+brew install redis
+```
+
+**Windows:**
+- Download Redis from this community-maintained build: https://github.com/microsoftarchive/redis/releases
+- Choose Redis-x64-3.2.100.msi and install
+
+**both run**
+``` bash
+redis-server
+```
+
+### Step 10: create 3 worker (each from a different terminal)
+``` bash
+python manage.py rundramatiq --queues default --processes 1 --threads 1
+python manage.py rundramatiq --queues image_queue --processes 1 --threads 1
+python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1
+```
+
+### Step 11: Start the ComfyUI Server
+- download ComfyUI https://www.comfy.org/download
+- download dreamshaper model ver 7 https://civitai.com/models/4384?modelVersionId=109123
+- put the model under `ComfyUI/models/checkpoints`
+- starts ComfyUI server, make sure it is running at port 8080, if default not 8080, run it from terminal, switch to port 8080
+    ```bash
+    cd /path/to/ComfyUI
+    python main.py --port 8080
+    ```
+
+### Step 12: Start the Development Server at port 9000
 
 ```bash
-python manage.py runserver
+python manage.py runserver 9000
 ```
 
 Then open your browser or use terminal tools like `curl` to test the following round-based endpoints:
@@ -329,7 +381,7 @@ CORS (Cross-Origin Resource Sharing) has been enabled via `django-cors-headers` 
 Frontend developers can now directly `fetch()` Django API endpoints from React, for example:
 
 ```js
-fetch("http://127.0.0.1:8000/api/storyline/start?year=2035")
+fetch("http://127.0.0.1:9000/api/storyline/start?year=2035")
   .then((res) => res.json())
   .then((data) => console.log(data));
 ```
