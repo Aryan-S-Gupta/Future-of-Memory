@@ -30,6 +30,9 @@ def validate_session(session_id: int) -> bool:
 @dramatiq.actor(queue_name="llm_queue")
 def step1_generate_question(session_id: int, year: int):
     """Step 1: Generate question and options"""
+    session_id = int(session_id)
+    year = int(year)
+    
     if not validate_session(session_id):
         return {"status": "skipped", "reason": "invalid_session"}
     
@@ -43,6 +46,10 @@ def step1_generate_question(session_id: int, year: int):
 @dramatiq.actor(queue_name="llm_queue")
 def step2_generate_image_texts(session_id: int, turn_id: int, year: int):
     """Step 2: Generate image descriptions"""
+    session_id = int(session_id)
+    turn_id = int(turn_id)
+    year = int(year)
+    
     if not validate_session(session_id):
         return {"status": "skipped", "reason": "invalid_session"}
     
@@ -56,6 +63,9 @@ def step2_generate_image_texts(session_id: int, turn_id: int, year: int):
 @dramatiq.actor(queue_name="image_queue")
 def step3a_generate_images(session_id: int, turn_id: int):
     """Step 3a: Generate actual images (runs in parallel with scenarios)"""
+    session_id = int(session_id)
+    turn_id = int(turn_id)
+    
     if not validate_session(session_id):
         return {"status": "skipped", "reason": "invalid_session"}
     
@@ -64,6 +74,10 @@ def step3a_generate_images(session_id: int, turn_id: int):
 @dramatiq.actor(queue_name="llm_queue")
 def step3b_generate_scenarios(session_id: int, turn_id: int, year: int):
     """Step 3b: Generate scenarios (runs in parallel with images)"""
+    session_id = int(session_id)
+    turn_id = int(turn_id)
+    year = int(year)
+    
     if not validate_session(session_id):
         return {"status": "skipped", "reason": "invalid_session"}
     
