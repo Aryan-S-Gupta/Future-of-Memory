@@ -1,5 +1,6 @@
 import json
 from django.db import transaction
+import logging
 from django.shortcuts import get_object_or_404
 from shared.models import Session, Turn, Option, ImageRender
 from .comfyui_client import (
@@ -27,6 +28,8 @@ def generate_two_images_blocking(session_id: int, turn_id: int) -> dict:
     """
     turn = get_object_or_404(Turn, id=turn_id)
     if turn.session_id != session_id:
+        logging.debug(f'Session/turn mismatch: {session_id} vs {turn.session_id}')
+        
         raise ValueError('Session/turn mismatch.')
 
     options = list(Option.objects.filter(turn=turn).order_by('label'))

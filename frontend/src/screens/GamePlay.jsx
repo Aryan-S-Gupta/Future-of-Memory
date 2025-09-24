@@ -60,13 +60,6 @@ const {
     return result;
   },
   enabled: screen === "question",
-  refetchInterval: (data) => {
-    // stop refetching once data is available
-    if (data?.data?.question) {
-      return false; // stop polling
-    }
-    return 2000; // keep polling every 2s until question arrives
-  },
   onError: (err) => {
     console.error("onError:", err);
   }
