@@ -1,4 +1,4 @@
-
+import logging
 # Dictionary to store all multiplayer rooms.
 # Key: room_code (string), Value: room details (dict)
 rooms = {}  
@@ -23,7 +23,7 @@ def create_room(host_name):
         "players": [host_name],  # host is the first player
         "state": {},             # placeholder for game state
     }
-
+    logging.info(f"Room created with code {room_code} by host {host_name}")
     return room_code
 
 def get_room_codes():
@@ -33,6 +33,7 @@ def get_room_codes():
     Returns:
         list: Room codes as strings.
     """
+    logging.info(f'Fetching all room codes are {rooms.keys()}')
     return list(rooms.keys())
 
 def get_rooms():
@@ -69,6 +70,7 @@ def join_room(room_code, player_name):
     """
     if room_code in rooms:
         rooms[room_code]["players"].append(player_name)
+        logging.info(f'Player {player_name} joined room {room_code}')
         return True
     return False
 
