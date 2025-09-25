@@ -55,7 +55,7 @@ const HowToScreen = () => {
      
         {/* Navigation Button */}
         <div className="button-group">
-          <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
+          <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
         </div>
       </div>
     </BasePage>

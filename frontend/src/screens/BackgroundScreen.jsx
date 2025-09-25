@@ -2,8 +2,7 @@ import { useNavigate } from "react-router-dom";
 import BasePage from "../components/BasePage/BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
 import "./BackgroundScreen.css";
-import { startPrerender } from "../../api/single-player/GameApi.js";
-import { useSession } from "../../SessionContext.jsx";
+import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 
 /**
  * BackgroundScreen component
@@ -42,7 +41,7 @@ const BackgroundScreen = () => {
         </div>
       {/* Navigation buttons (Back to home, Next to gameplay) */}
       <div className="button-container">
-      <Button baseButton="btn-back" action={() => navigate("/")} title="Exit Experience" />
+      <ExitExperience />
       <Button baseButton="btn-next next-fade-in" action={() => navigate("/game-play")} title="Next" />
       </div>
       </BasePage>

@@ -87,7 +87,7 @@ const MultiplayerLobby = () => {
 
   return (
     <div>
-      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
+      <Button baseButton="btn-back" action={() => navigate("/")} title="Exit Experience" />
       <h2>Multiplayer Lobby</h2>
       <input
         type="text"
