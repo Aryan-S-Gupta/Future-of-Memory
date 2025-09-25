@@ -235,7 +235,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
     try:
         world_view_data = display_world_view(session_id, turn_id, year, option_id)
 
-        if world_view_data.get('status') == 'ready':
+        if world_view_data.get("success"):
             next_year = int(year) + 1
             try:
                 # start generating next turn in background

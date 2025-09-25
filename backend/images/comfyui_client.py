@@ -21,9 +21,9 @@ EXPORTED_WORKFLOW = {
   "3": {
     "inputs": {
       "seed": 49289279412421,
-      "steps": 20,
-      "cfg": 8,
-      "sampler_name": "euler",
+      "steps": 1, #20
+      "cfg": 1, #8
+      "sampler_name": "euler_ancestral", #"euler"
       "scheduler": "normal",
       "denoise": 1,
       "model": [
@@ -59,8 +59,8 @@ EXPORTED_WORKFLOW = {
   },
   "5": {
     "inputs": {
-      "width": 512,
-      "height": 512,
+      "width": 50,#512
+      "height": 50, #512
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
