@@ -42,3 +42,55 @@
     transform: translateY(0);
   }
 }
+
+/* Scenario screen layout */
+.scenario-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+/* Scenario text at top */
+.scenario-text {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: center;
+  font-size: 1rem; 
+  line-height: 1.6;
+  max-width: 80%; 
+  margin: 0 auto;
+  overflow-y: auto;
+  color: #ffffff;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
+  padding: 3 rem;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Image in middle with spacing */
+.scenario-image {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem 0; /* space above and below image */
+}
+
+.scenario-img {
+  width: 250px;
+  height: 250px;
+  object-fit: cover; /* fill 500x500 nicely */
+  border-radius: 12px;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+}
+
+/* Button pinned at bottom with spacing */
+.scenario-footer {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}

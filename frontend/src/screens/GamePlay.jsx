@@ -7,6 +7,7 @@ import { useSession } from "../../SessionContext.jsx";
 import "./GamePlay.css";
 import { useMutation } from "@tanstack/react-query";
 import background from "../assets/background.jpg";
+import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 
 
 /**
@@ -86,26 +87,37 @@ const {
 
   return (
     <div className="screen">
-      <Button baseButton="btn-back" action={() => navigate("/")} title="Exit Experience" />
-
+      <ExitExperience/>
       {/* Scenario Screen */}
-      {screen === "scenario" && scenarioData && (
-        <div className="text-container">
-          <h2 className="fade-in">{scenarioData.scenario}</h2>
-          {scenarioData.image && (
-            <img src={scenarioData.image} alt="scenario" className="scenario-img" />
-          )}
-        <Button
-          baseButton="btn-primary"
-          action={() => {
-            setScreen("question");
-            console.log("Session ID:", sessionId);
+{screen === "scenario" && scenarioData && (
+  <div className="screnario-screen">
+        {/* Image in middle */}
+    {scenarioData.image && (
+      <div className="scenario-image">
+        <img src={scenarioData.image} alt="scenario" className="scenario-img" />
+      </div>
+    )}
+    {/* Scenario text at top */}
+    <div className="text-container">
+      <h2 className="fade-in">{scenarioData.scenario}</h2>
+    </div>
 
-          }}
-          title="Continue"
-        />
-        </div>
-      )}
+
+
+    {/* Continue button at bottom */}
+    <div className="scenario-footer">
+      <Button
+        baseButton="btn-primary"
+        action={() => {
+          setScreen("question");
+          console.log("Session ID:", sessionId);
+        }}
+        title="Continue"
+      />
+    </div>
+  </div>
+)}
+      {/* Question Screen */} 
       {screen === "question" && currentTurn && (
         <div>
           <div className="question-container">
