@@ -29,7 +29,7 @@ function App() {
               <Route path="/story" element={<BackgroundScreen />} />
               <Route path="/how-to-play" element={<HowToScreen />} />
               <Route path="/game-play" element={<GamePlay />} />
-              <Route path="/multiplayer" element={<MultiplayerLobby />} />
+              <Route path="/multiplayer-lobby" element={<MultiplayerLobby />} />
             </Routes>
           </SessionProvider>
         </BackgroundWrapper>
