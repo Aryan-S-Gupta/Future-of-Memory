@@ -235,7 +235,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
     try:
         world_view_data = display_world_view(session_id, turn_id, year, option_id)
 
-        if world_view_data.get('success'):
+        if world_view_data.get('status') == 'ready':
             next_year = int(year) + 1
             try:
                 # start generating next turn in background
@@ -243,7 +243,6 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
                 logger.info(f"Started generating next turn (year {next_year}) in background")
             except Exception as e:
                 logger.warning(f"Failed to start next turn generation: {e}")
-        
         return JsonResponse(world_view_data)
         
     except Exception as e:

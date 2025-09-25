@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { useSession } from "../../SessionContext.jsx";
 import "./GamePlay.css";
 import { useMutation } from "@tanstack/react-query";
+import background from "../assets/background.jpg";
+
 
 /**
  * GamePlay component
@@ -38,7 +40,7 @@ const GamePlay = () => {
     "traumatic experiences, enhance learning capabilities, allow perfect recall of any information," +
     " and even enable memory sharing between individuals. These capabilities present both extraordinary "+
     " opportunities and profound risks. The international community stands at a crossroads. Some nations advocate for unrestricted access to memory technologies, viewing them as the next step in human evolution. Others call for strict regulation, warning of potential misuse and the erosion of human authenticity. Meanwhile, private corporations have developed sophisticated memory storage systems, creating new questions about data ownership, privacy, and commercial exploitation of human consciousness.",
-  image: "../assets/background.jpg", // no image for the first one
+  image: background, // no image for the first one
 });
 
   const navigate = useNavigate();
@@ -71,14 +73,17 @@ const {
     if (!currentTurn) return;
     const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id)
         const mapped = {
-    scenario: out.scenario.text,
-    image: out.image.url
-  };
-  console.log("Submit choice response:", mapped);
-  setScenarioData(mapped);
-  setScreen("scenario");
-  setYear(year + 1);
-  };
+        scenario: out.scenario.text,
+        image: out.image.url
+      };
+      if (out.image.status !== "ready" ) {
+        console.log("Failed to submit choice:", out.message);
+      }
+      console.log("Submit choice response:", mapped);
+      setScenarioData(mapped);
+      setScreen("scenario");
+      setYear(year + 1);
+      };
 
   return (
     <div className="screen">

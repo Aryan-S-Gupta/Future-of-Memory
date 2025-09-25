@@ -70,5 +70,6 @@ def generate_two_images_blocking(session_id: int, turn_id: int) -> dict:
             ImageRender.objects.filter(pk=ir_pk).update(status='failed')
             results[opt.id] = {'status': 'failed', 'image_rel': None}
     print("line 71")
+    print(f'image results: {results}')
     return {'turnId': turn_id, 'image_rels': results}
 
