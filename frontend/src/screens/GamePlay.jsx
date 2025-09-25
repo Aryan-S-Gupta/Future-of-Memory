@@ -32,15 +32,14 @@ const GamePlay = () => {
   const [currentTurn, setCurrentTurn] = useState(null);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
-    "The year is 2035. Breakthrough advances in neurotechnology have made human memory" +
-    "manipulation not just possible, but precise and reliable. Memory editing, enhancement," +
-    " and storage technologies have matured from experimental procedures to commercially " +
-    "viable solutions Global governments now face unprecedented policy decisions that will " + 
-    "fundamentally reshape human society. Memory modification technologies can eliminate " +
-    "traumatic experiences, enhance learning capabilities, allow perfect recall of any information," +
-    " and even enable memory sharing between individuals. These capabilities present both extraordinary "+
-    " opportunities and profound risks. The international community stands at a crossroads. Some nations advocate for unrestricted access to memory technologies, viewing them as the next step in human evolution. Others call for strict regulation, warning of potential misuse and the erosion of human authenticity. Meanwhile, private corporations have developed sophisticated memory storage systems, creating new questions about data ownership, privacy, and commercial exploitation of human consciousness.",
-  image: background, // no image for the first one
+    "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
+    "Once experimental, memory editing, enhancement, and storage are mainstream, forcing governments " +
+    "to confront choices that could redefine humanity. manipulation not just possible, but precise and reliable." +
+    "Memory editing, enhancement," +
+    "These technologies can erase trauma, boost learning, and even share memories, offering both promise " +
+    "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
+    " ownership, and the commercialization of consciousness.",
+    image: background // no image for the first one
 });
 
   const navigate = useNavigate();
@@ -87,7 +86,7 @@ const {
 
   return (
     <div className="screen">
-      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
+      <Button baseButton="btn-back" action={() => navigate("/")} title="Exit Experience" />
 
       {/* Scenario Screen */}
       {screen === "scenario" && scenarioData && (

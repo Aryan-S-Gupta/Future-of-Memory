@@ -22,12 +22,7 @@ import { useSession } from "../../SessionContext.jsx";
  */
 const BackgroundScreen = () => {
   const navigate = useNavigate();
-  const { sessionId } = useSession();
 
-  const pre_render = async () => {
-    await startPrerender(sessionId);
-    navigate("/game-play");
-  }
   return (
     <BasePage>
       <h1 className="title">Background</h1>
@@ -47,8 +42,8 @@ const BackgroundScreen = () => {
         </div>
       {/* Navigation buttons (Back to home, Next to gameplay) */}
       <div className="button-container">
-      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
-      <Button baseButton="btn-next next-fade-in" action={() => pre_render()} title="Next" />
+      <Button baseButton="btn-back" action={() => navigate("/")} title="Exit Experience" />
+      <Button baseButton="btn-next next-fade-in" action={() => navigate("/game-play")} title="Next" />
       </div>
       </BasePage>
     );

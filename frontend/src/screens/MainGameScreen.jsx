@@ -3,6 +3,7 @@ import BasePage from "../components/BasePage/BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
 import { createSession } from "../../api/single-player/GameApi.js";
 import { useSession } from "../../SessionContext.jsx";
+import { startPrerender } from "../../api/single-player/GameApi.js";
 
 /**
  * MainGameScreen component
@@ -29,6 +30,7 @@ const MainGameScreen = () => {
     try {
       const response = await createSession();
       setSessionId(response.session_id); 
+      await startPrerender(sessionId);
       console.log("session is" + sessionId);
       navigate("/story");
     } catch (error) {
