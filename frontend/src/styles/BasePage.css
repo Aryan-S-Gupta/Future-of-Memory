@@ -1,7 +1,11 @@
+@import url('/src/styles/tokens.css');
+
 /* Fonts actually used below */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -9,14 +13,17 @@ html, body, #root {
   position: fixed;
   inset: 0;
   width: 100vw;
-  height: 100vh;          /* use 100dvh if you prefer mobile-safe viewport */
+  height: 100vh;
+  /* use 100dvh if you prefer mobile-safe viewport */
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;       /* prevents scrollbars from background overflow */
+  overflow: hidden;
+  /* prevents scrollbars from background overflow */
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+  background-color: var(--bg-canvas);
 }
 
 /* Background container ensures LetterGlitch fills the screen and sits behind content */
@@ -24,13 +31,14 @@ html, body, #root {
   position: absolute;
   inset: 0;
   z-index: 0;
-  pointer-events: none;   /* clicks go to content layer */
+  pointer-events: none;
+  /* clicks go to content layer */
 }
 
 /* In case LetterGlitch renders a <canvas>/<svg>/<div>, force it to fill */
 .bg-layer canvas,
 .bg-layer svg,
-.bg-layer > * {
+.bg-layer>* {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -53,61 +61,62 @@ html, body, #root {
 
 /* Title styling */
 .title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 4rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
   font-weight: 800;
   text-align: center;
-  color: #ffffff;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-  margin-bottom: 3rem;
+  color: var(--color-text);
+  text-shadow: var(--shadow-title);
+  margin-bottom: var(--space-xxl);
 }
 
 .subheading {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 2rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-subheading);
   font-weight: 500;
   text-align: center;
-  color: #61dca3;
-  text-shadow: 1px 1px 6px rgba(123, 0, 255, 0.7);
-  margin: 1.5rem 0 0.5rem 0;  
+  color: var(--color-accent);
+  text-shadow: var(--shadow-subheading);
+  margin: var(--space-lg) 0 var(--space-md) 0;
 }
 
 /* Body text */
 .text {
-  font-family: 'Kanit', sans-serif;
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
   font-weight: 400;
   text-align: center;
-  color: #ffffff;
-  text-shadow: 1px 1px 4px rgb(0, 0, 0);
+  color: var(--color-text);
+  text-shadow: var(--shadow-text);
   max-width: 700px;
   margin: 0 auto;
   line-height: 1.2;
 }
 
 .text-container {
-  background-color: rgba(0, 0, 0, 0.6);
-  padding: 3rem;
-  border-radius: 10px;
+  background-color: var(--color-text-container-bg);
+  padding: var(--space-xxl);
+  border-radius: var(--radius-lg);
   max-width: 800px;
   text-align: center;
 }
 
 .text-container h2 {
-  font-family: 'Kanit', sans-serif;
+  font-family: var(--font-body);
   font-size: 2.5rem;
+  /* could be a token later if you like */
   font-weight: 700;
-  color: #ffffff;
+  color: var(--color-text);
   text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-md);
 }
 
 .text-container p {
-  font-family: 'Kanit', sans-serif;
-  font-size: 1.05rem;
+  font-family: var(--font-body);
+  font-size: var(--fs-body-strong);
   font-weight: 500;
   text-align: center;
-  color: #ffffff;
-  text-shadow: 1px 1px 4px rgb(255, 255, 255);      
-  line-height: 1.2;  
+  color: var(--color-text);
+  text-shadow: var(--shadow-text-invert);
+  line-height: 1.2;
 }
