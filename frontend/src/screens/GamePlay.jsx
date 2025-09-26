@@ -9,6 +9,7 @@ import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
 import "../styles/GamePlay.css";
 
 
@@ -52,16 +53,26 @@ const GamePlay = () => {
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
-  const {
-    data: questionData,
-    isLoading: isQuestionLoading,
-    error: questionError,
+// Fetches the scenario whenever we are on the "scenario" screen.
+ const {
+  data: questionData,
+  isLoading: isQuestionLoading,
+  error: questionError,
+  status,
   } = useQuery({
-    queryKey: ["question", year],
-    queryFn: () => getQuestion(year),
-    enabled: screen === "question", // only fetch when we are on question screen
-  });
-
+    queryKey: ["question", sessionId],
+    queryFn: async () => {
+      console.log("queryFn running for", sessionId);
+      const result = await getQuestion(sessionId);
+      console.log("queryFn result:", result);
+      setCurrentTurn(result)
+      return result;
+    },
+    enabled: screen === "question",
+    onError: (err) => {
+      console.error("onError:", err);
+    }
+});
 
   // --- Minimal TTS: inline (no extra files/deps) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
@@ -195,7 +206,7 @@ const GamePlay = () => {
     <BasePage>
       <ExitExperience/>
       {screen === "scenario" && scenarioData && (
-        <div className="screnario-screen">
+        <div className="scenario-screen">
               {/* Image in middle */}
           {scenarioData.image && (
             <div className="scenario-image">

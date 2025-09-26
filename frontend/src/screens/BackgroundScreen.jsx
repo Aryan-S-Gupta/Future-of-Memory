@@ -3,6 +3,8 @@ import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
 import "../styles/BackgroundScreen.css";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
+import { startPrerender } from "../../api/single-player/GameApi.js";
+import { useSession } from "../../SessionContext.jsx";
 
 /**
  * BackgroundScreen component
@@ -21,6 +23,12 @@ import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
  */
 const BackgroundScreen = () => {
   const navigate = useNavigate();
+  const {sessionId} = useSession();
+
+  const pre_render = async () => {
+    await startPrerender(sessionId);
+    navigate("/game-play");
+  }
 
   return (
     <BasePage>
@@ -41,11 +49,10 @@ const BackgroundScreen = () => {
         </div>
       {/* Navigation buttons (Back to home, Next to gameplay) */}
       <div className="button-container">
-      <ExitExperience />
-      <Button baseButton="btn-next next-fade-in" action={() => navigate("/game-play")} title="Next" />
+        <ExitExperience />
+-       <Button baseButton="btn-next next-fade-in" action={() => pre_render()} title="Next" />
       </div>
       </BasePage>
     );
 };
 export default BackgroundScreen;
-``
