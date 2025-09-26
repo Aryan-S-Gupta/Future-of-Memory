@@ -9,6 +9,7 @@ import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
 import "../styles/GamePlay.css";
 
 
@@ -205,7 +206,7 @@ const GamePlay = () => {
     <BasePage>
       <ExitExperience/>
       {screen === "scenario" && scenarioData && (
-        <div className="screnario-screen">
+        <div className="scenario-screen">
               {/* Image in middle */}
           {scenarioData.image && (
             <div className="scenario-image">

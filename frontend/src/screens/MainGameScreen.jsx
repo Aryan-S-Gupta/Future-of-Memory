@@ -31,7 +31,7 @@ const MainGameScreen = () => {
     try {
       const response = await createSession();
       setSessionId(response.session_id); 
-      await startPrerender(sessionId);
+      //await startPrerender(sessionId);
       console.log("session is" + sessionId);
       navigate("/story");
     } catch (error) {
