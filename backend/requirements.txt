@@ -10,9 +10,13 @@ requests>=2.31.0
 langchain>=0.3.0
 langchain-community>=0.3.0
 langchain-ollama>=0.2.0
-faiss-cpu>=1.8.0
+faiss-cpu==1.9.0.post1
 sentence-transformers>=3.0.0
 langchain-text-splitters>=0.3.0
+
+# ML Core (Stable versions to avoid OpenMP conflicts)
+numpy==1.26.4
+torch==2.4.1
 
 # Parsing & NLP
 unstructured[pdf,docx,image]>=0.15.0
@@ -32,3 +36,4 @@ psycopg2-binary>=2.9
 # bg manager
 redis>=5.0
 dramatiq==1.18.0
+django_dramatiq>=0.14.0
