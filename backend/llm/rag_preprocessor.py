@@ -23,7 +23,7 @@ DEFAULT_PREPROCESS_MODEL = OLLAMA_PREPROCESS_MODEL
 logger = logging.getLogger(__name__)
 
 
-def _create_preprocessing_prompt(content: str) -> str:
+def create_preprocessing_prompt(content: str) -> str:
     """
     Create preprocessing prompt for RAG content summarization
     
@@ -57,7 +57,7 @@ FINAL CHECK: Before submitting, count your words. Your response must be 50 words
 """.strip()
 
 
-def _call_preprocess_model(prompt: str, timeout: int = 45) -> Optional[str]:
+def call_preprocess_model(prompt: str, timeout: int = 45) -> Optional[str]:
     """
     Call the preprocessing model via Ollama API
     
@@ -66,7 +66,7 @@ def _call_preprocess_model(prompt: str, timeout: int = 45) -> Optional[str]:
         timeout: Timeout duration in seconds
         
     Returns:
-        Optional[str]: Preprocessing result, None if failed
+        Optional[str]: Preprocessing result as plain text, None if failed
     """
     try:
         payload = {
@@ -81,18 +81,19 @@ def _call_preprocess_model(prompt: str, timeout: int = 45) -> Optional[str]:
         data = response.json()
         result = data.get("response", "").strip()
         
-        # Validate result quality
-        if len(result) > 50:  # Ensure substantial content
+        # Validate result quality - check word count, not character count
+        word_count = len(result.split())
+        if word_count >= 10:  # Ensure substantial content (minimum 10 words)
             return result
         else:
-            logger.warning(f"Preprocessor returned short result: {len(result)} chars")
+            logger.warning(f"Preprocessor returned short result: {word_count} words")
             return None
             
     except requests.exceptions.Timeout:
-        logger.error("Preprocessing timeout")
+        logger.error("Preprocessing timeout - Ollama API took too long to respond")
         return None
     except requests.exceptions.RequestException as e:
-        logger.error(f"Preprocessing request failed: {e}")
+        logger.error(f"Preprocessing network error: {e}")
         return None
     except Exception as e:
         logger.error(f"Preprocessing unexpected error: {e}")
@@ -124,10 +125,10 @@ def preprocess_rag_content(content: str) -> str:
     logger.info(f"Starting preprocessing: {word_count} words → target 50 words")
     
     # Create preprocessing prompt
-    prompt = _create_preprocessing_prompt(content)
+    prompt = create_preprocessing_prompt(content)
     
     # Call preprocessing model
-    processed_content = _call_preprocess_model(prompt)
+    processed_content = call_preprocess_model(prompt)
     
     if processed_content:
         processed_words = len(processed_content.split())
