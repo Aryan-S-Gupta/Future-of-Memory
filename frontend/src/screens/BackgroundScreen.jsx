@@ -49,11 +49,10 @@ const BackgroundScreen = () => {
         </div>
       {/* Navigation buttons (Back to home, Next to gameplay) */}
       <div className="button-container">
-      <ExitExperience />
-      <Button baseButton="btn-next next-fade-in" action={() => pre_render()} title="Next" />
+        <ExitExperience />
+-       <Button baseButton="btn-next next-fade-in" action={() => pre_render()} title="Next" />
       </div>
       </BasePage>
     );
 };
 export default BackgroundScreen;
-``
