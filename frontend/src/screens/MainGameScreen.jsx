@@ -1,9 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import BasePage from "../components/BasePage/BasePage.jsx";
+import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
+<<<<<<< HEAD
 import { createSession } from "../../api/single-player/GameApi.js";
 import { useSession } from "../../SessionContext.jsx";
 import { startPrerender } from "../../api/single-player/GameApi.js";
+=======
+import { Typewriter } from "react-simple-typewriter";
+>>>>>>> main
 
 /**
  * MainGameScreen component
@@ -51,7 +55,17 @@ const MainGameScreen = () => {
   return (
     <BasePage>
       {/* Game title */}
-      <h1 className="title">Future of Memory</h1>
+      <h1 className="title">
+        <Typewriter
+          words={["WELCOME TO", "FUTURE OF MEMORY"]}
+          loop={1}              // run through once
+          cursor
+          cursorStyle="|"
+          typeSpeed={100}
+          deleteSpeed={30}
+          delaySpeed={1000}     // pause before deleting
+        />
+      </h1>
 
       {/* Menu buttons */}
       <div className="button-group">

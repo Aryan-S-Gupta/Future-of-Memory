@@ -1,0 +1,278 @@
+/* ===== Design Tokens (Memory / Futuristic) =====
+   Keep values identical to current styles to avoid visual changes.
+   Override via [data-theme="dark"] later, or update values here. */
+
+:root {
+    /* Colors */
+    --color-text: #ffffff;
+    /* base text */
+    --color-accent: #61dca3;
+    /* green accent currently used */
+    --color-accent-2: #7b00ff;
+    /* purple glow used in shadow */
+    --color-btn-grad-start: #1e40af;
+    /* btn-next gradient start */
+    --color-btn-grad-end: #3b82f6;
+    /* btn-next gradient end */
+    --color-btn-hover-start: #0b2b6f;
+    /* btn-next hover gradient start */
+    --color-btn-hover-end: #60dbfa;
+    /* btn-next hover gradient end */
+    --color-text-container-bg: rgba(0, 0, 0, 0.6);
+    /* translucent panel */
+
+    /* Shadows / glow (kept as rgba to match current look) */
+    --shadow-strong: 0 0 12px rgba(73, 159, 239, 0.9), 0 0 25px rgba(6, 41, 98, 0.7), inset 0 0 8px rgba(255, 255, 255, 0.2);
+    --shadow-strong-hover: 0 0 20px rgba(59, 130, 246, 1), 0 0 40px rgba(59, 130, 246, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
+    --shadow-title: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    --shadow-subheading: 1px 1px 6px rgba(123, 0, 255, 0.7);
+    --shadow-text: 1px 1px 4px rgb(0, 0, 0);
+    --shadow-text-invert: 1px 1px 4px rgb(255, 255, 255);
+    --shadow-crawl: 1px 1px 4px rgb(7, 142, 106);
+
+    /* Fonts */
+    --font-display: 'Orbitron', sans-serif;
+    --font-body: 'Kanit', sans-serif;
+
+    /* Font sizes (match current fixed sizes for zero visual change) */
+    --fs-title: 4rem;
+    --fs-subheading: 2rem;
+    --fs-body: 1rem;
+    --fs-body-strong: 1.05rem;
+    --fs-crawl: 2.5rem;
+    --fs-question: 3rem;
+    --fs-btn: 1rem;
+
+    /* Text zoom tokens */
+    --text-zoom: 1;
+    /* live value set by JS */
+    --text-zoom-min: 0.85;
+    /* lower bound */
+    --text-zoom-max: 1.35;
+    /* upper bound (keeps UI stable) */
+    --text-zoom-capped: clamp(var(--text-zoom-min), var(--text-zoom), var(--text-zoom-max));
+
+    /* Spacing / radii */
+    --space-xxl: 3rem;
+    --space-xl: 2rem;
+    --space-lg: 1.5rem;
+    --space-md: 1rem;
+    --radius-lg: 10px;
+    --radius-sm: 3px;
+
+    /* Motion timing — keeps animations identical */
+    --ease-standard: ease;
+    --dur-fade: 1.2s;
+    --dur-choice-fade: 2s;
+    --dur-next-fade: 3s;
+    --dur-crawl: 30s;
+}
+
+html {
+    font-size: calc(16px * var(--text-zoom-capped));
+}
+
+/* ===== GlobalToolbar tokens ===== */
+:root {
+    --gtb-bg: rgba(18, 20, 28, 0.55);
+    --gtb-fg: #ffffff;
+    --gtb-fg-muted: rgba(255, 255, 255, 0.75);
+    --gtb-track: rgba(255, 255, 255, 0.35);
+    --gtb-track-bg: rgba(255, 255, 255, 0.25);
+    --gtb-hover: rgba(255, 255, 255, 0.12);
+    --gtb-ring: rgba(255, 255, 255, 0.35);
+    --gtb-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+
+    --gtb-icon-glow: 0 0 6px rgba(97, 220, 163, 0.15);
+    --gtb-thumb-glow: 0 0 8px rgba(97, 220, 163, 0.35);
+
+    --gtb-radius: 16px;
+    --gtb-gap: 12px;
+    --gtb-pad-y: 8px;
+    --gtb-pad-x: 10px;
+    --gtb-btn-pad: 8px;
+    --gtb-btn-radius: 10px;
+    --gtb-btn-min: 36px;
+    --gtb-icon-size: 20px;
+
+    --gtb-slider-w: 110px;
+    --gtb-slider-h: 4px;
+    --gtb-slider-thumb: 16px;
+}
+
+/* Light theme overrides */
+:root[data-theme="light"] {
+    --gtb-bg: rgba(245, 248, 255, 0.6);
+    --gtb-fg: #0f172a;
+    --gtb-fg-muted: rgba(15, 23, 42, 0.75);
+    --gtb-track: rgba(15, 23, 42, 0.5);
+    --gtb-track-bg: rgba(15, 23, 42, 0.25);
+    --gtb-hover: rgba(0, 0, 0, 0.07);
+    --gtb-ring: rgba(15, 23, 42, 0.35);
+}
+
+/* Dark theme overrides */
+:root[data-theme="dark"] {
+    --gtb-bg: rgba(12, 14, 20, 0.62);
+    --gtb-fg: #ffffff;
+    --gtb-fg-muted: rgba(255, 255, 255, 0.75);
+    --gtb-track: rgba(255, 255, 255, 0.4);
+    --gtb-track-bg: rgba(255, 255, 255, 0.2);
+    --gtb-hover: rgba(255, 255, 255, 0.12);
+    --gtb-ring: rgba(255, 255, 255, 0.35);
+}
+
+/* Optional auto-dark until you wire a toggle */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+        --gtb-bg: rgba(12, 14, 20, 0.62);
+        --gtb-fg: #ffffff;
+        --gtb-fg-muted: rgba(255, 255, 255, 0.75);
+        --gtb-track: rgba(255, 255, 255, 0.4);
+        --gtb-track-bg: rgba(255, 255, 255, 0.2);
+        --gtb-hover: rgba(255, 255, 255, 0.12);
+        --gtb-ring: rgba(255, 255, 255, 0.35);
+    }
+}
+
+/* Respect users who prefer reduced motion (no visual change for most users) */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --dur-fade: 0.01ms;
+        --dur-choice-fade: 0.01ms;
+        --dur-next-fade: 0.01ms;
+        --dur-crawl: 0.01ms;
+    }
+}
+
+/* ===== Button tokens (primary / secondary / back / choice) ===== */
+:root {
+    /* Shared button typography */
+    --btn-font-display: var(--font-display);
+    --btn-font-body: var(--font-body);
+
+    /* Primary / Secondary gradients + shadows (kept identical to your CSS) */
+    --btn-primary-grad-start: #1e40af;
+    --btn-primary-grad-end: #3b82f6;
+    --btn-primary-hover-start: #0b2b6f;
+    --btn-primary-hover-end: #60dbfa;
+    --btn-primary-text: #ffffff;
+    --btn-primary-shadow: 0 0 12px rgba(73, 159, 239, 0.9),
+        0 0 25px rgba(6, 41, 98, 0.7),
+        inset 0 0 8px rgba(255, 255, 255, 0.2);
+    --btn-primary-shadow-hover: 0 0 20px rgba(59, 130, 246, 1),
+        0 0 40px rgba(59, 130, 246, 0.8),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+
+    --btn-secondary-grad-start: #1e40af;
+    --btn-secondary-grad-end: #3b82f6;
+    --btn-secondary-hover-start: #0a3364;
+    --btn-secondary-hover-end: #386098;
+    --btn-secondary-text: #ffffff;
+    --btn-secondary-shadow: 0 0 12px rgba(73, 159, 239, 0.9),
+        0 0 25px rgba(6, 41, 98, 0.7),
+        inset 0 0 8px rgba(255, 255, 255, 0.2);
+    --btn-secondary-shadow-hover: 0 0 12px rgba(156, 163, 175, 0.8),
+        inset 0 0 6px rgba(255, 255, 255, 0.15);
+
+    /* Back button (neutral/dimmed) */
+    --btn-back-grad-start: #111827;
+    --btn-back-grad-end: #1f2937;
+    --btn-back-hover-start: #1f2937;
+    --btn-back-hover-end: #374151;
+    --btn-back-text: #d1d5db;
+    --btn-back-shadow: 0 3px 6px rgba(107, 114, 128, 0.6),
+        inset 0 0 4px rgba(255, 255, 255, 0.05);
+    --btn-back-shadow-hover: 0 0 10px rgba(156, 163, 175, 0.7),
+        inset 0 0 6px rgba(255, 255, 255, 0.1);
+
+    /* Choice cards (glass neon) */
+    --choice-text: #eaf6ff;
+    --choice-bg-radial: radial-gradient(120% 140% at 0% 0%,
+            rgba(125, 140, 255, 0.28) 0%,
+            rgba(28, 40, 68, 0.10) 45%,
+            rgba(16, 24, 39, 0.00) 100%);
+    --choice-bg-linear: linear-gradient(135deg,
+            rgba(26, 38, 70, 0.90) 0%,
+            rgba(8, 14, 34, 0.90) 100%);
+    --choice-edge: rgba(125, 140, 255, 0.38);
+    --choice-shadow: 0 12px 28px rgba(4, 10, 24, 0.78),
+        0 0 20px rgba(99, 205, 255, 0.45),
+        0 0 70px rgba(184, 148, 255, 0.35);
+    --choice-shadow-hover: 0 16px 36px rgba(4, 10, 24, 0.92),
+        0 0 30px rgba(125, 211, 252, 0.85),
+        0 0 110px rgba(196, 181, 253, 0.55);
+    --choice-sweep: linear-gradient(120deg,
+            rgba(185, 24, 24, 0) 0%,
+            rgba(173, 216, 255, 0.22) 45%,
+            rgba(255, 255, 255, 0.0) 80%);
+}
+
+/* ===== Glitch & Background tokens (no visual change now) ===== */
+:root {
+    /* Canvas base behind the glitch */
+    --bg-canvas: #000000;
+
+    /* Glitch glyph palette (hex for interpolation) */
+    --glitch-1: #2b4539;
+    /* deep green */
+    --glitch-2: #61dca3;
+    /* mint */
+    --glitch-3: #61b3dc;
+    /* cyan */
+
+    /* Vignette ramps */
+    --vignette-center-opaque: rgba(0, 0, 0, 0.7);
+    --vignette-center-clear: rgba(0, 0, 0, 0.5);
+    --vignette-outer-clear: rgba(255, 255, 255, 0.05);
+
+    --vignette-outer-bg: radial-gradient(circle,
+            var(--vignette-outer-clear) 60%,
+            var(--vignette-outer-opaque) 100%);
+
+    --vignette-bg: radial-gradient(circle,
+            var(--vignette-center-opaque) 40%,
+            var(--vignette-center-clear) 55%);
+}
+
+/* Theme overrides (adjust to taste later) */
+:root[data-theme="light"] {
+    --bg-canvas: #f6f9fc;
+    --glitch-1: #e9eff6;
+    --glitch-2: #cfd9e8;
+    --glitch-3: #aabbd3;
+
+    --vignette-center-opaque: rgba(0, 0, 0, 0.3);
+    --vignette-center-clear: rgba(0, 0, 0, 0.5);
+    --vignette-outer-clear: rgba(255, 255, 255, 0.15);
+
+    --vignette-outer-bg: radial-gradient(circle,
+            var(--vignette-outer-clear) 60%,
+            var(--vignette-outer-opaque) 100%);
+
+    --vignette-bg: radial-gradient(circle,
+            var(--vignette-center-opaque) 40%,
+            var(--vignette-center-clear) 55%);
+}
+
+:root[data-theme="dark"] {
+    --bg-canvas: #000000;
+    /* same as current */
+    --glitch-1: #2b4539;
+    --glitch-2: #61dca3;
+    --glitch-3: #61b3dc;
+    /* vignettes unchanged */
+
+    --vignette-center-opaque: rgba(0, 0, 0, 0.7);
+    --vignette-center-clear: rgba(0, 0, 0, 0.5);
+    --vignette-outer-clear: rgba(255, 255, 255, 0.05);
+
+    --vignette-outer-bg: radial-gradient(circle,
+            var(--vignette-outer-clear) 60%,
+            var(--vignette-outer-opaque) 100%);
+
+    --vignette-bg: radial-gradient(circle,
+            var(--vignette-center-opaque) 40%,
+            var(--vignette-center-clear) 55%);
+
+}

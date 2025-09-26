@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import BasePage from "../components/BasePage/BasePage.jsx";
+import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
-import "./BackgroundScreen.css";
+import "../styles/BackgroundScreen.css";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 
 /**

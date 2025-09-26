@@ -12,8 +12,14 @@ venv/
 .idea/
 .DS_Store
 
+<<<<<<< HEAD
 # Ignore image repo
 backend/media/
 
 # Add static repo back
 !backend/media/static/
+=======
+# Networking
+.env
+decisions.json
+>>>>>>> main

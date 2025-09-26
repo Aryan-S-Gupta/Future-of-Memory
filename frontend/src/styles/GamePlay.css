@@ -1,3 +1,5 @@
+@import url('/src/styles/tokens.css');
+
 .question-container {
   padding: 3rem; 
   border-radius: 10px;
@@ -9,17 +11,17 @@
 
 }
 .question-container h2 {
-    font-family: 'Kanit', sans-serif;
-    font-size: 3rem;
-    font-weight: 600;
-    color: #ffffff;
-    margin-bottom: 1rem;
-}
-.fade-in {
-  opacity: 0;
-  animation: fadeIn 1.2s ease forwards;
+  font-family: var(--font-body);
+  font-size: var(--fs-question);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
 }
 
+.fade-in {
+  opacity: 0;
+  animation: fadeIn var(--dur-fade) var(--ease-standard) forwards;
+}
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -27,9 +29,9 @@
 
 /* Start button fade-in */
 .choice-fade-in {
-  opacity: 0; /* initially invisible */
-  animation: choicefadeIn 2s ease forwards;
-  animation-delay: 2s; 
+  opacity: 0;
+  animation: choicefadeIn var(--dur-choice-fade) var(--ease-standard) forwards;
+  animation-delay: 2s;
 }
 
 @keyframes choicefadeIn {
