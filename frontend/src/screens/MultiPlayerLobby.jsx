@@ -5,6 +5,8 @@ import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/RoomManag
 import "./MultiplayerLobby.css"; // Import CSS for styling
 import Button from "../components/Button/Button.jsx";
 import BasePage from "./BasePage.jsx";
+import { useSession } from "../../SessionContext.jsx";
+import { startPrerender } from "../../api/single-player/GameApi.js";
 
 /**
  * MultiplayerLobby Component
@@ -23,6 +25,7 @@ const MultiplayerLobby = () => {
   // Local state to store player name and room code
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
+  const { sessionId } = useSession();
   const navigate = useNavigate();
 
   // Fetch list of available rooms using React Query
@@ -47,6 +50,7 @@ const MultiplayerLobby = () => {
         return alert("Please Enter a NickName");
     }
     const data = await createRoom(playerName);
+    await startPrerender(sessionId);
     setRoomCode(data.room_code);
     console.log(roomCode);
     // Navigate to multiplayer room screen
@@ -76,6 +80,7 @@ const MultiplayerLobby = () => {
       const data = await joinRoom(code, name);
       if (data.success == "True") {
         navigate(`/multiplayer-room/${code}?playerName=${name}`);
+        await startPrerender(sessionId);
         console.log("navigated")
       } else {
         alert("Sorry, unable to join the room. Please try again.");
@@ -112,7 +117,7 @@ const MultiplayerLobby = () => {
         ))}
     </ul>
     <div className="button-container">
-      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
+      <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
     </div>
   </div>
   </BasePage>

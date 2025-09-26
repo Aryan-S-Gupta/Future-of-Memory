@@ -1,104 +1,245 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getScenario, getQuestion, submitChoice } from "../../api/multiplayer/GameFlowApi.js";
+import { getQuestion, submitChoice } from "../../api/multiplayer/GameFlowApi.js";
 import { getRoomState } from "../../api/multiplayer/RoomManagementApi.js";
 import Button from "../components/Button/Button.jsx";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../styles/GamePlay.css";
+import { useSession } from "../../SessionContext.jsx";
+import background from "../assets/background.jpg";
+import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
+import BasePage from "./BasePage.jsx";
+import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
+import { useMemo, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
 
 const GamePlayMulti = () => {
   const navigate = useNavigate();
   const { roomCode } = useParams(); 
   const [searchParams] = useSearchParams();
   const playerName = searchParams.get("playerName");
-
-  const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
+  const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
-  const [otherPlayersChoices, setOtherPlayersChoices] = useState({});
-  const [outcome, setOutcome] = useState(null);
-  const [waiting, setWaiting] = useState(false);
+  const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
+  const [currentTurn, setCurrentTurn] = useState(null);
+  const [scenarioData, setScenarioData] = useState({
+  scenario: 
+    "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
+    "Once experimental, memory editing, enhancement, and storage are mainstream, forcing governments " +
+    "to confront choices that could redefine humanity. manipulation not just possible, but precise and reliable." +
+    "Memory editing, enhancement," +
+    "These technologies can erase trauma, boost learning, and even share memories, offering both promise " +
+    "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
+    " ownership, and the commercialization of consciousness.",
+    image: background // no image for the first one
+});
 
-  // Fetch the current scenario
-  const { data: scenarioData } = useQuery({
-    queryKey: ["scenario", roomCode, year],
-    queryFn: () => getScenario(roomCode, year),
-    enabled: screen === "scenario",
-  });
 
-  // Fetch the current question
-  const { data: questionData } = useQuery({
-    queryKey: ["question", roomCode, year],
-    queryFn: () => getQuestion(roomCode, year),
+  // --- Tie narration to BGM ---
+  const { isPlaying, volume, setVolume } = useBgm();
+
+  // --- Question Query ---
+  // Fetches the question whenever we are on the "question" screen.
+// Fetches the scenario whenever we are on the "scenario" screen.
+ const {
+  data: questionData,
+  isLoading: isQuestionLoading,
+  error: questionError,
+  status,
+  } = useQuery({
+    queryKey: ["question", roomCode, sessionId],
+    queryFn: async () => {
+      console.log("queryFn running for", sessionId);
+      const result = await getQuestion(roomCode, sessionId);
+      console.log("queryFn result:", result);
+      setCurrentTurn(result)
+      return result;
+    },
     enabled: screen === "question",
-  });
-
-  // Polling room state to get other players' choices
-  useEffect(() => {
-    if (screen === "question") {
-      const interval = setInterval(async () => {
-        const state = await getRoomState(roomCode);
-        setOtherPlayersChoices(state.playersChoices);
-        if (state.allAnswered) {
-          setOutcome(state.outcome);
-          setWaiting(false);
-        }
-      }, 1000);
-      return () => clearInterval(interval);
+    onError: (err) => {
+      console.error("onError:", err);
     }
-  }, [screen, roomCode]);
+});
 
-  const handleChoice = async (choice) => {
-    setWaiting(true);
-    await submitChoice(roomCode, playerName, year, choice);
+  // --- Minimal TTS: inline (no extra files/deps) ---
+  const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
+  const prevVolRef = useRef(null); // remember user volume while narrating
+  const duckFactor = 0.3; // simple lower (no separate ducking state)
+
+  const cancelTTS = () => {
+    try { synthRef.current?.cancel(); } catch { }
+    // Restore volume if we changed it
+    if (prevVolRef.current !== null) {
+      setVolume(prevVolRef.current);
+      prevVolRef.current = null;
+    }
   };
 
-  const handleNext = () => {
-    setScreen("scenario");
-    setYear(year + 1);
-    setOtherPlayersChoices({});
+  const speak = (text) => {
+    if (!synthRef.current || !text) return;
+    // Cancel any previous narration
+    cancelTTS();
+
+    // Only narrate if BGM is playing (toolbar controls this)
+    if (!isPlaying) return;
+
+    // Lower BGM volume temporarily (minimal approach)
+    prevVolRef.current = volume;
+    setVolume(Math.max(0, Math.min(1, volume * duckFactor)));
+
+    const utter = new SpeechSynthesisUtterance(String(text));
+    // --- choose voice here ---
+    const voices = synthRef.current.getVoices();
+    const prefs = [
+      /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i, // Edge (neural)
+      /Microsoft Jenny Online \(Natural\).*English \(United States\)/i,  // Edge (neural)
+      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i,                    // macOS built-ins
+      /Google UK English Female/i                                        // Chrome fallback
+    ];
+    const picked = prefs
+      .map(rx => voices.find(v => rx.test(v.name)))
+      .find(Boolean) || voices[0];
+    utter.voice = picked;
+    // tweak for more “majestic” feel
+    utter.rate = 0.90;  // slower = more weighty
+    utter.pitch = 1.12;  // deeper
+    utter.volume = 1;   // full, since we ducked bgm
+
+    utter.onend = utter.onerror = () => {
+      // Restore BGM volume
+      if (prevVolRef.current !== null) {
+        setVolume(prevVolRef.current);
+        prevVolRef.current = null;
+      }
+    };
+
+    try { synthRef.current.speak(utter); } catch {
+      // In case of any error, restore
+      if (prevVolRef.current !== null) {
+        setVolume(prevVolRef.current);
+        prevVolRef.current = null;
+      }
+    }
   };
 
-  if (!scenarioData || !questionData) return <p>Loading...</p>;
+  // Build readout for question + options
+  const questionReadout = useMemo(() => {
+    if (!questionData) return "";
+    const q = String(questionData.question || "");
+    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const parts = Object.entries(questionData.options || {}).map(
+      ([, text], i) => `Option ${alpha[i] || i + 1}: ${String(text)}`
+    );
+    return [q, ...parts].join(". ");
+  }, [questionData]);
+
+  // Auto-read Scenario when it shows (and BGM is playing)
+  useEffect(() => {
+    if (screen === "scenario" && scenarioData?.scenario) {
+      speak(scenarioData.scenario);
+    }
+    return () => cancelTTS();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, scenarioData?.scenario, isPlaying]); // tie to playing state
+
+  // Auto-read Question + Options when it shows (and BGM is playing)
+  useEffect(() => {
+    if (screen === "question" && questionReadout) {
+      speak(questionReadout);
+    }
+    return () => cancelTTS();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, questionReadout, isPlaying]);
+
+  // Replay narration when toolbar Play is clicked (even if already playing)
+  useEffect(() => {
+    const handler = () => {
+      if (screen === "scenario" && scenarioData?.scenario) {
+        speak(scenarioData.scenario);
+      } else if (screen === "question" && questionReadout) {
+        speak(questionReadout);
+      }
+    };
+    window.addEventListener("bgm-play", handler);
+    return () => window.removeEventListener("bgm-play", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
+
+  /**
+   * Handles a player's choice when answering a question.
+   *
+   * @param {string} answer - The key of the chosen option.
+   */
+
+  // handle choice click
+  const handleChoice = async (option_id) => {
+    if (!currentTurn) return;
+    cancelTTS(); 
+    const out = await submitChoice(playerName, roomCode, sessionId, currentTurn.turn_id, year, option_id)
+        const mapped = {
+        scenario: out.scenario.text,
+        image: out.image.url
+      };
+      if (out.image.status !== "ready" ) {
+        console.log("Failed to submit choice:", out.message);
+      }
+      console.log("Submit choice response:", mapped);
+      setScenarioData(mapped);
+      setScreen("scenario");
+      setYear(year + 1);
+      };
 
   return (
-    <div className="screen">
-      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
+    <BasePage>
+      <ExitExperience/>
+      {screen === "scenario" && scenarioData && (
+        <div className="scenario-screen">
+              {/* Image in middle */}
+          {scenarioData.image && (
+            <div className="scenario-image">
+              <img src={scenarioData.image} alt="scenario" className="scenario-img" />
+            </div>
+          )}
+          {/* Scenario text at top */}
+          <div className="text-container">
+            <h2 className="fade-in">{scenarioData.scenario}</h2>
+          </div>
 
-      {screen === "scenario" && (
-        <div className="text-container">
-          <h2 className="fade-in">{scenarioData.scenario}</h2>
-          <Button baseButton="btn-primary" action={() => setScreen("question")} title="Continue"/>
+
+
+          {/* Continue button at bottom */}
+          <div className="scenario-footer">
+            <Button
+              baseButton="btn-primary"
+              action={() => {
+                setScreen("question");
+                console.log("Session ID:", sessionId);
+              }}
+              title="Continue"
+            />
+          </div>
         </div>
       )}
-
-      {screen === "question" && (
+      {/** Question Screen*/}
+      {screen === "question" && currentTurn && (
         <div>
           <div className="question-container">
-            <h2 className="fade-in">{questionData.question}</h2>
+            <h2 className="fade-in">{currentTurn.question}</h2>
           </div>
           <div className="choice-container">
-            {Object.entries(questionData.options).map(([key, value]) => (
+            {currentTurn.options.map((opt) => (
               <Button
                 baseButton="choice-btn choice-fade-in"
-                key={key}
-                action={() => handleChoice(key)}
-                title={value}
-                disabled={waiting}
+                key={opt.option_id}
+                action={() => handleChoice(opt.option_id)}
+                title={`${opt.label}. ${opt.option_text}`}
               />
             ))}
           </div>
-
-          {waiting && <p>Waiting for other players...</p>}
-
-          {outcome && (
-            <div>
-              <p>Outcome: {questionData.options[outcome]}</p>
-              <Button baseButton="btn-next" action={handleNext} title="Next Scenario" />
-            </div>
-          )}
         </div>
       )}
-    </div>
+
+    </BasePage>
   );
 };
 

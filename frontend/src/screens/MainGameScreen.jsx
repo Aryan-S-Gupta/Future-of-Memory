@@ -43,6 +43,7 @@ const MainGameScreen = () => {
     try {
       const response = await createSession();
       setSessionId(response.sessionId);
+      console.log("session is" + sessionId);
       navigate("/multiplayer-lobby");
     } catch (error) {
       console.error("Error creating multiplayer session:", error);
