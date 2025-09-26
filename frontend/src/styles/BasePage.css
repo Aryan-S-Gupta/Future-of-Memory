@@ -102,14 +102,9 @@ body,
 }
 
 .text-container h2 {
-<<<<<<< HEAD:frontend/src/components/BasePage/BasePage.css
-  font-family: 'Kanit', sans-serif;
-  font-size: 1rem;
-=======
   font-family: var(--font-body);
   font-size: 2.5rem;
   /* could be a token later if you like */
->>>>>>> main:frontend/src/styles/BasePage.css
   font-weight: 700;
   color: var(--color-text);
   text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);

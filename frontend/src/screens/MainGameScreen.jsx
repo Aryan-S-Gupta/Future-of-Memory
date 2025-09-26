@@ -1,13 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
-<<<<<<< HEAD
 import { createSession } from "../../api/single-player/GameApi.js";
 import { useSession } from "../../SessionContext.jsx";
 import { startPrerender } from "../../api/single-player/GameApi.js";
-=======
 import { Typewriter } from "react-simple-typewriter";
->>>>>>> main
 
 /**
  * MainGameScreen component
