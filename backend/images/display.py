@@ -53,4 +53,5 @@ def display_by_option(session_id: int, turn_id: int, option_id: int, max_wait_s:
 
 def build_image_url(rel_path):
     base = getattr(settings, 'ABSOLUTE_BASE_URL', 'http://127.0.0.1:9000').rstrip('/')
+    print(f'{base}{settings.MEDIA_URL}{rel_path} is image url')
     return f"{base}{settings.MEDIA_URL}{rel_path}" # http://127.0.0.1:9000/media/comfyui/output/xxx.png

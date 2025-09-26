@@ -3,14 +3,16 @@ from images.render_pipeline import generate_two_images_blocking
 from .models import Session, Turn 
 from .services import generate_and_save_image_text, generate_and_save_scenario, generate_and_save_question
 from images.render_pipeline import generate_two_images_blocking
-
+import logging
 # bg manager
 # sequence: step 1: question + options --> step2: image_texts --> step 3a: image + step 3b: scenario
 
 @dramatiq.actor(queue_name="llm_queue")
 def step1_generate_question(session_id: int, year: int):
     """Step 1: Generate question and options"""
+    logging.debug(f'the result from generating the question ur umm')
     result = generate_and_save_question(session_id, year)
+    logging.debug(f'the result from generating the question is{result}')
     turn_id = result['turn_id']
     
     # trigger step 2

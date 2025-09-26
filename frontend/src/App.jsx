@@ -12,6 +12,7 @@ import GamePlayMulti from "./screens/GamePlayMulti.jsx";
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
+import { SessionProvider } from "../SessionContext.jsx";
 
 function App() {
 
@@ -23,14 +24,16 @@ function App() {
     <Router>
       <AudioProvider routeAudioMap={routeAudioMap} crossfadeMs={1000} initialVolume={0.38}>
         <BackgroundWrapper>
-          <Routes>
-            <Route path="/" element={<MainGameScreen />} />
-            <Route path="/story" element={<BackgroundScreen />} />
-            <Route path="/how-to-play" element={<HowToScreen />} />
-            <Route path="/game-play" element={<GamePlay />} />
-            <Route path="/multiplayer-lobby" element={<MultiplayerLobby/>} />
+          <SessionProvider>
+            <Routes>
+              <Route path="/" element={<MainGameScreen />} />
+              <Route path="/story" element={<BackgroundScreen />} />
+              <Route path="/how-to-play" element={<HowToScreen />} />
+              <Route path="/game-play" element={<GamePlay />} />
+              <Route path="/multiplayer-lobby-lobby" element={<MultiplayerLobby/>} />
             <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
-          </Routes>
+            </Routes>
+          </SessionProvider>
         </BackgroundWrapper>
       </AudioProvider>
     </Router >

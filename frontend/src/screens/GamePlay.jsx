@@ -1,15 +1,16 @@
-// frontend/src/pages/GamePlay.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getQuestion } from "../../api/questionApi";
-import { getScenario } from "../../api/scenarioApi";
-import { submitChoice } from "../../api/answerApi";
->>>>>>> main
+import { getQuestion, submitChoice,  } from "../../api/single-player/GameApi";
 import Button from "../components/Button/Button";
 import { useNavigate } from "react-router-dom";
-import "../styles/GamePlay.css";
+import { useSession } from "../../SessionContext.jsx";
+import background from "../assets/background.jpg";
+import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
+import { useMemo, useRef } from "react";
+import "../styles/GamePlay.css";
+
 
 /**
  * GamePlay component
@@ -28,24 +29,26 @@ import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/contro
  * @returns {JSX.Element} The interactive gameplay screen with scenario/question flow.
  */
 const GamePlay = () => {
+  const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
+  const [currentTurn, setCurrentTurn] = useState(null);
+  const [scenarioData, setScenarioData] = useState({
+  scenario: 
+    "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
+    "Once experimental, memory editing, enhancement, and storage are mainstream, forcing governments " +
+    "to confront choices that could redefine humanity. manipulation not just possible, but precise and reliable." +
+    "Memory editing, enhancement," +
+    "These technologies can erase trauma, boost learning, and even share memories, offering both promise " +
+    "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
+    " ownership, and the commercialization of consciousness.",
+    image: background // no image for the first one
+});
+
   const navigate = useNavigate();
 
   // --- Tie narration to BGM ---
   const { isPlaying, volume, setVolume } = useBgm();
-
-  // --- Scenario Query ---
-  // Fetches the scenario whenever we are on the "scenario" screen.
-  const {
-    data: scenarioData,
-    isLoading: isScenarioLoading,
-    error: scenarioError,
-  } = useQuery({
-    queryKey: ["scenario", year],
-    queryFn: () => getScenario(year),
-    enabled: screen === "scenario",
-  });
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
@@ -58,6 +61,7 @@ const GamePlay = () => {
     queryFn: () => getQuestion(year),
     enabled: screen === "question", // only fetch when we are on question screen
   });
+
 
   // --- Minimal TTS: inline (no extra files/deps) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
@@ -168,49 +172,70 @@ const GamePlay = () => {
    *
    * @param {string} answer - The key of the chosen option.
    */
-  const handleChoice = async (answer) => {
-    try {
-      cancelTTS(); // stop narration immediately
-      submitChoice(year, answer);
-      setScreen("scenario");
-      setYear((year) => year + 1);
-    } catch (error) {
-      console.error("Error submitting choice:", error);
-    }
-  }
 
-  // --- UI Loading/Error States ---
-  if (isScenarioLoading && screen === "scenario") return <p>Loading scenario...</p>;
-  if (isQuestionLoading && screen === "question") return <p>Loading question...</p>;
-  if (scenarioError) return <p>Error loading scenario</p>;
-  if (questionError) return <p>Error loading question</p>;
+  // handle choice click
+  const handleChoice = async (option_id) => {
+    if (!currentTurn) return;
+    cancelTTS(); 
+    const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id)
+        const mapped = {
+        scenario: out.scenario.text,
+        image: out.image.url
+      };
+      if (out.image.status !== "ready" ) {
+        console.log("Failed to submit choice:", out.message);
+      }
+      console.log("Submit choice response:", mapped);
+      setScenarioData(mapped);
+      setScreen("scenario");
+      setYear(year + 1);
+      };
 
   return (
     <BasePage>
-
-      <Button baseButton="btn-back" action={() => { cancelTTS(); navigate("/"); }} title="Back" />
-
-      {/* Scenario screen */}
+      <ExitExperience/>
       {screen === "scenario" && scenarioData && (
-        <div className="text-container">
-          <h2 className="fade-in">{scenarioData.scenario}</h2>
-          <Button baseButton="btn-primary" action={() => setScreen("question")} title="Continue" />
+        <div className="screnario-screen">
+              {/* Image in middle */}
+          {scenarioData.image && (
+            <div className="scenario-image">
+              <img src={scenarioData.image} alt="scenario" className="scenario-img" />
+            </div>
+          )}
+          {/* Scenario text at top */}
+          <div className="text-container">
+            <h2 className="fade-in">{scenarioData.scenario}</h2>
+          </div>
+
+
+
+          {/* Continue button at bottom */}
+          <div className="scenario-footer">
+            <Button
+              baseButton="btn-primary"
+              action={() => {
+                setScreen("question");
+                console.log("Session ID:", sessionId);
+              }}
+              title="Continue"
+            />
+          </div>
         </div>
       )}
       {/** Question Screen*/}
-      {screen === "question" && questionData && (
+      {screen === "question" && currentTurn && (
         <div>
           <div className="question-container">
-            <h2 className="fade-in">{questionData.question}</h2>
+            <h2 className="fade-in">{currentTurn.question}</h2>
           </div>
           <div className="choice-container">
-            {/*Displays the questions and the choices */}
-            {Object.entries(questionData.options).map(([key, value]) => (
+            {currentTurn.options.map((opt) => (
               <Button
                 baseButton="choice-btn choice-fade-in"
-                key={key}
-                action={() => handleChoice(key)}
-                title={value} />
+                key={opt.option_id}
+                action={() => handleChoice(opt.option_id)}
+                title={`${opt.label}. ${opt.option_text}`}
+              />
             ))}
           </div>
         </div>

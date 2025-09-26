@@ -16,4 +16,4 @@ urlpatterns = [
     path("multiplayer/", include("multiplayer.urls")),
     # Root path and other core functionality - routes to core app
     path('', include('core.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 

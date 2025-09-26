@@ -1,5 +1,15 @@
 import api from "./api"
 
+export const createSession = async () => {
+  const response = await api.get("/create_session");
+  return response.data;
+};
+
+export const startPrerender = async (session_id, year) => {
+  const res = await api.get("/start_prerender", { params: { session_id, year } });
+  return res.data; // { status: "generation_started" }
+};
+
 /**
  * Fetches the scenario for a given year from the backend.
  *
@@ -9,7 +19,7 @@ import api from "./api"
  * - Returns only the response data.
  *
  * @async
- * @function getScenario
+ * @function getScenarioAndImage
  * @param {number} year - The current year for which to fetch the scenario.
  * @returns {Promise<object>} The scenario object containing scenario text and metadata.
  *
@@ -17,11 +27,9 @@ import api from "./api"
  * const scenario = await getScenario(2035);
  * console.log(scenario.scenario);
  */
-export const getScenario = async (year) => {
-  const response = await api.get("/storyline/start", {
-    params: { year }
-  });
-  return response.data;
+export const getScenarioAndImage = async (session_id, turn_id, year, option_id) => {
+  const res = await api.post(`/storyline/start/${session_id}/${turn_id}/${year}/${option_id}`);
+  return res.data;
 };
 
 /**
@@ -42,12 +50,16 @@ export const getScenario = async (year) => {
  * console.log(question.question);
  * console.log(question.options);
  */
-export const getQuestion = async(year) => {
-  const response = await api.get("/storyline/question", {
-    params: { year }
-  })
-  return response.data // extract only data of the payload
+export const getQuestion = async (session_id) => {
+  console.log("called question api for session:", session_id);
+  const res = await api.get(`/storyline/${session_id}/question`);
+  console.log("got output:", res.data);  // prints the actual object
+  console.log("question:", res.data.data.question);
+  console.log("options:", res.data.data.options);
+
+  return res.data.data; // { message, data: { turn_id, year, question, options } }
 };
+
 
 /**
  * Fetches an image from the backend API.
@@ -76,13 +88,9 @@ export const getImage = async () => {
  * @param {string} choice - The user's selected choice
  * @returns {Promise<object>} The result and next scenario/question
  */
-export const submitChoice = async (year, choice) => {
-  try {
-    const response = await api.post("/storyline/result", 
-    { year, choice });
-    return response.data;
-  } catch (error) {
-    console.error("Error submitting choice:", error);
-    throw error;
-  }
-};
+export const submitChoice = async (session_id, turn_id, year, option_id) => {
+  const res = await api.get(
+    `/storyline/start/${session_id}/${turn_id}/${year}/${option_id}`
+  );
+  return res.data; // { scenario, image, ...
+}
