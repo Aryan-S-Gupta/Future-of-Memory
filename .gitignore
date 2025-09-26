@@ -17,3 +17,7 @@ backend/media/
 
 # Add static repo back
 !backend/media/static/
+
+# Networking
+.env
+decisions.json

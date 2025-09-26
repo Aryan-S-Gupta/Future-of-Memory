@@ -9,7 +9,7 @@ import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
 import GamePlayMulti from "./screens/GamePlayMulti.jsx";
 
-import BackgroundWrapper from "./components/BasePage/BasePage.jsx";
+import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
 
