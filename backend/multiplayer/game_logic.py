@@ -1,42 +1,43 @@
 import random
 from collections import Counter
+import multiplayer.room_manager as rm
 
-def singleplayer_result(year, choice, story_data):
-    entry = next((item for item in story_data if str(item["year"]) == str(year)), None)
-    if not entry:
-        return {"error": "Year not found", "status": 404}
+class VotingSession :
 
-    result = entry.get("options", {}).get(choice.lower())
-    if not result:
-        return {"error": f"No result found for choice '{choice}'", "status": 404}
+    def __init__(self, room_code):
+        self.room_code = room_code
+        self.votes = {}
+        self.num_responses = 0
+        self.total_players = len(rm.get_players(room_code))
+        self.voted_players = []
 
-    return {
-        "year": entry["year"],
-        "choice": choice,
-        "result": result,
-        "next_year": entry["year"] + 1,
-    }
 
-def multiplayer_result(room, player_name, choice):
-    player = room["players"].get(player_name)
-    if not player:
-        return {"error": f"No player named {player_name} in room"}
+    def process_player_response(room, player_name, session_id, turn_id, option_id):
+        self.num_responses += 1
+
+        if player_name in self.voted_players:
+            return None
+
+        elif room != self.room_code:
+            raise ValueError("Room code does not match voting session")
+            return None
+        elif player_name not in self.voted_players:
+            self.voted_players.append(player_name)        
+
+
+        if num_players != num_responses:
+            self.votes[option_id] += 1
+        elif num_players < num_responses:
+
+            raise ValueError("Number of responses exceeds number of players")
+            return None
+        else:
+            max_votes = 0
+            final_option = random.choice(list(self.votes.keys()))
+            for option, vote in self.votes:
+                if vote > max_votes:
+                    max_votes = vote
+                    final_option = option
     
-    player["last_choice"] = choice
-
-    all_answered = all(p.get("last_choice") for p in room["players"].values())
-    outcome = None
-    if all_answered:
-        votes = [p["last_choice"] for p in room["players"].values()]
-        count = Counter(votes)
-        max_votes = max(count.values())
-        top_choices = [c for c, v in count.items() if v == max_votes]
-        outcome = random.choice(top_choices)  # break ties randomly
-
-        # Move room to next year
-        room["current_year"] += 1
-        # Clear last choices
-        for p in room["players"].values():
-            p["last_choice"] = None
-
-    return {"all_answered": all_answered, "outcome": outcome, "current_year": room["current_year"]}
+            return final_option
+        return None

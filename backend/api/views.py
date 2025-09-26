@@ -103,12 +103,7 @@ def get_story_result_by_choice(request):
 def submit_choice(request):
     data = json.loads(request.body.decode("utf-8"))
     mode = data.get("mode")
-
-    if mode == "single":
-        get_singleplayer_result(request)
-
-    elif mode == "multi":
-        get_multiplayer_result(request)
+    get_multiplayer_result(request)
 
 
 def get_multiplayer_result(data):
