@@ -4,6 +4,7 @@ import Button from "../components/Button/Button.jsx";
 import "../styles/BackgroundScreen.css";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import { startPrerender } from "../../api/single-player/GameApi.js";
+import { useSession } from "../../SessionContext.jsx";
 
 /**
  * BackgroundScreen component
