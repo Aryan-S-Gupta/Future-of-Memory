@@ -20,14 +20,8 @@ import axios from "axios";
  * @module api
  * @returns {AxiosInstance} A configured Axios instance for making HTTP requests.
  */
-const hostname = window.location.hostname;
-let baseURL;
 
-if (hostname === "localhost" || hostname === "127.0.0.1") {
-  baseURL = "http://127.0.0.1:8000";   // dev on same machine
-} else {
-  baseURL = `http://${hostname}:8000`; // resolve machine on LAN
-}
+const baseURL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:9000";
 
 const api = axios.create({
   baseURL: `${baseURL}/multiplayer`,
