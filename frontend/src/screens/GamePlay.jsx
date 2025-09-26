@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getQuestion } from "../../api/questionApi";
 import { getScenario } from "../../api/scenarioApi";
 import { submitChoice } from "../../api/answerApi";
+>>>>>>> main
 import Button from "../components/Button/Button";
 import { useNavigate } from "react-router-dom";
 import "../styles/GamePlay.css";
