@@ -15,7 +15,7 @@ from django.utils import timezone
 from .models import Session, Turn, Option, WorldBackground, DefaultQueryList
 
 # Import LLM generation functions
-from llm.generate import generate_question
+from llm.generate import generate_question, create_story_state, update_story_state
 
 # Import RAG functionality
 from rag.retrieve import retrieve_chunks
@@ -115,17 +115,58 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         
         last_description = "This is the beginning of your memory editing journey." # is this not supposed to be the initial world view???
     
-    # Step 6: Call LLM generation
+    # Step 6: Prepare or retrieve story state for efficient LLM processing
+    logger.info("Preparing story state for LLM generation...")
+    try:
+        if year == 2035:
+            # First turn: Create initial story state
+            current_story_state = create_story_state(
+                scenario_summary="Government announces new memory editing technology capabilities, raising questions about ethics, policy, and societal impact",
+                user_choice="Starting the journey"
+            )
+            logger.info("Created initial story state for first turn")
+        else:
+            # Subsequent turns: Get previous story state and update it
+            try:
+                previous_turn = Turn.objects.get(session=session, year=year-1)
+                current_story_state = previous_turn.story_state or {}
+                
+                # Update state if previous turn had a user choice
+                if previous_turn.user_choice:
+                    decision_text = previous_turn.user_choice.option_text or "Previous choice unavailable"
+                    scenario_summary = previous_turn.user_choice.scenario_summary or "Previous scenario development continues"
+                    
+                    current_story_state = update_story_state(
+                        current_state=current_story_state,
+                        new_scenario_summary=scenario_summary,
+                        new_user_choice=decision_text
+                    )
+                    logger.info(f"Updated story state with previous decision: Option {previous_turn.user_choice.label}")
+                else:
+                    logger.info("Using previous story state without updates (no user choice)")
+                    
+            except Turn.DoesNotExist:
+                logger.warning(f"Previous turn {year-1} not found, creating fresh story state")
+                current_story_state = create_story_state(
+                    scenario_summary=f"Continuing from year {year-1} developments in memory editing technology and policy",
+                    user_choice="Previous decisions led to current situation"
+                )
+    except Exception as e:
+        logger.error(f"Story state preparation failed: {e}")
+        # Fallback to empty state
+        current_story_state = None
+
+    # Step 7: Call LLM generation with story state
     logger.info("Calling LLM question generation...")
     try:
         question_result_json = generate_question(
             year=year,
             background=background,
             context_block=context_block,
-            last_description=last_description
+            story_state=current_story_state
         )
         
-        # Step 7: Parse the JSON result
+        # Step 8: Parse the JSON result
         question_result = json.loads(question_result_json)
         logger.debug(f"LLM generated question: {question_result.get('question', '')[:50]}...")
         
@@ -133,13 +174,14 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         logger.error(f"LLM question generation failed: {e}")
         raise
     
-    # Step 8: Create new Turn record
+    # Step 9: Create new Turn record with story state
     try:
         new_turn = Turn.objects.create(
             session=session,
             year=year,
             question=question_result.get('question', ''),
-            question_generated_at=timezone.now()
+            question_generated_at=timezone.now(),
+            story_state=current_story_state or {}  # Restored: save story state to database
         )
         logger.info(f"Created new turn {new_turn.id} for year {year}")
         
@@ -147,7 +189,7 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         logger.error(f"Failed to create Turn record: {e}")
         raise
     
-    # Step 9: Create two Option records
+    # Step 10: Create two Option records
     options_data = question_result.get('options', [])
     option_queries = question_result.get('option_queries', [])
     
@@ -176,7 +218,7 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         logger.error(f"Failed to create Option records: {e}")
         raise
     
-    # Step 10: Return result summary
+    # Step 11: Return result summary
     result = {
         'turn_id': new_turn.id,
         'session_id': session_id,
@@ -331,8 +373,9 @@ def generate_and_save_scenario(session_id: int, turn_id: int, year: int) -> Dict
             if label in descriptions_result:
                 description_data = descriptions_result[label]
                 
-                # Update scenario and question_query_text fields
+                # Update scenario, scenario_summary and question_query_text fields
                 option.scenario = description_data.get('scenario', '')
+                option.scenario_summary = description_data.get('scenario_summary', '')
                 option.question_query_text = description_data.get('query_text', '')
                 option.save()
                 

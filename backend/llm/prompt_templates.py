@@ -4,60 +4,64 @@ def build_question_prompt(
     year: int,
     background: str,
     context_block: str,
-    last_description: str,
 ) -> str:
     """
-    STEP A: Ask the model to return a multiple-choice style question with two options AND two corresponding RAG queries.
-    OUTPUT must be STRICT JSON with fields: question, options[2], option_queries[2]
+    Generate a prompt for LLM to create a multiple-choice question with two options and RAG queries.
+    
+    Returns:
+        str: Formatted prompt string for the LLM
     """
+    # Check if context_block contains compressed context (has "Previous Scenario:" pattern)
+    if "Previous Scenario:" in context_block and "Previous Choice:" in context_block:
+        # This is compressed context with story state
+        story_context = f"""STORY FRAME
+Current Year: {year}
+
+World Background:
+{background}
+
+Story Context:
+{context_block}"""
+    else:
+        # This is regular RAG context
+        story_context = f"""STORY FRAME
+Current Year: {year}
+
+World Background:
+{background}
+
+Retrieved Context (if any):
+{context_block}"""
+    
     return f"""
+    
 You are a narrative engine for a turn-based story.
 
 TASK
 1) Propose ONE clear, decision-driving question WITH EXACTLY TWO OPTIONS (A, B). 
    Each option must be short, mutually exclusive, and lead to meaningfully different outcomes.
-2) Build TWO specific retrieval queries (one for each option) to fetch 3–6 highly relevant factual snippets for grounding each option's consequences.
+2) Build TWO specific retrieval queries (one for each option) to fetch relevant factual snippets for grounding each option's consequences.
 
-STORY FRAME
-Current Year: {year}
-
-Background:
-{background}
-
-Previous Story Summary:
-{last_description}
-
-Retrieved Context (if any, distilled):
-{context_block}
+{story_context}
 
 
-HARD CONSTRAINTS
-- Return ONLY valid JSON (no markdown, no code fences).
-- The question must be specific and consequential for the next plot turn.
-- "options": an array of EXACTLY 2 strings. Avoid "Yes/No".
-- Each retrieval query must be standalone (<= 110 chars) and safe to send to RAG.
-- Each option must be short (6–14 words), mutually exclusive, concrete, and must NOT repeat the question text.
+REQUIREMENTS
+- The question should be detailed and specific (aim for 18-30 words total).
+- Provide context to make the scenario and stakes clear to players.
+- Generate exactly TWO options that avoid "Yes/No" answers.
+- Each option should be 10–18 words, mutually exclusive, and concrete.
 - Do NOT include labels like "A." or "B." inside option strings.
 - The two options MUST represent distinctly different approaches or philosophies.
-- Options should be self-contained and understandable without repeating the whole question.
+- Options should be self-contained and understandable without repeating the question text.
 - Frame the question at the societal, policy, or community level (e.g., citizens, regulators, clinics, researchers).
+- Each retrieval query must contain relevant keywords for the corresponding option (maximum 80 characters).
+- RAG queries should be short keyword phrases only - no full sentences, questions, or punctuation.
+- Example query format: "memory editing safety protocols clinical trials" or "regulatory frameworks ethical oversight"
 
-OUTPUT FORMAT (STRICT)
-Return ONLY valid JSON with this exact schema:
-{{
-  "question": "<one question ending with a question mark>",
-  "options": ["<option A>", "<option B>"],
-  "option_queries": ["<query for option A>", "<query for option B>"]
-}}
-
-EXAMPLE (ONLY to learn the shape; DO NOT copy content):
-{{
-  "question": "Which approach should the regulatory committee prioritize?",
-  "options": ["Establish mandatory waiting periods for all procedures", "Create independent patient advocate programs"],
-  "option_queries": ["clinical protocols waiting periods memory editing safety", "patient advocacy programs memory editing support"]
-}}
-
-Return ONLY valid JSON. Do not include markdown, code fences, or commentary.
+CRITICAL OUTPUT REQUIREMENTS
+- MUST return clean JSON without any template tags, placeholders, or markup syntax
+- FORBIDDEN: Never include template variables, curly braces, angle brackets, or HTML-like tags in any field
+- All text must be plain, readable content without programming syntax or placeholder markers
 """.strip()
 
 
@@ -85,7 +89,9 @@ CRITICAL VALIDATION REQUIREMENTS (Your response will be automatically validated)
 2. MUST include "scenario" field as a string paragraph
 3. MUST include "query_text" field as a string
 4. Total word count for the scenario paragraph must be between 80-150 words
-5. If any of these requirements are not met, your response will be rejected and retried
+5. FORBIDDEN: Never include template tags, brackets, or HTML-like syntax such as curly braces, angle brackets, slashes with brackets, etc.
+6. FORBIDDEN: Never include placeholder text like "retrieval_query", "option_text", or similar template variables
+7. If any of these requirements are not met, your response will be rejected and retried
 
 STORY FRAME
 Current Year: {year}
@@ -107,8 +113,9 @@ Selected Option:
 
 SCENARIO REQUIREMENTS
 - Output "scenario" as a single coherent paragraph string.
-- CRITICAL: Total word count MUST be between 80-150 words (count words by spaces). Your response will be REJECTED if under 80 words.
-- Write as one flowing narrative paragraph with multiple detailed sentences (aim for 4-6 sentences minimum).
+- CRITICAL LENGTH REQUIREMENT: Target 80-120 words for optimal length. Aim for approximately 100 words. Count carefully as you write.
+- MANDATORY: Your response will be automatically REJECTED if under 80 words. Ensure sufficient detail and elaboration.
+- Write as one flowing narrative paragraph with multiple detailed sentences (minimum 5-7 sentences for adequate length).
 - Focus on institutional actors (clinics, agencies, councils, governments, consortia). Do not center individual doctors or patients; avoid personal names.
 - Overall causal arc: an institutional actor takes an action → visible consequences or public reactions. You do not need to repeat this structure inside every sentence.
 - Use simple, everyday language suitable for museum visitors or high-school students.
@@ -124,13 +131,16 @@ ANTI-COPYING & VARIATION
 EXAMPLE TEMPLATE (structure only, NOT content to copy - this example is approximately 95 words):
 "scenario": "<Government/Agency/Clinic/Consortium> announces a comprehensive policy/action at <specific venue and city> on <specific date>, explaining detailed goals and multiple safeguards while diverse audiences react with curiosity and measured caution about identity preservation and privacy implications. <Regulatory body/Clinic network> demonstrates standardized procedures under strict multi-step consent checks, describing verification protocols and displaying preliminary results as visitors carefully weigh potential cognitive benefits against possible psychological risks and societal consequences. <Council/Agency> hosts an extensive public session in <concrete setting and time>, where detailed signage, ambient sounds, and interactive screen visuals shape the contemplative mood and make complex scientific ideas feel tangible and accessible. <Government/Consortium> coordinates systematically with regional partners, promising rigorous oversight and transparent reporting, while ongoing debates and news coverage amplify both hopes alongside growing doubts about long-term consequences. What fundamental aspects of human identity should be protected if memories become editable in daily life?"
 
-CRITICAL LENGTH REQUIREMENT
-- YOUR RESPONSE WILL BE AUTOMATICALLY REJECTED IF THE SCENARIO IS UNDER 80 WORDS.
-- Target 100-120 words for optimal length (well within the 80-150 range).
-- Include multiple detailed sentences with specific examples, locations, reactions, and consequences.
-- Add descriptive elements: specific venues, participant reactions, timeline details, policy specifics.
-- Count words carefully before finalizing your response.
-- Never include banned phrases.
+CRITICAL LENGTH REQUIREMENT - READ CAREFULLY
+- MANDATORY: Write EXACTLY 80-120 words. Your response will be AUTOMATICALLY REJECTED if outside this range.
+- TARGET: Aim for 90-110 words as the sweet spot for detailed but concise narrative.
+- VERIFICATION: Count words as you write. Use specific details to reach the word count:
+  * Specific dates, locations, and institution names (adds 5-10 words)
+  * Participant reactions and emotions (adds 10-15 words) 
+  * Policy details and implementation steps (adds 10-15 words)
+  * Sensory details and atmosphere (adds 5-10 words)
+- STRUCTURE: 5-7 detailed sentences with rich descriptions to naturally reach word count.
+- Never use banned phrases or copy example content.
 
 FOLLOW-UP RAG QUERY REQUIREMENTS
 - Base the query strictly on entities, mechanisms, or ethical dilemmas explicitly raised in the scenario.
@@ -140,19 +150,28 @@ FOLLOW-UP RAG QUERY REQUIREMENTS
 - Examples: "memory editing consent procedures and safety protocols" | "clinical trial regulations and patient rights" | "institutional oversight and ethical guidelines"
 - Do NOT use question words (what, how, why, should, can, will, etc.) or question marks (?)
 
+SCENARIO SUMMARY REQUIREMENTS
+- In addition to the full scenario, provide a brief "scenario_summary" field.
+- This should be a 20-30 word summary capturing the key developments.
+- Focus on the main institutional action and immediate outcome.
+- Use concise, clear language suitable for story state tracking.
+- Example: "Government announces comprehensive memory editing policy with safeguards, public shows measured caution about identity implications"
+
 OUTPUT FORMAT (STRICT)
 CRITICAL: Your response will be validated automatically. It MUST pass these checks:
 1. Valid JSON format (starts with {{ and ends with }})
 2. Contains "scenario" field as a string paragraph
 3. MANDATORY: Total word count of the scenario paragraph must be between 80-150 words (WILL BE REJECTED IF UNDER 80)
-4. Contains "query_text" field as a string
-5. No extra text outside the JSON structure
+4. Contains "scenario_summary" field as a 20-30 word summary
+5. Contains "query_text" field as a string
+6. No extra text outside the JSON structure
 
 BEFORE SUBMITTING: Count the words in your scenario. If under 80 words, add more specific details, institutional reactions, timeline information, or consequences until you reach at least 80 words.
 
 Return ONLY valid JSON with this exact schema:
 {{
   "scenario": "<one coherent paragraph with 80-150 words total>",
+  "scenario_summary": "<20-30 word summary of key developments and context>",
   "query_text": "<declarative keyword phrase - no questions or question marks>"
 }}
 

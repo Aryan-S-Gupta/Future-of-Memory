@@ -15,7 +15,7 @@ try:
     from .prompt_templates import build_question_prompt, build_description_prompt, build_image_text_prompt
     from ..shared.constants import OLLAMA_LLM_MODEL
 except ImportError:
-    from prompt_templates import build_question_prompt, build_description_prompt, build_image_text_prompt
+    from llm.prompt_templates import build_question_prompt, build_description_prompt, build_image_text_prompt
     from shared.constants import OLLAMA_LLM_MODEL
 
 # Configuration constants
@@ -32,14 +32,20 @@ QUESTION_SCHEMA = {
         },
         "options": {
             "type": "array",
-            "items": {"type": "string"},
+            "items": {
+                "type": "string",
+                "description": "Option text"
+            },
             "minItems": 2,
             "maxItems": 2,
             "description": "Exactly 2 option strings"
         },
         "option_queries": {
             "type": "array",
-            "items": {"type": "string"},
+            "items": {
+                "type": "string",
+                "description": "RAG query keywords"
+            },
             "minItems": 2,
             "maxItems": 2,
             "description": "Exactly 2 RAG queries, one for each option"
@@ -55,12 +61,16 @@ DESCRIPTION_SCHEMA = {
             "type": "string",
             "description": "Single paragraph with 80-150 words"
         },
+        "scenario_summary": {
+            "type": "string",
+            "description": "Brief 20-30 word summary"
+        },
         "query_text": {
             "type": "string",
-            "description": "Declarative keyword phrase for next turn retrieval"
+            "description": "Declarative keyword phrase"
         }
     },
-    "required": ["scenario", "query_text"]
+    "required": ["scenario", "scenario_summary", "query_text"]
 }
 
 OPTIONS_REFINE_SCHEMA = {
@@ -99,7 +109,13 @@ def call_ollama(prompt: str, json_schema: dict = None) -> dict:
         "model": MODEL, 
         "prompt": prompt, 
         "stream": False, 
-        "format": "json"
+        "format": "json",
+        "options": {
+            "temperature": 0.6,      # Low temperature for more predictable output
+            "top_p": 0.95,           # Nucleus sampling
+            "top_k": 80,            # Top-k sampling  
+            "repeat_penalty": 1.1,  # Penalize repetition
+        }
     }
     
     # Add JSON schema if provided (for better structured output)
@@ -165,10 +181,10 @@ def validate_description_scenario(result: dict) -> bool:
         print(f"Validation failed: scenario is empty")
         return False
     
-    # Check word count is between 60-150 words (relaxed from 80-150)
+    # Check word count - fixed 50-150 words requirement
     word_count = len(scenario.split())
-    if not (60 <= word_count <= 150):
-        print(f"Validation failed: word count is {word_count}, expected 60-150")
+    if not (50 <= word_count <= 150):
+        print(f"Validation failed: word count is {word_count}, expected 50-150")
         return False
     
     return True
@@ -247,6 +263,51 @@ def validate_image_texts(image_texts: Dict[str, str]) -> bool:
     
     return True
 
+# ---------- Story State Management ----------
+
+def create_story_state(
+    scenario_summary: str = "",
+    user_choice: str = ""
+) -> dict:
+    """
+    Create a simplified story state with only essential context.
+    
+    Args:
+        scenario_summary: Summary of the previous turn's scenario and theme development
+        user_choice: The user's previous choice/decision
+        
+    Returns:
+        dict: Simplified story state for efficient LLM processing
+    """
+    return {
+        "scenario_summary": scenario_summary or "Story beginning",
+        "user_choice": user_choice or "No previous choice",
+        "context_version": "simplified_v1"  # For future compatibility
+    }
+
+
+def update_story_state(
+    current_state: dict,
+    new_scenario_summary: str,
+    new_user_choice: str
+) -> dict:
+    """
+    Update story state with new scenario and user choice.
+    
+    Args:
+        current_state: Existing story state dict
+        new_scenario_summary: New scenario summary and theme development
+        new_user_choice: Latest user choice/decision
+        
+    Returns:
+        dict: Updated story state
+    """
+    return {
+        "scenario_summary": new_scenario_summary,
+        "user_choice": new_user_choice,
+        "context_version": current_state.get("context_version", "simplified_v1")
+    }
+
 # ---------- Public API ----------
 
 def generate_question(
@@ -254,7 +315,7 @@ def generate_question(
     year: int,
     background: str,
     context_block: str,
-    last_description: str,
+    story_state: dict = None,
     max_retries: int = 3,
 ) -> str:
     """
@@ -264,10 +325,10 @@ def generate_question(
     with exactly two mutually exclusive options that advance the story.
     
     Args:
-        year: The current year in the story timeline
+        year: The current year in the story timeline (2035 = first year, uses background directly)
         background: The overall story background/setting
         context_block: Retrieved context information for grounding
-        last_description: Previous story summary/description
+        story_state: Optional compressed story state (dict with key context for years > 2035)
         max_retries: Maximum number of retry attempts for validation
         
     Returns:
@@ -279,9 +340,27 @@ def generate_question(
     Raises:
         Exception: If generation fails after all retries
     """
-    prompt = build_question_prompt(
-        year, background, context_block, last_description
-    )
+    # Year-based validation and context selection
+    if year == 2035:
+        # First year: use background directly without story state
+        prompt = build_question_prompt(
+            year, background, context_block
+        )
+    elif story_state:
+        # Subsequent years with story state: use compressed context
+        scenario_summary = story_state.get("scenario_summary", "")
+        user_choice = story_state.get("user_choice", "")
+        
+        # Build compressed context instead of full re-reading
+        compressed_context = f"Previous Scenario: {scenario_summary}\nPrevious Choice: {user_choice}\nRAG Context: {context_block}"
+        prompt = build_question_prompt(
+            year, background, compressed_context
+        )
+    else:
+        # Fallback for subsequent years without story state
+        prompt = build_question_prompt(
+            year, background, context_block
+        )
     
     # Step A: Main generation attempt
     try:
@@ -518,6 +597,7 @@ def generate_option_descriptions(
         if not success:
             option_descriptions[label] = {
                 "scenario": fallback_scenarios[i],
+                "scenario_summary": f"{'Policy-focused institutional changes' if i == 0 else 'Research-driven scientific investigation'} continue to develop",
                 "query_text": fallback_queries[i]
             }
             print(f"Option {label}: Using fallback description")
@@ -580,6 +660,7 @@ def generate_description(
     # If all attempts fail, return a fallback result
     fallback_result = {
         "scenario": "The selected decision creates immediate ripple effects across institutions and communities as stakeholders gather in meeting rooms and public spaces to discuss the implications of this choice. New policies and procedures begin to take shape based on the direction that was chosen, while citizens and experts alike watch closely as the consequences unfold in real time. The path forward remains uncertain, but the choice has been made and will shape future developments. Implementation challenges emerge as different groups interpret the decision through their own perspectives and priorities. How will society adapt to the changes that this pivotal moment has set in motion?",
+        "scenario_summary": "Selected decision creates institutional changes and policy developments with uncertain outcomes",
         "query_text": "policy implementation and social consequences of memory editing decisions"
     }
     return json.dumps(fallback_result)
