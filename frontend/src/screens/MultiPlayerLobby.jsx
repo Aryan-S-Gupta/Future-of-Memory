@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/RoomManagementApi.js";
 import "./MultiplayerLobby.css"; // Import CSS for styling
 import Button from "../components/Button/Button.jsx";
-import BasePage from "../components/BasePage/BasePage.jsx";
+import BasePage from "./BasePage.jsx";
 
 /**
  * MultiplayerLobby Component

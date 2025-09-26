@@ -209,7 +209,7 @@ def start_prerendering(request):
     session_id = request.GET.get("session_id")
     logger.debug("start_turn_pipeline.send() called")
     start_turn_pipeline.send(session_id, year)
-    logger.debug("start_turn_pipeline.send() called")
+    logger.debug("start_turn_pipeline.send() called: ")
     return JsonResponse({'status': 'generation_started'})
 
 # question and options display page

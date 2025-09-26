@@ -4,7 +4,7 @@ import { getScenario, getQuestion, submitChoice } from "../../api/multiplayer/Ga
 import { getRoomState } from "../../api/multiplayer/RoomManagementApi.js";
 import Button from "../components/Button/Button.jsx";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import "./GamePlay.css";
+import "../styles/GamePlay.css";
 
 const GamePlayMulti = () => {
   const navigate = useNavigate();
