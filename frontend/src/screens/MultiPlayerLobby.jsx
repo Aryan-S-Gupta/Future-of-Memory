@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/RoomManagementApi.js";
-import "./GamePlay.css";
 import Button from "../components/Button/Button.jsx";
 
 /**

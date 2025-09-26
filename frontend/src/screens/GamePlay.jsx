@@ -1,28 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQuestion, submitChoice,  } from "../../api/single-player/GameApi";
 import Button from "../components/Button/Button";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "../../SessionContext.jsx";
-import "./GamePlay.css";
-import { useMutation } from "@tanstack/react-query";
 import background from "../assets/background.jpg";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
-import Button from "../components/Button/Button";
-import { useNavigate } from "react-router-dom";
-import "../styles/GamePlay.css";
 import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getQuestion } from "../../api/questionApi";
-import { getScenario } from "../../api/scenarioApi";
-import { submitChoice } from "../../api/answerApi";
-import Button from "../components/Button/Button";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useRef } from "react";
 import "../styles/GamePlay.css";
-import BasePage from "./BasePage.jsx";
-import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 
 
 /**
@@ -204,17 +191,9 @@ const GamePlay = () => {
       setYear(year + 1);
       };
 
-  // --- UI Loading/Error States ---
-  if (isScenarioLoading && screen === "scenario") return <p>Loading scenario...</p>;
-  if (isQuestionLoading && screen === "question") return <p>Loading question...</p>;
-  if (scenarioError) return <p>Error loading scenario</p>;
-  if (questionError) return <p>Error loading question</p>;
-
   return (
     <BasePage>
-
       <ExitExperience/>
-
       {screen === "scenario" && scenarioData && (
         <div className="screnario-screen">
               {/* Image in middle */}
