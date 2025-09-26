@@ -13,12 +13,14 @@ from typing import Dict, Any, Union
 # Handle imports for both relative (Django) and absolute (standalone) usage
 try:
     from .prompt_templates import build_question_prompt, build_description_prompt, build_image_text_prompt
+    from ..shared.constants import OLLAMA_LLM_MODEL
 except ImportError:
     from prompt_templates import build_question_prompt, build_description_prompt, build_image_text_prompt
+    from shared.constants import OLLAMA_LLM_MODEL
 
 # Configuration constants
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "phi3:3.8b"
+MODEL = OLLAMA_LLM_MODEL
 
 # JSON Schemas for structured output
 QUESTION_SCHEMA = {

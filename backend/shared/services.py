@@ -19,7 +19,7 @@ from llm.generate import generate_question
 
 # Import RAG functionality
 from rag.retrieve import retrieve_chunks
-from llm.rag_adapter import format_rag_context_for_llm
+from llm.rag_preprocessor import preprocess_rag_chunks
 from images.render_pipeline import generate_two_images_blocking
 
 logger = logging.getLogger(__name__)
@@ -78,7 +78,7 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
                 # Step 4: Call RAG to get context_block
                 if query_text.strip():
                     rag_chunks = retrieve_chunks(query_text)
-                    context_block = format_rag_context_for_llm(rag_chunks)
+                    context_block = preprocess_rag_chunks(rag_chunks)
                     logger.debug(f"Generated context block length: {len(context_block)}")
                 
                 # Step 5: Get scenario from previous choice (last_description)
@@ -109,7 +109,7 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         if default_keywords:
             default_query = " ".join(default_keywords)
             rag_chunks = retrieve_chunks(default_query)
-            context_block = format_rag_context_for_llm(rag_chunks)
+            context_block = preprocess_rag_chunks(rag_chunks)
         else:
             context_block = ""
         
@@ -270,7 +270,7 @@ def generate_and_save_scenario(session_id: int, turn_id: int, year: int) -> Dict
         if query_text and query_text.strip():
             try:
                 rag_chunks = retrieve_chunks(query_text)
-                context_block = format_rag_context_for_llm(rag_chunks)
+                context_block = preprocess_rag_chunks(rag_chunks)
                 context_blocks.append(context_block)
                 logger.debug(f"Generated context block {i+1} length: {len(context_block)}")
             except Exception as e:
@@ -604,7 +604,6 @@ def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int]
         image_result = generate_and_save_image_text(session_id, turn_id, target_year)
         step_duration = (timezone.now() - step_start).total_seconds()
         logger.info(f"Image text generation completed in {step_duration:.2f}s")
-        print(f'Session/turn mismatch: {session_id} vs {turn.session_id}')
         # TODO: Reserved space for image generation function
         generate_two_images_blocking(session_id, turn_id)
         
