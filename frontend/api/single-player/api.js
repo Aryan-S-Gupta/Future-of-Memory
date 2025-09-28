@@ -4,7 +4,7 @@ import axios from "axios";
  * Axios API instance
  *
  * Creates a pre-configured Axios instance (`api`) that can be reused
- * across the frontend to communicate with the backend for single player game.
+ * across the frontend to communicate with the backend.
  *
  * Configuration:
  * - `baseURL`: points to the backend API root (default: http://127.0.0.1:8000/api).
@@ -20,10 +20,24 @@ import axios from "axios";
  * @module api
  * @returns {AxiosInstance} A configured Axios instance for making HTTP requests.
  */
-const baseURL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:9000";
-const api = axios.create({
-  baseURL:  `${baseURL}/api`,
 
+const hostname = window.location.hostname;
+
+// Build URL depending on environment
+let baseURL;
+if (hostname === "localhost" || hostname === "127.0.0.1") {
+  console.log("Using local backend URL using hostname:", hostname );
+  // Local dev
+  baseURL = "http://127.0.0.1:9000";
+} else {
+  // Assume LAN or deployed host
+  baseURL = `http://${hostname}:9000`;
+  console.log("Using LAN/deployed backend URL:", baseURL);
+  console.log("hostname:", hostname);
+}
+
+const api = axios.create({
+  baseURL: `${baseURL}/api`,
   headers: {
     "Content-Type": "application/json",
   },
