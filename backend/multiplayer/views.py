@@ -229,30 +229,36 @@ from shared.tasks import start_turn_pipeline
 def start_prerendering(request):
     year = request.GET.get("year")
     session_id = request.GET.get("session_id")
-    logger.debug("start_turn_pipeline.send() called")
-    start_turn_pipeline.send(session_id, year)
-    logger.debug("start_turn_pipeline.send() called: ")
+    logger.debug("start_turn_pipeline.send() called with session id " + str(session_id) + " and year " + year)
+    response = start_turn_pipeline.send(session_id, year)
+    logger.debug("start_turn_pipeline.send() called: " + response)
     return JsonResponse({'status': 'generation_started'})
 
 
 # send the existing work
-def display_question_and_options(request, session_id, room_code):
+# everytime this is called update turn id 
+def display_question_and_options(request, session_id, room_code, turn_id):
     VOTING_SESSION = VotingSession(room_code)
-
     # get session
     logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
     logger.debug(f"Found session: {existing_session}")
 
+    if turn_id is None:
+        logger.warning("first turn, no turn_id provided")
+        return JsonResponse({'error': 'No turn found for this session'}, status=404)
+    
     # find the latest turn for this session
     latest_turn = (
         Turn.objects
         .filter(session_id=existing_session.id)
         .order_by('-year', '-id')
-        .first()
+        .get(id=turn_id)
     )
     if latest_turn is None:
         logger.warning("No turn found for this session")
+        # send question for the first turn 
+        
         return JsonResponse({'error': 'No turn found for this session'}, status=404)
     logger.debug(f"Latest turn for session: {latest_turn}")
     # use the latest turn's id to fetch its question and related options
@@ -287,10 +293,11 @@ from shared.services import display_world_view
 
 
 
-def display_scenario_and_image(request, session_id, turn_id, year, option_id, player_name, room_code):
+def display_scenario_and_image(request, session_id, turn_id, year, option_id, room_code):
     """
     Display the world view after user makes a choice.
     """
+    player_name = request.GET.get("player_name")
     final_option = VOTING_SESSION.process_player_response(room_code, player_name, session_id, turn_id, option_id)
 
     # when you receive request check no of players, check number of responses, create a map of option id, and num votes, then get the votes from the reqwuest 

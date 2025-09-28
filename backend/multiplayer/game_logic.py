@@ -12,7 +12,7 @@ class VotingSession :
         self.voted_players = []
 
 
-    def process_player_response(room, player_name, session_id, turn_id, option_id):
+    def process_player_response(self, room, player_name, session_id, turn_id, option_id):
         self.num_responses += 1
 
         if player_name in self.voted_players:
@@ -25,9 +25,9 @@ class VotingSession :
             self.voted_players.append(player_name)        
 
 
-        if num_players != num_responses:
+        if self.num_players != self.num_responses:
             self.votes[option_id] += 1
-        elif num_players < num_responses:
+        elif self.num_players < self.num_responses:
 
             raise ValueError("Number of responses exceeds number of players")
             return None
