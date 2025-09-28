@@ -21,7 +21,7 @@ const GamePlayMulti = () => {
   const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
-  const [currentTurn, setCurrentTurn] = useState(null);
+  const [currentTurn, setCurrentTurn] = useState(-1);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -47,10 +47,11 @@ const GamePlayMulti = () => {
   error: questionError,
   status,
   } = useQuery({
-    queryKey: ["question", roomCode, sessionId],
+    queryKey: ["question", roomCode, sessionId, currentTurn.turn_id],
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
-      const result = await getQuestion(roomCode, sessionId);
+      const result = await getQuestion(roomCode, sessionId, currentTurn.turn_id);
+      console.log("currentTurn after getQuestion:", currentTurn);
       console.log("queryFn result:", result);
       setCurrentTurn(result)
       return result;

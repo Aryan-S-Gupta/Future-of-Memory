@@ -244,7 +244,7 @@ def display_question_and_options(request, session_id, room_code, turn_id):
     existing_session = get_object_or_404(Session, id=session_id)
     logger.debug(f"Found session: {existing_session}")
 
-    if turn_id is None:
+    if turn_id == int(-1):
         logger.warning("first turn, no turn_id provided")
         return JsonResponse({'error': 'No turn found for this session'}, status=404)
     
