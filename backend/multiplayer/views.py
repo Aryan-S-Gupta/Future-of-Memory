@@ -239,7 +239,9 @@ def start_prerendering(request):
 # everytime this is called update turn id 
 def display_question_and_options(request, session_id, room_code, turn_id):
     VOTING_SESSION = VotingSession(room_code)
-    # get session
+    rm.update_state(room_code, {"voting_session": VOTING_SESSION})
+    # get
+    #  session
     logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
     logger.debug(f"Found session: {existing_session}")
