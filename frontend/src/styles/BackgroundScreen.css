@@ -1,0 +1,92 @@
+@import url('/src/styles/tokens.css');
+
+.text-container2 {
+  background-color: var(--color-text-container-bg);
+  padding: var(--space-md);
+  border-radius: var(--radius-sm);
+  max-width: 400px;
+  text-align: center;
+}
+
+/* Body text */
+.text2 {
+  font-family: var(--font-body);
+  font-size: var(--fs-body-strong);
+  font-weight: 400;
+  text-align: center;
+  color: var(--color-accent);
+  text-shadow: var(--shadow-subheading);
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+
+.crawl-container {
+  perspective: 500px; /* creates the 3D effect */
+  height: 500px; /* height of the visible area */
+  width: 800px;
+  overflow: hidden;
+  position: relative;
+}
+
+.crawl-text {
+  font-family: var(--font-body);
+  position: absolute;
+  width: 100%;
+  font-size: var(--fs-crawl);
+  text-align: center;
+  transform-origin: 50% 100%;
+  transform: rotateX(25deg);
+  animation: crawl var(--dur-crawl) linear infinite;
+  color: var(--color-text);
+  text-shadow: var(--shadow-crawl);
+}
+
+@keyframes crawl {
+  0% {
+    bottom: -200%;
+  }
+  100% {
+    bottom: 100%;
+  }
+}
+
+.btn-next {
+  padding: 1rem 3rem;
+  font-size: var(--fs-btn);
+  font-family: var(--font-display);
+  font-weight: bold;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, var(--color-btn-grad-start), var(--color-btn-grad-end));
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: var(--shadow-strong);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s var(--ease-standard);
+}
+.btn-next:hover {
+  background: linear-gradient(145deg, var(--color-btn-hover-start), var(--color-btn-hover-end));
+  box-shadow: var(--shadow-strong-hover);
+  transform: scale(1.05);
+}
+
+/* next button fade-in */
+.next-fade-in {
+  opacity: 0;
+  animation: nextfadeIn var(--dur-next-fade) var(--ease-standard) forwards;
+  animation-delay: 15s;
+}
+
+@keyframes nextfadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px); /* subtle upward motion */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

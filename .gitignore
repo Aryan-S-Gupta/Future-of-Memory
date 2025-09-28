@@ -26,3 +26,7 @@ redis.conf
 # Ignore other local development files
 *.log
 node_modules/
+
+# Networking
+.env
+decisions.json
