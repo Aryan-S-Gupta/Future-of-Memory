@@ -1,7 +1,11 @@
 import logging
+
+from django.http import JsonResponse
+from shared.models import Session, Option, Turn
 # Dictionary to store all multiplayer rooms.
 # Key: room_code (string), Value: room details (dict)
 rooms = {}  
+room_sessions = {}  # Maps room codes to session IDs
 
 
 def create_room(host_name):
@@ -16,15 +20,20 @@ def create_room(host_name):
     """
     # Generate a room code based on current number of rooms, padded to 4 digits
     room_code = str(len(rooms) + 1).zfill(4)
+    session = Session.objects.create()
+    logging.debug(f'session id created: {session.id}')
+    room_sessions[room_code] = session.id
 
     # Initialize room data: host, list of players, and game state
     rooms[room_code] = {
         "host": host_name,
         "players": [host_name],  # host is the first player
         "state": {},             # placeholder for game state
-    }
+    }   
     logging.info(f"Room created with code {room_code} by host {host_name}")
-    return room_code
+    logging.info(f'Current rooms: {rooms}')
+    return room_code, session.id
+
 
 def get_room_codes():
     """
@@ -55,6 +64,8 @@ def get_players(room_code):
     Returns:
         list: Names of players in the room.
     """
+    logging.info(f'Fetching players in room {rooms}')
+    logging.info(f'Fetching players in room {room_code} which has players {rooms[room_code]["players"]}')
     return rooms[room_code]["players"]
 
 def join_room(room_code, player_name):
@@ -73,6 +84,18 @@ def join_room(room_code, player_name):
         logging.info(f'Player {player_name} joined room {room_code}')
         return True
     return False
+
+def get_session_id(room_code):
+    """
+    Retrieve the session ID associated with a room code.
+    
+    Args:
+        room_code (str): The room code to query.
+        
+    Returns:
+        int: The session ID linked to the room.
+    """
+    return room_sessions.get(room_code)
 
 def update_state(room_code, state):
     """
@@ -102,5 +125,17 @@ def get_state(room_code):
     """
     return rooms.get(room_code).get("state")
 
-
-
+def destroy_room(room_code):
+    """
+    Delete a room and all its data.
+    
+    Args:
+        room_code (str): The room code to delete.
+    Returns:
+        bool: True if deletion was successful, False if room doesn't exist. 
+    """
+    if room_code in rooms:
+        del rooms[room_code]
+        logging.info(f'Room {room_code} has been destroyed')
+        return True
+    return False
