@@ -42,11 +42,11 @@ def create_multiplayer_room(request):
             return HttpResponseBadRequest("Missing 'host' parameter.")
         
         # Create a new room using room_manager
-        room_code = create_room(host_name)
+        room_code, session = create_room(host_name)
         logger.info(f"Created room: {room_code}")
 
         # Return room code as JSON
-        return JsonResponse({"room_code": room_code})
+        return JsonResponse({"room_code": room_code, "session_id": session})
     
     except json.JSONDecodeError:
         # Return 400 Bad Request if JSON is invalid
@@ -83,9 +83,16 @@ def join_multiplayer_room(request):
 
     # Attempt to join the room
     success = join_room(room_code, player_name)
+    session = None
+    if success:
+        logger.info(f"Player {player_name} joined room {room_code}")
+        session = rm.get_session_id(room_code)
+        logger.info(f"Session id for room {room_code} is {session}")
+    else:
+        logger.warning(f"Failed to join room {room_code}: Room does not exist")
     logger.info("the result of join_room " + str(success))
 
-    return JsonResponse({"success": str(success)})
+    return JsonResponse({"success": str(success), "session_id": session})
 
 
 @csrf_exempt
@@ -239,9 +246,7 @@ def start_prerendering(request):
 # everytime this is called update turn id 
 def display_question_and_options(request, session_id, room_code, turn_id):
     VOTING_SESSION = VotingSession(room_code)
-    rm.update_state(room_code, {"voting_session": VOTING_SESSION})
-    # get
-    #  session
+    # get session
     logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
     logger.debug(f"Found session: {existing_session}")

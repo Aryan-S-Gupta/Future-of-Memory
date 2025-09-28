@@ -25,7 +25,7 @@ const MultiplayerLobby = () => {
   // Local state to store player name and room code
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
-  const { sessionId } = useSession();
+  const { sessionId, setSessionId } = useSession();
   const navigate = useNavigate();
 
   // Fetch list of available rooms using React Query
@@ -50,7 +50,8 @@ const MultiplayerLobby = () => {
         return alert("Please Enter a NickName");
     }
     const data = await createRoom(playerName);
-    await startPrerender(sessionId);
+    setSessionId(data.session_id);
+    await startPrerender(data.sessionId);
     setRoomCode(data.room_code);
     console.log(roomCode);
     // Navigate to multiplayer room screen
@@ -79,8 +80,10 @@ const MultiplayerLobby = () => {
     try {
       const data = await joinRoom(code, name);
       if (data.success == "True") {
+        setSessionId(data.session_id);
+        console.log("session id is " + data.session_id);
         navigate(`/multiplayer-room/${code}?playerName=${name}`);
-        await startPrerender(sessionId);
+        await startPrerender(data.session_id);
         console.log("navigated")
       } else {
         alert("Sorry, unable to join the room. Please try again.");
@@ -125,3 +128,6 @@ const MultiplayerLobby = () => {
 };
 
 export default MultiplayerLobby;
+
+
+
