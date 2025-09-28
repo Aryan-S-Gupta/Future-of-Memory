@@ -1,6 +1,6 @@
 import api from "./api";
 
-export const createSession = async () => {
+export const createMultiplayerSession = async () => {
   const response = await api.get("/create_session");
   return response.data;
 };
@@ -50,9 +50,9 @@ export const getScenarioAndImage = async (session_id, turn_id, year, option_id) 
  * console.log(question.question);
  * console.log(question.options);
  */
-export const getQuestion = async (roomCode, session_id) => {
+export const getQuestion = async (roomCode, session_id, turn_id) => {
   console.log("called question api for session:", session_id);
-  const res = await api.get(`/storyline/${session_id}/question/${roomCode}`)
+  const res = await api.get(`/storyline/${session_id}/question/${roomCode}/${turn_id}`);
   console.log("got output:", res.data);  // prints the actual object
   console.log("question:", res.data.data.question);
   console.log("options:", res.data.data.options);
