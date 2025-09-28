@@ -21,11 +21,25 @@ import axios from "axios";
  * @returns {AxiosInstance} A configured Axios instance for making HTTP requests.
  */
 
-const baseURL = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:9000";
+const hostname = window.location.hostname;
+
+// Build URL depending on environment
+let baseURL;
+if (hostname === "localhost" || hostname === "127.0.0.1") {
+  console.log("Using local backend URL using hostname:", hostname );
+  // Local dev
+  baseURL = "http://127.0.0.1:9000";
+} else {
+  // Assume LAN or deployed host
+  baseURL = `http://${hostname}:9000`;
+  console.log("Using LAN/deployed backend URL:", baseURL);
+  console.log("hostname:", hostname);
+}
 
 const api = axios.create({
   baseURL: `${baseURL}/multiplayer`,
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 export default api;
-
