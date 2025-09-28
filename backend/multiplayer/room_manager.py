@@ -28,7 +28,7 @@ def create_room(host_name):
     rooms[room_code] = {
         "host": host_name,
         "players": [host_name],  # host is the first player
-        "state": {},             # placeholder for game state
+        "state": -1,             # placeholder for game state
     }   
     logging.info(f"Room created with code {room_code} by host {host_name}")
     logging.info(f'Current rooms: {rooms}')

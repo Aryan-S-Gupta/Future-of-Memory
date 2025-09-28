@@ -1,6 +1,8 @@
 import json
 import os
 import logging
+
+from django.shortcuts import get_object_or_404
 import multiplayer.room_manager as rm
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
@@ -64,6 +66,7 @@ def list_room_codes(request):
 
 
 @csrf_exempt
+@require_POST
 def join_multiplayer_room(request):
     """
     Adds a player to an existing multiplayer room.
@@ -85,6 +88,8 @@ def join_multiplayer_room(request):
     success = join_room(room_code, player_name)
     session = None
     if success:
+        turn = rm.get_state(room_code)
+        logger.info(f"Current turn for room {room_code} is {turn}")
         logger.info(f"Player {player_name} joined room {room_code}")
         session = rm.get_session_id(room_code)
         logger.info(f"Session id for room {room_code} is {session}")
@@ -92,7 +97,7 @@ def join_multiplayer_room(request):
         logger.warning(f"Failed to join room {room_code}: Room does not exist")
     logger.info("the result of join_room " + str(success))
 
-    return JsonResponse({"success": str(success), "session_id": session})
+    return JsonResponse({"success": str(success), "session_id": session, "turn_id" : str(turn)})
 
 
 @csrf_exempt
@@ -245,54 +250,47 @@ def start_prerendering(request):
 # send the existing work
 # everytime this is called update turn id 
 def display_question_and_options(request, session_id, room_code, turn_id):
+    global VOTING_SESSION
     VOTING_SESSION = VotingSession(room_code)
-    # get session
     logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
     logger.debug(f"Found session: {existing_session}")
+    logger.debug(f"turn_id received: {turn_id}")
 
-    if turn_id == int(-1):
-        logger.warning("first turn, no turn_id provided")
-        return JsonResponse({'error': 'No turn found for this session'}, status=404)
-    
-    # find the latest turn for this session
-    latest_turn = (
-        Turn.objects
-        .filter(session_id=existing_session.id)
-        .order_by('-year', '-id')
-        .get(id=turn_id)
-    )
-    if latest_turn is None:
-        logger.warning("No turn found for this session")
-        # send question for the first turn 
-        
-        return JsonResponse({'error': 'No turn found for this session'}, status=404)
+    if int(turn_id) == -1:
+        # first turn, get the latest turn (or none)
+        latest_turn = (
+            Turn.objects
+            .filter(session_id=existing_session.id)
+            .order_by('-year', '-id')
+            .first()
+        )
+        if not latest_turn:
+            logger.warning("No turns found for this session")
+            return JsonResponse({'error': 'No turn found for this session'}, status=404)
+    else:
+        # get specific turn by ID
+        latest_turn = get_object_or_404(Turn, id=int(turn_id))
+
     logger.debug(f"Latest turn for session: {latest_turn}")
-    # use the latest turn's id to fetch its question and related options
-    question_text = latest_turn.question or ''  # ensure a string
-    options = Option.objects.filter(turn_id=latest_turn.id).order_by('label')
-    logger.debug(f"Options for turn {latest_turn.id}: {list(options)}")
 
-    # serialize the options as exactly: option_id, label, option_text
+    # fetch options
+    options = Option.objects.filter(turn_id=latest_turn.id).order_by('label')
     options_payload = [
-        {
-            'option_id': option.id,
-            'label': option.label,
-            'option_text': option.option_text or ''
-        }
-        for option in options
+        {'option_id': o.id, 'label': o.label, 'option_text': o.option_text or ''}
+        for o in options
     ]
 
-    # build the final JSON payload that the frontend can render directly
     response_payload = {
         'room_code': room_code,
         'turn_id': latest_turn.id,
         'year': latest_turn.year,
-        'question': question_text,
+        'question': latest_turn.question or '',
         'options': options_payload,
     }
-    logger.debug(f"Payload to return: {response_payload}")
+
     return JsonResponse({'message': 'ok', 'data': response_payload}, status=200)
+
 
 # scenario and image display page
 from shared.services import display_world_view
@@ -304,8 +302,10 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     """
     Display the world view after user makes a choice.
     """
-    player_name = request.GET.get("player_name")
-    final_option = VOTING_SESSION.process_player_response(room_code, player_name, session_id, turn_id, option_id)
+    player_name = request.GET.get("playerName")
+    logger.debug(f"playername is {player_name}")
+    final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
+    
 
     # when you receive request check no of players, check number of responses, create a map of option id, and num votes, then get the votes from the reqwuest 
     # the max voted option id, and use that to generate the world view
