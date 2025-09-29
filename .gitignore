@@ -11,3 +11,22 @@ venv/
 .vscode/
 .idea/
 .DS_Store
+
+# Ignore image repo
+backend/media/
+
+# Add static repo back
+!backend/media/static/
+
+# Ignore Redis files
+dump.rdb
+*.rdb
+redis.conf
+
+# Ignore other local development files
+*.log
+node_modules/
+
+# Networking
+.env
+decisions.json

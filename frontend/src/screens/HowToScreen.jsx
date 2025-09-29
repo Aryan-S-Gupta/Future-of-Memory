@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import BasePage from "../components/BasePage/BasePage.jsx";
+import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
 
 /**

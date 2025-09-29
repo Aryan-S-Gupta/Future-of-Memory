@@ -11,4 +11,5 @@ urlpatterns = [
     path('storyline/choice', views.get_story_result_by_choice, name='storyline_choice'),
     path('storyline/result', views.get_story_result, name='storyline_result'),
     path('rag/retrieve', views.rag_retrieve, name='rag_retrieve'),
+    path('storyline/result', views.get_story_result, name='storyline_result'),
 ]

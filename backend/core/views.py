@@ -7,10 +7,11 @@ def index(request):
     """
     Simple index view that returns a status message.
     
-    Args:
+    Args:{'display_text': str, 'image_text': str, 'world_id': int}
         request: The HTTP request object
         
     Returns:
         HttpResponse: A simple text response indicating the backend is running with 200 OK status
     """
     return HttpResponse("MemorySim backend is running.", status=200)
+    return HttpResponse("MemorySim backend is running.")
