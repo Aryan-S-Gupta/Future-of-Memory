@@ -84,7 +84,8 @@
             "Henry James"
         ],
         "link_text": "Novel from Project Gutenberg",
-        "link": "https://www.gutenberg.org/ebooks/642"
+        "link": "https://www.gutenberg.org/ebooks/642",
+        "is_fiction": true
     },
     "A_trace_of_memory.txt": {
         "title": "A trace of memory",
@@ -93,7 +94,8 @@
             "Keith Laumer"
         ],
         "link_text": "Novel from Project Gutenberg",
-        "link": "https://www.gutenberg.org/ebooks/72015"
+        "link": "https://www.gutenberg.org/ebooks/72015",
+        "is_fiction": true
     },
     "The_Mind_Digger.txt": {
         "title": "The Mind Digger",
@@ -102,7 +104,8 @@
             "Winston K. Marks"
         ],
         "link_text": "Novel from Project Gutenberg",
-        "link": "https://www.gutenberg.org/ebooks/32353"
+        "link": "https://www.gutenberg.org/ebooks/32353",
+        "is_fiction": true
     },
     "Don_Miguel_Lehumada_discoverer_of_liquid_from_the_suns_rays.txt": {
         "title": "Don Miguel Lehumada: discoverer of liquid from the sun's rays",
@@ -111,7 +114,8 @@
             "Sue Greenleaf"
         ],
         "link_text": "Novel from Project Gutenberg",
-        "link": "https://www.gutenberg.org/ebooks/67753"
+        "link": "https://www.gutenberg.org/ebooks/67753",
+        "is_fiction": true
     },
     "My_past_is_mine.txt": {
         "title": "My past is mine",
@@ -120,7 +124,8 @@
             "Gerda Rhoads"
         ],
         "link_text": "Novel from Project Gutenberg",
-        "link": "https://www.gutenberg.org/ebooks/74205"
+        "link": "https://www.gutenberg.org/ebooks/74205",
+        "is_fiction": true
     },
     "Total_Recall.txt": {
         "title": "Total Recall",
@@ -129,6 +134,7 @@
             "Larry Sternig"
         ],
         "link_text": "Novel from Project Gutenberg",
-        "link": "https://www.gutenberg.org/ebooks/63708"
+        "link": "https://www.gutenberg.org/ebooks/63708",
+        "is_fiction": true
     }
 }
