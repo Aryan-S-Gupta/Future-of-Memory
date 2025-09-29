@@ -4,7 +4,7 @@ from images.render_pipeline import generate_two_images_blocking
 from .models import Session, Turn 
 from .services import generate_and_save_image_text, generate_and_save_scenario, generate_and_save_question
 from images.render_pipeline import generate_two_images_blocking
-
+import logging
 logger = logging.getLogger(__name__)
 
 # bg manager
@@ -30,6 +30,7 @@ def validate_session(session_id: int) -> bool:
 @dramatiq.actor(queue_name="llm_queue")
 def step1_generate_question(session_id: int, year: int):
     """Step 1: Generate question and options"""
+    logging.debug(f'the result from generating the question is called with session_id {session_id} and year {year}')
     session_id = int(session_id)
     year = int(year)
     
@@ -37,6 +38,7 @@ def step1_generate_question(session_id: int, year: int):
         return {"status": "skipped", "reason": "invalid_session"}
     
     result = generate_and_save_question(session_id, year)
+    logging.debug(f'the result from generating the question is{result}')
     turn_id = result['turn_id']
     
     # trigger step 2
