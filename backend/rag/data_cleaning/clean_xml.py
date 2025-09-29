@@ -121,6 +121,9 @@ def xml_to_txt() -> dict[str, dict]:
             body = article.find("body")
             assert body is not None, "Article doesn't have body"
             body_text = clean_body_tag(body)
+            
+            article_metadata["link"] = "https://www.ncbi.nlm.nih.gov/pmc"
+            article_metadata["link_text"] = "PubMed Central article"
 
             # Write cleaned txt files
             with open(

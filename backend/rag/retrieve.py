@@ -28,10 +28,10 @@ def retrieve_chunks(query: str) -> list[dict]:
         retrieved_documents = retriever.invoke(query)
         return [
             {
-                "text": doc.page_content, 
-                "meta": doc.metadata, 
+                "text": doc.page_content,
+                "meta": doc.metadata,
                 "metadata": doc.metadata,  # both 'meta' and 'metadata' included for backward compatibility
-                "id": doc.id
+                "id": doc.id,
             }
             for doc in retrieved_documents
         ]
