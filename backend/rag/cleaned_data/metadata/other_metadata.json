@@ -76,5 +76,59 @@
         ],
         "link_text": "Cambridge Core article",
         "link": "https://www.cambridge.org/core/journals/memory-mind-and-media/article/media-technology-and-the-sins-of-memory/4F169E671DFA95639E971B43B5E4D57A"
+    },
+    "The_Altar_of_the_Dead.txt": {
+        "title": "The Altar of the Dead",
+        "licence": "Project Gutenberg™ License available online at www.gutenberg.org/license",
+        "authors": [
+            "Henry James"
+        ],
+        "link_text": "Novel from Project Gutenberg",
+        "link": "https://www.gutenberg.org/ebooks/642"
+    },
+    "A_trace_of_memory.txt": {
+        "title": "A trace of memory",
+        "licence": "Project Gutenberg™ License available online at www.gutenberg.org/license",
+        "authors": [
+            "Keith Laumer"
+        ],
+        "link_text": "Novel from Project Gutenberg",
+        "link": "https://www.gutenberg.org/ebooks/72015"
+    },
+    "The_Mind_Digger.txt": {
+        "title": "The Mind Digger",
+        "licence": "Project Gutenberg™ License available online at www.gutenberg.org/license",
+        "authors": [
+            "Winston K. Marks"
+        ],
+        "link_text": "Novel from Project Gutenberg",
+        "link": "https://www.gutenberg.org/ebooks/32353"
+    },
+    "Don_Miguel_Lehumada_discoverer_of_liquid_from_the_suns_rays.txt": {
+        "title": "Don Miguel Lehumada: discoverer of liquid from the sun's rays",
+        "licence": "Project Gutenberg™ License available online at www.gutenberg.org/license",
+        "authors": [
+            "Sue Greenleaf"
+        ],
+        "link_text": "Novel from Project Gutenberg",
+        "link": "https://www.gutenberg.org/ebooks/67753"
+    },
+    "My_past_is_mine.txt": {
+        "title": "My past is mine",
+        "licence": "Project Gutenberg™ License available online at www.gutenberg.org/license",
+        "authors": [
+            "Gerda Rhoads"
+        ],
+        "link_text": "Novel from Project Gutenberg",
+        "link": "https://www.gutenberg.org/ebooks/74205"
+    },
+    "Total_Recall.txt": {
+        "title": "Total Recall",
+        "licence": "Project Gutenberg™ License available online at www.gutenberg.org/license",
+        "authors": [
+            "Larry Sternig"
+        ],
+        "link_text": "Novel from Project Gutenberg",
+        "link": "https://www.gutenberg.org/ebooks/63708"
     }
 }
