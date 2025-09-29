@@ -327,9 +327,13 @@ brew install redis
 - Download Redis from this community-maintained build: https://github.com/microsoftarchive/redis/releases
 - Choose Redis-x64-3.2.100.msi and install
 
-**both run**
+**on MacOs**
 ``` bash
 redis-server
+```
+**on Windows**
+```bash
+redis-server.exe --port 6380 --bind 127.0.0.1
 ```
 
 ### Step 10: create 3 worker (each from a different terminal)
@@ -348,6 +352,10 @@ python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1
     cd /path/to/ComfyUI
     python main.py --port 8080
     ```
+   ### on windows: 
+   ```
+   cd C:\Users\<username>\AppData\Local\Programs\ComfyUI\resources\ComfyUI\models\checkpoints
+   ```
 
 ### Step 12: Start the Development Server at port 9000
 
