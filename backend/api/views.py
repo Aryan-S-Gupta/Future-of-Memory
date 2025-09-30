@@ -267,8 +267,8 @@ def retrieve_fun_facts_api(request) -> JsonResponse:
                 "link_text": "text to display for the link e.g. 'Cambridge Core article'"
             },
             ...
+            (one item for each fact)
         ]
     }
-    (one item for each fact)
     """
     return JsonResponse({"data": retrieve_fun_facts()})
