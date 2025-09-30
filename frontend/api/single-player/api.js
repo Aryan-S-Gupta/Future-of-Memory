@@ -20,8 +20,24 @@ import axios from "axios";
  * @module api
  * @returns {AxiosInstance} A configured Axios instance for making HTTP requests.
  */
+
+const hostname = window.location.hostname;
+
+// Build URL depending on environment
+let baseURL;
+if (hostname === "localhost" || hostname === "127.0.0.1") {
+  console.log("Using local backend URL using hostname:", hostname );
+  // Local dev
+  baseURL = "http://127.0.0.1:9000";
+} else {
+  // Assume LAN or deployed host
+  baseURL = `http://${hostname}:9000`;
+  console.log("Using LAN/deployed backend URL:", baseURL);
+  console.log("hostname:", hostname);
+}
+
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api", // adjust if backend URL changes
+  baseURL: `${baseURL}/api`,
   headers: {
     "Content-Type": "application/json",
   },

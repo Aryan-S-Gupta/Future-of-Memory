@@ -2,10 +2,9 @@ import { useNavigate } from "react-router-dom";
 import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
 import "../styles/BackgroundScreen.css";
-
-
-const BackgroundScreen = () => {
-  const navigate = useNavigate();
+import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
+import { startPrerender } from "../../api/single-player/GameApi.js";
+import { useSession } from "../../SessionContext.jsx";
 
 /**
  * BackgroundScreen component
@@ -22,6 +21,15 @@ const BackgroundScreen = () => {
  * @component
  * @returns {JSX.Element} A styled introductory background screen with story text and navigation.
  */
+const BackgroundScreen = () => {
+  const navigate = useNavigate();
+  const {sessionId} = useSession();
+
+  const pre_render = async () => {
+    await startPrerender(sessionId);
+    navigate("/game-play");
+  }
+
   return (
     <BasePage>
       <h1 className="title">Background</h1>
@@ -29,7 +37,7 @@ const BackgroundScreen = () => {
         <div className="crawl-container">
           <div className="crawl-text">
             <p>
-              Welcome to 2040 <br /> <br />
+              Welcome to 2035 <br /> <br />
               Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /> <br />
               You are the chosen voice of your people, standing between promise and peril.  <br /> <br />
               Every law you shape will ripple through lives and futures,              
@@ -41,8 +49,8 @@ const BackgroundScreen = () => {
         </div>
       {/* Navigation buttons (Back to home, Next to gameplay) */}
       <div className="button-container">
-      <Button baseButton="btn-back" action={() => navigate("/")} title="Back" />
-      <Button baseButton="btn-next next-fade-in" action={() => navigate("/game-play")} title="Next" />
+        <ExitExperience />
+-       <Button baseButton="btn-next next-fade-in" action={() => pre_render()} title="Next" />
       </div>
       </BasePage>
     );

@@ -604,7 +604,7 @@ def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int]
         image_result = generate_and_save_image_text(session_id, turn_id, target_year)
         step_duration = (timezone.now() - step_start).total_seconds()
         logger.info(f"Image text generation completed in {step_duration:.2f}s")
-        
+        print(f'Session/turn mismatch: {session_id} vs {turn.session_id}')
         # TODO: Reserved space for image generation function
         generate_two_images_blocking(session_id, turn_id)
         
