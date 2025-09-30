@@ -5,6 +5,7 @@ import BackgroundScreen from "./screens/BackgroundScreen.jsx";
 import HowToScreen from "./screens/HowToScreen.jsx";
 import GamePlay from "./screens/GamePlay.jsx";
 import MultiplayerLobby from "./screens/MultiPlayerLobby.jsx";
+import GalleryScreen from "./screens/GalleryScreen.jsx";
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
 
@@ -30,6 +31,7 @@ function App() {
               <Route path="/how-to-play" element={<HowToScreen />} />
               <Route path="/game-play" element={<GamePlay />} />
               <Route path="/multiplayer-lobby" element={<MultiplayerLobby />} />
+              <Route path="/gallery/:sessionId" element={<GalleryScreen />} />
             </Routes>
           </SessionProvider>
         </BackgroundWrapper>
