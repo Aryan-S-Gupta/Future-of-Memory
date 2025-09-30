@@ -392,6 +392,13 @@ curl --header "Content-Type: application/json" \
 http://127.0.0.1:9000/api/rag/retrieve
 ```
 
+To test fun facts API:
+```bash
+curl --header "Content-Type: application/json" \
+--request POST \
+http://127.0.0.1:9000/api/rag/fun_facts
+```
+
 ---
 
 ## For Collaborators

@@ -25,7 +25,7 @@ setup_rag_system()
 embeddings = get_ollama_embeddings()
 
 # List of source, link, link_text for the documents that were retrieved in the last query
-last_retrieved_files: list[dict[str, str]] = []
+last_retrieved_files: dict[str, dict[str, str]] = {}
 
 logger.debug(f"Loading vector store from {VECTOR_DB_PATH}...")
 persisted_vectorstore = FAISS.load_local(
