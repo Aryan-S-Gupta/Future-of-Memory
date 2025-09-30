@@ -14,6 +14,7 @@ from rag.data_cleaning.clean_xml import xml_to_txt
 from shared.utils import get_ollama_embeddings
 from shared.constants import VECTOR_DB_PATH
 from rag.config import UPDATE_RAG, LATEST_VERSION
+from rag.utils.utils import vector_db_exists
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -109,10 +110,7 @@ def setup_rag_system() -> None:
     else:
         
         # Not updating, check if vector database already exists
-        index_files = ["index.faiss", "index.pkl"]
-        if not all(
-            os.path.exists(os.path.join(VECTOR_DB_PATH, f)) for f in index_files
-        ):
+        if not vector_db_exists():
             logger.warning(
                 "Vector database not found, this may lead to errors. Run the backend with UPDATE_RAG in backend/rag/config.py set to True to set up the vector database."
             )

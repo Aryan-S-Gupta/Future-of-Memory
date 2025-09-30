@@ -1,4 +1,4 @@
-"""Create fun facts based on given texts."""
+"""Run this file to create fun facts based on given texts."""
 
 from pydantic import BaseModel
 from pathlib import Path

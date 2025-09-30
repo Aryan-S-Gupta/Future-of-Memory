@@ -12,7 +12,7 @@ from shared.utils import get_ollama_embeddings
 from rag.setup import setup_rag_system
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Number of chunks to retrieve per query
@@ -23,6 +23,9 @@ retriever: VectorStoreRetriever | None = None
 
 setup_rag_system()
 embeddings = get_ollama_embeddings()
+
+# List of source, link, link_text for the documents that were retrieved in the last query
+last_retrieved_files: list[dict[str, str]] = []
 
 logger.debug(f"Loading vector store from {VECTOR_DB_PATH}...")
 persisted_vectorstore = FAISS.load_local(
