@@ -216,7 +216,9 @@ python -c "from nltk.tokenize import sent_tokenize; print(sent_tokenize('Hello w
 
 ---
 
-### Step 5: Build the Vector Store (First time or files changed) 
+### Step 5: Build the Vector Store (First time or files changed)
+
+Note that you won't have to do this manually, but you can follow these steps if you wish.
 
 #### Option A (recommended, inside backend) (This step might cost 1-2 mins)
 
@@ -262,7 +264,11 @@ Should contain `index.faiss` and `index.pkl`
 ```bash
 python manage.py shell -c "
 from rag.retrieve import retrieve_chunks;
-print('\n---\n'.join(chunk['text'] for chunk in retrieve_chunks('sleep memory consolidation')))
+result = retrieve_chunks('sleep memory consolidation')
+for chunk in result:
+    for key, value in chunk.items():
+        print(f'{key}: {value}\n')
+    print('\n---\n')
 "
 ```
 
@@ -298,12 +304,13 @@ brew services start postgresql
 
 ### Step 7: Create DB user
 ```bash
-createdb $(yourname)
 psql -U postgres
 # inside the shell, enter
 CREATE DATABASE memorysim_db;
 CREATE USER memorysim_user WITH PASSWORD 'password123';
 GRANT ALL PRIVILEGES ON DATABASE memorysim_db TO memorysim_user;
+\c memorysim_db;
+GRANT ALL ON SCHEMA public TO memorysim_user;
 \q
 ```
 
@@ -382,7 +389,7 @@ MacOS/Linux: Try this `curl` query to test the RAG chunk retrieval API once the 
 curl --header "Content-Type: application/json" \
 --request POST \
 --data '{ "query_text": "what is the future of memory", "keywords": ["future", "memory"]}' \
-http://127.0.0.1:8000/api/rag/retrieve
+http://127.0.0.1:9000/api/rag/retrieve
 ```
 
 ---
