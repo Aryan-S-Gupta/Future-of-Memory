@@ -32,4 +32,4 @@ def sanitise_string(text: str) -> str:
 def vector_db_exists() -> bool:
     """Return True if vector database files ("index.faiss", "index.pkl") exist, False otherwise."""
     index_files = ["index.faiss", "index.pkl"]
-    return all(Path(VECTOR_DB_PATH, f) for f in index_files)
+    return all(Path(VECTOR_DB_PATH, f).exists() for f in index_files)
