@@ -216,37 +216,7 @@ python -c "from nltk.tokenize import sent_tokenize; print(sent_tokenize('Hello w
 
 ---
 
-### Step 5: Build the Vector Store (First time or files changed)
-
-Note that you won't have to do this manually, but you can follow these steps if you wish.
-
-#### Option A (recommended, inside backend) (This step might cost 1-2 mins)
-
-**macOS/Linux:**
-```bash
-python - <<'PY'
-from rag.setup import setup_rag_system
-setup_rag_system()
-print("RAG setup done")
-PY
-```
-
-**Windows Command Prompt:**
-```cmd
-python -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
-```
-
-#### Option B (from project root)
-
-**macOS/Linux:**
-```bash
-python backend/manage.py shell -c "from rag.setup import setup; setup_rag_system(); print('RAG setup done')"
-```
-
-**Windows:**
-```cmd
-python backend\manage.py shell -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
-```
+### Step 5: Verify Vector Store setup (optional)
 
 #### Verify Setup (All Platforms)
 ```bash
@@ -432,5 +402,3 @@ fetch("http://127.0.0.1:9000/api/storyline/start?year=2035")
 - [ ] LLM story/question generation
 - [ ] Timeline & turn loop controller
 - [ ] AI image integration (ComfyUI or SD)
-
-
