@@ -27,7 +27,6 @@ def retrieve_chunks(query: str) -> list[dict]:
         logger.info(f"Searching for the query in the vector store: '{query}'\n")
         assert retriever is not None
         retrieved_documents = retriever.invoke(query)
-        # rag_init.last_retrieved_files = [{"source": doc.metadata["source"], "link": doc.metadata["link"], "link_text": doc.metadata["link_text"]} for doc in retrieved_documents]
         rag_init.last_retrieved_files = {doc.metadata["source"]: {"link": doc.metadata["link"], "link_text": doc.metadata["link_text"]} for doc in retrieved_documents}
         return [
             {
