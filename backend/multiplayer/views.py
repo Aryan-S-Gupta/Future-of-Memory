@@ -45,6 +45,9 @@ def create_multiplayer_room(request):
         
         # Create a new room using room_manager
         room_code, session = create_room(host_name)
+        global VOTING_SESSION
+        VOTING_SESSION = VotingSession(room_code)
+        logger.info(f"Initialized VotingSession for room {room_code}")
         logger.info(f"Created room: {room_code}")
 
         # Return room code as JSON
@@ -88,6 +91,8 @@ def join_multiplayer_room(request):
     success = join_room(room_code, player_name)
     session = None
     if success:
+        global VOTING_SESSION
+        VOTING_SESSION.update_players()
         turn = rm.get_state(room_code)
         logger.info(f"Current turn for room {room_code} is {turn}")
         logger.info(f"Player {player_name} joined room {room_code}")
@@ -250,8 +255,7 @@ def start_prerendering(request):
 # send the existing work
 # everytime this is called update turn id 
 def display_question_and_options(request, session_id, room_code, turn_id):
-    global VOTING_SESSION
-    VOTING_SESSION = VotingSession(room_code)
+
     logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
     logger.debug(f"Found session: {existing_session}")
@@ -305,6 +309,16 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     player_name = request.GET.get("playerName")
     logger.debug(f"playername is {player_name}")
     final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
+    if final_option is None:
+        logger.debug("Not all players have voted yet.")
+        return JsonResponse({
+            'success': False,
+            'message': 'Waiting for other players to vote.'
+        }, status=404)
+    logger.debug(f"Voting result is {final_option}")
+    logger.debug(f"votes so far {VOTING_SESSION.votes}")
+    logger.debug(f"num responses so far {VOTING_SESSION.num_responses}")
+    logger.debug(f"votes for option {option_id} is {VOTING_SESSION.votes.get(option_id)}")
     
 
     # when you receive request check no of players, check number of responses, create a map of option id, and num votes, then get the votes from the reqwuest 
