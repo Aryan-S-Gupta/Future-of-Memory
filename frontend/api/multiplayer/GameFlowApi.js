@@ -73,5 +73,5 @@ export const submitChoice = async (playerName, roomCode, session_id, turn_id, ye
   const res = await api.get(
     `/storyline/choice/${session_id}/${turn_id}/${year}/${option_id}/${roomCode}`, { params: { playerName }}
   );
-  return res.data; // { scenario, image, ...
+  return res; // { scenario, image, ...
 }
