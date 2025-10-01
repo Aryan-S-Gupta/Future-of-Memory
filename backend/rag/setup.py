@@ -69,7 +69,6 @@ def setup_rag_system() -> None:
     - writing PMC document metadata to JSON
     - creating the vector DB
     """
-    # todo better docstrings
 
     if UPDATE_RAG:
 
