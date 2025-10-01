@@ -178,21 +178,42 @@ const GamePlayMulti = () => {
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
     cancelTTS(); 
-    const out = await submitChoice(playerName, roomCode, sessionId, currentTurn.turn_id, year, option_id)
-        const mapped = {
-        scenario: out.scenario.text,
-        image: out.image.url
-      };
-      if (out.image.status !== "ready" ) {
-        console.log("Failed to submit choice:", out.message);
-      }
-      console.log("Submit choice response:", mapped);
-      setScenarioData(mapped);
+   try {
+    const out = await submitChoice(
+      playerName,
+      roomCode,
+      sessionId,
+      currentTurn.turn_id,
+      year,
+      option_id
+    );
+   //If waiting → don't move forward
+    if (out.success === false && out.image?.status === "waiting") {
+      console.log("Waiting for other players...");
+      return;
+    }
 
-      setScreen("scenario");
-      setYear(year + 1);
-      };
+    //If no scenario yet → don't move forward
+    if (!out.scenario || !out.scenario.text) {
+      console.warn("No scenario text returned yet, not switching screen.");
+      return;
+    }
 
+    //Safe mapping
+    const mapped = {
+      scenario: out.scenario.text,
+      image: out.image?.url || null,
+    };
+
+    console.log("Submit choice response:", mapped);
+
+    setScenarioData(mapped);
+    setScreen("scenario");
+    setYear((prev) => prev + 1);
+  } catch (err) {
+    console.error("Error submitting choice:", err);
+  }
+};
   return (
     <BasePage>
       <ExitExperience/>

@@ -311,10 +311,12 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
     if final_option is None:
         logger.debug("Not all players have voted yet.")
+        print("Not all players have voted yet.")
         return JsonResponse({
             'success': False,
-            'message': 'Waiting for other players to vote.'
-        }, status=404)
+            'image': {"status": "waiting"},
+            'message': 'Waiting for other players to vote.' 
+            }, status=404)
     logger.debug(f"Voting result is {final_option}")
     logger.debug(f"votes so far {VOTING_SESSION.votes}")
     logger.debug(f"num responses so far {VOTING_SESSION.num_responses}")
@@ -334,10 +336,13 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
                 logger.info(f"Started generating next turn (year {next_year}) in background")
             except Exception as e:
                 logger.warning(f"Failed to start next turn generation: {e}")
+        print("world view data: " + str(world_view_data))
         return JsonResponse(world_view_data)
         
     except Exception as e:
+        print(f"Error displaying world view: {e}")
         return JsonResponse({
             'success': False,
+            'status': 'error',
             'error': f'Failed to display world view: {str(e)}'
         }, status=500)
