@@ -1,3 +1,7 @@
+"""Load all fun facts from the JSON file. Maintain a count of how many times each fact has been
+returned.
+"""
+
 import json
 from pathlib import Path
 
@@ -11,8 +15,6 @@ with open(FUN_FACTS_SOURCE_PATH, "r", encoding="utf-8") as read_file:
 
 # Count of how many times each fact has been returned
 fun_fact_counts: dict[str, dict[str, int]] = {
-    source: {
-        fact: 0 for fact in fun_facts_source[source]
-    }
+    source: {fact: 0 for fact in fun_facts_source[source]}
     for source in fun_facts_source
 }

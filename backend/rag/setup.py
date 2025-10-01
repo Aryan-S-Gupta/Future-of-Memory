@@ -54,7 +54,7 @@ def create_vector_score(documents: list[Document]) -> None:
     embeddings = get_ollama_embeddings()
 
     # Create FAISS vector store
-    logger.debug("Creating FAISS vector store from document chunks...")
+    logger.info("Creating FAISS vector store from document chunks...")
     vectorstore = FAISS.from_documents(chunks, embeddings)
     logger.info("FAISS vector store created successfully.")
 
@@ -64,35 +64,39 @@ def create_vector_score(documents: list[Document]) -> None:
 
 
 def setup_rag_system() -> None:
-    """Set up the RAG system by
-    1. cleaning texual data
-    2. creating the vector DB (if it doesn't already exist)
+    """If UPDATE_RAG is True, update the RAG system if it is outdated. This involves:
+    - cleaning texual data
+    - writing PMC document metadata to JSON
+    - creating the vector DB
     """
     # todo better docstrings
 
     if UPDATE_RAG:
-        
+
         # Decide if update is required
         current_version: int | None = None
         current_version_filepath = Path(VECTOR_DB_PATH, "current_version.txt")
         if current_version_filepath.exists():
             with open(current_version_filepath, "r", encoding="utf-8") as file:
                 current_version = int(file.read().strip())
-                
+
+        # Update if required
         if current_version is None or current_version < LATEST_VERSION:
             logger.info("Current RAG system is outdated. Updating RAG system...")
             pmc_file_metadata = xml_to_txt()
             logger.info("Created PMC txt source files.")
             documents = load_documents()
             other_metadata: dict
-            with open(Path("rag", "cleaned_data", "metadata", "other_metadata.json"), "r", encoding="utf-8") as file:
+            with open(
+                Path("rag", "cleaned_data", "metadata", "other_metadata.json"),
+                "r",
+                encoding="utf-8",
+            ) as file:
                 other_metadata = json.load(file)
             for doc in documents:
-                # todo test that this works (metadata recoded in vector store)
                 source_filename = doc.metadata["source"]
                 if source_filename in pmc_file_metadata:
                     doc.metadata.update(pmc_file_metadata[source_filename])
-                    # todo write other metadata to md?
                 elif source_filename in other_metadata:
                     doc.metadata.update(other_metadata[source_filename])
                 else:
@@ -101,20 +105,23 @@ def setup_rag_system() -> None:
             create_vector_score(documents)
             with open(current_version_filepath, "w", encoding="utf-8") as file:
                 file.write(str(LATEST_VERSION))
-                
+
         else:
             logger.info(
                 "Vector DB already exists and is up-to-date. Skipping RAG setup."
             )
-            
+
     else:
-        
+
         # Not updating, check if vector database already exists
         if not vector_db_exists():
             logger.warning(
-                "Vector database not found, this may lead to errors. Run the backend with UPDATE_RAG in backend/rag/config.py set to True to set up the vector database."
+                "Vector database not found, this may lead to errors. Run the backend with "
+                "UPDATE_RAG in backend/rag/config.py set to True to set up the vector database."
             )
         else:
             logger.warning(
-                "Vector database already exists but has not been updated, and so may be outdated. Run the backend with UPDATE_RAG in backend/rag/config.py set to True to set up the vector database."
+                "Vector database already exists but has not been updated, and so may be outdated. "
+                "Run the backend with UPDATE_RAG in backend/rag/config.py set to True to set up "
+                "the vector database."
             )
