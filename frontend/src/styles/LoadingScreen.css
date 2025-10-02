@@ -1,0 +1,29 @@
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
+  padding: 2rem;
+  background: #f0f0f0;
+}
+
+.loading-screen h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.fun-facts {
+  margin-top: 1rem;
+}
+
+.fun-facts ul {
+  list-style: disc;
+  text-align: left;
+  padding-left: 2rem;
+}
+
+.loading-footer {
+  margin-top: 2rem;
+}

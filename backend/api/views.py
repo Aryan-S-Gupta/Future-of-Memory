@@ -281,7 +281,6 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
         }, status=500)
 
 @csrf_exempt
-@require_POST
 def retrieve_fun_facts_api(request) -> JsonResponse:
     """Retrieve fun facts based on the most recent retrieved chunks.
     
@@ -300,6 +299,6 @@ def retrieve_fun_facts_api(request) -> JsonResponse:
     }
     
     The constant NUM_FUN_FACTS in backend/rag/fun_facts/retrieve_fun_facts.py will determine the 
-    number of fun facts retrieved on eac call.
+    number of fun facts retrieved on each call.
     """
     return JsonResponse({"data": retrieve_fun_facts()})

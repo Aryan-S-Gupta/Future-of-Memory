@@ -6,11 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { useSession } from "../../SessionContext.jsx";
 import background from "../assets/background.jpg";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
+import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import "../styles/GamePlay.css";
+import { getFunFacts } from "../../api/single-player/GameApi.js";
+
 
 
 /**
@@ -34,6 +37,9 @@ const GamePlay = () => {
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
+  const [isLoadingScenario, setIsLoadingScenario] = useState(false);
+  const [loadingFacts, setLoadingFacts] = useState([]);
+
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -45,11 +51,9 @@ const GamePlay = () => {
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
 });
-
-  const navigate = useNavigate();
-
-  // --- Tie narration to BGM ---
+ // --- Tie narration to BGM ---
   const { isPlaying, volume, setVolume } = useBgm();
+  
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
@@ -187,24 +191,44 @@ const GamePlay = () => {
   // handle choice click
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
-    cancelTTS(); 
-    const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id)
-        const mapped = {
-        scenario: out.scenario.text,
-        image: out.image.url
-      };
-      if (out.image.status !== "ready" ) {
-        console.log("Failed to submit choice:", out.message);
-      }
-      console.log("Submit choice response:", mapped);
-      setScenarioData(mapped);
-      setScreen("scenario");
-      setYear(year + 1);
-      };
+      cancelTTS();
+      setScreen("loading");
+      await fetchFunFacts();
 
+    const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id);
+
+    if (!out.scenario || !out.scenario.text || !out.image?.url) {
+      console.log("Scenario/image not ready yet...");
+      return;
+    }
+
+    setScenarioData({ scenario: out.scenario.text, image: out.image.url });
+    setScreen("scenario");
+    setYear(year + 1);
+  };
+
+  // Fetch fun facts when loading scenario
+  const fetchFunFacts = async () => {
+    try {
+      const facts = await getFunFacts(); // Fetch 3 fun facts
+      setLoadingFacts(facts);
+    } catch (error) {
+        console.error("Error fetching fun facts:", error);
+    }
+  }
   return (
     <BasePage>
       <ExitExperience/>
+      {screen === "loading" && (
+      <LoadingScreen
+        isReady={scenarioData?.scenario && scenarioData?.image}
+        funFacts={loadingFacts}
+        onContinue={() => {
+          setScreen("scenario");
+        }}
+      />
+    )}
+
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
               {/* Image in middle */}

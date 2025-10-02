@@ -22,16 +22,7 @@ const GamePlayMulti = () => {
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
-  const [turn, setTurn] = useState(1);
-
-  useEffect(() => {
-  const fetchTurn = async () => {
-    const state = await getRoomState(roomCode);
-    setTurn(state.current_turn_id || 1);
-  };
-  fetchTurn();
-  }, [roomCode]);
-  
+  const [turn, setTurn] = useState(2035);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -43,9 +34,6 @@ const GamePlayMulti = () => {
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
 });
-
-//when someone joins a new rom make an api call that gets what turn the room is in currently and use that to set the turn id/
-//everytime a response is gotten in front end which is in display scenario and image up[date the turn id ]
 
 
   // --- Tie narration to BGM ---
@@ -222,11 +210,6 @@ const GamePlayMulti = () => {
     setScenarioData(mapped);
     setScreen("scenario");
     setYear((prev) => prev + 1);
-    if (out.next_turn_id) {
-      setTurn(out.next_turn_id);
-    } else {
-      setTurn((prev) => prev + 1);
-    }
   } catch (err) {
     console.error("Error submitting choice:", err);
   }

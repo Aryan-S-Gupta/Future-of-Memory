@@ -94,3 +94,8 @@ export const submitChoice = async (session_id, turn_id, year, option_id) => {
   );
   return res.data; // { scenario, image, ...
 }
+
+export const getFunFacts = async () => {
+  const res = await api.get("rag/fun_facts");
+  return res.data; // array of { fact, link, link_text }
+}

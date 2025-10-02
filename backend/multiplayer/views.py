@@ -349,3 +349,64 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
             'status': 'error',
             'error': f'Failed to display world view: {str(e)}'
         }, status=500)
+
+from shared.services import display_world_view
+from django.http import JsonResponse
+
+def display_scenario_and_image(request, session_id, turn_id, year, option_id, room_code):
+    """
+    Display the world view after user makes a choice.
+    Returns current votes and scenario if all players have voted.
+    """
+    player_name = request.GET.get("playerName")
+    logger.debug(f"playername is {player_name}")
+
+    # Process player response and determine the winning option if all voted
+    final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
+
+    # Prepare vote tracking info
+    votes_info = {
+        "num_responses": VOTING_SESSION.num_responses,
+        "players_voted": list(VOTING_SESSION.votes.keys()),  # player names who voted
+        "total_players": VOTING_SESSION.total_players,
+    }
+
+    # If not all players have voted, return votes info only
+    if final_option is None:
+        logger.debug("Not all players have voted yet.")
+        return JsonResponse({
+            "success": False,
+            "image": {"status": "waiting"},
+            "votes_info": votes_info,
+            "message": "Waiting for other players to vote."
+        }, status=200)
+
+    # All players have voted → generate world view
+    try:
+        world_view_data = display_world_view(session_id, turn_id, year, final_option)
+
+        if world_view_data.get("success"):
+            next_year = int(year) + 1
+            next_turn = Turn.objects.filter(session_id=session_id, year=next_year).first()
+            if next_turn:
+                world_view_data["next_turn_id"] = next_turn.id
+            # start generating next turn in background
+            try:
+                start_turn_pipeline.send(session_id, next_year)
+                logger.info(f"Started generating next turn (year {next_year}) in background")
+            except Exception as e:
+                logger.warning(f"Failed to start next turn generation: {e}")
+
+        # Include votes info always
+        world_view_data["votes_info"] = votes_info
+
+        return JsonResponse(world_view_data)
+
+    except Exception as e:
+        logger.error(f"Error displaying world view: {e}")
+        return JsonResponse({
+            'success': False,
+            'status': 'error',
+            'votes_info': votes_info,
+            'error': f'Failed to display world view: {str(e)}'
+        }, status=500)

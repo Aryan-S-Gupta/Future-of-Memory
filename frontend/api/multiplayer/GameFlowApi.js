@@ -75,3 +75,8 @@ export const submitChoice = async (playerName, roomCode, session_id, turn_id, ye
   );
   return res; // { scenario, image, ...
 }
+
+export const getFunFacts = async () => {
+  const res = await api.get("/fun_facts");
+  return res.data; // array of { fact, link, link_text }
+}
