@@ -21,3 +21,4 @@ backend/media/
 # Networking
 .env
 decisions.json
+backend/ollama_env
