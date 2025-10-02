@@ -1,12 +1,15 @@
 """Clean XML files from PubMed Central."""
 
-import xml.etree.ElementTree as ET
 import logging
 import os
-from rag.utils.utils import sanitise_string
 import re
+import json
 
-logging.basicConfig(level=logging.DEBUG)
+import xml.etree.ElementTree as ET
+
+from rag.utils.utils import sanitise_string
+
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 RAG_DIR = os.path.abspath("rag")
@@ -21,7 +24,7 @@ XML_PATHS = [os.path.join("pmc_2025_08_17", "pmc_result.xml")]
 TXT_PATH = os.path.join(RAG_DIR, "cleaned_data")
 
 # where to put article metadata
-METADATA_PATH = os.path.join(TXT_PATH, "metadata", "pmc_metadata.md")
+METADATA_PATH = os.path.join(TXT_PATH, "metadata", "pmc_metadata.json")
 
 
 class XPath:
@@ -63,8 +66,8 @@ def clean_body_tag(body_tag: ET.Element) -> str:
 
 
 def xml_to_txt() -> dict[str, dict]:
-    """Parse all given PMC-sourced XML fils to text. Return a dict mapping filename to metadata
-    (article title, author/s, licence info).
+    """Parse all given PMC-sourced XML files to text. Return a dict mapping filename to metadata
+    (article title, author/s, licence info, link text, link). Also write this dict to JSON.
     """
 
     file_metadata: dict[str, dict] = {}
@@ -122,6 +125,9 @@ def xml_to_txt() -> dict[str, dict]:
             assert body is not None, "Article doesn't have body"
             body_text = clean_body_tag(body)
 
+            article_metadata["link"] = "https://www.ncbi.nlm.nih.gov/pmc"
+            article_metadata["link_text"] = "PubMed Central article"
+
             # Write cleaned txt files
             with open(
                 os.path.join(TXT_PATH, f"{sanitised_article_title}.txt"),
@@ -134,13 +140,7 @@ def xml_to_txt() -> dict[str, dict]:
 
     # Write metadata
     with open(os.path.join(METADATA_PATH), "w", encoding="utf-8") as metadata_file:
-        for filename, meta in file_metadata.items():
-            metadata_file.write(
-                f"# {meta['title']}\n\n"
-                f"Filename: {filename}\n\n"
-                f"Licence: {meta['licence']}\n\n"
-                f"Author/s: {', '.join(meta['authors'])}\n\n"
-            )
+        json.dump(file_metadata, metadata_file, indent=4)
 
     return file_metadata
 

@@ -216,35 +216,7 @@ python -c "from nltk.tokenize import sent_tokenize; print(sent_tokenize('Hello w
 
 ---
 
-### Step 5: Build the Vector Store (First time or files changed) 
-
-#### Option A (recommended, inside backend) (This step might cost 1-2 mins)
-
-**macOS/Linux:**
-```bash
-python - <<'PY'
-from rag.setup import setup_rag_system
-setup_rag_system()
-print("RAG setup done")
-PY
-```
-
-**Windows Command Prompt:**
-```cmd
-python -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
-```
-
-#### Option B (from project root)
-
-**macOS/Linux:**
-```bash
-python backend/manage.py shell -c "from rag.setup import setup; setup_rag_system(); print('RAG setup done')"
-```
-
-**Windows:**
-```cmd
-python backend\manage.py shell -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
-```
+### Step 5: Verify Vector Store setup (optional)
 
 #### Verify Setup (All Platforms)
 ```bash
@@ -262,7 +234,11 @@ Should contain `index.faiss` and `index.pkl`
 ```bash
 python manage.py shell -c "
 from rag.retrieve import retrieve_chunks;
-print('\n---\n'.join(chunk['text'] for chunk in retrieve_chunks('sleep memory consolidation')))
+result = retrieve_chunks('sleep memory consolidation')
+for chunk in result:
+    for key, value in chunk.items():
+        print(f'{key}: {value}\n')
+    print('\n---\n')
 "
 ```
 
@@ -298,12 +274,13 @@ brew services start postgresql
 
 ### Step 7: Create DB user
 ```bash
-createdb $(yourname)
 psql -U postgres
 # inside the shell, enter
 CREATE DATABASE memorysim_db;
 CREATE USER memorysim_user WITH PASSWORD 'password123';
 GRANT ALL PRIVILEGES ON DATABASE memorysim_db TO memorysim_user;
+\c memorysim_db;
+GRANT ALL ON SCHEMA public TO memorysim_user;
 \q
 ```
 
@@ -327,9 +304,13 @@ brew install redis
 - Download Redis from this community-maintained build: https://github.com/microsoftarchive/redis/releases
 - Choose Redis-x64-3.2.100.msi and install
 
-**both run**
+**on MacOs**
 ``` bash
 redis-server
+```
+**on Windows**
+```bash
+redis-server.exe --port 6380 --bind 127.0.0.1
 ```
 
 ### Step 10: create 3 worker (each from a different terminal)
@@ -348,11 +329,15 @@ python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1
     cd /path/to/ComfyUI
     python main.py --port 8080
     ```
+   ### on windows: 
+   ```
+   cd C:\Users\<username>\AppData\Local\Programs\ComfyUI\resources\ComfyUI\models\checkpoints
+   ```
 
 ### Step 12: Start the Development Server at port 9000
 
 ```bash
-python manage.py runserver 9000
+python manage.py runserver 0.0.0.0:9000
 ```
 
 Then open your browser or use terminal tools like `curl` to test the following round-based endpoints:
@@ -374,7 +359,14 @@ MacOS/Linux: Try this `curl` query to test the RAG chunk retrieval API once the 
 curl --header "Content-Type: application/json" \
 --request POST \
 --data '{ "query_text": "what is the future of memory", "keywords": ["future", "memory"]}' \
-http://127.0.0.1:8000/api/rag/retrieve
+http://127.0.0.1:9000/api/rag/retrieve
+```
+
+To test fun facts API:
+```bash
+curl --header "Content-Type: application/json" \
+--request POST \
+http://127.0.0.1:9000/api/rag/fun_facts
 ```
 
 ---
@@ -410,5 +402,3 @@ fetch("http://127.0.0.1:9000/api/storyline/start?year=2035")
 - [ ] LLM story/question generation
 - [ ] Timeline & turn loop controller
 - [ ] AI image integration (ComfyUI or SD)
-
-
