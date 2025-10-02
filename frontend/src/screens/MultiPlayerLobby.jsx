@@ -51,7 +51,7 @@ const MultiplayerLobby = () => {
     }
     const data = await createRoom(playerName);
     setSessionId(data.session_id);
-    await new Promise(res => setTimeout(res, 50));
+   // await new Promise(res => setTimeout(res, 50));
 
     await startPrerender(data.session_id, 2035);
     setRoomCode(data.room_code);

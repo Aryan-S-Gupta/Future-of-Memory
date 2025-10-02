@@ -74,6 +74,9 @@ const GamePlay = () => {
     }
 });
 
+
+
+
   // --- Minimal TTS: inline (no extra files/deps) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
   const prevVolRef = useRef(null); // remember user volume while narrating
@@ -87,6 +90,9 @@ const GamePlay = () => {
       prevVolRef.current = null;
     }
   };
+
+
+
 
   const speak = (text) => {
     if (!synthRef.current || !text) return;
@@ -114,8 +120,8 @@ const GamePlay = () => {
       .find(Boolean) || voices[0];
     utter.voice = picked;
     // tweak for more “majestic” feel
-    utter.rate = 0.90;  // slower = more weighty
-    utter.pitch = 1.12;  // deeper
+   utter.rate = 0.7;  // slower (was 0.9) — lower is slower
+  utter.pitch = 1.0;   // deeper
     utter.volume = 1;   // full, since we ducked bgm
 
     utter.onend = utter.onerror = () => {
@@ -164,25 +170,57 @@ const GamePlay = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, questionReadout, isPlaying]);
 
-  // Replay narration when toolbar Play is clicked (even if already playing)
-  useEffect(() => {
-    const handler = () => {
-      if (screen === "scenario" && scenarioData?.scenario) {
-        speak(scenarioData.scenario);
-      } else if (screen === "question" && questionReadout) {
-        speak(questionReadout);
-      }
-    };
-    window.addEventListener("bgm-play", handler);
-    return () => window.removeEventListener("bgm-play", handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
+  // Fetch question
+  const { data: questionQueryData } = useQuery({
+    queryKey: ["question", sessionId],
+    queryFn: async () => {
+      const result = await getQuestion(sessionId);
+      setCurrentTurn(result);
+      return result;
+    },
+    enabled: screen === "question",
+    onError: console.error,
+  });
 
-  /**
-   * Handles a player's choice when answering a question.
-   *
-   * @param {string} answer - The key of the chosen option.
-   */
+  // --- Staged reveal ---
+  // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
+  const [stage, setStage] = useState(0);
+  const fadeDuration = 2000; //
+  useEffect(() => {
+    if (screen === "question" && currentTurn) {
+      setStage(1); // show question
+      speak(currentTurn.question);
+
+      const timer1 = setTimeout(() => {
+        setStage(2);
+        speak(currentTurn.options[0].option_text);
+      }, 12000 - fadeDuration);
+
+      const timer2 = setTimeout(() => {
+        setStage(3);
+        speak(currentTurn.options[1].option_text);
+      }, 17000 - fadeDuration);
+
+      const timer3 = setTimeout(() => {
+        setStage(4); // show all together, no TTS
+      }, 22000 - fadeDuration);
+
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        cancelTTS();
+      };
+    }
+  }, [screen, currentTurn]);
+
+  // Map button stage
+  const getButtonStageClass = (idx) => {
+    if (stage === 4) return "show";
+    if (stage === idx + 2) return "show";
+    if (stage > idx + 2) return "hide";
+    return "";
+  };
 
   // handle choice click
   const handleChoice = async (option_id) => {
@@ -235,23 +273,24 @@ const GamePlay = () => {
       )}
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
-        <div>
-          <div className="question-container">
-            <h2 className="fade-in">{currentTurn.question}</h2>
-          </div>
+        <div className="question-container">
+          <h2 className={`fade-in-out ${stage === 1 ? "show" : stage > 1 ? "hide" : ""}`}>
+            {currentTurn.question}
+          </h2>
           <div className="choice-container">
-            {currentTurn.options.map((opt) => (
-              <Button
-                baseButton="choice-btn choice-fade-in"
-                key={opt.option_id}
-                action={() => handleChoice(opt.option_id)}
-                title={`${opt.label}. ${opt.option_text}`}
-              />
-            ))}
+            <Button
+              baseButton={`choice-btn fade-in-out ${getButtonStageClass(0)}`}
+              action={() => handleChoice(currentTurn.options[0].option_id)}
+              title={`${currentTurn.options[0].label}. ${currentTurn.options[0].option_text}`}
+            />
+            <Button
+              baseButton={`choice-btn fade-in-out ${getButtonStageClass(1)}`}
+              action={() => handleChoice(currentTurn.options[1].option_id)}
+              title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
+            />
           </div>
         </div>
       )}
-
     </BasePage>
   );
 };
