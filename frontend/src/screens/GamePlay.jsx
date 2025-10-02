@@ -238,13 +238,25 @@ const GamePlay = () => {
       setScreen("scenario");
       setYear(year + 1);
       };
+  const questionClass =
+    stage === 1 || stage === 4 ? "fade-in-out show" :
+      stage > 1 ? "fade-in-out hide" : "fade-in-out";
+
+  const optionAClass =
+    stage === 2 || stage === 4 ? "choice-btn fade-in-out show" :
+      stage > 2 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
+
+  const optionBClass =
+    stage === 3 || stage === 4 ? "choice-btn fade-in-out show" :
+      stage > 3 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
+
 
   return (
     <BasePage>
-      <ExitExperience/>
+      <ExitExperience />
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
-              {/* Image in middle */}
+          {/* Image in middle */}
           {scenarioData.image && (
             <div className="scenario-image">
               <img src={scenarioData.image} alt="scenario" className="scenario-img" />
@@ -273,29 +285,24 @@ const GamePlay = () => {
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
         <div className="question-container">
-          {/* Question */}
-          <h2
-            className={`fade-in-out ${stage === 1 ? "show" : stage > 1 ? "hide" : ""
-              }`}
-          >
+          <h2 className={questionClass}>
             {currentTurn.question}
           </h2>
-
-          {/* Options */}
           <div className="choice-container">
             <Button
-              baseButton={`choice-btn fade-in-out ${getButtonStageClass(0)}`}
+              baseButton={optionAClass}
               action={() => handleChoice(currentTurn.options[0].option_id)}
               title={`${currentTurn.options[0].label}. ${currentTurn.options[0].option_text}`}
             />
             <Button
-              baseButton={`choice-btn fade-in-out ${getButtonStageClass(1)}`}
+              baseButton={optionBClass}
               action={() => handleChoice(currentTurn.options[1].option_id)}
               title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
             />
           </div>
         </div>
       )}
+
     </BasePage>
   );
 };
