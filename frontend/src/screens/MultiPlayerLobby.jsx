@@ -51,7 +51,9 @@ const MultiplayerLobby = () => {
     }
     const data = await createRoom(playerName);
     setSessionId(data.session_id);
-    await startPrerender(data.sessionId);
+    await new Promise(res => setTimeout(res, 50));
+
+    await startPrerender(data.session_id, 2035);
     setRoomCode(data.room_code);
     console.log(roomCode);
     // Navigate to multiplayer room screen
@@ -83,7 +85,6 @@ const MultiplayerLobby = () => {
         setSessionId(data.session_id);
         console.log("session id is " + data.session_id);
         navigate(`/multiplayer-room/${code}?playerName=${name}`);
-        await startPrerender(data.session_id);
         console.log("navigated")
       } else {
         alert("Sorry, unable to join the room. Please try again.");
