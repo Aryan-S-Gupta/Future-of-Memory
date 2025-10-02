@@ -34,6 +34,22 @@
   animation-delay: 2s;
 }
 
+.fade-in-out {
+  opacity: 0;
+  transition: opacity 1.5s ease, transform 1.5s ease;
+  transform: translateY(15px);
+}
+
+.fade-in-out.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-out.hide {
+  opacity: 0;
+  transform: translateY(-15px);
+}
+
 @keyframes choicefadeIn {
   from {
     opacity: 0;

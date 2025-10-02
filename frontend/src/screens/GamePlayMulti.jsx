@@ -168,6 +168,50 @@ const GamePlayMulti = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
 
+    // --- Staged reveal for multiplayer ---
+  // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
+  const [stage, setStage] = useState(0);
+  const fadeDuration = 2000;
+
+  useEffect(() => {
+    if (screen === "question" && currentTurn) {
+      setStage(1); // show question
+      speak(currentTurn.question);
+
+      const timer1 = setTimeout(() => {
+        setStage(2);
+        speak(currentTurn.options[0].option_text);
+      }, 12000 - fadeDuration);
+
+      const timer2 = setTimeout(() => {
+        setStage(3);
+        speak(currentTurn.options[1].option_text);
+      }, 17000 - fadeDuration);
+
+      const timer3 = setTimeout(() => {
+        setStage(4); // show all together, no TTS
+      }, 22000 - fadeDuration);
+
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        cancelTTS();
+      };
+    }
+  }, [screen, currentTurn]);
+
+  const questionClass =
+    stage === 1 || stage === 4 ? "fade-in-out show" :
+      stage > 1 ? "fade-in-out hide" : "fade-in-out";
+
+  const optionAClass =
+    stage === 2 || stage === 4 ? "choice-btn fade-in-out show" :
+      stage > 2 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
+
+  const optionBClass =
+    stage === 3 || stage === 4 ? "choice-btn fade-in-out show" :
+      stage > 3 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
   /**
    * Handles a player's choice when answering a question.
    *
@@ -190,13 +234,13 @@ const GamePlayMulti = () => {
    //If waiting → don't move forward
     if (out.success === false && out.image?.status === "waiting") {
       console.log("Waiting for other players...");
-      return;
+      // return;
     }
 
     //If no scenario yet → don't move forward
     if (!out.scenario || !out.scenario.text) {
       console.warn("No scenario text returned yet, not switching screen.");
-      return;
+      // return;
     }
 
     //Safe mapping
@@ -249,17 +293,19 @@ const GamePlayMulti = () => {
       {screen === "question" && currentTurn && (
         <div>
           <div className="question-container">
-            <h2 className="fade-in">{currentTurn.question}</h2>
+            <h2 className={questionClass}>{currentTurn.question}</h2>
           </div>
           <div className="choice-container">
-            {currentTurn.options.map((opt) => (
-              <Button
-                baseButton="choice-btn choice-fade-in"
-                key={opt.option_id}
-                action={() => handleChoice(opt.option_id)}
-                title={`${opt.label}. ${opt.option_text}`}
-              />
-            ))}
+            <Button
+              baseButton={optionAClass}
+              action={() => handleChoice(currentTurn.options[0].option_id)}
+              title={`${currentTurn.options[0].label}. ${currentTurn.options[0].option_text}`}
+            />
+            <Button
+              baseButton={optionBClass}
+              action={() => handleChoice(currentTurn.options[1].option_id)}
+              title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
+            />
           </div>
         </div>
       )}

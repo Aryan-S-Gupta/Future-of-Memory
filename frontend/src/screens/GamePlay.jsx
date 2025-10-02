@@ -18,7 +18,6 @@ import { getFunFacts } from "../../api/single-player/GameApi.js";
 
 /**
  * GamePlay component
- *
  * This screen drives the main gameplay loop. It alternates between:
  * - Displaying a scenario for the given year.
  * - Displaying a decision-making question** with multiple choices.
@@ -77,6 +76,9 @@ const GamePlay = () => {
     }
 });
 
+
+
+
   // --- Minimal TTS: inline (no extra files/deps) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
   const prevVolRef = useRef(null); // remember user volume while narrating
@@ -90,6 +92,9 @@ const GamePlay = () => {
       prevVolRef.current = null;
     }
   };
+
+
+
 
   const speak = (text) => {
     if (!synthRef.current || !text) return;
@@ -117,8 +122,8 @@ const GamePlay = () => {
       .find(Boolean) || voices[0];
     utter.voice = picked;
     // tweak for more “majestic” feel
-    utter.rate = 0.90;  // slower = more weighty
-    utter.pitch = 1.12;  // deeper
+   utter.rate = 0.7;  // slower (was 0.9) — lower is slower
+  utter.pitch = 1.0;   // deeper
     utter.volume = 1;   // full, since we ducked bgm
 
     utter.onend = utter.onerror = () => {
@@ -167,25 +172,57 @@ const GamePlay = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, questionReadout, isPlaying]);
 
-  // Replay narration when toolbar Play is clicked (even if already playing)
-  useEffect(() => {
-    const handler = () => {
-      if (screen === "scenario" && scenarioData?.scenario) {
-        speak(scenarioData.scenario);
-      } else if (screen === "question" && questionReadout) {
-        speak(questionReadout);
-      }
-    };
-    window.addEventListener("bgm-play", handler);
-    return () => window.removeEventListener("bgm-play", handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
+  // Fetch question
+  const { data: questionQueryData } = useQuery({
+    queryKey: ["question", sessionId],
+    queryFn: async () => {
+      const result = await getQuestion(sessionId);
+      setCurrentTurn(result);
+      return result;
+    },
+    enabled: screen === "question",
+    onError: console.error,
+  });
 
-  /**
-   * Handles a player's choice when answering a question.
-   *
-   * @param {string} answer - The key of the chosen option.
-   */
+  // --- Staged reveal ---
+  // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
+  const [stage, setStage] = useState(0);
+  const fadeDuration = 2000; //
+  useEffect(() => {
+    if (screen === "question" && currentTurn) {
+      setStage(1); // show question
+      speak(currentTurn.question);
+
+      const timer1 = setTimeout(() => {
+        setStage(2);
+        speak(currentTurn.options[0].option_text);
+      }, 12000 - fadeDuration);
+
+      const timer2 = setTimeout(() => {
+        setStage(3);
+        speak(currentTurn.options[1].option_text);
+      }, 17000 - fadeDuration);
+
+      const timer3 = setTimeout(() => {
+        setStage(4); // show all together, no TTS
+      }, 22000 - fadeDuration);
+
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        cancelTTS();
+      };
+    }
+  }, [screen, currentTurn]);
+
+  // Map button stage
+  const getButtonStageClass = (idx) => {
+    if (stage === 4) return "show";
+    if (stage === idx + 2) return "show";
+    if (stage > idx + 2) return "hide";
+    return "";
+  };
 
   // handle choice click
   const handleChoice = async (option_id) => {
@@ -210,6 +247,32 @@ const GamePlay = () => {
     setIsReady(true);
     setYear(year + 1);
   };
+    cancelTTS(); 
+    const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id)
+        const mapped = {
+        scenario: out.scenario.text,
+        image: out.image.url
+      };
+      if (out.image.status !== "ready" ) {
+        console.log("Failed to submit choice:", out.message);
+      }
+      console.log("Submit choice response:", mapped);
+      setScenarioData(mapped);
+      setScreen("scenario");
+      setYear(year + 1);
+      };
+  const questionClass =
+    stage === 1 || stage === 4 ? "fade-in-out show" :
+      stage > 1 ? "fade-in-out hide" : "fade-in-out";
+
+  const optionAClass =
+    stage === 2 || stage === 4 ? "choice-btn fade-in-out show" :
+      stage > 2 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
+
+  const optionBClass =
+    stage === 3 || stage === 4 ? "choice-btn fade-in-out show" :
+      stage > 3 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
+
 
   // Fetch fun facts when loading scenario
   const fetchFunFacts = async () => {
@@ -236,7 +299,7 @@ const GamePlay = () => {
 
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
-              {/* Image in middle */}
+          {/* Image in middle */}
           {scenarioData.image && (
             <div className="scenario-image">
               <img src={scenarioData.image} alt="scenario" className="scenario-img" />
@@ -264,19 +327,21 @@ const GamePlay = () => {
       )}
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
-        <div>
-          <div className="question-container">
-            <h2 className="fade-in">{currentTurn.question}</h2>
-          </div>
+        <div className="question-container">
+          <h2 className={questionClass}>
+            {currentTurn.question}
+          </h2>
           <div className="choice-container">
-            {currentTurn.options.map((opt) => (
-              <Button
-                baseButton="choice-btn choice-fade-in"
-                key={opt.option_id}
-                action={() => handleChoice(opt.option_id)}
-                title={`${opt.label}. ${opt.option_text}`}
-              />
-            ))}
+            <Button
+              baseButton={optionAClass}
+              action={() => handleChoice(currentTurn.options[0].option_id)}
+              title={`${currentTurn.options[0].label}. ${currentTurn.options[0].option_text}`}
+            />
+            <Button
+              baseButton={optionBClass}
+              action={() => handleChoice(currentTurn.options[1].option_id)}
+              title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
+            />
           </div>
         </div>
       )}

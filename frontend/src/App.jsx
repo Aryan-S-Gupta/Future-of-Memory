@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainGameScreen from "./screens/MainGameScreen.jsx";
 import BackgroundScreen from "./screens/BackgroundScreen.jsx";
+import BackgroundScreenMulti from "./screens/BackgroundScreenMulti.jsx";
 import HowToScreen from "./screens/HowToScreen.jsx";
 import GamePlay from "./screens/GamePlay.jsx";
 import MultiplayerLobby from "./screens/MultiPlayerLobby.jsx";
@@ -31,7 +32,8 @@ function App() {
               <Route path="/how-to-play" element={<HowToScreen />} />
               <Route path="/game-play" element={<GamePlay />} />
               <Route path="/multiplayer-lobby" element={<MultiplayerLobby/>} />
-            <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
+              <Route path="/background-multi/:roomCode" element={<BackgroundScreenMulti />} />
+              <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
             </Routes>
           </SessionProvider>
         </BackgroundWrapper>
