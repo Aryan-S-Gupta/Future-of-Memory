@@ -244,7 +244,7 @@ def create_session(request):
 # need a call in background page - it starts gebnerating question and options and images and scenario
 from shared.tasks import start_turn_pipeline
 def start_prerendering(request):
-    year = request.GET.get("year")
+    year = int(request.GET.get("year"))
     session_id = request.GET.get("session_id")
     logger.debug("start_turn_pipeline.send() called with session id " + str(session_id) + " and year " + year)
     response = start_turn_pipeline.send(session_id, year)
@@ -330,6 +330,9 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
 
         if world_view_data.get("success"):
             next_year = int(year) + 1
+            next_turn = Turn.objects.filter(session_id=session_id, year=next_year).first()
+            if next_turn:
+                world_view_data["next_turn_id"] = next_turn.id 
             try:
                 # start generating next turn in background
                 start_turn_pipeline.send(session_id, next_year)
