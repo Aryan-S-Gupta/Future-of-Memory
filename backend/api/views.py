@@ -282,6 +282,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
 
 @csrf_exempt
 def retrieve_fun_facts_api(request) -> JsonResponse:
+    logger.debug("retrieve_fun_facts_api called")
     """Retrieve fun facts based on the most recent retrieved chunks.
     
     Input format: no data given

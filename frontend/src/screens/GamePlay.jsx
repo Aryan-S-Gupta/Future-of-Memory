@@ -37,9 +37,8 @@ const GamePlay = () => {
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
-  const [isLoadingScenario, setIsLoadingScenario] = useState(false);
   const [loadingFacts, setLoadingFacts] = useState([]);
-
+  const [isReady, setIsReady] = useState(false);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -193,17 +192,22 @@ const GamePlay = () => {
     if (!currentTurn) return;
       cancelTTS();
       setScreen("loading");
+        setIsReady(false);
       await fetchFunFacts();
-
     const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id);
 
     if (!out.scenario || !out.scenario.text || !out.image?.url) {
       console.log("Scenario/image not ready yet...");
+        
+      return;
+    } else if (out.scenario.text === scenarioData?.scenario && out.image.url === scenarioData?.image) {
+      console.log("Scenario/image unchanged, waiting...");
+
       return;
     }
-
     setScenarioData({ scenario: out.scenario.text, image: out.image.url });
     setScreen("scenario");
+    setIsReady(true);
     setYear(year + 1);
   };
 
@@ -211,7 +215,8 @@ const GamePlay = () => {
   const fetchFunFacts = async () => {
     try {
       const facts = await getFunFacts(); // Fetch 3 fun facts
-      setLoadingFacts(facts);
+      setLoadingFacts(facts.data);
+      console.log("Fun facts loaded:", facts);
     } catch (error) {
         console.error("Error fetching fun facts:", error);
     }
@@ -221,7 +226,7 @@ const GamePlay = () => {
       <ExitExperience/>
       {screen === "loading" && (
       <LoadingScreen
-        isReady={scenarioData?.scenario && scenarioData?.image}
+        isReady={isReady}
         funFacts={loadingFacts}
         onContinue={() => {
           setScreen("scenario");

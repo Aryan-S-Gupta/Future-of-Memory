@@ -2,6 +2,7 @@ import React from "react";
 import Button from "../Button/Button.jsx";
 import "../../styles/LoadingScreen.css";
 
+
 /**
  * LoadingScreen component
  *
@@ -13,23 +14,33 @@ import "../../styles/LoadingScreen.css";
 const LoadingScreen = ({ isReady, funFacts = [], onContinue }) => {
   return (
     <div className="loading-screen">
-      {!isReady && <h2>Please wait while we are generating your world...</h2>}
+      {!isReady && (
+        <div className="loading-container">
+          <h2 className="loading-title">
+            Please wait while we are generating your world...
+          </h2>
 
-      {funFacts.length > 0 && (
-        <div className="fun-facts">
-          <h3>Did you know?</h3>
-          <ul>
-            {funFacts.map((fact, i) => (
-              <li key={i}>
-                {fact.fact}{" "}
-                {fact.link && (
-                  <a href={fact.link} target="_blank" rel="noreferrer">
-                    {fact.link_text || "Learn more"}
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
+          {funFacts.length > 0 && (
+            <div className="fun-facts-section">
+              <h3 className="fun-facts-title">Did you know?</h3>
+              <div className="fun-facts-list">
+                {funFacts.map((fact, i) => (
+                  <div key={i} className="fun-fact-item">
+                    <p className="fun-fact-text">{fact.fact}</p>
+                    {fact.link && (
+                      <p className="fun-fact-link">
+                        Visit{" "}
+                        <a href={fact.link} target="_blank" rel="noreferrer">
+                          {fact.link_text || fact.link}
+                        </a>{" "}
+                        to read more.
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

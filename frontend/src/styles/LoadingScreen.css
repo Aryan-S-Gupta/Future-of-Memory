@@ -1,29 +1,61 @@
 .loading-screen {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  min-height: 80vh;
+  align-items: center;
+  min-height: 100vh; /* full screen */
+  padding: 20px;
+  font-family: "Poppins", sans-serif;
+  color: white;
   text-align: center;
-  padding: 2rem;
-  background: #f0f0f0;
 }
 
-.loading-screen h2 {
+.loading-container {
+  background: rgba(0, 0, 0, 0.7); /* black translucent box */
+  padding: 30px 40px;
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+}
+
+.loading-title {
   font-size: 1.8rem;
-  margin-bottom: 1rem;
+  margin-bottom: 25px;
 }
 
-.fun-facts {
-  margin-top: 1rem;
+.fun-facts-section {
+  margin-top: 20px;
 }
 
-.fun-facts ul {
-  list-style: disc;
-  text-align: left;
-  padding-left: 2rem;
+.fun-facts-title {
+  font-size: 2.5rem; /* big Did you know? */
+  font-weight: 700;
+  margin-bottom: 20px;
 }
 
-.loading-footer {
-  margin-top: 2rem;
+.fun-facts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center; /* center facts */
+}
+
+.fun-fact-item {
+  font-size: 1.3rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.fun-fact-text {
+  margin: 0 0 10px 0;
+}
+
+.fun-fact-link {
+  font-size: 1rem;
+  color: #ccc;
+}
+
+.fun-fact-link a {
+  color: #4da6ff;
+  text-decoration: underline;
+  font-weight: 500;
 }
