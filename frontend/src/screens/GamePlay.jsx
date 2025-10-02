@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQuestion, submitChoice,  } from "../../api/single-player/GameApi";
-import Button from "../components/Button/Button";
-import { useNavigate } from "react-router-dom";
 import { useSession } from "../../SessionContext.jsx";
 import background from "../assets/background.jpg";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
+import Button from "../components/Button/Button.jsx";
 import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
 import "../styles/GamePlay.css";
 import { getFunFacts } from "../../api/single-player/GameApi.js";
 
@@ -48,14 +46,14 @@ const GamePlay = () => {
     "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
-});
+  });
  // --- Tie narration to BGM ---
   const { isPlaying, volume, setVolume } = useBgm();
   
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
-// Fetches the scenario whenever we are on the "scenario" screen.
+  // Fetches the scenario whenever we are on the "scenario" screen.
  const {
   data: questionData,
   isLoading: isQuestionLoading,
@@ -74,7 +72,7 @@ const GamePlay = () => {
     onError: (err) => {
       console.error("onError:", err);
     }
-});
+  });
 
 
 
@@ -172,18 +170,6 @@ const GamePlay = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, questionReadout, isPlaying]);
 
-  // Fetch question
-  const { data: questionQueryData } = useQuery({
-    queryKey: ["question", sessionId],
-    queryFn: async () => {
-      const result = await getQuestion(sessionId);
-      setCurrentTurn(result);
-      return result;
-    },
-    enabled: screen === "question",
-    onError: console.error,
-  });
-
   // --- Staged reveal ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
@@ -229,38 +215,27 @@ const GamePlay = () => {
     if (!currentTurn) return;
       cancelTTS();
       setScreen("loading");
-        setIsReady(false);
+      setIsReady(false);
       await fetchFunFacts();
     const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id);
 
     if (!out.scenario || !out.scenario.text || !out.image?.url) {
       console.log("Scenario/image not ready yet...");
-        
       return;
-    } else if (out.scenario.text === scenarioData?.scenario && out.image.url === scenarioData?.image) {
+    } else if (out.scenario.text === scenarioData?.scenario) {
       console.log("Scenario/image unchanged, waiting...");
-
       return;
     }
-    setScenarioData({ scenario: out.scenario.text, image: out.image.url });
-    setScreen("scenario");
-    setIsReady(true);
-    setYear(year + 1);
-  };
-    cancelTTS(); 
-    const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id)
-        const mapped = {
+      const mapped = {
         scenario: out.scenario.text,
         image: out.image.url
       };
-      if (out.image.status !== "ready" ) {
-        console.log("Failed to submit choice:", out.message);
-      }
       console.log("Submit choice response:", mapped);
       setScenarioData(mapped);
       setScreen("scenario");
       setYear(year + 1);
-      };
+    }
+
   const questionClass =
     stage === 1 || stage === 4 ? "fade-in-out show" :
       stage > 1 ? "fade-in-out hide" : "fade-in-out";
@@ -272,6 +247,7 @@ const GamePlay = () => {
   const optionBClass =
     stage === 3 || stage === 4 ? "choice-btn fade-in-out show" :
       stage > 3 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
+    
 
 
   // Fetch fun facts when loading scenario
@@ -309,8 +285,6 @@ const GamePlay = () => {
           <div className="text-container">
             <h2 className="fade-in">{scenarioData.scenario}</h2>
           </div>
-
-
 
           {/* Continue button at bottom */}
           <div className="scenario-footer">

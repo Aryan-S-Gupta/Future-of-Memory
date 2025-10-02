@@ -1,25 +1,57 @@
 .loading-screen {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 100vh; /* full screen */
-  padding: 20px;
-  font-family: "Poppins", sans-serif;
+  min-height: 100vh;
+  font-family: 'Kanit', sans-serif;
   color: white;
   text-align: center;
+
+  position: relative;
 }
 
 .loading-container {
-  background: rgba(0, 0, 0, 0.7); /* black translucent box */
+  background: rgba(23, 23, 23, 0.85);
   padding: 30px 40px;
-  border-radius: 16px;
+  border-radius: 20px;
   max-width: 900px;
   width: 100%;
+  box-shadow: 0 0 30px rgba(237, 237, 237, 0.3);
+  border: 1px solid rgba(0, 200, 255, 0.25);
 }
 
 .loading-title {
   font-size: 1.8rem;
   margin-bottom: 25px;
+  color: #f5fcff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Futuristic Loading Bar */
+.loading-bar-wrapper {
+  width: 80%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 20px auto;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.loading-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #00f0ff, #00ffa0);
+  border-radius: 8px;
+  animation: loadAnim 2s linear infinite;
+}
+
+@keyframes loadAnim {
+  0% { width: 0%; }
+  50% { width: 100%; }
+  100% { width: 0%; }
 }
 
 .fun-facts-section {
@@ -27,35 +59,81 @@
 }
 
 .fun-facts-title {
-  font-size: 2.5rem; /* big Did you know? */
+  font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgb(44, 143, 255);
 }
 
 .fun-facts-list {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  align-items: center; /* center facts */
+  align-items: center;
 }
 
 .fun-fact-item {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   line-height: 1.6;
   text-align: center;
-}
-
-.fun-fact-text {
-  margin: 0 0 10px 0;
-}
-
-.fun-fact-link {
-  font-size: 1rem;
-  color: #ccc;
+  background: rgba(0, 255, 200, 0.05);
+  padding: 12px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 255, 200, 0.2);
+  max-width: 600px;
 }
 
 .fun-fact-link a {
   color: #4da6ff;
   text-decoration: underline;
   font-weight: 500;
+}
+
+/* Footer Continue Button - futuristic pop-up */
+.loading-footer {
+  position: fixed;
+  bottom: 20px;           /* slightly above the bottom edge */
+  left: 50%;
+  transform: translateX(-50%) translateY(30px); /* start below view */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  animation: slideUpFade 1s ease forwards;      /* new keyframe animation */
+  z-index: 1000;
+}
+
+
+.btn-continue {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+  border: 2px solid #60dbfa;
+  border-radius: 6px;
+  background: linear-gradient(145deg, rgba(20, 30, 40, 0.95), rgba(15, 25, 35, 0.85));
+  color: #60dbfa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(96, 219, 250, 0.4);
+}
+
+.btn-continue:hover {
+  background: linear-gradient(145deg, rgba(30, 50, 60, 0.95), rgba(25, 40, 50, 0.85));
+  box-shadow: 0 0 25px rgba(96, 219, 250, 0.7);
+  transform: scale(1.05);
+}
+
+/* Slide up + fade-in animation */
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
