@@ -17,7 +17,7 @@ const BackgroundScreenMulti = () => {
   const playerName = searchParams.get("playerName");
 
   const goToGame = () => {
-    navigate(`/game-play-multi/${roomCode}?playerName=${playerName}`);
+    navigate(`/multiplayer-room/${roomCode}?playerName=${playerName}`);
   };
 
   return (

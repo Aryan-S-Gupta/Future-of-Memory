@@ -246,13 +246,13 @@ const GamePlayMulti = () => {
    //If waiting → don't move forward
     if (out.success === false && out.image?.status === "waiting") {
       console.log("Waiting for other players...");
-      return;
+      // return;
     }
 
     //If no scenario yet → don't move forward
     if (!out.scenario || !out.scenario.text) {
       console.warn("No scenario text returned yet, not switching screen.");
-      return;
+      // return;
     }
 
     //Safe mapping

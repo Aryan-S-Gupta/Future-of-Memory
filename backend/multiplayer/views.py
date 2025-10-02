@@ -326,7 +326,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     # when you receive request check no of players, check number of responses, create a map of option id, and num votes, then get the votes from the reqwuest 
     # the max voted option id, and use that to generate the world view
     try:
-        world_view_data = display_world_view(session_id, turn_id, year, final_option)
+        world_view_data = display_world_view(session_id, turn_id, int(year), final_option)
 
         if world_view_data.get("success"):
             next_year = int(year) + 1
