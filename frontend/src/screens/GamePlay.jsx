@@ -15,7 +15,6 @@ import "../styles/GamePlay.css";
 
 /**
  * GamePlay component
- *
  * This screen drives the main gameplay loop. It alternates between:
  * - Displaying a scenario for the given year.
  * - Displaying a decision-making question** with multiple choices.
@@ -274,9 +273,15 @@ const GamePlay = () => {
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
         <div className="question-container">
-          <h2 className={`fade-in-out ${stage === 1 ? "show" : stage > 1 ? "hide" : ""}`}>
+          {/* Question */}
+          <h2
+            className={`fade-in-out ${stage === 1 ? "show" : stage > 1 ? "hide" : ""
+              }`}
+          >
             {currentTurn.question}
           </h2>
+
+          {/* Options */}
           <div className="choice-container">
             <Button
               baseButton={`choice-btn fade-in-out ${getButtonStageClass(0)}`}
