@@ -280,10 +280,14 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
         else:
             return JsonResponse({'error': 'No turn found for this session'}, status=404)
     except Exception as e:
+        logger.exception("Error in display_scenario_and_image")
         return JsonResponse({
-            'success': False,
-            'error': f'Failed to display world view: {str(e)}'
+            "success": False,
+            "status": "error",
+            "error": f"Failed to display world view: {str(e)}"
         }, status=500)
+    
+
 
 @csrf_exempt
 def retrieve_fun_facts_api(request) -> JsonResponse:
