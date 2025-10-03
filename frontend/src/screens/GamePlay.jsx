@@ -173,7 +173,7 @@ const GamePlay = () => {
   // --- Staged reveal ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
-  const fadeDuration = 2000; //
+  const fadeDuration = 1000; //
   useEffect(() => {
     if (screen === "question" && currentTurn) {
       setStage(1); // show question
@@ -182,16 +182,16 @@ const GamePlay = () => {
       const timer1 = setTimeout(() => {
         setStage(2);
         speak(currentTurn.options[0].option_text);
-      }, 12000 - fadeDuration);
+      }, 10000 - fadeDuration);
 
       const timer2 = setTimeout(() => {
         setStage(3);
         speak(currentTurn.options[1].option_text);
-      }, 17000 - fadeDuration);
+      }, 15000 - fadeDuration);
 
       const timer3 = setTimeout(() => {
         setStage(4); // show all together, no TTS
-      }, 22000 - fadeDuration);
+      }, 20000 - fadeDuration);
 
       return () => {
         clearTimeout(timer1);
@@ -230,7 +230,7 @@ const GamePlay = () => {
         scenarioReady = true;
       } else {
         console.log("Scenario not ready, retrying in 2s...");
-        await new Promise((resolve) => setTimeout(resolve, 500)); // wait 2 seconds
+        await new Promise((resolve) => setTimeout(resolve, 500)); 
       }
     }
 
