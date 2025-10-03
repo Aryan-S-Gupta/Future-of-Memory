@@ -276,30 +276,6 @@ def retrieve_fun_facts_api(request) -> JsonResponse:
     """
     return JsonResponse({"data": retrieve_fun_facts()})
 
-@csrf_exempt
-@require_POST
-def retrieve_fun_facts_api(request) -> JsonResponse:
-    """Retrieve fun facts based on the most recent retrieved chunks.
-    
-    Input format: no data given
-    
-    Return format: {
-        "data": [
-            {
-                "fact": "the fact text, probably single sentence",
-                "link": "link to the original document",
-                "link_text": "text to display for the link e.g. 'Cambridge Core article'"
-            },
-            ...
-            (one item for each fact)
-        ]
-    }
-    
-    The constant NUM_FUN_FACTS in backend/rag/fun_facts/retrieve_fun_facts.py will determine the 
-    number of fun facts retrieved on eac call.
-    """
-    return JsonResponse({"data": retrieve_fun_facts()})
-
 def _to_media_url(rel):
     if not rel:
         return None
