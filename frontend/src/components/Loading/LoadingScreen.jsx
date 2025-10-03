@@ -51,7 +51,28 @@ const LoadingScreen = ({ isReady, funFacts = [], onContinue, setScreen,  }) => {
 
       {isReady && (
         <div className="loading-footer">
-          <p>Your work is now ready. Press continue to view.</p>
+              {funFacts.length > 0 && (
+            <div className="fun-facts-section">
+              <h3 className="fun-facts-title">Did you know?</h3>
+              <div className="fun-facts-list">
+                {funFacts.map((fact, i) => (
+                  <div key={i} className="fun-fact-item">
+                    <p className="fun-fact-text">{fact.fact}</p>
+                    {fact.link && (
+                      <p className="fun-fact-link">
+                        Visit{" "}
+                        <a href={fact.link} target="_blank" rel="noreferrer">
+                          {fact.link_text || fact.link}
+                        </a>{" "}
+                        to read more.
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <p>Your world is now ready. Press continue to view.</p>
           <Button
             baseButton="btn-continue"
             action={onContinue}

@@ -7,6 +7,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../styles/GamePlay.css";
 import { useSession } from "../../SessionContext.jsx";
 import background from "../assets/background.jpg";
+import { getFunFacts } from "../../api/single-player/GameApi.js";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
@@ -227,16 +228,6 @@ const GamePlayMulti = () => {
     setScreen("loading");
     setIsReady(false);
     await fetchFunFacts();
-
-    // Submit the choice to the backend
-    const out = await submitChoice(
-      playerName,
-      roomCode,
-      sessionId,
-      currentTurn.turn_id,
-      year,
-      option_id
-    );
   
     if (!out.scenario || !out.scenario.text || !out.image?.url) {
       console.log("Scenario/image not ready yet...");
@@ -256,6 +247,41 @@ const GamePlayMulti = () => {
       setYear(year + 1);
     
   };
+
+const {
+  data: out,
+  isLoading: isTurnLoading,
+  error: turnError,
+  status: turnStatus,
+  } = useQuery({
+    queryKey: ["scenario", playerName, roomCode, currentTurn.turn_id, sessionId, roomCode, currentTurn.option_id, year],
+    queryFn: async () => {
+      console.log("submitting option", sessionId);
+      const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, currentTurn.option_id);
+      console.log("the data is", out);
+
+      if (!out.scenario || !out.scenario.text || !out.image?.url) {
+        console.log("Scenario/image not ready yet...");
+        return;
+    } else if (out.scenario.text === scenarioData?.scenario) {
+      console.log("Scenario/image unchanged, waiting...");
+      return;
+    }
+      const mapped = {
+        scenario: out.scenario.text,
+        image: out.image.url
+      };
+      console.log("Submit choice response:", mapped);
+      setIsReady(true);
+      setScenarioData(mapped);
+      // setScreen("scenario");
+      setYear(year + 1);
+    },
+    enabled: screen !== "question" && currentTurn.turn_id != null,
+    onError: (err) => {
+      console.error("onError:", err);
+    }
+});
 
     // Fetch fun facts when loading scenario
     const fetchFunFacts = async () => {

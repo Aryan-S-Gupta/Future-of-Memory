@@ -385,7 +385,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     try:
         world_view_data = display_world_view(session_id, turn_id, year, final_option)
 
-        if world_view_data.get("success"):
+        if world_view_data.get("success") and world_view_data.get("scenario").get("text") != "":
             next_year = int(year) + 1
             next_turn = Turn.objects.filter(session_id=session_id, year=next_year).first()
             if next_turn:
@@ -397,10 +397,12 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
             except Exception as e:
                 logger.warning(f"Failed to start next turn generation: {e}")
 
-        # Include votes info always
-        world_view_data["votes_info"] = votes_info
+            # Include votes info always
+            world_view_data["votes_info"] = votes_info
 
-        return JsonResponse(world_view_data)
+            return JsonResponse(world_view_data)
+        else:
+            return JsonResponse({'error': 'No turn found for this session'}, status=404)
 
     except Exception as e:
         logger.error(f"Error displaying world view: {e}")
