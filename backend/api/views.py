@@ -264,21 +264,26 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
     try:
         world_view_data = display_world_view(session_id, turn_id, year, option_id)
 
-        if world_view_data.get("success"):
+        if world_view_data.get("success") and world_view_data.get("status") == "ready":
             next_year = int(year) + 1
             try:
-                # start generating next turn in background
                 start_turn_pipeline.send(session_id, next_year)
                 logger.info(f"Started generating next turn (year {next_year}) in background")
             except Exception as e:
                 logger.warning(f"Failed to start next turn generation: {e}")
+
+        # return the raw payload from services.py (status-aware)
         return JsonResponse(world_view_data)
-        
+
     except Exception as e:
+        logger.exception("Error in display_scenario_and_image")
         return JsonResponse({
-            'success': False,
-            'error': f'Failed to display world view: {str(e)}'
+            "success": False,
+            "status": "error",
+            "error": f"Failed to display world view: {str(e)}"
         }, status=500)
+    
+
 
 @csrf_exempt
 def retrieve_fun_facts_api(request) -> JsonResponse:

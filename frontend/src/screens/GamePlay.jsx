@@ -213,29 +213,39 @@ const GamePlay = () => {
   // handle choice click
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
-      cancelTTS();
-      setScreen("loading");
-      setIsReady(false);
-      await fetchFunFacts();
-    const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id);
+    cancelTTS();
+    setScreen("loading");
+    setIsReady(false);
 
-    if (!out.scenario || !out.scenario.text || !out.image?.url) {
-      console.log("Scenario/image not ready yet...");
-      return;
-    } else if (out.scenario.text === scenarioData?.scenario) {
-      console.log("Scenario/image unchanged, waiting...");
-      return;
+    await fetchFunFacts();
+
+    let scenarioReady = false;
+    let out = null;
+
+    while (!scenarioReady) {
+      out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id);
+
+      // Check if scenario is returned
+      if (out?.scenario?.text && out?.image?.url && out.scenario.text !== scenarioData?.scenario) {
+        scenarioReady = true;
+      } else {
+        console.log("Scenario not ready, retrying in 2s...");
+        await new Promise((resolve) => setTimeout(resolve, 500)); // wait 2 seconds
+      }
     }
-      const mapped = {
-        scenario: out.scenario.text,
-        image: out.image.url
-      };
-      console.log("Submit choice response:", mapped);
-      setScenarioData(mapped);
-      // setScreen("scenario");
-      setYear(year + 1);
-      setIsReady(true);
-    }
+
+    const mapped = {
+      scenario: out.scenario.text,
+      image: out.image.url
+    };
+    setScenarioData(mapped);
+
+    // Mark ready so LoadingScreen shows continue
+    setIsReady(true);
+
+    // Increment year
+    setYear(year + 1);
+  };
 
   const questionClass =
     stage === 1 || stage === 4 ? "fade-in-out show" :
