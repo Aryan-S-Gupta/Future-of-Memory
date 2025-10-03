@@ -10,7 +10,7 @@ import "../../styles/LoadingScreen.css";
  * - funFacts: array of { fact, link, link_text } objects
  * - onContinue: function to call when user clicks continue
  */
-const LoadingScreen = ({ isReady, funFacts = [], onContinue }) => {
+const LoadingScreen = ({ isReady, funFacts = [], onContinue, setScreen,  }) => {
   return (
     <div className="loading-screen">
       
@@ -26,7 +26,7 @@ const LoadingScreen = ({ isReady, funFacts = [], onContinue }) => {
           </div>
 
           {funFacts.length > 0 && (
-            <div className="fun-facts-section">L
+            <div className="fun-facts-section">
               <h3 className="fun-facts-title">Did you know?</h3>
               <div className="fun-facts-list">
                 {funFacts.map((fact, i) => (

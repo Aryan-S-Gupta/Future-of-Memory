@@ -232,7 +232,7 @@ const GamePlay = () => {
       };
       console.log("Submit choice response:", mapped);
       setScenarioData(mapped);
-      setScreen("scenario");
+      // setScreen("scenario");
       setYear(year + 1);
     }
 

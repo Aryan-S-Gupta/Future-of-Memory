@@ -22,6 +22,8 @@ const GamePlayMulti = () => {
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
+      const [loadingFacts, setLoadingFacts] = useState([]);
+    const [isReady, setIsReady] = useState(false);
   const [turn, setTurn] = useState(2035);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
@@ -222,7 +224,11 @@ const GamePlayMulti = () => {
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
     cancelTTS(); 
-   try {
+    setScreen("loading");
+    setIsReady(false);
+    await fetchFunFacts();
+
+    // Submit the choice to the backend
     const out = await submitChoice(
       playerName,
       roomCode,
@@ -231,36 +237,49 @@ const GamePlayMulti = () => {
       year,
       option_id
     );
-   //If waiting → don't move forward
-    if (out.success === false && out.image?.status === "waiting") {
-      console.log("Waiting for other players...");
-      // return;
+  
+    if (!out.scenario || !out.scenario.text || !out.image?.url) {
+      console.log("Scenario/image not ready yet...");
+      return;
+    } else if (out.scenario.text === scenarioData?.scenario) {
+      console.log("Scenario/image unchanged, waiting...");
+      return;
+    }
+      const mapped = {
+        scenario: out.scenario.text,
+        image: out.image.url
+      };
+      console.log("Submit choice response:", mapped);
+      setIsReady(true);
+      setScenarioData(mapped);
+      // setScreen("scenario");
+      setYear(year + 1);
+    
+  };
+
+    // Fetch fun facts when loading scenario
+    const fetchFunFacts = async () => {
+      try {
+        const facts = await getFunFacts(); // Fetch 3 fun facts
+        setLoadingFacts(facts.data);
+        console.log("Fun facts loaded:", facts);
+      } catch (error) {
+          console.error("Error fetching fun facts:", error);
+      }
     }
 
-    //If no scenario yet → don't move forward
-    if (!out.scenario || !out.scenario.text) {
-      console.warn("No scenario text returned yet, not switching screen.");
-      // return;
-    }
-
-    //Safe mapping
-    const mapped = {
-      scenario: out.scenario.text,
-      image: out.image?.url || null,
-    };
-
-    console.log("Submit choice response:", mapped);
-
-    setScenarioData(mapped);
-    setScreen("scenario");
-    setYear((prev) => prev + 1);
-  } catch (err) {
-    console.error("Error submitting choice:", err);
-  }
-};
   return (
     <BasePage>
       <ExitExperience/>
+            {screen === "loading" && (
+      <LoadingScreen
+        isReady={isReady}
+        funFacts={loadingFacts}
+        onContinue={() => {
+          setScreen("scenario");
+        }} 
+      />
+    )}
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
               {/* Image in middle */}
