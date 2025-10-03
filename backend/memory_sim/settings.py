@@ -55,7 +55,7 @@ INSTALLED_APPS = [
 DRAMATIQ_BROKER = {
     "BROKER": "dramatiq.brokers.redis.RedisBroker",
     "OPTIONS": {
-        "url": "redis://localhost:6379/0",
+        "url": "redis://localhost:6380/0",
     },
     "MIDDLEWARE": [
         "dramatiq.middleware.TimeLimit",
