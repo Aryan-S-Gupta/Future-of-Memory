@@ -234,6 +234,7 @@ const GamePlay = () => {
       setScenarioData(mapped);
       // setScreen("scenario");
       setYear(year + 1);
+      setIsReady(true);
     }
 
   const questionClass =
