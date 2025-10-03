@@ -12,12 +12,17 @@ import '@fontsource/kanit/500.css';
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
+import galleryTheme from "./assets/DeepMeditation_DavidFesliyan.mp3"
 import { SessionProvider } from "../SessionContext.jsx";
 
 function App() {
 
   const routeAudioMap = {
-    "*": { src: mainTheme, loop: true },
+    "/gallery*": [
+      { src: mainTheme, loop: true, volume: 0.1 },
+      { src: galleryTheme, loop: true, volume: 0.2 },
+    ],
+    "*": [{ src: mainTheme, loop: true }],
   };
 
   return (

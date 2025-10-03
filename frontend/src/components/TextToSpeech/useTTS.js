@@ -89,7 +89,7 @@ export default function useTTS(defaultEnabled = true, duckLevel = 0.25) {
         if (v) utter.voice = v;
 
         // sync with app volume/mute
-        utter.volume = isMuted ? 0 : Math.max(0.1, Math.min(1, volume));
+        utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
         utter.rate = 1;
         utter.pitch = 1;
 
@@ -103,6 +103,11 @@ export default function useTTS(defaultEnabled = true, duckLevel = 0.25) {
 
     // cleanup on unmount
     useEffect(() => () => cancel(), [cancel]);
+
+    // hard-stop current speech if user mutes in the toolbar
+    useEffect(() => {
+        if (isMuted && isSpeaking) cancel();
+    }, [isMuted, isSpeaking, cancel]);
 
     // return stuff for outside use
     return {

@@ -49,7 +49,7 @@ const GamePlay = () => {
   const navigate = useNavigate();
 
   // --- Tie narration to BGM ---
-  const { isPlaying, volume, setVolume } = useBgm();
+  const { isPlaying, isMuted, volume, setVolume } = useBgm();
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
@@ -116,7 +116,7 @@ const GamePlay = () => {
     // tweak for more “majestic” feel
     utter.rate = 0.90;  // slower = more weighty
     utter.pitch = 1.12;  // deeper
-    utter.volume = 1;   // full, since we ducked bgm
+    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));   // tie TTS loudness to the global toolbar
 
     utter.onend = utter.onerror = () => {
       // Restore BGM volume
@@ -177,6 +177,9 @@ const GamePlay = () => {
     return () => window.removeEventListener("bgm-play", handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
+
+  // If user hits Mute in the toolbar, kill any ongoing speech immediately
+  useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
 
   /**
    * Handles a player's choice when answering a question.
