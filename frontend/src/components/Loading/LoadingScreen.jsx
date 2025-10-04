@@ -50,7 +50,10 @@ const LoadingScreen = ({ isReady, funFacts = [], onContinue, setScreen,  }) => {
       )}
 
       {isReady && (
-        <div className="loading-footer">
+        <div className="loading-container">
+              <h2 className="loading-title">
+            Your world is now ready. Press continue to view.   
+          </h2>
               {funFacts.length > 0 && (
             <div className="fun-facts-section">
               <h3 className="fun-facts-title">Did you know?</h3>
@@ -72,7 +75,6 @@ const LoadingScreen = ({ isReady, funFacts = [], onContinue, setScreen,  }) => {
               </div>
             </div>
           )}
-          <p>Your world is now ready. Press continue to view.</p>
           <Button
             baseButton="btn-continue"
             action={onContinue}

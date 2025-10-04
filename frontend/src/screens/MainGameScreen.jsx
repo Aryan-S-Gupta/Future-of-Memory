@@ -31,7 +31,7 @@ const MainGameScreen = () => {
     try {
       const response = await createSession();
       setSessionId(response.session_id); 
-      //await startPrerender(sessionId);
+      await startPrerender(sessionId);
       console.log("session is" + sessionId);
       navigate("/story");
     } catch (error) {
@@ -39,16 +39,16 @@ const MainGameScreen = () => {
     }
   };
 
-  const start_multiple_session = async () => {
-    try {
-      const response = await createSession();
-      setSessionId(response.sessionId);
-      console.log("session is" + sessionId);
-      navigate("/multiplayer-lobby");
-    } catch (error) {
-      console.error("Error creating multiplayer session:", error);
-    }
-  };
+  // const start_multiple_session = async () => {
+  //   try {
+  //     const response = await createSession();
+  //     setSessionId(response.sessionId);
+  //     console.log("session is" + sessionId);
+  //     navigate("/multiplayer-lobby");
+  //   } catch (error) {
+  //     console.error("Error creating multiplayer session:", error);
+  //   }
+  // };
 
   return (
     <BasePage>
@@ -69,7 +69,7 @@ const MainGameScreen = () => {
       <div className="button-group">
         <Button baseButton="btn-primary" action={() => start_single_session()} title="Start" />
         <Button baseButton="btn-secondary" action={() => navigate("/how-to-play")} title="How To Play" />
-        <Button baseButton="btn-secondary" action={() => start_multiple_session()} title="Multiplayer" />
+        <Button baseButton="btn-secondary" action={() =>       navigate("/multiplayer-lobby")} title="Multiplayer" />
       </div>
     </BasePage>
   );
