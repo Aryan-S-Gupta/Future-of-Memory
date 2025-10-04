@@ -12,6 +12,7 @@ import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
+import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import { useMutation } from "@tanstack/react-query";
 
 const GamePlayMulti = () => {
@@ -23,9 +24,10 @@ const GamePlayMulti = () => {
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
-      const [loadingFacts, setLoadingFacts] = useState([]);
+    const [loadingFacts, setLoadingFacts] = useState([]);
     const [isReady, setIsReady] = useState(false);
-  const [turn, setTurn] = useState(2035);
+    const [option_id, setOptionId] = useState(null);
+  const [turn, setTurn] = useState(-1);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -226,25 +228,10 @@ const GamePlayMulti = () => {
     if (!currentTurn) return;
     cancelTTS(); 
     setScreen("loading");
+    setOptionId(option_id);
     setIsReady(false);
     await fetchFunFacts();
-  
-    if (!out.scenario || !out.scenario.text || !out.image?.url) {
-      console.log("Scenario/image not ready yet...");
-      return;
-    } else if (out.scenario.text === scenarioData?.scenario) {
-      console.log("Scenario/image unchanged, waiting...");
-      return;
-    }
-      const mapped = {
-        scenario: out.scenario.text,
-        image: out.image.url
-      };
-      console.log("Submit choice response:", mapped);
-      setIsReady(true);
-      setScenarioData(mapped);
-      // setScreen("scenario");
-      setYear(year + 1);
+
     
   };
 
@@ -254,18 +241,18 @@ const {
   error: turnError,
   status: turnStatus,
   } = useQuery({
-    queryKey: ["scenario", playerName, roomCode, currentTurn.turn_id, sessionId, roomCode, currentTurn.option_id, year],
+    queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
     queryFn: async () => {
       console.log("submitting option", sessionId);
-      const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, currentTurn.option_id);
-      console.log("the data is", out);
+      const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
+      console.log("the data is", out.data );
 
-      if (!out.scenario || !out.scenario.text || !out.image?.url) {
+      if (!out.scenario || !out.scenario.text) {
         console.log("Scenario/image not ready yet...");
-        return;
+        return null;
     } else if (out.scenario.text === scenarioData?.scenario) {
       console.log("Scenario/image unchanged, waiting...");
-      return;
+      return null;
     }
       const mapped = {
         scenario: out.scenario.text,
@@ -277,7 +264,7 @@ const {
       // setScreen("scenario");
       setYear(year + 1);
     },
-    enabled: screen !== "question" && currentTurn.turn_id != null,
+    enabled: screen !== "question" && currentTurn != null,
     onError: (err) => {
       console.error("onError:", err);
     }
