@@ -1,9 +1,5 @@
 import api from "./api";
 
-export const createMultiplayerSession = async () => {
-  const response = await api.get("/create_session");
-  return response.data;
-};
 /**
  * List all available rooms.
  * @returns {Promise<object[]>} Array of room objects.

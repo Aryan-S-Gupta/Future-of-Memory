@@ -359,7 +359,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     Returns current votes and scenario if all players have voted.
     """
     player_name = request.GET.get("playerName")
-    logger.debug(f"playername is {player_name}")
+    logger.info(f"playername is {player_name}")
 
     # Process player response and determine the winning option if all voted
     final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
@@ -373,13 +373,13 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
 
     # If not all players have voted, return votes info only
     if final_option is None:
-        logger.debug("Not all players have voted yet.")
+        logger.info("Not all players have voted yet.")
         return JsonResponse({
             "success": False,
-            "image": {"status": "waiting"},
+            "scenario": "",
             "votes_info": votes_info,
             "message": "Waiting for other players to vote."
-        }, status=200)
+        }, status=404)
 
     # All players have voted → generate world view
     try:
