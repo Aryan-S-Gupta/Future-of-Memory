@@ -6,62 +6,98 @@ def build_question_prompt(
     context_block: str,
 ) -> str:
     """
-    Generate a prompt for LLM to create a multiple-choice question with two options and RAG queries.
+    Generate a prompt for LLM to create a progressive, time-aware 2-option question
+    with per-option RAG queries. Includes anti-repetition and theme progression.
     
     Returns:
-        str: Formatted prompt string for the LLM
+        A single JSON object (no markdown).
     """
-    # Check if context_block contains compressed context (has "Previous Scenario:" pattern)
-    if "Previous Scenario:" in context_block and "Previous Choice:" in context_block:
-        # This is compressed context with story state
-        story_context = f"""STORY FRAME
-Current Year: {year}
-
-World Background:
-{background}
-
-Story Context:
-{context_block}"""
+    # Map year to developmental phase and thematic focus
+    if year < 2045:
+        phase = "early-adoption"
+        phase_themes = "regulation, safety, clinical oversight, commercialization onset, privacy concerns"
+    elif year < 2060:
+        phase = "social-integration" 
+        phase_themes = "labor market shifts, insurance, education, unequal access, platform monopolies, cross-border trade"
+    elif year < 2075:
+        phase = "governance-and-geopolitics"
+        phase_themes = "international standards, sanctions, memory IP, state surveillance, collective archives, cultural conflict"
     else:
-        # This is regular RAG context
-        story_context = f"""STORY FRAME
-Current Year: {year}
+        phase = "long-term-consequences"
+        phase_themes = "intergenerational effects, historical revision, identity fragmentation, collective trauma, black markets"
 
-World Background:
+    # Check if context_block contains compressed context from story state
+    if "Story History:" in context_block:
+        world_ctx = f"""CURRENT WORLD STATE
+Year: {year}
+Phase: {phase}
+Phase-Themes: {phase_themes}
+
+Story History (HIGH PRIORITY):
+{context_block}
+
+Initial Setting (reference only): {background}
+"""
+    else:
+        world_ctx = f"""CURRENT WORLD STATE
+Year: {year}
+Phase: {phase}
+Phase-Themes: {phase_themes}
+
+Setting (first turn or RAG-only):
 {background}
 
-Retrieved Context (if any):
-{context_block}"""
+Available Context:
+{context_block}
+"""
     
     return f"""
-    
-You are a narrative engine for a turn-based story.
+ROLE
+You are a narrative engine for a turn-based story about humanity's relationship with memory editing technology.
 
-TASK
-1) Propose ONE clear, decision-driving question WITH EXACTLY TWO OPTIONS (A, B). 
-   Each option must be short, mutually exclusive, and lead to meaningfully different outcomes.
-2) Build TWO specific retrieval queries (one for each option) to fetch relevant factual snippets for grounding each option's consequences.
+CORE MISSION
+Produce a story-progressive, time-aware question that reflects CURRENT world state and introduces NEW challenges appropriate for the '{phase}' phase.
 
-{story_context}
+WORLD STATE & HISTORY (read carefully; highest priority)
+{world_ctx}
 
+WORLD STATE EVOLUTION PRINCIPLES
+- The story progresses through distinct phases of societal change
+- Historical Continuity: Each question must build upon previous developments and decisions  
+- Thematic Evolution: Move beyond basic "is memory editing ethical" to explore complex consequences
+- PRIORITY: Story Context/History above takes precedence over static background information
 
-REQUIREMENTS
-- The question should be detailed and specific (aim for 18-30 words total).
-- Provide context to make the scenario and stakes clear to players.
-- Generate exactly TWO options that avoid "Yes/No" answers.
-- Each option should be 10–18 words, mutually exclusive, and concrete.
-- Do NOT include labels like "A." or "B." inside option strings.
-- The two options MUST represent distinctly different approaches or philosophies.
-- Options should be self-contained and understandable without repeating the question text.
-- Frame the question at the societal, policy, or community level (e.g., citizens, regulators, clinics, researchers).
-- Each retrieval query must contain relevant keywords for the corresponding option (maximum 80 characters).
-- RAG queries should be short keyword phrases only - no full sentences, questions, or punctuation.
-- Example query format: "memory editing safety protocols clinical trials" or "regulatory frameworks ethical oversight"
+NARRATIVE PROGRESSION REQUIREMENTS
+- MANDATORY: Analyze the Story Context/History above to understand what has already happened
+- FORBIDDEN: Do NOT repeat basic questions like "Should memory editing be allowed?" or "Is this technology ethical?"
+- REQUIRED: Focus on SPECIFIC consequences, complications, or new developments that arise from previous decisions
+- ADVANCEMENT: Each question should introduce novel challenges that emerge as technology and society evolve
+- SPECIFICITY: Address concrete scenarios (new regulations, technological breakthroughs, social conflicts, international tensions, economic impacts, cultural shifts)
 
-CRITICAL OUTPUT REQUIREMENTS
-- MUST return clean JSON without any template tags, placeholders, or markup syntax
-- FORBIDDEN: Never include template variables, curly braces, angle brackets, or HTML-like tags in any field
-- All text must be plain, readable content without programming syntax or placeholder markers
+QUESTION DEVELOPMENT GUIDELINES
+- Build upon previous story developments rather than rehashing basic ethical debates
+- ALIGN WITH CURRENT PHASE: Focus on the Phase-Themes listed in the world state above
+- Focus on EMERGING issues that society hasn't faced before in this timeline
+- Present dilemmas that arise FROM the world state, not abstract philosophical questions
+- Phase-Specific Focus: Address challenges that naturally emerge during the current developmental phase
+- Consider secondary effects: economic disruption, generational divides, international competition, cultural evolution
+
+TASK SPECIFICATION
+1) Generate ONE story-progressive question WITH EXACTLY TWO OPTIONS (A, B)
+   - Question must reflect current world developments and introduce NEW challenges
+   - Options must be concrete responses to this specific situation, not generic approaches
+   - Each option should lead to meaningfully different societal trajectories
+2) Create TWO targeted retrieval queries (one for each option) for factual grounding
+
+OUTPUT REQUIREMENTS
+- MUST return valid JSON with fields: question, options, option_queries
+- Question: 18-30 words, specific, time-aware, builds on history
+- Options: Exactly 2 strings, 10-18 words each, concrete policy/action, mutually exclusive
+- Do NOT include labels like "A." or "B." inside option strings
+- Frame at societal/institutional level (governments, organizations, communities)
+- Option queries: Exactly 2 keyword phrases, ≤80 characters each (no questions)
+- Example query format: "memory editing safety protocols clinical trials"
+- FORBIDDEN: Never include template variables, placeholders, or markup syntax
 """.strip()
 
 
@@ -151,11 +187,13 @@ FOLLOW-UP RAG QUERY REQUIREMENTS
 - Do NOT use question words (what, how, why, should, can, will, etc.) or question marks (?)
 
 SCENARIO SUMMARY REQUIREMENTS
-- In addition to the full scenario, provide a brief "scenario_summary" field.
-- This should be a 20-30 word summary capturing the key developments.
-- Focus on the main institutional action and immediate outcome.
-- Use concise, clear language suitable for story state tracking.
-- Example: "Government announces comprehensive memory editing policy with safeguards, public shows measured caution about identity implications"
+- CRITICAL: Provide "scenario_summary" field that captures WORLD STATE CHANGES and STORY PROGRESSION
+- Length: 20-30 words focusing on societal shifts, policy changes, or cultural developments
+- MUST emphasize what is NEW or DIFFERENT in the world after this decision
+- Include concrete changes to institutions, public attitudes, technology adoption, or social structures
+- Use language that advances the narrative timeline and sets up future developments
+- Focus on measurable outcomes and their implications for society's relationship with memory editing
+- Example: "New international memory editing standards create citizen registry system, while underground modification networks emerge in response to restrictions"
 
 OUTPUT FORMAT (STRICT)
 CRITICAL: Your response will be validated automatically. It MUST pass these checks:

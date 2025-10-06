@@ -28,13 +28,13 @@ QUESTION_SCHEMA = {
     "properties": {
         "question": {
             "type": "string", 
-            "description": "The generated question"
+            "description": "18-30 words, specific, time-aware, builds on history"
         },
         "options": {
             "type": "array",
             "items": {
                 "type": "string",
-                "description": "Option text"
+                "description": "10-18 words, concrete policy/action, mutually exclusive"
             },
             "minItems": 2,
             "maxItems": 2,
@@ -44,7 +44,7 @@ QUESTION_SCHEMA = {
             "type": "array",
             "items": {
                 "type": "string",
-                "description": "RAG query keywords"
+                "description": "<=80 chars keyword phrase for RAG retrieval"
             },
             "minItems": 2,
             "maxItems": 2,
@@ -109,7 +109,7 @@ def call_ollama(prompt: str, json_schema: dict = None) -> dict:
         "model": MODEL, 
         "prompt": prompt, 
         "stream": False, 
-        "format": "json",
+        "format": json_schema if json_schema else "json",
         "options": {
             "temperature": 0.6,      # Low temperature for more predictable output
             "top_p": 0.95,           # Nucleus sampling
@@ -117,10 +117,6 @@ def call_ollama(prompt: str, json_schema: dict = None) -> dict:
             "repeat_penalty": 1.1,  # Penalize repetition
         }
     }
-    
-    # Add JSON schema if provided (for better structured output)
-    if json_schema:
-        payload["format"] = json_schema
     
     response = requests.post(OLLAMA_URL, json=payload, timeout=60)
     response.raise_for_status()
@@ -153,9 +149,9 @@ def validate_question_options(result: dict) -> bool:
     if len(options) != 2:
         return False
     
-    # Each option must be a string with 6-14 words
+    # Each option must be a string with 6-20 words
     for opt in options:
-        if not isinstance(opt, str) or not (6 <= len(opt.split()) <= 14):
+        if not isinstance(opt, str) or not (6 <= len(opt.split()) <= 20):
             return False
     
     return True
@@ -266,46 +262,48 @@ def validate_image_texts(image_texts: Dict[str, str]) -> bool:
 # ---------- Story State Management ----------
 
 def create_story_state(
-    scenario_summary: str = "",
-    user_choice: str = ""
+    scenario_summary: str = ""
 ) -> dict:
     """
-    Create a simplified story state with only essential context.
+    Create a story state with historical context for better narrative continuity.
     
     Args:
-        scenario_summary: Summary of the previous turn's scenario and theme development
-        user_choice: The user's previous choice/decision
+        scenario_summary: Summary of the current turn's scenario and theme development
         
     Returns:
-        dict: Simplified story state for efficient LLM processing
+        dict: Story state with historical tracking for LLM processing
     """
     return {
-        "scenario_summary": scenario_summary or "Story beginning",
-        "user_choice": user_choice or "No previous choice",
-        "context_version": "simplified_v1"  # For future compatibility
+        "history": [scenario_summary] if scenario_summary else []
     }
 
 
 def update_story_state(
     current_state: dict,
-    new_scenario_summary: str,
-    new_user_choice: str
+    new_scenario_summary: str
 ) -> dict:
     """
-    Update story state with new scenario and user choice.
+    Update story state with new scenario, maintaining last 50 rounds of history.
     
     Args:
         current_state: Existing story state dict
         new_scenario_summary: New scenario summary and theme development
-        new_user_choice: Latest user choice/decision
         
     Returns:
-        dict: Updated story state
+        dict: Updated story state with historical context (max 50 rounds)
     """
+    # Get existing history or initialize empty list
+    history = current_state.get("history", [])
+    
+    # Add new scenario summary
+    history.append(new_scenario_summary)
+    
+    # Keep only the last 50 rounds for efficient processing
+    if len(history) > 50:
+        history = history[-50:]
+    
     return {
-        "scenario_summary": new_scenario_summary,
-        "user_choice": new_user_choice,
-        "context_version": current_state.get("context_version", "simplified_v1")
+        "history": history
     }
 
 # ---------- Public API ----------
@@ -347,12 +345,16 @@ def generate_question(
             year, background, context_block
         )
     elif story_state:
-        # Subsequent years with story state: use compressed context
-        scenario_summary = story_state.get("scenario_summary", "")
-        user_choice = story_state.get("user_choice", "")
+        # Subsequent years with story state: use all historical context
+        history = story_state.get("history", [])
         
-        # Build compressed context instead of full re-reading
-        compressed_context = f"Previous Scenario: {scenario_summary}\nPrevious Choice: {user_choice}\nRAG Context: {context_block}"
+        # Build compressed context with all history and RAG content
+        if history:
+            history_context = "\n".join([f"Turn {i+1}: {summary}" for i, summary in enumerate(history)])
+            compressed_context = f"Story History:\n{history_context}\n\nRAG Context: {context_block}"
+        else:
+            compressed_context = f"RAG Context: {context_block}"
+            
         prompt = build_question_prompt(
             year, background, compressed_context
         )
