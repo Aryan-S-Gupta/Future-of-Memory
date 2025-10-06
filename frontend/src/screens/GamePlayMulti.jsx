@@ -297,7 +297,7 @@ const {
 
   return (
     <BasePage>
-      <ExitExperience roomCode={roomCode} playerName={playerName}/>
+      <ExitExperience code={roomCode} player={playerName}/>
       {roomDestroyed && (
         <RoomDestroyedPopup/>
       )}

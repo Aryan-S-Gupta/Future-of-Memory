@@ -176,7 +176,7 @@ def leave_multiplayer_room(request):
                 'room_code': room_code,
                 'player_name': player_name,
                 'destroy': True,
-                'message': f'player removed but {room_code} still exists'
+                'message': f'Host removed and {room_code} does not exists'
             }
 
     else: 
@@ -336,6 +336,7 @@ def display_question_and_options(request, session_id, room_code, turn_id):
     ]
 
     response_payload = {
+        'message': 'ok',
         'room_code': room_code,
         'turn_id': latest_turn.id,
         'year': latest_turn.year,
@@ -343,7 +344,7 @@ def display_question_and_options(request, session_id, room_code, turn_id):
         'options': options_payload,
     }
 
-    return JsonResponse({'message': 'ok', 'data': response_payload}, status=200)
+    return JsonResponse(response_payload)
 
 
 # scenario and image display page
