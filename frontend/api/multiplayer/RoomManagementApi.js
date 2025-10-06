@@ -37,8 +37,9 @@ export const joinRoom = async (roomCode, playerName) => {
  * @returns {Promise<object>} Room state after leave
  */
 export const leaveRoom = async (roomCode, playerName) => {
+  console.log(roomCode)
   const response = await api.get(`/leave`, { roomCode, playerName});
-  return response.data;
+  return response;
 }
 
 /**

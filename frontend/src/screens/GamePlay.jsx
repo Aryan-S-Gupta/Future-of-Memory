@@ -284,7 +284,7 @@ const {
   }
   return (
     <BasePage>
-      <ExitExperience/>
+      <ExitExperience roomCode={"-1"} playerName={"single-player"}/>
       {screen === "loading" && (
       <LoadingScreen
         isReady={isReady}

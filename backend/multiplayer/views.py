@@ -87,6 +87,8 @@ def join_multiplayer_room(request):
     room_code = data.get("roomCode")
     player_name = data.get("playerName")
 
+    if not rm.room_exists: 
+        JsonResponse({"Success": False, "room_exists": False})
     # Attempt to join the room
     success = join_room(room_code, player_name)
     session = None
@@ -120,12 +122,14 @@ def sync_state(request):
     data = json.loads(request.body.decode("utf-8"))
     room_code = data.get("room_code")
     state = data.get("state")
+    
+    if not rm.room_exists(room_code):
+        return JsonResponse({'success': False, 'room_exists': False})
 
     # Update room state using room_manager
     update_state(room_code, state)
     
     return JsonResponse({"success": True})
-
 
 def get_current_state(request, room_code):
     """
@@ -140,13 +144,16 @@ def get_current_state(request, room_code):
     return JsonResponse({"state": get_state(room_code)})
 
 
-def leave_mutliplayer_room(request):
-    data = json.loads(request.body.decode("utf-8"))
-    logger.info("request: "+ str(data))
+def leave_multiplayer_room(request):
+    room_code = request.GET.get("roomCode")
+    player_name = request.GET.get("playerName")
 
-    room_code = data.get("roomCode")
-    player_name = data.get("playerName")
+    if not rm.room_exists(room_code):
+        logging.info(f'the room code {room_code} does not exist')
+        return JsonResponse({'success': False, 'room_exists': False})
+    
     success = rm.leave_room(room_code, player_name)
+    logging.info(f'the output of leave is {success}')
     data_payload = {}
     if success:
         # delete all voting sessions
@@ -155,16 +162,23 @@ def leave_mutliplayer_room(request):
             rem_players = rm.get_players(room_code)
             logging.info(f'One player removed but the room exists. ' +
                          f'The remaining players are {rem_players}')
+            data_payload = {
+                'success': success,
+                'room_code': room_code,
+                'player_name': player_name,
+                'destroy': True,
+                'message': f'player removed but {room_code} still exists'
+            }
 
     else: 
         data_payload = {
-            'success': str(success),
+            'success': success,
             'room_code': room_code,
             'player_name': player_name,
             'message': f'Failed to leave room {room_code}'
         }
         logger.warning(f'Failed to leave room {room_code}')
-        return JsonResponse(data_payload)
+    return JsonResponse(data_payload)
 
 
 
@@ -285,6 +299,9 @@ def display_question_and_options(request, session_id, room_code, turn_id):
     logger.debug(f"Found session: {existing_session}")
     logger.debug(f"turn_id received: {turn_id}")
 
+    if not rm.room_exists(room_code):
+        return JsonResponse({'success': False, 'room_exists': False})
+
     if int(turn_id) == -1:
         # first turn, get the latest turn (or none)
         latest_turn = (
@@ -332,6 +349,8 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     """
     player_name = request.GET.get("playerName")
     logger.debug(f"playername is {player_name}")
+    if not rm.room_exists(room_code):
+        return JsonResponse({'success': False, 'room_exists': False})
     final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
     if final_option is None:
         logger.debug("Not all players have voted yet.")
@@ -384,6 +403,8 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     """
     player_name = request.GET.get("playerName")
     logger.info(f"playername is {player_name}")
+    if not rm.room_exists(room_code):
+        return JsonResponse({'success': False, 'room_exists': False})
 
     # Process player response and determine the winning option if all voted
     final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
