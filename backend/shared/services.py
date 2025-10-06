@@ -334,21 +334,18 @@ def generate_and_save_scenario(session_id: int, turn_id: int, year: int) -> Dict
         logger.warning(f"Expected 2 context blocks, got {len(context_blocks)}. Using empty fallbacks.")
         context_blocks = ["", ""]
     
-    # Step 5: Get last_description from previous turn
-    last_description = ""
+        # Step 5: Get story state from current turn for scenario generation
+    current_story_state = None
     if year > 2035:
         try:
-            previous_turn = Turn.objects.get(session=session, year=year-1)
-            if previous_turn.user_choice and previous_turn.user_choice.scenario:
-                last_description = previous_turn.user_choice.scenario
-                logger.debug(f"Retrieved last description length: {len(last_description)}")
-            else:
-                logger.warning(f"Previous turn {year-1} has no user choice or scenario")
-        except Turn.DoesNotExist:
-            logger.warning(f"Previous turn {year-1} not found for session {session_id}")
+            # Get story state from current turn (same as question generation)
+            current_story_state = current_turn.story_state or {}
+            logger.debug(f"Retrieved story state with {len(current_story_state.get('history', []))} history entries")
+        except Exception as e:
+            logger.warning(f"Failed to retrieve story state: {e}")
     else:
-        logger.info("First turn (2035) detected, using empty last_description")
-    
+        logger.info("First turn (2035) detected, using no story state")
+
     # Step 6: Call LLM generation for option descriptions
     logger.info("Calling LLM scenario generation...")
     try:
@@ -358,9 +355,9 @@ def generate_and_save_scenario(session_id: int, turn_id: int, year: int) -> Dict
             year=year + 1,  # Next year for scenario projection
             background=background,
             context_blocks=context_blocks,  # Pass list of 2 context blocks
-            last_description=last_description,
             current_question=current_question,
-            options=option_texts
+            options=option_texts,
+            story_state=current_story_state
         )
         
         # Step 7: Parse the JSON result

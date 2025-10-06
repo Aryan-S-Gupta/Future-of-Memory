@@ -129,6 +129,7 @@ def call_ollama(prompt: str, json_schema: dict = None) -> dict:
 
 # ---------- Light validators ----------
 
+
 def validate_question_options(result: dict) -> bool:
     """
     Validate that question result has exactly two valid options.
@@ -517,10 +518,10 @@ def generate_option_descriptions(
     *,
     year: int,
     background: str,
-    context_blocks: list,  # List of 2 context blocks, one for each option
-    last_description: str,
+    context_blocks: list,
     current_question: str,
-    options: list,  # List of 2 option texts
+    options: list,
+    story_state: dict = None,
     max_retries: int = 2,
 ) -> str:
     """
@@ -530,18 +531,19 @@ def generate_option_descriptions(
     allowing users to explore the consequences of each option.
     
     Args:
-        year: The current year in the story timeline
+        year: The current year in the story timeline (2035 = first year, uses background directly)
         background: The overall story background/setting
         context_blocks: List of 2 context blocks, each corresponding to one option's RAG query
-        last_description: Previous story summary/description
         current_question: The question that was presented to the player
         options: List of exactly 2 option texts [A, B]
+        story_state: Optional compressed story state (dict with key context for years > 2035)
         max_retries: Maximum number of retry attempts for each option
         
     Returns:
         str: JSON string ready for database storage, mapping option labels ('A', 'B') 
         to description results, each containing:
             - scenario: String paragraph (80-150 words)
+            - scenario_summary: Brief summary for story state tracking
             - query_text: RAG query string for next turn
             
     Raises:
@@ -569,16 +571,30 @@ def generate_option_descriptions(
         "scientific research and empirical evidence"
     ]
     
+    # Process context_block with story_state for each option
     for i, (label, option_text, context_block) in enumerate(zip(option_labels, options, context_blocks)):
         success = False
+        
+        # Process context_block with story state
+        if year == 2035:
+            processed_context = context_block
+        elif story_state:
+            history = story_state.get("history", [])
+            if history:
+                history_context = "\n".join([f"Turn {i+1}: {summary}" for i, summary in enumerate(history)])
+                processed_context = f"Story History:\n{history_context}\n\nRAG Context: {context_block}"
+            else:
+                processed_context = f"RAG Context: {context_block}"
+        else:
+            # Fallback
+            processed_context = context_block
         
         for attempt in range(max_retries):
             try:
                 prompt = build_description_prompt(
                     year=year,
                     background=background,
-                    context_block=context_block,
-                    last_description=last_description,
+                    context_block=processed_context,
                     current_question=current_question,
                     selected_option=option_text
                 )
@@ -608,64 +624,97 @@ def generate_option_descriptions(
     return json.dumps(option_descriptions)
 
 
-def generate_description(
-    *,
-    year: int,
-    background: str,
-    context_block: str,
-    last_description: str,
-    current_question: str,
-    selected_option: str,
-    max_retries: int = 3,
-) -> str:
-    """
-    Generate a story description based on the selected option and return as JSON string for database storage.
+# def generate_description(
+#     *,
+#     year: int,
+#     background: str,
+#     context_block: str,
+#     current_question: str,
+#     selected_option: str,
+#     story_state: dict = None,
+#     max_retries: int = 3,
+# ) -> str:
+#     """
+#     Generate a story description based on the selected option and return as JSON string for database storage.
     
-    This function creates the next part of the narrative by incorporating the
-    player's choice and generating a vivid scenario with accompanying metadata.
+#     This function creates the next part of the narrative by incorporating the
+#     player's choice and generating a vivid scenario with accompanying metadata.
     
-    Args:
-        year: The current year in the story timeline
-        background: The overall story background/setting
-        context_block: Retrieved context information for grounding
-        last_description: Previous story summary/description
-        current_question: The question that was presented to the player
-        selected_option: The option chosen by the player
-        max_retries: Maximum number of retry attempts for validation
+#     Args:
+#         year: The current year in the story timeline (2035 = first year, uses background directly)
+#         background: The overall story background/setting
+#         context_block: Retrieved context information for grounding
+#         current_question: The question that was presented to the player
+#         selected_option: The option chosen by the player
+#         story_state: Optional compressed story state (dict with key context for years > 2035)
+#         max_retries: Maximum number of retry attempts for validation
         
-    Returns:
-        str: JSON string ready for database storage with keys:
-            - scenario: String paragraph (80-150 words)
-            - query_text: RAG query string for next turn
+#     Returns:
+#         str: JSON string ready for database storage with keys:
+#             - scenario: String paragraph (80-150 words)
+#             - scenario_summary: Brief summary for story state tracking
+#             - query_text: RAG query string for next turn
             
-    Raises:
-        Exception: If generation fails after all retries
-    """
-    prompt = build_description_prompt(
-        year, background, context_block, last_description,
-        current_question, selected_option
-    )
+#     Raises:
+#         Exception: If generation fails after all retries
+#     """
+#         # Year-based validation and context selection (same as generate_question)
+#     if year == 2035:
+#         # First year: use background directly without story state
+#         prompt = build_description_prompt(
+#             year, background, context_block,
+#             current_question, selected_option
+#         )
+#     elif story_state:
+#         # Subsequent years with story state: use all historical context
+#         history = story_state.get("history", [])
+        
+#         # Build compressed context with all history and RAG content
+#         if history:
+#             history_context = "\n".join([f"Turn {i+1}: {summary}" for i, summary in enumerate(history)])
+#             compressed_context = f"Story History:\n{history_context}\n\nRAG Context: {context_block}"
+#         else:
+#             compressed_context = f"RAG Context: {context_block}"
+            
+#         prompt = build_description_prompt(
+#             year, background, compressed_context,
+#             current_question, selected_option
+#         )
+#     else:
+#         # Fallback for subsequent years without story state
+#         prompt = build_description_prompt(
+#             year, background, context_block,
+#             current_question, selected_option
+#         )
     
-    # Attempt generation with retries
-    for attempt in range(max_retries):
-        try:
-            result = call_ollama(prompt, DESCRIPTION_SCHEMA)
+#     # Step A: Main generation attempt
+#     try:
+#         result = call_ollama(prompt, DESCRIPTION_SCHEMA)
+#         if validate_description_scenario(result):
+#             return json.dumps(result)
+#     except Exception as e:
+#         print(f"Initial description generation failed: {e}")
+    
+#     # Step B: Retry generation with validation
+#     for attempt in range(max_retries):
+#         try:
+#             result = call_ollama(prompt, DESCRIPTION_SCHEMA)
             
-            if validate_description_scenario(result):
-                return json.dumps(result)
-            else:
-                print(f"Attempt {attempt + 1}: Scenario validation failed, retrying...")
+#             if validate_description_scenario(result):
+#                 return json.dumps(result)
+#             else:
+#                 print(f"Retry attempt {attempt + 1}: Scenario validation failed, retrying...")
                 
-        except Exception as e:
-            print(f"Attempt {attempt + 1}: Generation failed - {e}")
+#         except Exception as e:
+#             print(f"Retry attempt {attempt + 1}: Generation failed - {e}")
     
-    # If all attempts fail, return a fallback result
-    fallback_result = {
-        "scenario": "The selected decision creates immediate ripple effects across institutions and communities as stakeholders gather in meeting rooms and public spaces to discuss the implications of this choice. New policies and procedures begin to take shape based on the direction that was chosen, while citizens and experts alike watch closely as the consequences unfold in real time. The path forward remains uncertain, but the choice has been made and will shape future developments. Implementation challenges emerge as different groups interpret the decision through their own perspectives and priorities. How will society adapt to the changes that this pivotal moment has set in motion?",
-        "scenario_summary": "Selected decision creates institutional changes and policy developments with uncertain outcomes",
-        "query_text": "policy implementation and social consequences of memory editing decisions"
-    }
-    return json.dumps(fallback_result)
+#     # If all attempts fail, return a fallback result
+#     fallback_result = {
+#         "scenario": "The selected decision creates immediate ripple effects across institutions and communities as stakeholders gather in meeting rooms and public spaces to discuss the implications of this choice. New policies and procedures begin to take shape based on the direction that was chosen, while citizens and experts alike watch closely as the consequences unfold in real time. The path forward remains uncertain, but the choice has been made and will shape future developments. Implementation challenges emerge as different groups interpret the decision through their own perspectives and priorities. How will society adapt to the changes that this pivotal moment has set in motion?",
+#         "scenario_summary": "Selected decision creates institutional changes and policy developments with uncertain outcomes",
+#         "query_text": "policy implementation and social consequences of memory editing decisions"
+#     }
+#     return json.dumps(fallback_result)
 
 
 
