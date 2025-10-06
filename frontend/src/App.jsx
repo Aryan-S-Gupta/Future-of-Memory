@@ -9,7 +9,7 @@ import MultiplayerLobby from "./screens/MultiPlayerLobby.jsx";
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
 import GamePlayMulti from "./screens/GamePlayMulti.jsx";
-
+import FeedbackScreen from "./screens/FeedbackScreen.jsx";
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
@@ -32,7 +32,8 @@ function App() {
               <Route path="/how-to-play" element={<HowToScreen />} />
               <Route path="/game-play" element={<GamePlay />} />
               <Route path="/multiplayer-lobby" element={<MultiplayerLobby/>} />
-              <Route path="/background-multi/:roomCode" element={<BackgroundScreenMulti />} />
+              <Route path="/background-multi/:roomCode" element={<BackgroundScreenMulti/>} />
+              <Route path="/feedback" element={<FeedbackScreen/>} />
               <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
             </Routes>
           </SessionProvider>
