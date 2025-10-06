@@ -13,7 +13,7 @@ import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
 import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
-import { useMutation } from "@tanstack/react-query";
+import RoomDestroyedPopup from "../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 
 const GamePlayMulti = () => {
   const navigate = useNavigate();
@@ -39,6 +39,7 @@ const GamePlayMulti = () => {
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
 });
+  const [roomDestroyed, setRoomDestroyed] = useState(false);
 
 
   // --- Tie narration to BGM ---
@@ -57,6 +58,13 @@ const GamePlayMulti = () => {
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
       const result = await getQuestion(roomCode, sessionId, turn);
+      if (!result.success) {
+        if (!result.room_exists) {
+          setRoomDestroyed(true);
+          console.log("the room does not exists")
+          // handle room doesnt exist
+        }
+      }
       console.log("currentTurn after getQuestion:", currentTurn);
       console.log("queryFn result:", result);
       setCurrentTurn(result);
@@ -245,6 +253,12 @@ const {
     queryFn: async () => {
       console.log("submitting option", sessionId);
       const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
+      if (!out.success) {
+        if (!out.room_exists) {
+          setRoomDestroyed(true); 
+          // handle room doesnt exist
+        }
+      }
       console.log("the data is", out.data );
 
       if (!out.scenario || !out.scenario.text) {
@@ -283,7 +297,10 @@ const {
 
   return (
     <BasePage>
-      <ExitExperience/>
+      <ExitExperience roomCode={roomCode} playerName={playerName}/>
+      {roomDestroyed && (
+        <RoomDestroyedPopup/>
+      )}
             {screen === "loading" && (
       <LoadingScreen
         isReady={isReady}
