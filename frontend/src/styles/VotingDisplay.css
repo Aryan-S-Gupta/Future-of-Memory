@@ -1,0 +1,64 @@
+.voting-display {
+  margin-top: 2rem;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  background: rgba(10, 15, 25, 0.75);
+
+  /* Glowing border like lobby */
+  border: 2px solid rgba(96, 219, 250, 0.6);
+  box-shadow: 0 0 20px rgba(96, 219, 250, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.8);
+
+  text-align: center;
+  font-family: "Orbitron", sans-serif;
+}
+
+.voting-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #60dbfa;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 8px rgba(96, 219, 250, 0.8);
+  letter-spacing: 1px;
+}
+
+/* Voting progress bar */
+.voting-progress {
+  height: 12px;
+  width: 100%;
+  background: rgba(20, 30, 40, 0.8);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 1rem 0;
+  box-shadow: inset 0 0 10px rgba(96, 219, 250, 0.3);
+}
+
+.voting-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #60dbfa, #00f7ff);
+  box-shadow: 0 0 15px rgba(96, 219, 250, 0.7);
+  transition: width 0.4s ease;
+}
+
+/* Player list */
+.voting-players {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.voting-player {
+  padding: 0.4rem 0.8rem;
+  background: rgba(31, 41, 55, 0.9);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #f9fafb;
+  box-shadow: 0 0 8px rgba(96, 219, 250, 0.4);
+  transition: all 0.3s ease;
+}
+
+.voting-player.voted {
+  background: rgba(96, 219, 250, 0.2);
+  color: #60dbfa;
+  text-shad

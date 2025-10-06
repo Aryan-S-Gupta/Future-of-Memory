@@ -76,6 +76,7 @@ class VotingSession:
         with self.lock:
             """Start the voting session and initialize/reset all relevant attributes."""
             self.votes = {}
+            self.player_votes = {} 
             self.voted_players = []
             self.num_responses = 0
             self.total_players = len(rm.get_players(self.room_code))
@@ -150,6 +151,7 @@ class VotingSession:
             logging.info(f"Total players in room: {rm.get_players(room)}")
             # record the player's vote
             self.voted_players.append(player_name)
+            self.player_votes[player_name] = option_id 
             self.num_responses += 1
             logging.info(f"Total responses: {self.num_responses}/{self.total_players}")
 
@@ -237,6 +239,36 @@ class VotingSession:
         """Returns True if voting has finished."""
         return self.final_option is not None
 
+
+    def get_current_votes(self):
+        """
+        Return current voting status for each player.
+        Shows the option ID for players who voted,
+        and 'Pending' for those who haven't yet.
+        """
+        all_players = set(rm.get_players(self.room_code))
+        votes_so_far = {}
+
+        for player in all_players:
+            if player in self.voted_players:
+                votes_so_far[player] = self.player_votes.get(player, None)
+            else:
+                votes_so_far[player] = "Pending"
+
+        logging.debug(f"Vote status for room {self.room_code}: {votes_so_far}")
+        return votes_so_far
+
+    """voting display:
+    1) create a function in voting session that checks who has voted so far 
+    2) got to the views file create an api that calls that function and returns a json with success = true or false and the dict of players
+    who have voted and who havent
+    3) in the frontend create a new react component that calls that api every q seconds and displays the players who have voted and who havent
+    4) use usequery in front end to call that api every q seconds untill the success = false  keep the fetch data state false and when backend returns success = true   
+    make  the state true and stop the query and make it enable == state == false .
+    4) if all players have" voted, automatically navigate to the next screen
+    5) if the timer runs out, automatically navigate to the next screen
+    6) if a player is inactive, skip their vote and move on to the next
+    """
 
 # Global dictionary to manage voting sessions per room
 VotingSessions = {}

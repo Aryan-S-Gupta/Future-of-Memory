@@ -21,6 +21,8 @@ from django.views.decorators.http import require_POST
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data", "static_stories.json")
+VOTING_SESSIONS = {}
+
 
 with open(DATA_FILE, "r", encoding="utf-8") as f:
     story_data = json.load(f)
@@ -179,6 +181,29 @@ def rag_retrieve(request):
 
     items = retrieve_chunks(query)
     return JsonResponse({"items": items})
+
+@csrf_exempt
+@require_GET
+def get_voting_status(request, room_code):
+    """
+       Returns current voting progress: who has voted, who is pending.
+    """
+    session = voting_sessions.get(room_code)
+    if not session:
+        return JsonResponse({"success": False, "error": "No active voting session"}, status=404)
+    votes = session.get_current_votes()
+
+    # Check if voting has finished
+    all_voted = all(v != "Pending" for v in votes.values())
+    still_active = session.vote_timer is not None
+
+    return JsonResponse({
+        "success": True,
+        "votes": votes,  # { "Alice": "A", "Bob": "Pending" ... }
+        "all_voted": all_voted,
+        "still_active": still_active
+    })
+
 
 
 

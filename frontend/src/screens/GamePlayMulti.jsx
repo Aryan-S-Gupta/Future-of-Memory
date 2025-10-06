@@ -12,6 +12,7 @@ import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
+import VotingDisplay from "../components/Voting Display/VotingDisplay.jsx";
 
 const GamePlayMulti = () => {
   const navigate = useNavigate();
@@ -326,6 +327,10 @@ const GamePlayMulti = () => {
               title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
             />
           </div>
+          <VotingDisplay
+            voters={currentTurn.voters || []}
+            totalPlayers={currentTurn.total_players || 1}
+          />
         </div>
       )}
 

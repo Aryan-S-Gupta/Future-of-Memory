@@ -141,9 +141,6 @@ def get_current_state(request, room_code):
 
 
 
-
-
-
 @csrf_exempt
 def submit_choice(request):
     data = json.loads(request.body.decode("utf-8"))
@@ -225,6 +222,41 @@ def rag_retrieve(request):
     return JsonResponse({"items": items})
 
 
+@csrf_exempt
+@require_GET
+def get_voting_status(request, room_code, turn_id):
+    """
+    Returns the current voting status for a room and turn.
+    Args:
+        request: HTTP request object.
+        room_code (str): Code of the multiplayer room.
+        turn_id (int): ID of the current turn.
+    Returns:
+        JsonResponse with voting status details.
+    """
+    session_key = (room_code, int(turn_id))
+    voting_session = VotingSessions.get(session_key)
+
+    if not voting_session:
+        return JsonResponse({"error": "No voting session found"}, status=404)
+
+    status = voting_session.get_vote_status()
+    players = rm.get_players(room_code)
+
+    # Build player-wise status
+    player_status = {
+        p: "Voted" if p in status["players_voted"] else "Pending"
+        for p in players
+    }
+
+    return JsonResponse({
+        "room_code": room_code,
+        "turn_id": turn_id,
+        "num_responses": status["num_responses"],
+        "total_players": status["total_players"],
+        "final_option": status["final_option"],
+        "players": player_status,
+})
 
 # new views
 from shared.models import Session, Option, Turn
@@ -255,6 +287,16 @@ def start_prerendering(request):
 # send the existing work
 # everytime this is called update turn id 
 def display_question_and_options(request, session_id, room_code, turn_id):
+    """ 
+    Display the question and options for the current turn.
+    Args:
+        request: HTTP request object.
+        session_id (int): ID of the game session.
+        room_code (str): Code of the multiplayer room.
+        turn_id (int): ID of the current turn. If -1, fetch the latest turn.
+    Returns:
+        JsonResponse with question, options, and turn details.
+    """
     global VOTING_SESSION
     logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
@@ -306,61 +348,6 @@ def display_question_and_options(request, session_id, room_code, turn_id):
     return JsonResponse({'message': 'ok', 'data': response_payload}, status=200)
 
 
-# scenario and image display page
-from shared.services import display_world_view
-
-
-
-
-def display_scenario_and_image(request, session_id, turn_id, year, option_id, room_code):
-    """
-    Display the world view after user makes a choice.
-    """
-    player_name = request.GET.get("playerName")
-    logger.debug(f"playername is {player_name}")
-    
-    final_option = VotingSessions[(room_code, int(turn_id))].process_player_response(room_code, player_name, option_id)
-    if final_option is None:
-        logger.debug("Not all players have voted yet.")
-        print("Not all players have voted yet.")
-        return JsonResponse({
-            'success': False,
-            'image': {"status": "waiting"},
-            'message': 'Waiting for other players to vote.' 
-            }, status=200)
-    logger.debug(f"Voting result is {final_option}")
-    logger.debug(f"votes so far {VotingSessions[(room_code, turn_id)].votes}")
-    logger.debug(f"num responses so far {VotingSessions[(room_code, turn_id)].num_responses}")
-    logger.debug(f"votes for option {option_id} is {VotingSessions[(room_code, turn_id)].votes.get(option_id)}")
-    
-
-    # when you receive request check no of players, check number of responses, create a map of option id, and num votes, then get the votes from the reqwuest 
-    # the max voted option id, and use that to generate the world view
-    try:
-        world_view_data = display_world_view(session_id, turn_id, int(year), final_option)
-
-        if world_view_data.get("success"):
-            next_year = int(year) + 1
-            next_turn = Turn.objects.filter(session_id=session_id, year=next_year).first()
-            rm.update_state_by_session(session_id, {"turn_id": next_turn.id if next_turn else -1, "year": next_year})   
-            if next_turn:
-                world_view_data["next_turn_id"] = next_turn.id 
-            try:
-                # start generating next turn in background
-                start_turn_pipeline.send(session_id, next_year)
-                logger.info(f"Started generating next turn (year {next_year}) in background")
-            except Exception as e:
-                logger.warning(f"Failed to start next turn generation: {e}")
-        print("world view data: " + str(world_view_data))
-        return JsonResponse(world_view_data)
-        
-    except Exception as e:
-        print(f"Error displaying world view: {e}")
-        return JsonResponse({
-            'success': False,
-            'status': 'error',
-            'error': f'Failed to display world view: {str(e)}'
-        }, status=500)
 
 from shared.services import display_world_view
 from django.http import JsonResponse
@@ -369,6 +356,15 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     """
     Display the world view after user makes a choice.
     Returns current votes and scenario if all players have voted.
+    Args:
+        request: HTTP request object containing playerName as GET parameter.
+        session_id (int): ID of the game session.
+        turn_id (int): ID of the current turn.
+        year (int): Current year in the game.
+        option_id (int): ID of the option chosen by the player.
+        room_code (str): Code of the multiplayer room.
+    Returns:
+        JsonResponse with voting status and scenario details.   
     """
     player_name = request.GET.get("playerName")
     logger.info(f"playername is {player_name}")
