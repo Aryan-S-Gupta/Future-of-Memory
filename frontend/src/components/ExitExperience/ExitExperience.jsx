@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import "./ExitExperience.css"; 
+import "../../styles/ExitExperience.css"; 
 import Button from "../Button/Button.jsx";
 
 const ExitExperience = () => {

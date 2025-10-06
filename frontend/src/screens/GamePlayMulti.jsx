@@ -7,10 +7,12 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../styles/GamePlay.css";
 import { useSession } from "../../SessionContext.jsx";
 import background from "../assets/background.jpg";
+import { getFunFacts } from "../../api/single-player/GameApi.js";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
+import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import { useMutation } from "@tanstack/react-query";
 import VotingDisplay from "../components/Voting Display/VotingDisplay.jsx";
 
@@ -23,9 +25,10 @@ const GamePlayMulti = () => {
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
-      const [loadingFacts, setLoadingFacts] = useState([]);
+    const [loadingFacts, setLoadingFacts] = useState([]);
     const [isReady, setIsReady] = useState(false);
-  const [turn, setTurn] = useState(2035);
+    const [option_id, setOptionId] = useState(null);
+  const [turn, setTurn] = useState(-1);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -226,25 +229,31 @@ const GamePlayMulti = () => {
     if (!currentTurn) return;
     cancelTTS(); 
     setScreen("loading");
+    setOptionId(option_id);
     setIsReady(false);
     await fetchFunFacts();
 
-    // Submit the choice to the backend
-    const out = await submitChoice(
-      playerName,
-      roomCode,
-      sessionId,
-      currentTurn.turn_id,
-      year,
-      option_id
-    );
-  
-    if (!out.scenario || !out.scenario.text || !out.image?.url) {
-      console.log("Scenario/image not ready yet...");
-      return;
+    
+  };
+
+const {
+  data: out,
+  isLoading: isTurnLoading,
+  error: turnError,
+  status: turnStatus,
+  } = useQuery({
+    queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
+    queryFn: async () => {
+      console.log("submitting option", sessionId);
+      const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
+      console.log("the data is", out.data );
+
+      if (!out.scenario || !out.scenario.text) {
+        console.log("Scenario/image not ready yet...");
+        return null;
     } else if (out.scenario.text === scenarioData?.scenario) {
       console.log("Scenario/image unchanged, waiting...");
-      return;
+      return null;
     }
       const mapped = {
         scenario: out.scenario.text,
@@ -255,8 +264,12 @@ const GamePlayMulti = () => {
       setScenarioData(mapped);
       // setScreen("scenario");
       setYear(year + 1);
-    
-  };
+    },
+    enabled: screen !== "question" && currentTurn != null,
+    onError: (err) => {
+      console.error("onError:", err);
+    }
+});
 
     // Fetch fun facts when loading scenario
     const fetchFunFacts = async () => {

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/RoomManagementApi.js";
-import "./MultiplayerLobby.css"; // Import CSS for styling
+import "../styles/MultiplayerLobby.css"; // Import CSS for styling
 import Button from "../components/Button/Button.jsx";
 import BasePage from "./BasePage.jsx";
 import { useSession } from "../../SessionContext.jsx";
@@ -58,7 +58,7 @@ const MultiplayerLobby = () => {
     console.log(roomCode);
     // Navigate to multiplayer room screen
     navigate(`/background-multi/${data.room_code}?playerName=${playerName}`);
-    console.log("navigated")
+    console.log("navigated with session id " + data.session_id);
   };
 
   /**

@@ -35,6 +35,7 @@ const GamePlay = () => {
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
   const [loadingFacts, setLoadingFacts] = useState([]);
+  const [option_id, setOptionId] = useState(null);
   const [isReady, setIsReady] = useState(false);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
@@ -64,18 +65,21 @@ const GamePlay = () => {
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
       const result = await getQuestion(sessionId);
+      if (!result) {
+        setScreen("loading");
+        setIsReady(false);
+        await fetchFunFacts();
+        return null;
+      }
       console.log("queryFn result:", result);
       setCurrentTurn(result)
       return result;
     },
-    enabled: screen === "question",
+    enabled: screen != "scenario", // only fetch when not on scenario screen
     onError: (err) => {
       console.error("onError:", err);
     }
   });
-
-
-
 
   // --- Minimal TTS: inline (no extra files/deps) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
@@ -90,9 +94,6 @@ const GamePlay = () => {
       prevVolRef.current = null;
     }
   };
-
-
-
 
   const speak = (text) => {
     if (!synthRef.current || !text) return;
@@ -210,43 +211,53 @@ const GamePlay = () => {
     return "";
   };
 
+
   // handle choice click
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
-    cancelTTS();
+    cancelTTS(); 
     setScreen("loading");
+    setOptionId(option_id);
+    console.log("handleChoice called with option_id:", option_id);
     setIsReady(false);
-
     await fetchFunFacts();
+  
 
-    let scenarioReady = false;
-    let out = null;
-
-    while (!scenarioReady) {
-      out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id);
-
-      // Check if scenario is returned
-      if (out?.scenario?.text && out?.image?.url && out.scenario.text !== scenarioData?.scenario) {
-        scenarioReady = true;
-      } else {
-        console.log("Scenario not ready, retrying in 2s...");
-        await new Promise((resolve) => setTimeout(resolve, 500)); 
-      }
-    }
-
-    const mapped = {
-      scenario: out.scenario.text,
-      image: out.image.url
-    };
-    setScenarioData(mapped);
-
-    // Mark ready so LoadingScreen shows continue
-    setIsReady(true);
-
-    // Increment year
-    setYear(year + 1);
   };
 
+const {
+  data: out,
+  isLoading: isTurnLoading,
+  error: turnError,
+  status: turnStatus,
+  } = useQuery({
+    queryKey: ["scenario", currentTurn, sessionId, year, option_id],
+    queryFn: async () => {
+      console.log("submitting option", option_id);
+      const out = await submitChoice(sessionId,currentTurn.turn_id, year, option_id);
+
+      if (!out.scenario || !out.scenario.text || !out.image?.url) {
+        console.log("Scenario/image not ready yet...");
+        return;
+    } else if (out.scenario.text === scenarioData?.scenario) {
+      console.log("Scenario/image unchanged, waiting...");
+      return;
+    }
+      const mapped = {
+        scenario: out.scenario.text,
+        image: out.image.url
+      };
+      console.log("Submit choice response:", mapped);
+      setIsReady(true);
+      setScenarioData(mapped);
+      setYear(year + 1);
+
+    },
+    enabled: screen !== "question" && currentTurn != null,
+    onError: (err) => {
+      console.error("onError:", err);
+    }
+});
   const questionClass =
     stage === 1 || stage === 4 ? "fade-in-out show" :
       stage > 1 ? "fade-in-out hide" : "fade-in-out";

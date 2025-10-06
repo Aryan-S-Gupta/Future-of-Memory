@@ -359,18 +359,22 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
     """
     try:
         world_view_data = display_world_view(session_id, turn_id, year, option_id)
-
-        if world_view_data.get("success") and world_view_data.get("status") == "ready":
+        if world_view_data.get("success") and world_view_data.get("scenario").get("text") != "":
             next_year = int(year) + 1
+            next_turn = Turn.objects.filter(session_id=session_id, year=next_year).first()
+            if next_turn:
+                world_view_data["next_turn_id"] = next_turn.id
+            # start generating next turn in background
             try:
                 start_turn_pipeline.send(session_id, next_year)
                 logger.info(f"Started generating next turn (year {next_year}) in background")
             except Exception as e:
                 logger.warning(f"Failed to start next turn generation: {e}")
 
-        # return the raw payload from services.py (status-aware)
-        return JsonResponse(world_view_data)
 
+            return JsonResponse(world_view_data)
+        else:
+            return JsonResponse({'error': 'No turn found for this session'}, status=404)
     except Exception as e:
         logger.exception("Error in display_scenario_and_image")
         return JsonResponse({
