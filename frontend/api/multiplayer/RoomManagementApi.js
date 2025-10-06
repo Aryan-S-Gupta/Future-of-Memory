@@ -31,6 +31,17 @@ export const joinRoom = async (roomCode, playerName) => {
 };
 
 /**
+ * Leave the current room player is in
+ * @param {String} roomCode - Code of the room to leave
+ * @param {*} playerName - The player's chosen name.
+ * @returns {Promise<object>} Room state after leave
+ */
+export const leaveRoom = async (roomCode, playerName) => {
+  const response = await api.get(`/leave`, { roomCode, playerName});
+  return response.data;
+}
+
+/**
  * Get the current room state (players, choices, etc.)
  * @param {string} roomCode - Room identifier.
  * @returns {Promise<object>} Room state.

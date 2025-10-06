@@ -140,7 +140,31 @@ def get_current_state(request, room_code):
     return JsonResponse({"state": get_state(room_code)})
 
 
+def leave_mutliplayer_room(request):
+    data = json.loads(request.body.decode("utf-8"))
+    logger.info("request: "+ str(data))
 
+    room_code = data.get("roomCode")
+    player_name = data.get("playerName")
+    success = rm.leave_room(room_code, player_name)
+    data_payload = {}
+    if success:
+        # delete all voting sessions
+        logging.info("Emptied out all voting sessions and left the room")
+        if rm.room_exists(room_code):
+            rem_players = rm.get_players(room_code)
+            logging.info(f'One player removed but the room exists. ' +
+                         f'The remaining players are {rem_players}')
+
+    else: 
+        data_payload = {
+            'success': str(success),
+            'room_code': room_code,
+            'player_name': player_name,
+            'message': f'Failed to leave room {room_code}'
+        }
+        logger.warning(f'Failed to leave room {room_code}')
+        return JsonResponse(data_payload)
 
 
 

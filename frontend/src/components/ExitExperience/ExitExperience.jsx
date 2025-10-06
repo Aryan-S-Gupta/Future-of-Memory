@@ -2,11 +2,16 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import "../../styles/ExitExperience.css"; 
 import Button from "../Button/Button.jsx";
+import { leaveRoom } from "../../../api/multiplayer/RoomManagementApi.js";
 
-const ExitExperience = () => {
+const ExitExperience = (room_code, player_name) => {
   const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
 
+  const exitRoom = async() => {
+    const res = await leaveRoom(room_code, player_name)
+    if res
+  }
   return (
     <div>
       {/* Exit button pinned to top-right */}
