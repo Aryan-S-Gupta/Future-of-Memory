@@ -61,4 +61,4 @@
 .voting-player.voted {
   background: rgba(96, 219, 250, 0.2);
   color: #60dbfa;
-  text-shad
+  text-shadow: 0 0 8px rgba(96, 219, 250, 0.8);

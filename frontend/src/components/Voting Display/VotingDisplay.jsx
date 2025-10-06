@@ -23,7 +23,7 @@ const VotingDisplay = ({ voters = [], totalPlayers }) => {
       <div className="voting-players">
         {voters.map((player, i) => (
           <div
-            key={i}
+            key={player.id ? player.id : `${player.name}-${i}`}
             className={`voting-player ${player.hasVoted ? "voted" : ""}`}
           >
             {player.name}
