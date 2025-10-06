@@ -167,6 +167,14 @@ def leave_multiplayer_room(request):
                 'success': success,
                 'room_code': room_code,
                 'player_name': player_name,
+                'destroy': False,
+                'message': f'player removed but {room_code} still exists'
+            }
+        else:
+            data_payload = {
+                'success': success,
+                'room_code': room_code,
+                'player_name': player_name,
                 'destroy': True,
                 'message': f'player removed but {room_code} still exists'
             }

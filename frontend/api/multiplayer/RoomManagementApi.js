@@ -41,7 +41,7 @@ export const leaveRoom = async (roomCode, playerName) => {
 const response = await api.get(`/leave`, {
     params: { roomCode, playerName }
   });
-  return response;
+  return response.data;
 }
 /**
  * Get the current room state (players, choices, etc.)

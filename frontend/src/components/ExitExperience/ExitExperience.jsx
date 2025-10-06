@@ -24,7 +24,7 @@ const ExitExperience = ({code, player}) => {
           //setRoomDestroyed(true);
           // handle room doesnt exist
         }
-        console.log("leaving room was not successful: " + res.message);
+        console.log("leaving room was not successful: " + res);
       } else {
         console.log(player + " has left the room with room code " + code)
         navigate("/")
