@@ -62,6 +62,7 @@ const GamePlayMulti = () => {
         if (!result.room_exists) {
           setRoomDestroyed(true);
           console.log("the room does not exists")
+          setScreen("destroyed")
           // handle room doesnt exist
         }
       }
@@ -256,6 +257,7 @@ const {
       if (!out.success) {
         if (!out.room_exists) {
           setRoomDestroyed(true); 
+          setScreen("destroyed")
           // handle room doesnt exist
         }
       }
@@ -278,7 +280,7 @@ const {
       // setScreen("scenario");
       setYear(year + 1);
     },
-    enabled: screen !== "question" && currentTurn != null,
+    enabled: screen !== "question" && currentTurn != null && screen !== "destroyed",
     onError: (err) => {
       console.error("onError:", err);
     }
@@ -298,7 +300,7 @@ const {
   return (
     <BasePage>
       <ExitExperience code={roomCode} player={playerName}/>
-      {roomDestroyed && (
+      {screen == "destroyed" && (
         <RoomDestroyedPopup/>
       )}
             {screen === "loading" && (

@@ -49,8 +49,8 @@ export const getQuestion = async (roomCode, session_id, turn_id) => {
   console.log("called question api for session:", session_id);
   const res = await api.get(`/storyline/${session_id}/question/${roomCode}/${turn_id}`);
   console.log("got output:", res.data);  // prints the actual object
-  console.log("question:", res.data.question);
-  console.log("options:", res.data.options);
+  // console.log("question:", res.data.question);
+  // console.log("options:", res.data.options);
 
   return res.data; // { message, data: { turn_id, year, question, options } }
 };

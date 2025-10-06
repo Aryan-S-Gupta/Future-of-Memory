@@ -11,16 +11,15 @@ const RoomDestroyedPopup = () => {
         <p>The host has left, and this room no longer exists.</p>
 
         <div className="popup-actions">
-          {onConfirm && (
+
             <button className="btn-confirm" onClick={navigate("/multiplayer-lobby")}>
               Join a Different Room
             </button>
-          )}
-          {onCancel && (
+      
             <button className="btn-cancel" onClick={navigate("/")}>
               Exit
             </button>
-          )}
+  
         </div>
       </div>
     </div>
