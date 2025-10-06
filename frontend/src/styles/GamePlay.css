@@ -112,3 +112,29 @@
   justify-content: center;
   margin-top: 2rem;
 }
+/* Layout for question screen with sidebar */
+.question-screen {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  width: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* Left column: question + choices */
+.question-main {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Right column: voting display */
+.voting-sidebar {
+  flex: 1;
+  max-width: 350px;
+  position: sticky;
+  top: 2rem;
+}

@@ -57,7 +57,7 @@ const GamePlayMulti = () => {
     queryKey: ["question", roomCode, sessionId, turn],
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
-      const result = await getQuestion(roomCode, sessionId, turn);
+      const result = await getQuestion(sessionId, roomCode, turn);
       console.log("currentTurn after getQuestion:", currentTurn);
       console.log("queryFn result:", result);
       setCurrentTurn(result);
@@ -228,7 +228,7 @@ const GamePlayMulti = () => {
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
     cancelTTS(); 
-    setScreen("loading");
+
     setOptionId(option_id);
     setIsReady(false);
     await fetchFunFacts();
@@ -249,6 +249,7 @@ const {
       console.log("the data is", out.data );
 
       if (!out.scenario || !out.scenario.text) {
+        setScreen("loading");
         console.log("Scenario/image not ready yet...");
         return null;
     } else if (out.scenario.text === scenarioData?.scenario) {
@@ -339,14 +340,15 @@ const {
               action={() => handleChoice(currentTurn.options[1].option_id)}
               title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
             />
+            <div className="voting-sidebar">
+              <VotingDisplay
+                voters={currentTurn.voters || []}
+                totalPlayers={currentTurn.total_players || 1}
+              />
+            </div>
           </div>
-          <VotingDisplay
-            voters={currentTurn.voters || []}
-            totalPlayers={currentTurn.total_players || 1}
-          />
         </div>
       )}
-
     </BasePage>
   );
 };

@@ -1,0 +1,134 @@
+@import url('/src/styles/tokens.css');
+
+/* Main container */
+.feedback-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: rgb(255, 255, 255);
+}
+.feedback-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;}
+
+/* Section title */
+.feedback-title {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  text-shadow: var(--shadow-strong);
+  margin-bottom: 1rem;
+}
+
+/* Individual question container */
+.feedback-question {
+  width: 100%;
+  background: var(--color-text-container-bg);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 2rem;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Question text */
+.feedback-question h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--color-accent);
+  text-shadow: 0 0 5px var(--color-accent-2);
+}
+
+/* Rating options container */
+.rating-options {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Individual rating button */
+.rating-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 1rem 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-align: center;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--btn-primary-grad-start), var(--btn-primary-grad-end));
+  border: 2px solid var(--color-accent);
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: var(--shadow-strong);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Subheading under number */
+.rating-btn span {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-accent-2);
+  margin-top: 0.3rem;
+  text-shadow: 0 0 4px var(--color-accent-2);
+}
+
+/* Hover effect */
+.rating-btn:hover {
+  background: linear-gradient(145deg, var(--btn-primary-hover-start), var(--btn-primary-hover-end));
+  box-shadow: var(--shadow-strong-hover);
+  transform: translateY(-3px) scale(1.05);
+}
+
+/* Textarea for feedback */
+.feedback-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-family: var(--font-display);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-accent);
+  background: rgba(20, 30, 40, 0.85);
+  color: var(--color-text);
+  box-shadow: inset 0 0 10px rgba(96, 219, 250, 0.4);
+  resize: vertical;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+}
+
+.feedback-textarea:focus {
+  outline: none;
+  box-shadow: var(--shadow-strong-hover);
+  transform: scale(1.02);
+}
+
+/* Submit button */
+.btn-submit-feedback {
+  padding: 1rem 3rem;
+  font-size: 1.6rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, var(--btn-primary-grad-start), var(--btn-primary-grad-end));
+  color: var(--btn-primary-text);
+  cursor: pointer;
+  box-shadow: var(--shadow-strong);
+  transition: all 0.3s ease;
+  margin-top: 2rem;
+}
+
+.btn-submit-feedback:hover {
+  background: linear-gradient(145deg, var(--btn-primary-hover-start), var(--btn-primary-hover-end));
+  box-shadow: var(--shadow-strong-hover);
+  transform: scale(1.05);
+}

@@ -223,22 +223,9 @@ def rag_retrieve(request):
 
 
 @csrf_exempt
-@require_GET
-def get_voting_status(request, room_code, turn_id):
+def get_voting_status_with_options(request, room_code, turn_id):
     """
-    Returns the current voting status for a room and turn.
-    Args:
-        request: HTTP request object.
-        room_code (str): Code of the multiplayer room.
-        turn_id (int): ID of the current turn.
-    Returns:
-        JsonResponse with voting status details.
-    attributes of response payload:
-        - room_code: The code of the multiplayer room.
-        - turn_id: The ID of the current turn.
-        - num_responses: Number of players who have voted.
-        - total_players: Total number of players in the room.
-        - final_option: The winning option if all players have voted, else null.        
+    Returns the current voting status for a room including player choices.
     """
     session_key = (room_code, int(turn_id))
     voting_session = VotingSessions.get(session_key)
@@ -246,22 +233,13 @@ def get_voting_status(request, room_code, turn_id):
     if not voting_session:
         return JsonResponse({"error": "No voting session found"}, status=404)
 
-    status = voting_session.get_vote_status()
-    players = rm.get_players(room_code)
-
-    # Build player-wise status
-    player_status = {
-        p: "Voted" if p in status["players_voted"] else "Pending"
-        for p in players
-    }
-
+    votes = voting_session.get_current_votes()  # dict: {player: option_id or 'Pending'}
     return JsonResponse({
-        "room_code": room_code,
-        "turn_id": turn_id,
-        "num_responses": status["num_responses"],
-        "total_players": status["total_players"],
-        "final_option": status["final_option"],
-        "players": player_status,
+        "success": True,
+        "votes": votes,
+        "num_responses": voting_session.num_responses,
+        "total_players": voting_session.total_players,
+        "final_option": voting_session.final_option
     })
 
 # new views
@@ -323,7 +301,9 @@ def display_question_and_options(request, session_id, room_code, turn_id):
     logger.debug(f"turn_id received: {turn_id}")
 
     if int(turn_id) == -1:
-        rm_state = rm.get_state(room_code)
+        rm.log_all_rooms()
+        logger.info("room_code is " + str(room_code))
+        rm_state = rm.get_state(str(room_code))
         logger.info(f"Room state for room {room_code}: {rm_state}")
         turn_id = rm_state.get("turn_id", -1)
         VotingSessions[(room_code, int(turn_id))] = VotingSession(room_code, int(turn_id))
@@ -401,7 +381,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     # Prepare vote tracking info
     votes_info = {
         "num_responses": VotingSessions[(room_code, current)].num_responses,
-        "players_voted": list(VotingSessions[(room_code, current)].votes.keys()),  # player names who voted
+        "players_voted": list(VotingSessions[(room_code, current)].voted_players), # player names who voted
         "total_players": VotingSessions[(room_code, current)].total_players,
     }
 

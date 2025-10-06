@@ -182,41 +182,6 @@ def rag_retrieve(request):
     items = retrieve_chunks(query)
     return JsonResponse({"items": items})
 
-@csrf_exempt
-@require_GET
-def get_voting_status(request, room_code):
-    """
-       Returns current voting progress: who has voted, who is pending.
-        Args: room_code (str): The room code to query.
-        Returns:
-                JsonResponse: {
-                    "success": bool,
-                    "votes": dict,  # { "Alice": "A", "Bob": "Pending" ... }
-                    "all_voted": bool,
-                    "still_active": bool
-                }
-        attributes:
-            - votes (dict): Mapping of player names to their votes or "Pending".
-            - all_voted (bool): True if all players have voted, False otherwise.
-            - still_active (bool): True if voting session is still active, False if ended.  
-            
-    """
-    session = voting_sessions.get(room_code)
-    if not session:
-        return JsonResponse({"success": False, "error": "No active voting session"}, status=404)
-    votes = session.get_current_votes()
-
-    # Check if voting has finished
-    all_voted = all(v != "Pending" for v in votes.values())
-    still_active = session.vote_timer is not None
-
-    return JsonResponse({
-        "success": True,
-        "votes": votes,  # { "Alice": "A", "Bob": "Pending" ... }
-        "all_voted": all_voted,
-        "still_active": still_active
-    })
-
 
 # new views
 from shared.models import Session, Option, Turn

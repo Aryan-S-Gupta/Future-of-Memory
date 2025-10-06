@@ -456,6 +456,7 @@ class VotingSession:
         logging.debug(f"Vote status for room {self.room_code}: {votes_so_far}")
         return votes_so_far
 
+
     """voting display:
     1) create a function in voting session that checks who has voted so far 
     2) got to the views file create an api that calls that function and returns a json with success = true or false and the dict of players
