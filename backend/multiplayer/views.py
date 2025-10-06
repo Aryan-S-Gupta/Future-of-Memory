@@ -256,7 +256,7 @@ def get_voting_status(request, room_code, turn_id):
         "total_players": status["total_players"],
         "final_option": status["final_option"],
         "players": player_status,
-})
+    })
 
 # new views
 from shared.models import Session, Option, Turn
