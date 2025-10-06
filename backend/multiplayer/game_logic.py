@@ -365,7 +365,9 @@ class VotingSession:
             - total_players (int): Total number of players in the room.
         """
         self.total_players += 1
-        logging.info(f"Added a player. Total players now {self.total_players}") 
+        logging.info(f"Added a player. Total players now {self.total_players}")
+
+
     def remove_player(self):    
         """
         Decrement the total number of players in the room.
@@ -378,6 +380,7 @@ class VotingSession:
             logging.info(f"Removed a player. Total players now {self.total_players}")
         else:
             logging.warning("Attempted to remove a player when total_players is already 0.")    
+
     
     def get_total_players(self):    
         """Get the total number of players in the room.
