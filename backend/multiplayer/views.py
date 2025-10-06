@@ -233,6 +233,12 @@ def get_voting_status(request, room_code, turn_id):
         turn_id (int): ID of the current turn.
     Returns:
         JsonResponse with voting status details.
+    attributes of response payload:
+        - room_code: The code of the multiplayer room.
+        - turn_id: The ID of the current turn.
+        - num_responses: Number of players who have voted.
+        - total_players: Total number of players in the room.
+        - final_option: The winning option if all players have voted, else null.        
     """
     session_key = (room_code, int(turn_id))
     voting_session = VotingSessions.get(session_key)
@@ -265,7 +271,13 @@ from shared.models import Session, Option, Turn
 # need to call this somewhere - as soon as the game is created
 def create_session(request):
     """
-    Create a new Session and return its ID as JSON.
+    Create a new Session and return its ID as JSON. 
+    Returns:
+        JsonResponse with session_id.
+    attributes of response payload:
+        - session_id: The ID of the newly created session.
+    args:
+        request: HTTP request object.   
     """
     session = Session.objects.create()
     logger.debug(f'session id created: {session.id}')
@@ -296,6 +308,13 @@ def display_question_and_options(request, session_id, room_code, turn_id):
         turn_id (int): ID of the current turn. If -1, fetch the latest turn.
     Returns:
         JsonResponse with question, options, and turn details.
+
+    attributes of response payload:
+        - room_code: The code of the multiplayer room.
+        - turn_id: The ID of the current turn.
+        - year: The year associated with the current turn.
+        - question: The question text for the current turn.
+        - options: A list of options, each with:        
     """
     global VOTING_SESSION
     logger.debug(f"display_question_and_options called for session_id={session_id}")
