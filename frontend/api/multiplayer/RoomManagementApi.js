@@ -38,10 +38,11 @@ export const joinRoom = async (roomCode, playerName) => {
  */
 export const leaveRoom = async (roomCode, playerName) => {
   console.log(roomCode)
-  const response = await api.get(`/leave`, { roomCode, playerName});
+const response = await api.get(`/leave`, {
+    params: { roomCode, playerName }
+  });
   return response;
 }
-
 /**
  * Get the current room state (players, choices, etc.)
  * @param {string} roomCode - Room identifier.

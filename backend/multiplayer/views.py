@@ -144,6 +144,7 @@ def get_current_state(request, room_code):
     return JsonResponse({"state": get_state(room_code)})
 
 
+@csrf_exempt
 def leave_multiplayer_room(request):
     room_code = request.GET.get("roomCode")
     player_name = request.GET.get("playerName")
