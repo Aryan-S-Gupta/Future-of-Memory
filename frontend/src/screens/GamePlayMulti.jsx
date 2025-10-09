@@ -69,15 +69,17 @@ const GamePlayMulti = () => {
     queryKey: ["question", roomCode, sessionId, turn],
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
+        setVotes([]);
+  setShowVotes(true);
+  setIsReady(false);
       const result = await getQuestion(sessionId, roomCode, turn);
       console.log("currentTurn after getQuestion:", currentTurn);
       console.log("queryFn result:", result);
       setCurrentTurn(result);
       console.log("show votes turned on line 75")
       setTurn(result.turn_id);
-      setVotes([])
 
-            console.log("show votes turned on 77")
+            console.log("show votes turned on 77");
       setShowVotes(true);
       console.log("show votes turned on")
       setIsReady(false);
@@ -226,7 +228,7 @@ const { data: votingData } = useQuery({
       votedFor: option,
       hasVoted: option !== "Pending",
     }));
-    console.log(mappedVotes)
+    console.log(mappedVotes);
     console.log("[VotingQuery] Mapped votes:", mappedVotes);
     setVotes(mappedVotes);
     setTotalPlayers(data.total_players);
@@ -241,8 +243,13 @@ const { data: votingData } = useQuery({
 
     if (allVoted) {
       console.log("[VotingQuery] All players have voted! Switching to loading screen...");
-      setScreen("loading");
+      setVotes([]);
       setShowVotes(false);
+      setCurrentTurn(null);
+      console.log(currentTurn)
+      await fetchFunFacts();
+      setScreen("loading");
+
     } else {
       console.log("[VotingQuery] Waiting for remaining players...");
     }
@@ -313,16 +320,17 @@ const getFadeClass = (idx) => {
     if (!currentTurn) return;
     cancelTTS(); 
     setOptionId(option_id);
+
     // setIsReady(false);
     // if (votes == totalPlayers) {
     //   setShowVotes(false);
     //   //setScreen("loading")
     //   setIsReady(false)
-    // }
-    await fetchFunFacts();
-
+    // 
     
-  };
+    //await fetchFunFacts();
+  }
+
 // make a var using states, shpw votes, when the screen is questions screen then start calling the voting again and again
 // once the votes == total player , set screen == loading 
 // u want to have another one of these API calls with refetch so that it keeps rendered the voting display and once all the players have voted set screen == loaidng 
@@ -362,7 +370,7 @@ const getFadeClass = (idx) => {
       // setScreen("scenario");
       setYear(year + 1);
     },
-    enabled: showVotes == true  && currentTurn != null &&  option_id != null,
+    enabled: currentTurn != null &&  option_id != null,
     onError: (err) => {
       console.error("onError:", err);
     }, 
@@ -389,15 +397,17 @@ const getFadeClass = (idx) => {
         isReady={isReady}
         funFacts={loadingFacts}
         onContinue={() => {
-          setScreen("scenario");
+
           setShowVotes(false);
-        }} 
+            setVotes([]);
+                      setScreen("scenario");
+        }}  
       />
     )}
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
               {/* Image in middle */}
-          {scenarioData.image && (
+          {scenarioData.image && ( 
             <div className="scenario-image">
               <img src={scenarioData.image} alt="scenario" className="scenario-img" />
             </div>

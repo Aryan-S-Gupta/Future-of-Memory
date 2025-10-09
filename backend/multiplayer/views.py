@@ -235,6 +235,7 @@ def get_voting_status_with_options(request, room_code, turn_id):
     payload = {
         "success": True,
         "votes": votes,
+        "turn_id": turn_id,
         "num_responses": voting_session.num_responses,
         "total_players": voting_session.total_players,
         "final_option": voting_session.final_option

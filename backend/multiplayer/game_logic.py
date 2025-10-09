@@ -431,6 +431,7 @@ class VotingSession:
             "players_voted": list(self.voted_players),
             "total_players": self.total_players,
             "final_option": self.final_option,
+            "turn_id": self.turn_id
         }
 
     def has_finished(self):
