@@ -1,14 +1,12 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import Button from "../components/Button/Button.jsx";
+import { useState, useEffect } from "react";
 import api from "../../api/multiplayer/api.js"; // axios instance
+import Button from "../components/Button/Button.jsx";
 
-const EMOJIS = ["🍎","🍌","🍇","🍒","🍉","🥝","🍍","🍓"]; // pool to pick from
-const DISPLAY_TIME = 5000; // show emojis 5 seconds
-const GRID_SIZE = 6; // 3x2 grid
+const EMOJIS = ["🍎","🍌","🍇","🍒","🍉","🥝","🍍","🍓"];
+const DISPLAY_TIME = 5000;
+const GRID_SIZE = 6;
 
 const MemoryMiniGame = ({ roomCode, turnId, tiedPlayers, optionMap, playerName, onFinish }) => {
-  const navigate = useNavigate();
   const [sequence, setSequence] = useState([]);
   const [hidden, setHidden] = useState(false);
   const [userSelection, setUserSelection] = useState([]);
@@ -16,7 +14,6 @@ const MemoryMiniGame = ({ roomCode, turnId, tiedPlayers, optionMap, playerName, 
   const [submitted, setSubmitted] = useState(false);
   const [pollingData, setPollingData] = useState(null);
 
-  // Generate random sequence
   useEffect(() => {
     const shuffled = EMOJIS.sort(() => 0.5 - Math.random()).slice(0, GRID_SIZE);
     setSequence(shuffled);
@@ -33,18 +30,14 @@ const MemoryMiniGame = ({ roomCode, turnId, tiedPlayers, optionMap, playerName, 
   const handleSubmit = async () => {
     if (submitted) return;
 
-    // Simple scoring: correct positions
     let points = userSelection.reduce(
       (acc, val, idx) => acc + (sequence[idx] === val ? 10 : 0),
       0
     );
-    // Bonus for speed: faster = more points
     points += Math.max(0, GRID_SIZE * 2 - userSelection.length);
-
     setScore(points);
     setSubmitted(true);
 
-    // Submit score to backend
     try {
       await api.post("/minigame/submit-score", {
         room_code: roomCode,
@@ -53,11 +46,10 @@ const MemoryMiniGame = ({ roomCode, turnId, tiedPlayers, optionMap, playerName, 
         score: points
       });
     } catch (err) {
-      console.error("Error submitting mini-game score:", err);
+      console.error(err);
     }
   };
 
-  // Poll backend to check if winner is determined
   useEffect(() => {
     if (!submitted) return;
 
@@ -65,16 +57,14 @@ const MemoryMiniGame = ({ roomCode, turnId, tiedPlayers, optionMap, playerName, 
       try {
         const res = await api.get(`/minigame/status/${roomCode}/${turnId}`);
         setPollingData(res.data);
-
         if (res.data.status === "resolved") {
           clearInterval(interval);
-          const winningOption = res.data.winning_option;
-          onFinish(winningOption, res.data.winner); // continue main game
+          onFinish(res.data.winning_option, res.data.winner);
         }
       } catch (err) {
-        console.error("Polling mini-game status failed:", err);
+        console.error(err);
       }
-    }, 3000); // every 3s
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [submitted]);
@@ -82,35 +72,27 @@ const MemoryMiniGame = ({ roomCode, turnId, tiedPlayers, optionMap, playerName, 
   return (
     <div className="memory-minigame">
       <h2>Memory Mini-Game</h2>
-      {!hidden && <p>Memorize the sequence!</p>}
-      <div className="emoji-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 60px)", gap: "10px" }}>
-        {(hidden ? EMOJIS : sequence).map((emoji, idx) => (
-          <button
+      <div className="emoji-grid">
+        {sequence.map((emoji, idx) => (
+          <div
             key={idx}
-            style={{
-              width: "60px",
-              height: "60px",
-              fontSize: "2rem",
-              cursor: hidden ? "pointer" : "default",
-              opacity: hidden ? 1 : 0.5
-            }}
+            className={`card ${hidden ? "flipped" : ""} ${submitted ? "disabled" : ""}`}
             onClick={() => handleClick(emoji)}
-            disabled={!hidden || submitted}
           >
-            {hidden ? emoji : emoji}
-          </button>
+            <div className="card-inner">
+              <div className="card-front">❓</div>
+              <div className="card-back">{emoji}</div>
+            </div>
+          </div>
         ))}
       </div>
 
-      {hidden && !submitted && (
-        <div style={{ marginTop: "20px" }}>
-          <p>Click the emojis in the original order!</p>
-          <Button title="Submit" baseButton="btn-primary" action={handleSubmit} />
-        </div>
+      {!submitted && hidden && (
+        <Button title="Submit" baseButton="btn-primary" action={handleSubmit} />
       )}
 
       {submitted && (
-        <div style={{ marginTop: "20px" }}>
+        <div>
           <p>Your score: {score}</p>
           <p>Waiting for other players...</p>
         </div>
