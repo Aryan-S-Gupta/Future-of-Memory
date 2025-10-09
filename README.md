@@ -365,10 +365,17 @@ http://127.0.0.1:9000/api/rag/retrieve
 ```
 
 To test fun facts API:
+
+On MacOS/Linux:
 ```bash
 curl --header "Content-Type: application/json" \
 --request POST \
 http://127.0.0.1:9000/api/rag/fun_facts
+```
+
+On Windows:
+```
+curl.exe -H "Content-Type: application/json" -X POST http://127.0.0.1:9000/api/rag/fun_facts
 ```
 
 ---
