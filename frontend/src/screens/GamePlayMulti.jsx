@@ -23,6 +23,7 @@ const GamePlayMulti = () => {
   const { roomCode } = useParams(); 
   const [searchParams] = useSearchParams();
   const playerName = searchParams.get("playerName");
+  const prevQuestionRef = useRef(null);
   const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
@@ -41,7 +42,7 @@ const GamePlayMulti = () => {
   const [hasAnimated, setHasAnimated] = useState(false); 
   const fadeDuration = 2000;
 
-  const [loadingState, setLoadingState] = useState("world")
+  const [loadingState, setLoadingState] = useState("question")
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -66,33 +67,30 @@ const GamePlayMulti = () => {
  
 
 const {
-  data: questionData,
-  isLoading: isQuestionLoading,
-  error: questionError,
-  status,
+  data: questionData
   } = useQuery({
     queryKey: ["question", roomCode, sessionId, turn],
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
-        // setVotes([]);
         setShowVotes(true);
         setIsReady(false);
       const result = await getQuestion(sessionId, roomCode, turn);
       console.log("the result was " + result)
-      if (!result) {
+      if (!result || result.question === currentTurn.question) {
         setScreen("loading");
-        setLoadingState("question");
+        setLoadingState("question");           
         await fetchFunFacts();
         console.log("the loaidng state updated")
         return null;
       } else {
         setScreen("question");
-        // setLoadingState("scenario")
         console.log("currentTurn after getQuestion:", currentTurn);
         console.log("queryFn result:", result);
         setCurrentTurn(result);
         console.log("show votes turned on line 75")
         setTurn(result.turn_id);
+
+        setLoadingState("scenario")
 
         console.log("show votes turned on 77");
         console.log("show votes turned on")
@@ -105,6 +103,12 @@ const {
     onError: (err) => {
       console.log("onError:", err);
 
+    }, refetchInterval: (data) => {
+          if (data != null) {
+            return false;
+          } else {
+            return 3000;
+          }
     }
 });
 
@@ -258,28 +262,28 @@ const { data: votingData } = useQuery({
       `[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`
     );
 
-if (allVoted) {
-  console.log("All players voted!");
-  
-  if (!scenarioData || !scenarioData.scenario) {
-    console.log("Scenario not ready → go to loading screen");
-    setScreen("loading");
-    setLoadingState("scenario");
-    await fetchFunFacts();
-  } else {
-    console.log("Scenario ready → show scenario");
-    setScreen("scenario");
-  }
-
-  // Reset votes
-  setVotes([]);
-  setShowVotes(false);
-}
-  },
-  enabled: screen === "question" && currentTurn != null && loadingState != "scenario",
-  refetchInterval: currentTurn ? 3000 : false, // poll every 3s
-    onError: (err) => {
-    console.error("[VotingQuery] onError triggered:", err);
+    if (allVoted) {
+      console.log("All players voted!");
+      setScreen("loading")
+      setLoadingState("scenario")
+      await fetchFunFacts();
+      if (!scenarioData || !scenarioData.scenario) {
+        console.log("Scenario not ready → go to loading screen");
+        setScreen("loading");
+        setLoadingState("scenario");
+        await fetchFunFacts();
+      } else {
+        console.log("Scenario ready → show scenario");
+        setScreen("scenario");
+      }
+      setVotes([]);
+      setShowVotes(false);
+    }
+      },
+      enabled: screen === "question" && currentTurn != null && loadingState != "question",
+      refetchInterval: currentTurn ? 3000 : false, // poll every 3s
+        onError: (err) => {
+        console.error("[VotingQuery] onError triggered:", err);
   }});
 
 useEffect(() => {
@@ -343,7 +347,6 @@ const getFadeClass = (idx) => {
     cancelTTS(); 
     setOptionId(option_id);
     setLoadingState("scenario")
-
   }
 
 // make a var using states, shpw votes, when the screen is questions screen then start calling the voting again and again
@@ -371,27 +374,26 @@ const getFadeClass = (idx) => {
           setScreen("loading");
           setLoadingState("scenario");
       }
-        console.log("the data is", out );
+      console.log("the data is", out );
 
-    if (out.scenario.text === scenarioData?.scenario) {
-      setIsReady(False)
-      setScreen("loading");
-      setLoadingState("scenario");
-      console.log("Scenario/image u nchanged, waiting...");
-      return null;
-    }
+    // if (out.scenario.text === scenarioData?.scenario) {
+    //   setIsReady(False)
+    //   setScreen("loading");
+    //   setLoadingState("scenario");
+    //   console.log("Scenario/image u nchanged, waiting...");
+    //   return null;
+    // }
       const mapped = {
         scenario: out.scenario.text,
         image: out.image.url
       };
       console.log("Submit choice response:", mapped);
-
       setIsReady(true);
       setScreen("scenario")
       setScenarioData(mapped);
       setYear(year + 1);
     },
-    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && loadingState == "scenario",
+    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && loadingState !== "question",
     onError: (err) => {
       console.log("onError:", err);
     }, 
@@ -447,10 +449,9 @@ const getFadeClass = (idx) => {
             <Button
               baseButton="btn-primary"
               action={() => {
-                setScenarioData(null)
-                setCurrentTurn(null)
                 setScreen("question");
-                setLoadingState("question")
+                setLoadingState("question");
+                setScenarioData(null);
                 
 
                 console.log("Session ID:", sessionId);
