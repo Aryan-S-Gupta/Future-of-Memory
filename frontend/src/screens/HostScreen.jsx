@@ -15,17 +15,18 @@ import { useMemo, useRef } from "react";
 import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 
+// show room code on the top of the screen 
+// change the api logic so that it gets the votes 
+// 
 const HostScreen = () => {
-  const { roomCode } = useParams(); 
-  const [searchParams] = useSearchParams();
-  const playerName = searchParams.get("playerName");
-  const { sessionId } = useSession(); // <-- get session from context
+  const { roomCode, playerName } = useParams(); 
+  const { sessionId } = useSession(); 
   const [year, setYear] = useState(2035);
-  const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
+  const [screen, setScreen] = useState("scenario"); 
   const [currentTurn, setCurrentTurn] = useState(null);
-    const [loadingFacts, setLoadingFacts] = useState([]);
-    const [isReady, setIsReady] = useState(false);
-    const [option_id, setOptionId] = useState(null);
+  const [loadingFacts, setLoadingFacts] = useState([]);
+  const [isReady, setIsReady] = useState(false);
+  const [option_id, setOptionId] = useState(null);
   const [turn, setTurn] = useState(-1);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
@@ -288,23 +289,10 @@ const HostScreen = () => {
       )}
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
-        <div>
+
           <div className="question-container">
             <h2 className={questionClass}>{currentTurn.question}</h2>
           </div>
-          <div className="choice-container">
-            <Button
-              baseButton={optionAClass}
-              action={() => handleChoice(currentTurn.options[0].option_id)}
-              title={`${currentTurn.options[0].label}. ${currentTurn.options[0].option_text}`}
-            />
-            <Button
-              baseButton={optionBClass}
-              action={() => handleChoice(currentTurn.options[1].option_id)}
-              title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
-            />
-          </div>
-        </div>
       )}
 
     </BasePage>
