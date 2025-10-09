@@ -12,11 +12,11 @@ const RoomDestroyedPopup = () => {
 
         <div className="popup-actions">
 
-            <button className="btn-confirm" onClick={navigate("/multiplayer-lobby")}>
+            <button className="btn-confirm" onClick={() => navigate("/multiplayer-lobby")}>
               Join a Different Room
             </button>
       
-            <button className="btn-cancel" onClick={navigate("/")}>
+            <button className="btn-cancel" onClick={() => navigate("/")}>
               Exit
             </button>
   

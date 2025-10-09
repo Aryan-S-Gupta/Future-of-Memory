@@ -47,7 +47,6 @@ def create_multiplayer_room(request):
         room_code, session = create_room(host_name)
         turn_id = rm.get_state(room_code).get("turn_id", -1)
         VotingSessions[(room_code, turn_id)] = VotingSession(room_code, turn_id)
-        VotingSessions[(room_code, turn_id)].start_voting()
         logger.info(f"Initialized VotingSession for room {room_code}")
         logger.info(f"Created room: {room_code}")
 
@@ -374,6 +373,9 @@ def display_question_and_options(request, session_id, room_code, turn_id):
             logger.warning("No turns found for this session")
             return JsonResponse({'error': 'No turn found for this session'}, status=404)
         turn_id = latest_turn.id
+        VotingSessions[(room_code, int(turn_id))]  = VotingSession(room_code, int(turn_id))
+        if VotingSessions[(room_code, int(turn_id))].is_timer_on() == False:
+            VotingSessions[(room_code, int(turn_id))].start_voting()
         logger.debug(f"Latest turn determined: {latest_turn}")
 
         rm.update_state(room_code, {"turn_id": turn_id, "year": latest_turn.year})

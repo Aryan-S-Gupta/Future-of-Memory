@@ -19,6 +19,7 @@ import { getVotingInfo} from "../../api/multiplayer/GameFlowApi";
 
 
 const GamePlayMulti = () => {
+  const navigate = useNavigate()
   const { roomCode } = useParams(); 
   const [searchParams] = useSearchParams();
   const playerName = searchParams.get("playerName");
@@ -61,7 +62,10 @@ const GamePlayMulti = () => {
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
 // Fetches the scenario whenever we are on the "scenario" screen.
- const {
+
+ 
+
+const {
   data: questionData,
   isLoading: isQuestionLoading,
   error: questionError,
@@ -74,38 +78,33 @@ const GamePlayMulti = () => {
         setShowVotes(true);
         setIsReady(false);
       const result = await getQuestion(sessionId, roomCode, turn);
-      if (!result || result.data.question == currentTurn.question) {
+      console.log("the result was " + result)
+      if (!result) {
         setScreen("loading");
         setLoadingState("question");
+        await fetchFunFacts();
+        console.log("the loaidng state updated")
         return null;
-      }
-      if (!result.success) {
-        if (!result.room_exists) {
-          setRoomDestroyed(true);
-          console.log("the room does not exists")
-          setScreen("destroyed")
-          return null;
-          // handle room doesnt exist
-        } else {
-          setScreen("loading");
-          return null;
-        }
-      }
-      console.log("currentTurn after getQuestion:", currentTurn);
-      console.log("queryFn result:", result);
-      setCurrentTurn(result);
-      console.log("show votes turned on line 75")
-      setTurn(result.turn_id);
+      } else {
+        setScreen("question");
+        // setLoadingState("scenario")
+        console.log("currentTurn after getQuestion:", currentTurn);
+        console.log("queryFn result:", result);
+        setCurrentTurn(result);
+        console.log("show votes turned on line 75")
+        setTurn(result.turn_id);
 
-            console.log("show votes turned on 77");
-      setShowVotes(true);
-      console.log("show votes turned on")
-      setIsReady(false);
-      return result;
+        console.log("show votes turned on 77");
+        console.log("show votes turned on")
+        return result;
+ 
+      }
+
     },
-    enabled: screen === "question",
+    enabled: screen !== "scenario" && loadingState != "scenario",
     onError: (err) => {
-      console.error("onError:", err);
+      console.log("onError:", err);
+
     }
 });
 
@@ -259,21 +258,25 @@ const { data: votingData } = useQuery({
       `[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`
     );
 
-    if (allVoted) {
-      console.log("[VotingQuery] All players have voted! Switching to loading screen...");
-      setVotes([]);
-      setShowVotes(false);
-      setCurrentTurn(null);
-      console.log(currentTurn)
-      await fetchFunFacts();
-      setScreen("loading");
+if (allVoted) {
+  console.log("All players voted!");
+  
+  if (!scenarioData || !scenarioData.scenario) {
+    console.log("Scenario not ready → go to loading screen");
+    setScreen("loading");
+    setLoadingState("scenario");
+    await fetchFunFacts();
+  } else {
+    console.log("Scenario ready → show scenario");
+    setScreen("scenario");
+  }
 
-    } else {
-      console.log("[VotingQuery] Waiting for remaining players...");
-    }
-      return res.data;
+  // Reset votes
+  setVotes([]);
+  setShowVotes(false);
+}
   },
-  enabled: screen === "question" && currentTurn != null,
+  enabled: screen === "question" && currentTurn != null && loadingState != "scenario",
   refetchInterval: currentTurn ? 3000 : false, // poll every 3s
     onError: (err) => {
     console.error("[VotingQuery] onError triggered:", err);
@@ -327,6 +330,7 @@ const getFadeClass = (idx) => {
   }
 };
 
+
   /**
    * Handles a player's choice when answering a question.
    *
@@ -340,14 +344,6 @@ const getFadeClass = (idx) => {
     setOptionId(option_id);
     setLoadingState("scenario")
 
-    // setIsReady(false);
-    // if (votes == totalPlayers) {
-    //   setShowVotes(false);
-    //   //setScreen("loading")
-    //   setIsReady(false)
-    // 
-    
-    //await fetchFunFacts();
   }
 
 // make a var using states, shpw votes, when the screen is questions screen then start calling the voting again and again
@@ -363,26 +359,25 @@ const getFadeClass = (idx) => {
       queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
       queryFn: async () => {
         console.log("submitting option", sessionId);
+        if (!currentTurn || !option_id) return;
         const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
-              if (!out.success) {
-        if (!out.room_exists) {
-          setRoomDestroyed(true); 
-          setScreen("destroyed")
-          // handle room doesnt exist
-        }
+        if (!out || !out.scenario || !out.scenario.text) {
+          if (!out.room_exists) {
+            setRoomDestroyed(true); 
+            setScreen("destroyed")
+            // handle room doesnt exist
+          }
+          console.log("dont have scenario yet");
+          setScreen("loading");
+          setLoadingState("scenario");
       }
-        console.log("the data is", out.data );
+        console.log("the data is", out );
 
-      if (!out.scenario || !out.scenario.text) {
-        
-        console.log("Scenario/image not ready yet...");
-        
-       // setIsReady(False)
-        return null;
-    } else if (out.scenario.text === scenarioData?.scenario) {
-      // setScreen("loading");
+    if (out.scenario.text === scenarioData?.scenario) {
       setIsReady(False)
-      console.log("Scenario/image unchanged, waiting...");
+      setScreen("loading");
+      setLoadingState("scenario");
+      console.log("Scenario/image u nchanged, waiting...");
       return null;
     }
       const mapped = {
@@ -390,15 +385,15 @@ const getFadeClass = (idx) => {
         image: out.image.url
       };
       console.log("Submit choice response:", mapped);
-      setIsReady(true);
-      setScenarioData(mapped);
 
-      // setScreen("scenario");
+      setIsReady(true);
+      setScreen("scenario")
+      setScenarioData(mapped);
       setYear(year + 1);
     },
-    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed",
+    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && loadingState == "scenario",
     onError: (err) => {
-      console.error("onError:", err);
+      console.log("onError:", err);
     }, 
     refetchInterval: 3000
 });
@@ -452,7 +447,11 @@ const getFadeClass = (idx) => {
             <Button
               baseButton="btn-primary"
               action={() => {
+                setScenarioData(null)
+                setCurrentTurn(null)
                 setScreen("question");
+                setLoadingState("question")
+                
 
                 console.log("Session ID:", sessionId);
               }}
