@@ -203,9 +203,9 @@ from shared.tasks import start_turn_pipeline
 def start_prerendering(request):
     year = request.GET.get("year")
     session_id = request.GET.get("session_id")
-    logger.debug("start_turn_pipeline.send() called")
+    logger.info("start_turn_pipeline.send() called")
     start_turn_pipeline.send(session_id, year)
-    logger.debug("start_turn_pipeline.send() called: ")
+    logger.info("start_turn_pipeline.send() called: ")
     return JsonResponse({'status': 'generation_started'})
 
 # question and options display page
