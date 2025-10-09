@@ -21,6 +21,8 @@ from django.views.decorators.http import require_POST
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data", "static_stories.json")
+VOTING_SESSIONS = {}
+
 
 with open(DATA_FILE, "r", encoding="utf-8") as f:
     story_data = json.load(f)
@@ -181,16 +183,21 @@ def rag_retrieve(request):
     return JsonResponse({"items": items})
 
 
-
 # new views
 from shared.models import Session, Option, Turn
-
 # home page
-
 # need to call this somewhere - as soon as the game is created
 def create_session(request):
     """
     Create a new Session and return its ID as JSON.
+    Returns:
+        JsonResponse: {'session_id': int} 
+        Status code: 201 Created
+    attributes:
+        - session_id (int): The ID of the newly created session. 
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+
     """
     session = Session.objects.create()
     logger.debug(f'session id created: {session.id}')
@@ -212,6 +219,34 @@ def start_prerendering(request):
 
 # send the existing work
 def display_question_and_options(request, session_id):
+
+    """
+    Display the question and options for the latest turn of a given session.
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+        session_id (int): The ID of the session to retrieve the turn for.
+    Returns:
+        JsonResponse: {
+            'message': 'ok',
+            'data': {
+                'turn_id': int,
+                'year': int,
+                'question': str,
+                'options': [
+                    {'option_id': int, 'label': str, 'option_text': str},
+                    ...
+                ]
+            }
+        }
+        Status code: 200 OK
+    attributes:
+        - turn_id (int): The ID of the latest turn.
+        - year (int): The year of the latest turn.
+        - question (str): The question text of the latest turn. 
+        - options (list): List of options with their IDs, labels, and texts.
+    Raises:
+        - 404 Not Found: If the session or turn does not exist.     
+    """
     # get session
     logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
@@ -259,7 +294,33 @@ from shared.services import display_world_view
 
 def display_scenario_and_image(request, session_id, turn_id, year, option_id):
     """
-    Display the world view after user makes a choice.
+    Display the scenario and image for a given session, turn, year, and option.
+    If the world view is ready, it also triggers the generation of the next turn in the background.
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+        session_id (int): The ID of the session.
+        turn_id (int): The ID of the turn.
+        year (int): The year of the turn.
+        option_id (int): The ID of the selected option.
+    Returns:
+        JsonResponse: {
+            'success': bool,
+            'status': str,  # "ready", "processing", "error"
+            'scenario': str,  # scenario text if ready
+            'image_url': str,  # image URL if ready
+            'error': str,  # error message if any
+        }
+        Status code: 200 OK if successful, 500 Internal Server Error if an exception occurs
+    attributes:
+        - success (bool): True if the operation was successful, False otherwise.
+        - status (str): The status of the world view ("ready", "processing", "  
+"error").
+        - scenario (str): The scenario text if the world view is ready.
+        - image_url (str): The image URL if the world view is ready.
+        - error (str): An error message if any error occurred.
+    Raises:
+        - 500 Internal Server Error: If an exception occurs during processing.
+
     """
     try:
         world_view_data = display_world_view(session_id, turn_id, year, option_id)

@@ -30,8 +30,9 @@ const MainGameScreen = () => {
   const start_single_session = async () => {
     try {
       const response = await createSession();
+      
       setSessionId(response.session_id); 
-      await startPrerender(sessionId);
+      // await startPrerender(sessionId);
       console.log("session is" + sessionId);
       navigate("/story");
     } catch (error) {
@@ -70,6 +71,16 @@ const MainGameScreen = () => {
         <Button baseButton="btn-primary" action={() => start_single_session()} title="Start" />
         <Button baseButton="btn-secondary" action={() => navigate("/how-to-play")} title="How To Play" />
         <Button baseButton="btn-secondary" action={() =>       navigate("/multiplayer-lobby")} title="Multiplayer" />
+      </div>
+
+
+      {/* Floating feedback button */}
+      <div className="feedback-button-container">
+      <Button
+        baseButton="btn-feedback"
+        action={() => navigate("/feedback")}
+        title="Give Feedback"
+      />
       </div>
     </BasePage>
   );

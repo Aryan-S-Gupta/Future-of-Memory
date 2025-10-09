@@ -1,4 +1,5 @@
 import api from "./api";
+import { getRoomState } from "./RoomManagementApi";
 
 export const startPrerender = async (session_id, year) => {
   const res = await api.get("/start_prerender", { params: { session_id, year } });
@@ -24,9 +25,13 @@ export const startPrerender = async (session_id, year) => {
  */
 export const getScenarioAndImage = async (session_id, turn_id, year, option_id) => {
   const res = await api.post(`/storyline/start/${session_id}/${turn_id}/${year}/${option_id}`);
-  return res.data;
+  return res;
 };
 
+export const getVotingInfo = async (roomCode, turn_id) => {
+  const res = await api.get(`votes/${roomCode}/${turn_id}`);
+  return res;
+}
 /**
  * Fetches the question for a given year from the backend.
  *
@@ -45,7 +50,7 @@ export const getScenarioAndImage = async (session_id, turn_id, year, option_id) 
  * console.log(question.question);
  * console.log(question.options);
  */
-export const getQuestion = async (roomCode, session_id, turn_id) => {
+export const getQuestion = async (session_id, roomCode, turn_id) => {
   console.log("called question api for session:", session_id);
   const res = await api.get(`/storyline/${session_id}/question/${roomCode}/${turn_id}`);
   console.log("got output:", res.data);  // prints the actual object
@@ -54,7 +59,6 @@ export const getQuestion = async (roomCode, session_id, turn_id) => {
 
   return res.data; // { message, data: { turn_id, year, question, options } }
 };
-
 /**
  * Submit a player's choice.
  * @param {string} roomCode

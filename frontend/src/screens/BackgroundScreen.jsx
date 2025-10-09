@@ -25,6 +25,10 @@ const BackgroundScreen = () => {
   const navigate = useNavigate();
   const {sessionId} = useSession();
 
+  const start = async () => {
+    await startPrerender(sessionId);
+    navigate("/game-play");
+  }
   return (
     <BasePage>
       <h1 className="title">Background</h1>
@@ -45,7 +49,7 @@ const BackgroundScreen = () => {
       {/* Navigation buttons (Back to home, Next to gameplay) */}
       <div className="button-container">
         <ExitExperience />
--       <Button baseButton="btn-next next-fade-in" action={() =>navigate("/game-play")} title="Next" />
+-       <Button baseButton="btn-next next-fade-in" action={start} title="Next" />
       </div>
       </BasePage>
     );
