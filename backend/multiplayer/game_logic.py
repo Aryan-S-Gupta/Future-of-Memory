@@ -43,6 +43,7 @@ class VotingSession:
         """
         self.room_code = room_code
         self.votes = {}
+        self.p_votes = {}
         self.turn_id = turn_id
         self.num_responses = 0
         self.total_players = len(rm.get_players(room_code))
@@ -76,7 +77,6 @@ class VotingSession:
         with self.lock:
             """Start the voting session and initialize/reset all relevant attributes."""
             self.votes = {}
-            self.player_votes = {} 
             self.voted_players = []
             self.num_responses = 0
             self.total_players = len(rm.get_players(self.room_code))
@@ -153,7 +153,7 @@ class VotingSession:
             logging.info(f"Total players in room: {rm.get_players(room)}")
             # record the player's vote
             self.voted_players.append(player_name)
-            self.player_votes[player_name] = option_id 
+            self.p_votes[player_name] = option_id 
             self.num_responses += 1
             logging.info(f"Total responses: {self.num_responses}/{self.total_players}")
 
@@ -327,14 +327,14 @@ class VotingSession:
         """
         return self.votes
     
-    def get_player_votes(self):
+    def get_p_votes(self):
         """Get the current votes cast by each player.
         Returns:
             dict: Mapping of player names to their voted option IDs.
         Attributes:
-            - player_votes (dict): Mapping of player names to their voted option IDs.  
+            - p_votes (dict): Mapping of player names to their voted option IDs.  
         """
-        return self.player_votes        
+        return self.p_votes        
     
     def reset_votes(self):
         """Reset the votes and voting state for a new round.
@@ -347,7 +347,7 @@ class VotingSession:
             - final_option (str): The option that won the vote.
         """ 
         self.votes = {}
-        self.player_votes = {} 
+        self.p_votes = {} 
         self.voted_players = []
         self.num_responses = 0
         self.inactive_players = set()
@@ -449,7 +449,7 @@ class VotingSession:
 
         for player in all_players:
             if player in self.voted_players:
-                votes_so_far[player] = self.player_votes.get(player, None)
+                votes_so_far[player] = self.p_votes.get(player, None)
             else:
                 votes_so_far[player] = "Pending"
 

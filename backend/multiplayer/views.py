@@ -146,8 +146,6 @@ def submit_choice(request):
     data = json.loads(request.body.decode("utf-8"))
     mode = data.get("mode")
     get_multiplayer_result(request)
-
-
 def get_multiplayer_result(data):
         room_code = data.get("room_code")
         player_name = data.get("player_name")
@@ -234,13 +232,15 @@ def get_voting_status_with_options(request, room_code, turn_id):
         return JsonResponse({"error": "No voting session found"}, status=404)
 
     votes = voting_session.get_current_votes()  # dict: {player: option_id or 'Pending'}
-    return JsonResponse({
+    payload = {
         "success": True,
         "votes": votes,
         "num_responses": voting_session.num_responses,
         "total_players": voting_session.total_players,
         "final_option": voting_session.final_option
-    })
+    }
+    logger.info(payload)
+    return JsonResponse(payload)
 
 # new views
 from shared.models import Session, Option, Turn

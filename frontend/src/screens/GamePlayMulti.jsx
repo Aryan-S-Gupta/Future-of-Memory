@@ -15,6 +15,8 @@ import { useMemo, useRef } from "react";
 import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import { useMutation } from "@tanstack/react-query";
 import VotingDisplay from "../components/Voting Display/VotingDisplay.jsx";
+import { getVotingInfo} from "../../api/multiplayer/GameFlowApi";
+
 
 const GamePlayMulti = () => {
   const navigate = useNavigate();
@@ -29,6 +31,16 @@ const GamePlayMulti = () => {
     const [isReady, setIsReady] = useState(false);
     const [option_id, setOptionId] = useState(null);
   const [turn, setTurn] = useState(-1);
+  const [showVotes, setShowVotes] = useState(false)
+  const [votes, setVotes] = useState([]);
+  const [totalPlayers, setTotalPlayers] = useState(1);
+  // --- Staged reveal for multiplayer ---
+  // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
+  const [stage, setStage] = useState(0);
+  
+  const [hasAnimated, setHasAnimated] = useState(false); 
+  const fadeDuration = 2000;
+
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -61,7 +73,14 @@ const GamePlayMulti = () => {
       console.log("currentTurn after getQuestion:", currentTurn);
       console.log("queryFn result:", result);
       setCurrentTurn(result);
-      setTurn(result.data.turn_id);
+      console.log("show votes turned on line 75")
+      setTurn(result.turn_id);
+      setVotes([])
+
+            console.log("show votes turned on 77")
+      setShowVotes(true);
+      console.log("show votes turned on")
+      setIsReady(false);
       return result;
     },
     enabled: screen === "question",
@@ -174,11 +193,78 @@ const GamePlayMulti = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
 
-    // --- Staged reveal for multiplayer ---
-  // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
-  const [stage, setStage] = useState(0);
-  const fadeDuration = 2000;
 
+
+
+
+const { data: votingData } = useQuery({
+  queryKey: ["votingStatus", roomCode, currentTurn?.turn_id],
+  queryFn: async () => {
+    if (!currentTurn) {
+      console.log("[VotingQuery] Skipped fetch — no currentTurn yet.");
+      return null;
+    }
+
+    console.log(
+      `[VotingQuery] Fetching voting info for room=${roomCode}, turn=${currentTurn.turn_id}...`
+    );
+
+      const res = await getVotingInfo(roomCode, currentTurn.turn_id);
+      console.log("[VotingQuery] Raw API response:", res);
+      const data = res.data
+      console.log("[VotingQuery] Parsed data:", res.data);
+
+      console.log("[VotingQuery] onSuccess triggered. Data:", data);
+      if (!data) {
+        console.log("[VotingQuery] Data empty, skipping state update.");
+        return;
+      }
+
+    // Map backend vote dictionary → frontend structure
+    const mappedVotes = Object.entries(data.votes).map(([player, option]) => ({
+      name: player,
+      votedFor: option,
+      hasVoted: option !== "Pending",
+    }));
+    console.log(mappedVotes)
+    console.log("[VotingQuery] Mapped votes:", mappedVotes);
+    setVotes(mappedVotes);
+    setTotalPlayers(data.total_players);
+
+    const votesCount = data.num_responses;
+    const totalCount = data.total_players;
+    const allVoted = votesCount >= totalCount;
+
+    console.log(
+      `[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`
+    );
+
+    if (allVoted) {
+      console.log("[VotingQuery] All players have voted! Switching to loading screen...");
+      setScreen("loading");
+      setShowVotes(false);
+    } else {
+      console.log("[VotingQuery] Waiting for remaining players...");
+    }
+      return res.data;
+  },
+  enabled: screen === "question" && currentTurn != null,
+  refetchInterval: 3000, // poll every 3s
+    onError: (err) => {
+    console.error("[VotingQuery] onError triggered:", err);
+  }});
+
+useEffect(() => {
+  if (screen === "question") {
+    console.log("[Animation] Resetting staged animation for new question");
+    setHasAnimated(false);
+    setStage(0);
+  }
+}, [currentTurn, screen])
+
+// --- Staged reveal ---
+  // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
+ 
   useEffect(() => {
     if (screen === "question" && currentTurn) {
       setStage(1); // show question
@@ -187,16 +273,16 @@ const GamePlayMulti = () => {
       const timer1 = setTimeout(() => {
         setStage(2);
         speak(currentTurn.options[0].option_text);
-      }, 12000 - fadeDuration);
+      }, 10000 - fadeDuration);
 
       const timer2 = setTimeout(() => {
         setStage(3);
         speak(currentTurn.options[1].option_text);
-      }, 17000 - fadeDuration);
+      }, 15000 - fadeDuration);
 
       const timer3 = setTimeout(() => {
         setStage(4); // show all together, no TTS
-      }, 22000 - fadeDuration);
+      }, 20000 - fadeDuration);
 
       return () => {
         clearTimeout(timer1);
@@ -207,17 +293,15 @@ const GamePlayMulti = () => {
     }
   }, [screen, currentTurn]);
 
-  const questionClass =
-    stage === 1 || stage === 4 ? "fade-in-out show" :
-      stage > 1 ? "fade-in-out hide" : "fade-in-out";
+const getFadeClass = (idx) => {
+  switch(idx) {
+    case 1: return stage === 1 || stage === 4 ? "fade-in-out show" : stage > 1 ? "fade-in-out hide" : "fade-in-out";
+    case 2: return stage === 2 || stage === 4 ? "fade-in-out show" : stage > 2 ? "fade-in-out hide" : "fade-in-out";
+    case 3: return stage === 3 || stage === 4 ? "fade-in-out show" : stage > 3 ? "fade-in-out hide" : "fade-in-out";
+    default: return "fade-in-out";
+  }
+};
 
-  const optionAClass =
-    stage === 2 || stage === 4 ? "choice-btn fade-in-out show" :
-      stage > 2 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
-
-  const optionBClass =
-    stage === 3 || stage === 4 ? "choice-btn fade-in-out show" :
-      stage > 3 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
   /**
    * Handles a player's choice when answering a question.
    *
@@ -228,31 +312,42 @@ const GamePlayMulti = () => {
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
     cancelTTS(); 
-
     setOptionId(option_id);
-    setIsReady(false);
+    // setIsReady(false);
+    // if (votes == totalPlayers) {
+    //   setShowVotes(false);
+    //   //setScreen("loading")
+    //   setIsReady(false)
+    // }
     await fetchFunFacts();
 
     
   };
-
-const {
-  data: out,
-  isLoading: isTurnLoading,
-  error: turnError,
-  status: turnStatus,
-  } = useQuery({
-    queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
-    queryFn: async () => {
-      console.log("submitting option", sessionId);
-      const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
-      console.log("the data is", out.data );
+// make a var using states, shpw votes, when the screen is questions screen then start calling the voting again and again
+// once the votes == total player , set screen == loading 
+// u want to have another one of these API calls with refetch so that it keeps rendered the voting display and once all the players have voted set screen == loaidng 
+// remove the set loading from submit choice and move it to loaidng screen
+  const {
+    data: out,
+    isLoading: isTurnLoading,
+    error: turnError,
+    status: turnStatus,
+    } = useQuery({
+      queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
+      queryFn: async () => {
+        console.log("submitting option", sessionId);
+        const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
+        console.log("the data is", out.data );
 
       if (!out.scenario || !out.scenario.text) {
-        setScreen("loading");
+        
         console.log("Scenario/image not ready yet...");
+        
+       // setIsReady(False)
         return null;
     } else if (out.scenario.text === scenarioData?.scenario) {
+      // setScreen("loading");
+      setIsReady(False)
       console.log("Scenario/image unchanged, waiting...");
       return null;
     }
@@ -263,13 +358,15 @@ const {
       console.log("Submit choice response:", mapped);
       setIsReady(true);
       setScenarioData(mapped);
+
       // setScreen("scenario");
       setYear(year + 1);
     },
-    enabled: screen !== "question" && currentTurn != null,
+    enabled: showVotes == true  && currentTurn != null &&  option_id != null,
     onError: (err) => {
       console.error("onError:", err);
-    }
+    }, 
+    refetchInterval: 3000
 });
 
     // Fetch fun facts when loading scenario
@@ -283,6 +380,7 @@ const {
       }
     }
 
+
   return (
     <BasePage>
       <ExitExperience/>
@@ -292,6 +390,7 @@ const {
         funFacts={loadingFacts}
         onContinue={() => {
           setScreen("scenario");
+          setShowVotes(false);
         }} 
       />
     )}
@@ -316,6 +415,7 @@ const {
               baseButton="btn-primary"
               action={() => {
                 setScreen("question");
+
                 console.log("Session ID:", sessionId);
               }}
               title="Continue"
@@ -325,30 +425,31 @@ const {
       )}
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
-        <div>
-          <div className="question-container">
-            <h2 className={questionClass}>{currentTurn.question}</h2>
-          </div>
-          <div className="choice-container">
-            <Button
-              baseButton={optionAClass}
-              action={() => handleChoice(currentTurn.options[0].option_id)}
-              title={`${currentTurn.options[0].label}. ${currentTurn.options[0].option_text}`}
-            />
-            <Button
-              baseButton={optionBClass}
-              action={() => handleChoice(currentTurn.options[1].option_id)}
-              title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
-            />
-            <div className="voting-sidebar">
-              <VotingDisplay
-                voters={currentTurn.voters || []}
-                totalPlayers={currentTurn.total_players || 1}
+        <div className="question-screen">
+          <div className="question-main">
+            <div className="question-container">
+              <h2 className={getFadeClass(1)}>{currentTurn.question}</h2>
+            </div>
+            <div className="choice-container">
+              <Button
+                baseButton={getFadeClass(2) + " choice-btn"}
+                action={() => handleChoice(currentTurn.options[0].option_id)}
+                title={`${currentTurn.options[0].label}. ${currentTurn.options[0].option_text}`}
+              />
+              <Button
+                baseButton={getFadeClass(3) + " choice-btn"}
+                action={() => handleChoice(currentTurn.options[1].option_id)}
+                title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
               />
             </div>
           </div>
+          
+          <div className="voting-sidebar">
+            <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
+          </div>
         </div>
       )}
+
     </BasePage>
   );
 };

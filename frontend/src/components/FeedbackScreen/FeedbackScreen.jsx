@@ -64,8 +64,9 @@ const FeedbackScreen = () => {
 
   return (
     <BasePage>
-      <h1 className="feedback-title">Player Feedback</h1>
-      <form className="feedback-form" onSubmit={(e) => e.preventDefault()}>
+      <div className="feedback-screen">
+        <h1 className="feedback-title">Player Feedback</h1>
+        <form className="feedback-form" onSubmit={(e) => e.preventDefault()}>
         {questions.map((q, i) => (
           <div key={i} className="feedback-question">
             <p>{q}</p>
@@ -100,13 +101,16 @@ const FeedbackScreen = () => {
           onChange={(e) => setFeedbackText(e.target.value)}
         />
 
-        <Button
-          baseButton="btn-primary"
-          action={handleSubmit}
-          title={submitting ? "Submitting..." : "Submit Feedback"}
-        />
-      </form>
-    </BasePage>
+          <button
+            className="btn-submit-feedback"
+            onClick={handleSubmit}
+            disabled={submitting}
+          >
+            {submitting ? "Submitting..." : "Submit Feedback"}
+          </button>
+        </form>
+      </div>
+    </BasePage >
   );
 };
 

@@ -5,7 +5,7 @@ const VotingDisplay = ({ voters = [], totalPlayers }) => {
   const votedCount = voters.filter((v) => v.hasVoted).length;
   const progress = (votedCount / totalPlayers) * 100;
 
-  return (
+   return (
     <div className="voting-display">
       <h3 className="voting-title">
         Votes in: {votedCount} / {totalPlayers}

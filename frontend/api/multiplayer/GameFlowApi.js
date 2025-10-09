@@ -28,6 +28,10 @@ export const getScenarioAndImage = async (session_id, turn_id, year, option_id) 
   return res;
 };
 
+export const getVotingInfo = async (roomCode, turn_id) => {
+  const res = await api.get(`votes/${roomCode}/${turn_id}`);
+  return res;
+}
 /**
  * Fetches the question for a given year from the backend.
  *
@@ -55,7 +59,6 @@ export const getQuestion = async (session_id, roomCode, turn_id) => {
 
   return res.data.data; // { message, data: { turn_id, year, question, options } }
 };
-
 /**
  * Submit a player's choice.
  * @param {string} roomCode
