@@ -273,7 +273,9 @@ brew services start postgresql
 - Use default setup and remember username/password, enable pgadmin
 
 ### Step 7: Create DB user
+Note that the `createdb` command may or may not be necessary to set up the database on your device.
 ```bash
+createdb $(yourname)
 psql -U postgres
 # inside the shell, enter
 CREATE DATABASE memorysim_db;
