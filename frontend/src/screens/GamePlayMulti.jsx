@@ -16,7 +16,6 @@ import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 
 const GamePlayMulti = () => {
-  const navigate = useNavigate();
   const { roomCode } = useParams(); 
   const [searchParams] = useSearchParams();
   const playerName = searchParams.get("playerName");
@@ -28,6 +27,7 @@ const GamePlayMulti = () => {
     const [isReady, setIsReady] = useState(false);
     const [option_id, setOptionId] = useState(null);
   const [turn, setTurn] = useState(-1);
+  const [loadingState, setLoadingState] = useState("world")
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -58,12 +58,21 @@ const GamePlayMulti = () => {
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
       const result = await getQuestion(roomCode, sessionId, turn);
+      if (!result || result.data.question == currentTurn.question) {
+        setScreen("loading");
+        setLoadingState("question")
+        return null;
+      }
       if (!result.success) {
         if (!result.room_exists) {
           setRoomDestroyed(true);
           console.log("the room does not exists")
           setScreen("destroyed")
+          return null;
           // handle room doesnt exist
+        } else {
+          setScreen("loading");
+          return null;
         }
       }
       console.log("currentTurn after getQuestion:", currentTurn);
