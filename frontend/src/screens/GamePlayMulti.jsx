@@ -70,13 +70,13 @@ const GamePlayMulti = () => {
     queryKey: ["question", roomCode, sessionId, turn],
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
-        setVotes([]);
-  setShowVotes(true);
-  setIsReady(false);
+        // setVotes([]);
+        setShowVotes(true);
+        setIsReady(false);
       const result = await getQuestion(sessionId, roomCode, turn);
       if (!result || result.data.question == currentTurn.question) {
         setScreen("loading");
-        setLoadingState("question")
+        setLoadingState("question");
         return null;
       }
       if (!result.success) {
@@ -338,6 +338,7 @@ const getFadeClass = (idx) => {
     if (!currentTurn) return;
     cancelTTS(); 
     setOptionId(option_id);
+    setLoadingState("scenario")
 
     // setIsReady(false);
     // if (votes == totalPlayers) {
@@ -425,10 +426,9 @@ const getFadeClass = (idx) => {
         isReady={isReady}
         funFacts={loadingFacts}
         onContinue={() => {
-
           setShowVotes(false);
-            setVotes([]);
-                      setScreen("scenario");
+          setVotes([]);
+          setScreen({loadingState});
         }}  
       />
     )}

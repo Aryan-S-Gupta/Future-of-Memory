@@ -311,4 +311,4 @@ const HostScreen = () => {
   );
 };
 
-export default GamePlayMulti;
+export default HostScreen;

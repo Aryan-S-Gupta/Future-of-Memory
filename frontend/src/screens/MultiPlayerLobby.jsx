@@ -56,8 +56,9 @@ const MultiplayerLobby = () => {
     await startPrerender(data.session_id, 2035);
     setRoomCode(data.room_code);
     console.log(roomCode);
+            navigate(`/background-multi/${data.room_code}?playerName=${name}`);
     // Navigate to multiplayer room screen
-    navigate(`/background-multi/${data.room_code}?playerName=${playerName}`);
+    // navigate(`/multiplayer-room/${data.room_code}/${playerName}`);
     console.log("navigated with session id " + data.session_id);
   };
 
