@@ -256,7 +256,7 @@ const { data: votingData } = useQuery({
       return res.data;
   },
   enabled: screen === "question" && currentTurn != null,
-  refetchInterval: 3000, // poll every 3s
+  refetchInterval: currentTurn ? 3000 : false, // poll every 3s
     onError: (err) => {
     console.error("[VotingQuery] onError triggered:", err);
   }});
