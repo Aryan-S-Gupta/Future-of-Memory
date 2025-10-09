@@ -427,3 +427,67 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
             'votes_info': votes_info,
             'error': f'Failed to display world view: {str(e)}'
         }, status=500)
+
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+import json
+from .minigame import start_minigame, submit_score, get_status
+
+@csrf_exempt
+@require_POST
+def start_minigame_view(request):
+    """
+    Start a memory mini-game for tied players.
+    Expects JSON body:
+      - room_code: str
+      - turn_id: int
+      - tied_players: [str]
+      - option_map: {player_name: option_id}
+    """
+    data = json.loads(request.body)
+    room_code = data.get("room_code")
+    turn_id = data.get("turn_id")
+    tied_players = data.get("tied_players", [])
+    option_map = data.get("option_map", {})
+
+    if not all([room_code, turn_id, tied_players, option_map]):
+        return JsonResponse({"error": "Missing parameters"}, status=400)
+
+    start_minigame(room_code, turn_id, tied_players, option_map)
+    return JsonResponse({"message": "Mini-game started"})
+
+
+
+@csrf_exempt
+@require_POST
+def submit_minigame_score_view(request):
+    """
+    Submit a player's score for the mini-game.
+    Expects JSON body:
+      - room_code: str
+      - turn_id: int
+      - player_name: str
+      - score: int
+    """
+    data = json.loads(request.body)
+    room_code = data.get("room_code")
+    turn_id = data.get("turn_id")
+    player_name = data.get("player_name")
+    score = data.get("score")
+
+    if not all([room_code, turn_id, player_name, score is not None]):
+        return JsonResponse({"error": "Missing parameters"}, status=400)
+
+    result = submit_score(room_code, turn_id, player_name, score)
+    return JsonResponse(result)
+
+
+def poll_minigame_status_view(request, room_code, turn_id):
+    """
+    Poll the current mini-game status.
+    """
+    result = get_status(room_code, int(turn_id))
+    return JsonResponse(result)

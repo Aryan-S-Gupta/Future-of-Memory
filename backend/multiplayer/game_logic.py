@@ -458,17 +458,5 @@ class VotingSession:
         return votes_so_far
 
 
-    """voting display:
-    1) create a function in voting session that checks who has voted so far 
-    2) got to the views file create an api that calls that function and returns a json with success = true or false and the dict of players
-    who have voted and who havent
-    3) in the frontend create a new react component that calls that api every q seconds and displays the players who have voted and who havent
-    4) use usequery in front end to call that api every q seconds untill the success = false  keep the fetch data state false and when backend returns success = true   
-    make  the state true and stop the query and make it enable == state == false .
-    4) if all players have" voted, automatically navigate to the next screen
-    5) if the timer runs out, automatically navigate to the next screen
-    6) if a player is inactive, skip their vote and move on to the next
-    """
-
 # Global dictionary to manage voting sessions per room
 VotingSessions = {}
