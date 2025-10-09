@@ -8,6 +8,10 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rag.retrieve import retrieve_chunks
+from django.http import JsonResponse
+import json
+from .mini_game import start_minigame, submit_score, get_status
+
 from .game_logic import VotingSession, VotingSessions
 
 logging.basicConfig(level=logging.DEBUG)
@@ -430,11 +434,6 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
 
 
 
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.http import JsonResponse
-import json
-from .minigame import start_minigame, submit_score, get_status
 
 @csrf_exempt
 @require_POST
