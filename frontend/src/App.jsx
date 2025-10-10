@@ -13,6 +13,9 @@ import FeedbackScreen from "./components/FeedbackScreen/FeedbackScreen.jsx";
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
+import MiniGameIntro from "./screens/MiniGameIntro.jsx";
+import MiniGame from "./screens/MiniGame.jsx";
+import MiniGameResult from "./screens/MiniGameResult.jsx";
 import { SessionProvider } from "../SessionContext.jsx";
 
 function App() {
@@ -35,6 +38,9 @@ function App() {
               <Route path="/background-multi/:roomCode" element={<BackgroundScreenMulti/>} />
               <Route path="/feedback" element={<FeedbackScreen/>} />
               <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
+              <Route path="/mini-game/intro" element={<MiniGameIntro />} />
+              <Route path="/mini-game/play" element={<MiniGame />} />
+              <Route path="/mini-game/result" element={<MiniGameResult />} /> 
             </Routes>
           </SessionProvider>
         </BackgroundWrapper>

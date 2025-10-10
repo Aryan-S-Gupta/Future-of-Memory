@@ -10,8 +10,7 @@ from django.views.decorators.http import require_POST
 from rag.retrieve import retrieve_chunks
 from django.http import JsonResponse
 import json
-from .mini_game import start_minigame, submit_score, get_status
-
+from .mini_game import get_scores, submit_score_single
 from .game_logic import VotingSession, VotingSessions
 
 logging.basicConfig(level=logging.DEBUG)
@@ -437,56 +436,31 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
 
 @csrf_exempt
 @require_POST
-def start_minigame_view(request):
+def submit_score_single_view(request):
     """
-    Start a memory mini-game for tied players.
+    Submit a score for the single-player memory mini-game.
     Expects JSON body:
-      - room_code: str
-      - turn_id: int
-      - tied_players: [str]
-      - option_map: {player_name: option_id}
-    """
-    data = json.loads(request.body)
-    room_code = data.get("room_code")
-    turn_id = data.get("turn_id")
-    tied_players = data.get("tied_players", [])
-    option_map = data.get("option_map", {})
-
-    if not all([room_code, turn_id, tied_players, option_map]):
-        return JsonResponse({"error": "Missing parameters"}, status=400)
-
-    start_minigame(room_code, turn_id, tied_players, option_map)
-    return JsonResponse({"message": "Mini-game started"})
-
-
-
-@csrf_exempt
-@require_POST
-def submit_minigame_score_view(request):
-    """
-    Submit a player's score for the mini-game.
-    Expects JSON body:
-      - room_code: str
-      - turn_id: int
       - player_name: str
       - score: int
     """
-    data = json.loads(request.body)
-    room_code = data.get("room_code")
-    turn_id = data.get("turn_id")
-    player_name = data.get("player_name")
-    score = data.get("score")
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        player_name = data.get("player_name")
+        score = data.get("score")
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON")
 
-    if not all([room_code, turn_id, player_name, score is not None]):
-        return JsonResponse({"error": "Missing parameters"}, status=400)
+    if player_name is None or score is None:
+        return HttpResponseBadRequest("Missing 'player_name' or 'score'")
 
-    result = submit_score(room_code, turn_id, player_name, score)
+    result = submit_score_single(player_name, score)
     return JsonResponse(result)
 
 
-def poll_minigame_status_view(request, room_code, turn_id):
+@csrf_exempt
+def get_scores_view(request):
     """
-    Poll the current mini-game status.
+    Retrieve all submitted single-player scores.
     """
-    result = get_status(room_code, int(turn_id))
-    return JsonResponse(result)
+    scores = get_scores()
+    return JsonResponse({"scores": scores})

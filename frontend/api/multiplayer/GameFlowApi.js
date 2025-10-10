@@ -79,3 +79,27 @@ export const getFunFacts = async () => {
   const res = await api.get("/fun_facts");
   return res.data; // array of { fact, link, link_text }
 }
+
+
+/**
+ * Submit a single-player memory game score to the backend.
+ *
+ * @param {string} playerName - Name of the player.
+ * @param {number} score - Score achieved in the mini-game.
+ * @returns {Promise<object>} The response from the backend.
+ *
+ * Example usage:
+ * const result = await submitMemoryScore("Alice", 85);
+ */
+export const submitMemoryScore = async (playerName, score) => {
+  const res = await api.post("/mini-game/submit_score", { player_name: playerName, score });
+  return res.data; // { status: "success", player_name, score }
+};
+
+/**
+ * Optional: Retrieve all submitted single-player scores.
+ */
+export const getMemoryScores = async () => {
+  const res = await api.get("/mini-game/scores");
+  return res.data.scores; // { player_name: score, ... }
+};

@@ -1,111 +1,79 @@
-import { useState, useEffect } from "react";
-import api from "../../api/multiplayer/api.js"; // axios instance
-import Button from "../components/Button/Button.jsx";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import "../styles/MemoryMiniGame.css";
 
-const EMOJIS = ["🍎","🍌","🍇","🍒","🍉","🥝","🍍","🍓"];
-const DISPLAY_TIME = 5000;
-const GRID_SIZE = 6;
+const cardSymbols = ["🍎","🍌","🍇","🍉","🍓","🍒"];
 
-const MemoryMiniGame = ({ roomCode, turnId, tiedPlayers, optionMap, playerName, onFinish }) => {
-  const [sequence, setSequence] = useState([]);
-  const [hidden, setHidden] = useState(false);
-  const [userSelection, setUserSelection] = useState([]);
-  const [score, setScore] = useState(0);
-  const [submitted, setSubmitted] = useState(false);
-  const [pollingData, setPollingData] = useState(null);
+const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
+
+const MiniGame = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const playerName = location.state?.playerName || "Player";
+
+  const [cards, setCards] = useState([]);
+  const [flipped, setFlipped] = useState([]);
+  const [matched, setMatched] = useState([]);
+  const [moves, setMoves] = useState(0);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    const shuffled = EMOJIS.sort(() => 0.5 - Math.random()).slice(0, GRID_SIZE);
-    setSequence(shuffled);
-    const timer = setTimeout(() => setHidden(true), DISPLAY_TIME);
-    return () => clearTimeout(timer);
+    const doubleCards = shuffle([...cardSymbols, ...cardSymbols]);
+    setCards(doubleCards);
   }, []);
 
-  const handleClick = (emoji) => {
-    if (hidden && !submitted) {
-      setUserSelection((prev) => [...prev, emoji]);
-    }
-  };
+  const handleFlip = (index) => {
+    if (flipped.includes(index) || matched.includes(index) || busy) return;
 
-  const handleSubmit = async () => {
-    if (submitted) return;
+    const newFlipped = [...flipped, index];
+    setFlipped(newFlipped);
 
-    let points = userSelection.reduce(
-      (acc, val, idx) => acc + (sequence[idx] === val ? 10 : 0),
-      0
-    );
-    points += Math.max(0, GRID_SIZE * 2 - userSelection.length);
-    setScore(points);
-    setSubmitted(true);
+    if (newFlipped.length === 2) {
+      setMoves((m) => m + 1);
+      const [first, second] = newFlipped;
 
-    try {
-      await api.post("/minigame/submit-score", {
-        room_code: roomCode,
-        turn_id: turnId,
-        player_name: playerName,
-        score: points
-      });
-    } catch (err) {
-      console.error(err);
+      if (cards[first] === cards[second]) {
+        setMatched([...matched, first, second]);
+        setFlipped([]);
+      } else {
+        setBusy(true);
+        setTimeout(() => {
+          setFlipped([]);
+          setBusy(false);
+        }, 800);
+      }
     }
   };
 
   useEffect(() => {
-    if (!submitted) return;
-
-    const interval = setInterval(async () => {
-      try {
-        const res = await api.get(`/minigame/status/${roomCode}/${turnId}`);
-        setPollingData(res.data);
-        if (res.data.status === "resolved") {
-          clearInterval(interval);
-          onFinish(res.data.winning_option, res.data.winner);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [submitted]);
+    if (matched.length === cards.length && cards.length > 0) {
+      const score = Math.max(0, 100 - moves * 2);
+      navigate("/mini-game/result", { state: { playerName, score } });
+    }
+  }, [matched, cards, moves, playerName, navigate]);
 
   return (
-    <div className="memory-minigame">
+    <div className="mini-game-intro"> {/* Theme wrapper */}
       <h2>Memory Mini-Game</h2>
+      <p>Player: {playerName}</p>
       <div className="emoji-grid">
-        {sequence.map((emoji, idx) => (
+        {cards.map((symbol, idx) => (
           <div
             key={idx}
-            className={`card ${hidden ? "flipped" : ""} ${submitted ? "disabled" : ""}`}
-            onClick={() => handleClick(emoji)}
+            className={`card ${flipped.includes(idx) || matched.includes(idx) ? "flipped" : ""}`}
+            onClick={() => handleFlip(idx)}
           >
             <div className="card-inner">
-              <div className="card-front">❓</div>
-              <div className="card-back">{emoji}</div>
+              <div className="card-front">?</div>
+              <div className="card-back">{symbol}</div>
             </div>
           </div>
+
         ))}
       </div>
-
-      {!submitted && hidden && (
-        <Button title="Submit" baseButton="btn-primary" action={handleSubmit} />
-      )}
-
-      {submitted && (
-        <div>
-          <p>Your score: {score}</p>
-          <p>Waiting for other players...</p>
-        </div>
-      )}
-
-      {pollingData && pollingData.status === "resolved" && (
-        <div>
-          <p>Winner: {pollingData.winner}</p>
-          <p>Winning Option: {pollingData.winning_option}</p>
-        </div>
-      )}
+      <p>Moves: {moves}</p>
     </div>
   );
 };
 
-export default MemoryMiniGame;
+export default MiniGame;
