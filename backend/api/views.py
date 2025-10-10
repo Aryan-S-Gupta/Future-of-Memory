@@ -155,7 +155,7 @@ def rag_retrieve(request):
 
 
 # new views
-from shared.models import Session, Option, Turn
+from shared.models import Session, Option, Turn, ImageRender
 
 # home page
 
@@ -275,3 +275,66 @@ def retrieve_fun_facts_api(request) -> JsonResponse:
     number of fun facts retrieved on eac call.
     """
     return JsonResponse({"data": retrieve_fun_facts()})
+
+def _to_media_url(rel):
+    if not rel:
+        return None
+    rel = rel.lstrip("/")
+    if not rel.startswith("media/"):
+        rel = f"media/{rel}"
+    return f"/{rel}"
+
+def get_gallery_for_session(request, session_id: int):
+    session = get_object_or_404(Session, id=session_id)
+    include_pending = request.GET.get("include_pending") in ("1", "true", "True", "yes", "on")
+
+    items = []
+    turns = (Turn.objects
+             .filter(session=session)
+             .order_by('year', 'id')
+             .select_related('user_choice'))
+
+    for t in turns:
+        if t.user_choice_id:
+            # COMPLETED — use displayed image unless it's a fallback; then prefer latest ready render
+            chosen = t.user_choice
+            img_rel = (t.displayed_image_rel or "").lstrip("/")
+            is_fallback = (not img_rel) or img_rel.startswith(("static/fallback_", "media/static/fallback_"))
+            if is_fallback:
+                r = (ImageRender.objects
+                     .filter(option=chosen, status='ready')
+                     .order_by('-created_at', '-id')
+                     .first())
+                if r:
+                    img_rel = r.image_rel
+
+            items.append({
+                "year": t.year,
+                "turn_id": t.id,
+                "option_id": chosen.id,
+                "option_label": getattr(chosen, "label", None),
+                "option_text": chosen.option_text or "",
+                "scenario": chosen.scenario or "",
+                "image_url": _to_media_url(img_rel),
+                "status": "completed",
+            })
+        elif include_pending:
+            # PENDING — pick latest ready render across both options (if any)
+            opt_ids = list(Option.objects.filter(turn=t).values_list('id', flat=True))
+            r = (ImageRender.objects
+                 .filter(option_id__in=opt_ids, status='ready')
+                 .order_by('-created_at', '-id')
+                 .first())
+            image_url = _to_media_url(r.image_rel if r else None)
+            items.append({
+                "year": t.year,
+                "turn_id": t.id,
+                "option_id": None,
+                "option_label": None,
+                "option_text": "",
+                "scenario": "",
+                "image_url": image_url,
+                "status": "pending",
+            })
+
+    return JsonResponse({"session_id": session_id, "count": len(items), "items": items}, status=200)
