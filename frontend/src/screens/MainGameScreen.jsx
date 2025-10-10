@@ -74,8 +74,6 @@ const MainGameScreen = () => {
         <Button baseButton="btn-secondary" action={() =>          navigate("/mini-game/intro")} title="Play Memory Game" />
 
       </div>
-
-
       {/* Floating feedback button */}
       <div className="feedback-button-container">
       <Button

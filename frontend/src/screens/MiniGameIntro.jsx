@@ -21,7 +21,11 @@ const MiniGameIntro = () => {
         value={playerName}
         onChange={(e) => setPlayerName(e.target.value)}
       />
-      <Button baseButton="btn-primary" action={startGame} title="Start Game" />
+      
+          <div className="button-group">
+              <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
+              <Button baseButton="btn-primary" action={startGame} title="Start Game" />
+          </div>
     </div>
   );
 };

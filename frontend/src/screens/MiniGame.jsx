@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/MemoryMiniGame.css";
+import Button from "../components/Button/Button.jsx";
 
-const cardSymbols = ["🍎","🍌","🍇","🍉","🍓","🍒"];
+// 8 unique emojis for 4x4 grid (16 cards total)
+const cardSymbols = ["🍎","🍌","🍇","🍉","🍓","🍒","🥝","🍍"];
 
+// Shuffle function
 const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
 
 const MiniGame = () => {
@@ -17,8 +20,9 @@ const MiniGame = () => {
   const [moves, setMoves] = useState(0);
   const [busy, setBusy] = useState(false);
 
+  // Initialize a 4x4 deck
   useEffect(() => {
-    const doubleCards = shuffle([...cardSymbols, ...cardSymbols]);
+    const doubleCards = shuffle([...cardSymbols, ...cardSymbols]); // duplicate and shuffle
     setCards(doubleCards);
   }, []);
 
@@ -45,6 +49,7 @@ const MiniGame = () => {
     }
   };
 
+  // Navigate to result when all matched
   useEffect(() => {
     if (matched.length === cards.length && cards.length > 0) {
       const score = Math.max(0, 100 - moves * 2);
@@ -53,9 +58,16 @@ const MiniGame = () => {
   }, [matched, cards, moves, playerName, navigate]);
 
   return (
-    <div className="mini-game-intro"> {/* Theme wrapper */}
+    <div className="mini-game-intro">
       <h2>Memory Mini-Game</h2>
       <p>Player: {playerName}</p>
+
+      {/* Back button */}
+      <div className="button-group" style={{ marginBottom: "1rem" }}>
+        <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
+      </div>
+
+      {/* 4x4 Grid */}
       <div className="emoji-grid">
         {cards.map((symbol, idx) => (
           <div
@@ -68,9 +80,9 @@ const MiniGame = () => {
               <div className="card-back">{symbol}</div>
             </div>
           </div>
-
         ))}
       </div>
+
       <p>Moves: {moves}</p>
     </div>
   );

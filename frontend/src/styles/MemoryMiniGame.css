@@ -1,22 +1,22 @@
 /* === Grid for MiniGame === */
+
 .emoji-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  grid-template-columns: repeat(4, 1fr); /* 4 columns */
   gap: 15px;
   justify-items: center;
   align-items: center;
   padding: 2rem 0;
-  max-width: 600px;
+  max-width: 500px; /* smaller width for 4x4 layout */
   margin: 0 auto;
 }
 
-/* Individual card */
 .card {
   width: 80px;
   height: 100px;
-  perspective: 1000px;
-  cursor: pointer;
 }
+
+
 
 /* Card inner wrapper for flip animation */
 .card-inner {
@@ -51,7 +51,7 @@
 
 /* Card front (hidden) */
 .card-front {
-  background: linear-gradient(145deg, rgba(20,30,40,0.95), rgba(15,25,35,0.85));
+  background: rgba(20, 30, 40, 0.6); /* semi-transparent front */
   border: 2px solid #00f0ff;
   color: #00f0ff;
   font-size: 1.5rem;
@@ -59,7 +59,7 @@
 
 /* Card back (emoji) */
 .card-back {
-  background: linear-gradient(145deg, rgba(0,0,0,0.9), rgba(5,5,5,0.85));
+  background: rgba(0,0,0,0.5); /* semi-transparent back */
   border: 2px solid #00ffa0;
   color: #00ffa0;
   transform: rotateY(180deg);
@@ -70,22 +70,21 @@
   text-shadow: 0 0 15px rgba(0, 255, 160, 0.8);
 }
 
-/* card hover eeffects */
+/* Card hover effects */
 .card:hover .card-front {
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); /* optional subtle glow */
-  transform: none; /* do not scale front */
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  transform: none; /* prevent revealing content */
 }
 
 .card:hover .card-back {
-  box-shadow: none; /* no shadow on back */
-  transform: rotateY(180deg); /* keep it hidden unless flipped */
+  box-shadow: 0 0 10px rgba(0, 255, 160, 0.5);
+  transform: rotateY(180deg); /* keep hidden unless flipped */
 }
-
-
 
 /* === MiniGame Intro & Result Screens === */
 .mini-game-intro,
 .mini-game-result {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -95,9 +94,21 @@
   text-align: center;
   min-height: 100vh;
   padding: 1rem;
-  background: linear-gradient(180deg, #0a0a0a, #111111);
+  background: transparent; /* blend with main background */
 }
 
+/* Optional subtle overlay for readability */
+.mini-game-intro::before,
+.mini-game-result::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10,10,10,0.2); /* subtle dark overlay */
+  z-index: -1; /* behind content */
+  border-radius: inherit;
+}
+
+/* Headings */
 .mini-game-intro h2,
 .mini-game-result h2 {
   font-family: 'Orbitron', sans-serif;
@@ -106,12 +117,13 @@
   text-shadow: 0 0 10px #00f0ff, 0 0 20px #00ffa0;
 }
 
+/* Input styling for intro screen */
 .mini-game-intro input {
   padding: 0.6rem 1rem;
   font-size: 1rem;
   border-radius: 8px;
   border: 2px solid #00f0ff;
-  background: rgba(20, 30, 40, 0.85);
+  background: rgba(20, 30, 40, 0.6); /* semi-transparent input */
   color: #f5fcff;
   margin-bottom: 1rem;
   text-align: center;
@@ -133,7 +145,7 @@
   letter-spacing: 1px;
   border: 2px solid #60dbfa;
   border-radius: 6px;
-  background: linear-gradient(145deg, rgba(20, 30, 40, 0.95), rgba(15, 25, 35, 0.85));
+  background: rgba(20, 30, 40, 0.6); /* semi-transparent button */
   color: #60dbfa;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -142,7 +154,7 @@
 
 .mini-game-intro button:hover,
 .mini-game-result button:hover {
-  background: linear-gradient(145deg, rgba(30, 50, 60, 0.95), rgba(25, 40, 50, 0.85));
+  background: rgba(30, 50, 60, 0.6);
   box-shadow: 0 0 25px rgba(96, 219, 250, 0.7);
   transform: scale(1.05);
 }
@@ -172,5 +184,17 @@
   .mini-game-intro h2,
   .mini-game-result h2 {
     font-size: 1.5rem;
+  }
+}
+/* Optional: smaller size for mobile */
+@media (max-width: 500px) {
+  .emoji-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .card {
+    width: 60px;
+    height: 80px;
   }
 }
