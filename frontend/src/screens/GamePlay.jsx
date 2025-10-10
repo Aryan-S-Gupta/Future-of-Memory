@@ -47,10 +47,12 @@ const GamePlay = () => {
     "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
-  });
- // --- Tie narration to BGM ---
-  const { isPlaying, volume, setVolume } = useBgm();
-  
+});
+
+  const navigate = useNavigate();
+
+  // --- Tie narration to BGM ---
+  const { isPlaying, isMuted, volume, setVolume } = useBgm();
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
@@ -123,7 +125,7 @@ const GamePlay = () => {
     // tweak for more “majestic” feel
    utter.rate = 0.7;  // slower (was 0.9) — lower is slower
   utter.pitch = 1.0;   // deeper
-    utter.volume = 1;   // full, since we ducked bgm
+    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));   // tie TTS loudness to the global toolbar
 
     utter.onend = utter.onerror = () => {
       // Restore BGM volume
