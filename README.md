@@ -249,6 +249,8 @@ psql -U postgres
 CREATE DATABASE memorysim_db;
 CREATE USER memorysim_user WITH PASSWORD 'password123';
 GRANT ALL PRIVILEGES ON DATABASE memorysim_db TO memorysim_user;
+\c memorysim_db;
+GRANT ALL ON SCHEMA public TO memorysim_user;
 \q
 ```
 
@@ -365,8 +367,11 @@ Should contain `index.faiss` and `index.pkl`
 ```bash
 python manage.py shell -c "
 from rag.retrieve import retrieve_chunks;
-print('\n---\n'.join(chunk['text'] for chunk in retrieve_chunks('sleep memory consolidation')))
-"
+result = retrieve_chunks('sleep memory consolidation')
+for chunk in result:
+    for key, value in chunk.items():
+        print(f'{key}: {value}\n')
+    print('\n---\n')
 ```
 
 **Windows:**
@@ -385,7 +390,12 @@ Try this `curl` query to test the RAG chunk retrieval API once the backend is ru
 curl --header "Content-Type: application/json" \
 --request POST \
 --data '{ "query_text": "what is the future of memory", "keywords": ["future", "memory"]}' \
-http://127.0.0.1:8000/api/rag/retrieve
+http://127.0.0.1:9000/api/rag/retrieve
+```
+
+On Windows:
+```
+curl.exe -H "Content-Type: application/json" -X POST http://127.0.0.1:9000/api/rag/fun_facts
 ```
 
 ---
