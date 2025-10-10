@@ -5,12 +5,12 @@ refer to this flow:  https://drive.google.com/file/d/1hW3yEeM5DpvwQmuXlTeUSz6Swl
 - download ComfyUI https://www.comfy.org/download
 - download dreamshaper model ver 7 https://civitai.com/models/4384?modelVersionId=109123
 - put the model under `ComfyUI/models/checkpoints`
-- starts ComfyUI server, make sure it is running at port 8080, if default not 8080, run it from terminal, switch to port 8080
+- start the ComfyUI server, make sure it is running at port 8000, if default not 8000, run it from terminal, switch to port 8000
     ```bash
     cd /path/to/ComfyUI
-    python main.py --port 8080
+    python main.py --port 8000
     ```
-- refer to backend/README.md, start the django server
+- refer to `README.md` and complete the setup instructions there, including starting the Django server
 
 # How to test it?
 ```bash
