@@ -49,7 +49,7 @@ class VotingSession:
         self.total_players = len(rm.get_players(room_code))
         self.voted_players = []
         self.vote_timeout = vote_timeout
-        self.vote_timer = None
+        self.vote_timer = self.vote_timer = threading.Timer(self.vote_timeout, self.end_voting)
         self.time_started = False
         self.inactive_players = set()
         self.final_option = None
@@ -91,7 +91,7 @@ class VotingSession:
             logging.info(f"Voting started for room {self.room_code} with {self.total_players} players.")
 
             # Start global timer
-            self.vote_timer = threading.Timer(self.vote_timeout, self.end_voting)
+            
             self.vote_timer.start()
             self.vote_timer = True
 
