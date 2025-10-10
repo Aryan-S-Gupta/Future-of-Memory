@@ -102,7 +102,7 @@ const {
       }
 
     },
-    enabled: screen !== "scenario" && loadingState != "scenario",
+    enabled: screen === "loading" && loadingState === "question",
     onError: (err) => {
       console.log("onError:", err);
 
@@ -283,7 +283,7 @@ const { data: votingData } = useQuery({
       setShowVotes(false);
     }
       },
-      enabled: screen === "question" && currentTurn != null && loadingState != "question" && showVotes === false,
+      enabled: screen === "question" && currentTurn != null && loadingState != "question" && showVotes === true,
       refetchInterval: currentTurn ? 3000 : false, // poll every 3s
         onError: (err) => {
         console.error("[VotingQuery] onError triggered:", err);
@@ -347,9 +347,10 @@ const getFadeClass = (idx) => {
   // handle choice click
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
+    setScreen("loading");
     cancelTTS(); 
     setOptionId(option_id);
-    setLoadingState("scenario")
+    setLoadingState("scenario");
   }
 
 // make a var using states, shpw votes, when the screen is questions screen then start calling the voting again and again
@@ -392,11 +393,11 @@ const getFadeClass = (idx) => {
       };
       console.log("Submit choice response:", mapped);
       setIsReady(true);
-      setScreen("scenario")
+      setScreen("scenario");
       setScenarioData(mapped);
       setYear(year + 1);
     },
-    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && loadingState !== "question",
+    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen === "loading" && loadingState === "question",
     onError: (err) => {
       console.log("onError:", err);
     }, 
@@ -452,7 +453,7 @@ const getFadeClass = (idx) => {
             <Button
               baseButton="btn-primary"
               action={() => {
-                setScreen("question");
+                setScreen("loading");
                 setLoadingState("question");
                 //setFetchQuestion(true);
                 setScenarioData(null);
