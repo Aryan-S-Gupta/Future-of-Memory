@@ -1,5 +1,9 @@
 """Configuration settings for the RAG system.
 """
 
-# Set to True to skip RAG setup if you just want to test other parts of the backend
-SKIP_RAG_SETUP = False
+# Set to True to always keep the RAG vector database updated. Note that updating the vector database 
+# will take time.
+UPDATE_RAG = True
+
+# Latest version of the RAG system
+LATEST_VERSION = 1

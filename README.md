@@ -229,35 +229,7 @@ python -c "from nltk.tokenize import sent_tokenize; print(sent_tokenize('Hello w
 
 ---
 
-### Step 5: Build the Vector Store (First time or files changed) 
-
-#### Option A (recommended, inside backend) (This step might cost 1-2 mins)
-
-**macOS/Linux:**
-```bash
-python - <<'PY'
-from rag.setup import setup_rag_system
-setup_rag_system()
-print("RAG setup done")
-PY
-```
-
-**Windows Command Prompt:**
-```cmd
-python -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
-```
-
-#### Option B (from project root)
-
-**macOS/Linux:**
-```bash
-python backend/manage.py shell -c "from rag.setup import setup; setup_rag_system(); print('RAG setup done')"
-```
-
-**Windows:**
-```cmd
-python backend\manage.py shell -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
-```
+### Step 5: Verify Vector Store setup (optional)
 
 #### Verify Setup (All Platforms)
 ```bash
@@ -275,7 +247,11 @@ Should contain `index.faiss` and `index.pkl`
 ```bash
 python manage.py shell -c "
 from rag.retrieve import retrieve_chunks;
-print('\n---\n'.join(chunk['text'] for chunk in retrieve_chunks('sleep memory consolidation')))
+result = retrieve_chunks('sleep memory consolidation')
+for chunk in result:
+    for key, value in chunk.items():
+        print(f'{key}: {value}\n')
+    print('\n---\n')
 "
 ```
 
@@ -319,6 +295,7 @@ C:\Program Files\PostgreSQL\18\bin
 psql postgres
 ```
 **Windows:**
+Note that the `createdb` command may or may not be necessary to set up the database on your device.
 ```bash
 psql -U postgres
 ```
@@ -328,6 +305,8 @@ psql -U postgres
 CREATE DATABASE memorysim_db;
 CREATE USER memorysim_user WITH PASSWORD 'password123';
 GRANT ALL PRIVILEGES ON DATABASE memorysim_db TO memorysim_user;
+\c memorysim_db;
+GRANT ALL ON SCHEMA public TO memorysim_user;
 \q
 ```
 extra step for Windows:
@@ -416,6 +395,20 @@ curl --header "Content-Type: application/json" \
 --request POST \
 --data '{ "query_text": "what is the future of memory", "keywords": ["future", "memory"]}' \
 http://127.0.0.1:9000/api/rag/retrieve
+```
+
+To test fun facts API:
+
+On MacOS/Linux:
+```bash
+curl --header "Content-Type: application/json" \
+--request POST \
+http://127.0.0.1:9000/api/rag/fun_facts
+```
+
+On Windows:
+```
+curl.exe -H "Content-Type: application/json" -X POST http://127.0.0.1:9000/api/rag/fun_facts
 ```
 
 ---

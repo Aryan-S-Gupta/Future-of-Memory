@@ -1,0 +1,233 @@
+{
+    "Cognitive_and_neural_mechanisms_underlying_false_memories_misinformation_distortion_or_erroneous_configuration.txt": [
+        "Human memory is not like a perfect computer recording; instead, it's a complex system that reconstructs events and is surprisingly prone to errors and distortions, despite its vital role in learning and daily life.",
+        "False memories are not intentional lies, but rather unintentional errors that can occur when remembering events, potentially mixing up details or even recalling incidents that never happened due to flaws in memory processing.",
+        "Neuroimaging techniques, like fMRI, have enabled researchers to explore the brain activity associated with false memories, revealing connections between brain regions and the cognitive processes involved in memory errors.",
+        "The Deese-Roediger-McDermott (DRM) paradigm is a common research tool used to study false memories by presenting participants with lists of related words and observing how they falsely recall a related, but unlisted, word.",
+        "Factors like sleep deprivation, aging, and emotional state can significantly impact memory accuracy, increasing susceptibility to false memories and highlighting the delicate balance required for reliable recall."
+    ],
+    "Five_Ethical_Challenges_of_Neuralinklike_Brain_Implants.txt": [
+        "Brain-machine interfaces could allow for speed-of-thought social media, super-fast gaming, and enhanced cognitive abilities by merging our minds with intelligent machines.",
+        "Elon Musk's company, Neuralink, is developing brain interfaces that wirelessly connect to your phone, which he describes as a \"Fitbit in your skull\" with the ability to influence thoughts and actions.",
+        "A significant concern with brain-machine interfaces is the potential for hacking, which could allow unauthorized individuals to access and manipulate a person's thoughts and actions.",
+        "The data extracted from our brains through brain-machine interfaces, referred to as \"neuro data\", could be extremely valuable and raise questions about who controls its use and potential abuse.",
+        "Unequal access to brain-machine interface technology could exacerbate existing social inequalities, creating a divide between those with \"supercharged brains\" and those without."
+    ],
+    "Odor_cueing_during_slowwave_sleep_benefits_memory_independently_of_low_cholinergic_tone.txt": [
+        "During sleep, memories are consolidated through the reactivation of learning-associated brain activity, mainly during non-rapid eye movement (REM) sleep, coordinating with neocortical areas to strengthen long-term associations.",
+        "The direction of information flow in the brain shifts during sleep, reversing from neocortical-to-hippocampal during wakefulness to hippocampal-to-neocortical during sleep, which is regulated by the neurotransmitter acetylcholine.",
+        "Presenting learning-associated cues like odors during slow-wave sleep can enhance various types of memory, including declarative, procedural, and emotional, improving subsequent memory recall.",
+        "An experiment involving men aged 20-30 tested memory recall of card pairs, finding that presenting odors associated with the card-location task during sleep improved memory performance.",
+        "The study administered physostigmine, a drug that increases acetylcholine levels, to test its effect on odor-cued memory reactivation during sleep, but found it did not abolish the memory-improving effect of odor cues."
+    ],
+    "Pretreatment_subjective_sleep_quality_as_a_predictive_biomarker_of_tDCS_effects_in_preclinical_Alzheimers_disease_patients_Secondary_analysis_of_a_randomised_clinical_trial.txt": [
+        "Poor sleep quality is increasingly recognized as a significant factor affecting brain health, especially in older adults, and is linked to neurovascular diseases and cognitive decline.",
+        "Transcranial direct current stimulation (tDCS), a non-invasive brain stimulation technique, has shown promise in improving sleep quality across various groups, including those with mood disorders and healthy aging adults.",
+        "A clinical trial screened 643 adults and ultimately recruited 201 Chinese adults aged 60-90 with mild neurocognitive disorder due to Alzheimer\u2019s disease to participate in a study about tDCS.",
+        "The Pittsburgh Sleep Quality Index (PSQI), a 19-item questionnaire, is used to measure subjective sleep quality and disturbances, where a higher score indicates worse sleep.",
+        "In a study using tDCS, some patients experienced mild, temporary skin injuries under the electrodes, but no serious side effects like nausea, seizures, or headaches were reported."
+    ],
+    "Neocortical_and_Hippocampal_Theta_Oscillations_Track_Audiovisual_Integration_and_Replay_of_Speech_Memories.txt": [
+        "This study found that when lip movements and speech sounds are out of sync, it affects theta oscillations in the brain during movie watching, and also impacts how we remember those audiovisual moments later on.",
+        "The research involved showing participants short movie clips and testing their memory of the speech content, while also monitoring their brain activity using magnetoencephalography (MEG), a technique that measures brain activity.",
+        "Researchers manipulated the timing of lip movements and speech in movie clips to be either synchronized or asynchronized at a theta frequency (4-8 Hz), which is the natural rhythm of syllable production.",
+        "The study showed that brain regions like the neocortex and hippocampus, which are important for integrating audiovisual information and forming memories, respond differently depending on whether the speech and lip movements are synchronized.",
+        "The scientists used a method called mutual information (MI) to determine how well lip movements and speech sounds aligned in each movie clip, ensuring they were manipulating stimuli where visual and auditory information naturally matched in the theta range."
+    ],
+    "Is_Neural_Activity_Detected_by_ERPBased_BrainComputer_Interfaces_Task_Specific.txt": [
+        "Brain-computer interfaces (BCIs) can detect specific neural responses, called event-related potentials (ERPs), in the electroencephalogram (EEG) when someone pays attention to a stimulus, allowing communication purely through brain activity.",
+        "This study used flashing colored squares to test if brain activity related to attention is specific to counting tasks or if it appears in other tasks like arithmetic and memorization, revealing that attention-related brain activity is not task-specific.",
+        "Electroencephalography (EEG) signals were recorded using 64 electrodes placed on participants' scalps, following the international 10-20 system, to measure brain activity during the experiment.",
+        "Researchers found that classifiers trained on one task (like counting) could predict target stimuli in other tasks (like arithmetic or memory), suggesting that attention allocation and cognitive effort can be inferred from EEG data.",
+        "The study suggests that brain-computer interfaces could be used in human-computer interaction to detect relevant screen content based on a user's brain activity, without the need for specific tasks like counting."
+    ],
+    "ActivityBased_Prospective_Memory_in_ADHD_during_Motor_Sleep_Inertia.txt": [
+        "ADHD is a neurodevelopmental disorder affecting around 5% of children, and it can persist into adulthood in approximately half of the cases, impacting their ability to focus, control impulses, and manage hyperactivity.",
+        "Prospective memory, crucial for planning and executing future actions, is categorized into time-based, event-based, and activity-based types, each presenting unique challenges in remembering and completing intended tasks.",
+        "Activity-based prospective memory, which involves performing an action before or after another activity, is generally considered easier than time-based or event-based memory tasks because it doesn't interrupt ongoing tasks.",
+        "A study reanalyzed data from children and adults with ADHD, focusing on how quickly participants remembered to press an event-marker button after waking up, as a measure of activity-based prospective memory.",
+        "Research suggests that children with ADHD may show lower activity-based prospective memory performance compared to healthy children, but this difference tends to diminish as they grow into adulthood."
+    ],
+    "An_electronic_chip_that_makes_memories_is_a_step_towards_creating_bionic_brains.txt": [
+        "Researchers are developing computer chips that mimic the human brain to improve computing efficiency by replicating the brain's ability to store, delete, and process information effectively.",
+        "Optogenetics, a technique using light to control cells in living tissue, inspired the creation of a chip that replicates how the brain stores and loses information, potentially advancing artificial intelligence.",
+        "A new electronic chip uses different colors of light to simulate the brain's inner workings, switching electrical currents to mimic the creation and breaking of connections between neurons.",
+        "The chip is made from black phosphorus with intentionally introduced defects, which are used to manipulate the material's behavior, mimicking neural connections and disconnections based on the light's wavelength.",
+        "This new chip technology could help neuroscientists simulate brain functions and abnormalities, potentially leading to cures for disorders like Alzheimer's disease without needing living test subjects."
+    ],
+    "Developer_perspectives_on_the_ethics_of_AIdriven_neural_implants_a_qualitative_study.txt": [
+        "AI-driven cochlear implants use machine learning to personalize noise suppression and enhance speech, aiming to improve the listening experience for users in complex auditory environments.",
+        "AI-driven visual neural implants use a camera and AI software to process visual information and stimulate the visual cortex, creating artificial perceptions of light for blind individuals.",
+        "AI-driven speech-brain-computer interfaces aim to restore communication for people with motor neuron diseases by translating brain signals associated with speech attempts into text or synthesized voice.",
+        "Developers of AI-driven neural implants emphasize the importance of accuracy and reliability for user safety, authenticity, and mental privacy, especially with the integration of AI technologies.",
+        "Ethical considerations for AI-driven neural implants include the potential reduction of user control due to predictive algorithms and the need to address mental privacy concerns arising from decoding internal thoughts."
+    ],
+    "Monitoring_the_Cortical_Activity_of_Children_and_Adults_during_Cognitive_Task_Completion.txt": [
+        "The Schulte table task, used in the study, involves finding numbers in descending order within a grid, which relies on cognitive processes like visual search, working memory, and mental arithmetic to complete the task.",
+        "In the experiment, children aged 7-8 and adults aged 18-20 participated in the Schulte table task while their brain activity was monitored using EEG, a non-invasive technique to measure electrical activity in the brain.",
+        "The study found that adults completed the Schulte table task faster than children, suggesting age-related differences in cognitive processing speed and efficiency when doing tasks involving numbers.",
+        "EEG analysis revealed that children showed increased parietal alpha-band power when working with single-digit numbers, indicating a shift towards a fact-retrieval strategy, whereas adults relied on top-down mechanisms.",
+        "The research suggests that the size of the arithmetical problem affects children more than adults, highlighting the importance of developing strong number sense and automatized arithmetic skills in primary school education."
+    ],
+    "Hyperrealistic_neural_decoding_for_reconstructing_faces_from_fMRI_activations_via_the_GAN_latent_space.txt": [
+        "Neural decoding aims to map brain responses back to sensory stimuli, like piecing together what someone is seeing based on their brain activity, similar to reverse-engineering the brain's visual process.",
+        "Generative Adversarial Networks, or GANs, are powerful models that can synthesize realistic data; in this study, they generated lifelike faces used as stimuli during brain scanning to understand visual perception.",
+        "The HYPER model combines brain scanning (fMRI) data with GANs to reconstruct the faces a person is seeing, marking a step forward in 'reading' visual perception from brain activity.",
+        "In the HYPER experiment, participants viewed computer-generated faces while undergoing fMRI scans, enabling researchers to link specific brain activity patterns to the perception of those faces.",
+        "The HYPER model can decode certain face attributes, such as gender, age, and pose, from brain activity, showing the potential for understanding complex visual features through neural decoding."
+    ],
+    "Sleep_Loss_Produces_False_Memories.txt": [
+        "False memories are when people confidently remember events that never happened, often linked to real memories, showing that memory isn't a perfect record but influenced by existing knowledge.",
+        "Sleep helps strengthen and reorganize new memories, potentially leading to the creation of false memories as the brain integrates new information with existing knowledge.",
+        "Sleep deprivation impairs cognitive functions like attention and memory retrieval, which can increase the likelihood of forming false memories due to reduced reality monitoring.",
+        "Experiments using word lists showed that sleep deprivation at the time of recalling information significantly increased false memory rates, while sleep after learning had no effect.",
+        "Caffeine, which blocks adenosine receptors in the brain, can reduce the occurrence of false memories in sleep-deprived individuals, suggesting a neurochemical link between sleep loss and memory errors."
+    ],
+    "Effects_of_Partial_and_Acute_Total_Sleep_Deprivation_on_Performance_across_Cognitive_Domains_Individuals_and_Circadian_Phase.txt": [
+        "After 24 hours of being awake, a person's cognitive performance can be as poor as someone who is intoxicated with alcohol, showing how critical sleep is for brain function.",
+        "Young adults may need as much as 8 to 9 hours of sleep to maintain optimal brain function during the day, highlighting the importance of sufficient sleep for cognitive performance.",
+        "The study found that alertness and sustained attention are more affected by sleep loss than executive functions like working memory, challenging some prior assumptions.",
+        "The effectiveness of prior partial sleep deprivation on cognitive performance varies throughout the day, with the largest effects seen in the morning, and a minimum in the evening.",
+        "A gene called PER3 plays a role in how people respond to sleep deprivation, with different versions of the gene affecting alertness and executive functions differently."
+    ],
+    "Sleep_Supports_the_Slow_Abstraction_of_Gist_from_Visual_Perceptual_Memories.txt": [
+        "Sleep helps our brains consolidate individual memories, but these memories are not exact replicas of events and are always subject to changes over time.",
+        "When remembering lists of associated words, people often falsely recall a related word that was never presented, showcasing how our brains create 'gist' memories.",
+        "A study using abstract shapes found that sleep after learning enhances the recall of specific details in the short term and the overall concept in the long term.",
+        "After sleeping, people remembered the general idea of what they learned better after a year, whereas the details faded away, showing sleep's role in long-term gist retention.",
+        "Eye-tracking during a memory test revealed that people spent more time looking at prototypes after sleeping, further supporting the idea that sleep strengthens gist memories."
+    ],
+    "Slow_oscillationspindle_coupling_predicts_enhanced_memory_formation_from_childhood_to_adolescence.txt": [
+        "During sleep, memories are reactivated in the hippocampus, strengthened by thalamo-cortical sleep spindles, and transferred to the neocortex for long-term storage, guided by neocortical slow oscillations.",
+        "A study of 33 participants found that memory recall improved from childhood (around 9.5 years old) to adolescence (around 16 years old), with immediate recall being generally better than delayed recall.",
+        "Researchers used polysomnography to record brain activity during sleep in participants' homes to study the relationship between sleep oscillations and memory consolidation from childhood to adolescence.",
+        "The study used a word pair task where participants learned pairs of words and were later tested on their recall, with the task being adjusted for difficulty between childhood and adolescence.",
+        "The study found that the precision of slow oscillation-spindle coupling during sleep increases from childhood to adolescence, and this increase is associated with improved memory formation."
+    ],
+    "Neuromodulation_and_memory_exploring_ethical_ramifications_in_memory_modification_treatment_via_implantable_neurotechnologies.txt": [
+        "Implantable neurotechnologies can alter and record brain activity, offering potential treatments for neurodegenerative and psychiatric conditions linked to memory impairments, marking a significant advancement in medical science.",
+        "Invasive brain-computer interfaces (iBCIs) can target specific neurons to manipulate neural circuits with high precision, potentially deactivating or dampening the emotional impact of unwanted memories.",
+        "Research in rodents and primates has demonstrated the effectiveness of deactivating consolidated memories and reducing the emotional intensity of specific events through advanced memory modulation techniques.",
+        "Modifying memories with implantable neurotechnologies could lead to a shift in an individual's core value system, potentially detaching them from their capacity to feel and respond to their own moral emotions.",
+        "Altering the emotional component of memories can hinder social activism by reducing empathy and the capacity to relate to trauma victims, ultimately impeding advocacy for systemic change and justice."
+    ],
+    "Taskevoked_pulse_wave_amplitude_tracks_cognitive_load.txt": [
+        "Cognitive load refers to the amount of mental resources required to process information, and exceeding working memory capacity can lead to cognitive overload, which researchers are trying to measure in real time.",
+        "Pulse wave amplitude, which can be easily measured using a smartphone camera, decreases as cognitive tasks become more difficult, offering a convenient way to monitor mental effort.",
+        "Measuring heart rate using photoplethysmography (PPG) and electrocardiography (ECG) provides comparable results, suggesting that PPG, a simpler method, can be used effectively in mental load research.",
+        "Baseline normalization is crucial for accurate pulse wave amplitude measurements, helping to reduce the variability in individual vascular physiology and improve the reliability of results when assessing cognitive load.",
+        "Pupil size and pulse wave amplitude both increase with cognitive load and decrease with overload, suggesting a shared underlying mechanism involving the sympathetic nervous system's response to mental effort."
+    ],
+    "Brain_Implants_to_Erase_Memories.txt": [
+        "Brain implants, like deep brain stimulation (DBS), are used to restore neural connections disrupted by conditions like depression and obsessive-compulsive disorder by modulating dysfunctional circuits.",
+        "Researchers are exploring the possibility of erasing specific fear memories using brain implants to treat anxiety, panic disorders, phobias, and post-traumatic stress disorder (PTSD).",
+        "Scientists believe that traumatic memories become embedded in the amygdala due to the release of noradrenaline during stressful experiences, solidifying the connection between aversive stimuli and fear responses.",
+        "One approach to weakening traumatic memories involves interfering with reconsolidation, the process of updating memories after retrieval, making them susceptible to alteration.",
+        "Electrical stimulation with devices like DBS may be able to selectively erase unwanted memories by targeting the neurons and synapses within the memory trace, without damaging brain tissue."
+    ],
+    "Media_technology_and_the_sins_of_memory.txt": [
+        "Human memory isn't a perfect recording device; it is prone to errors, which can be grouped into seven categories, including forgetting and distortions, offering a framework for understanding memory's imperfections.",
+        "Relying on GPS for navigation can lead to reduced memory for routes, possibly because the brain's hippocampus, crucial for spatial memory, becomes less active when using navigational aids.",
+        "While taking photos can sometimes impair memory by reducing focus on the event itself, selectively zooming in or intentionally deciding when to take a photo may actually enhance memory.",
+        "Media multitasking, like using a phone during a lecture, can lead to attentional lapses and poorer memory for the lecture content, but technology can also provide useful external memory aids.",
+        "Photos, especially when manipulated or paired with fake news, can create false memories, demonstrating how media can distort our recollections of both personal and public events."
+    ],
+    "Comparing_the_Effects_of_Nocturnal_Sleep_and_Daytime_Napping_on_Declarative_Memory_Consolidation.txt": [
+        "This study showed that both sleeping at night and napping during the day can help people remember new information, especially unusual or unrelated word pairings.",
+        "The research indicated that sleeping after learning something may help move that information from short-term storage in the brain to a more permanent location for better recall.",
+        "Interestingly, the study found that while both nighttime sleep and daytime naps are beneficial, nighttime sleep seems to be more helpful for remembering things that are already somewhat familiar.",
+        "Participants in the experiment were asked to avoid caffeine, alcohol, and naps for 24 hours before the sessions to ensure accurate results regarding the effects of sleep.",
+        "Researchers used word pairs and tested how well participants remembered them after either sleeping or staying awake, measuring the impact of sleep on memory."
+    ],
+    "Inverse_forgetting_in_unconscious_episodic_memory.txt": [
+        "Episodic memory, which involves recalling personally experienced events, tends to decline in accuracy as time passes, a phenomenon consistently observed in memory research over minutes and hours.",
+        "When complex, new images are presented subliminally, the brain's hippocampus is engaged, potentially allowing the memories to be stored for longer periods, unlike short-lived effects from familiar stimuli.",
+        "Research indicates that sleep, especially deep sleep, is believed to help consolidate new memories in the brain, improving retention of learned material compared to staying awake.",
+        "Encoding cartoon clips requires constantly updating information about each animal's location, posing high demands on the hippocampus-dependent episodic buffer of working memory.",
+        "Interestingly, unlike conscious learning, unconscious learning from subliminal stimuli may not show immediate behavioral effects, but can influence decisions several hours later, highlighting a delayed impact."
+    ],
+    "Learning_from_the_Physical_Consequences_of_Our_Actions_Improves_Motor_Memory.txt": [
+        "This study found that experiencing a balance-threatening slip when making stepping errors improves motor memory, suggesting our brains prioritize behaviors promoting personal safety while walking.",
+        "Researchers used prism lenses to alter the relationship between sight and motor control during a walking task, causing participants to adapt to a new visuomotor mapping and make foot placement errors.",
+        "Participants who experienced a slip perturbation generalized their learning better to other walking tasks and showed greater memory retention a week later, compared to a control group.",
+        "The study involved participants walking on a path with a hidden slippery surface next to a target, creating an unexpected slip when participants made foot-placement errors to the right.",
+        "Scientists tracked body motion with infrared markers to measure foot placement and gait speed, ensuring participants walked at a consistent pace without correcting their steps."
+    ],
+    "Restoring_Active_Memory_Program_Poised_to_Launch.txt": [
+        "The Restoring Active Memory (RAM) program aims to create implantable devices that can help restore memory in individuals who have experienced memory loss due to traumatic brain injury or disease.",
+        "DARPA is investing millions of dollars in research at universities like UCLA and the University of Pennsylvania to develop and test these innovative neuroprosthetics for memory restoration.",
+        "Traumatic brain injury (TBI) affects a significant number of people in the United States, leading to difficulties in both recalling old memories and forming new ones, highlighting the need for effective treatments.",
+        "Researchers are using advanced techniques like computational models and neural signal analysis to understand how the brain encodes memories, with the goal of developing targeted therapies.",
+        "The UCLA team is focusing on the entorhinal area, considered the gateway to the hippocampus, because of its critical role in transforming daily experiences into lasting memories."
+    ],
+    "Attention_network_dysfunction_underlies_memory_impairment_in_posterior_cortical_atrophy.txt": [
+        "Posterior cortical atrophy (PCA) is characterized by progressive issues with visual function and atrophy in the posterior regions of the brain, often linked to Alzheimer's disease pathology.",
+        "The Attention to Memory (AtoM) model suggests the dorsal posterior parietal cortex (PPC) is associated with top-down attention, while ventral PPC handles bottom-up attention to memory.",
+        "The Free and Cued Selective Reminding Test (FCSRT) is useful for evaluating memory by distinguishing between problems with retrieving memories and storing memories.",
+        "In PCA, memory issues seem to stem from difficulty directing attention to memories rather than a problem with actually storing the information, which is often seen in typical Alzheimer's.",
+        "The dorsal attention network (DAN) and default mode network (DMN), both crucial for memory and attention, show reduced connectivity in PCA patients compared to healthy individuals."
+    ],
+    "Recognition_of_Attentional_States_in_VR_Environment_An_fNIRS_Study.txt": [
+        "Functional near-infrared spectroscopy (fNIRS) is a relatively new neuroimaging method that utilizes infrared light to monitor brain activity by measuring blood flow changes in the neocortical regions, offering insights into cognitive processes.",
+        "Continuous wave fNIRS, a common type, stands out for being non-invasive and relatively resistant to movement, making it suitable for studying brain activity during real-world tasks and is easier to integrate with other devices.",
+        "Combining virtual reality (VR) with fNIRS technology shows promise for training attention and reducing impulsive behavior, as demonstrated in studies involving ADHD patients who showed improved cognitive performance.",
+        "Brain activity patterns differ during focused tasks versus relaxation; areas like the prefrontal cortex are more active during attention, while others are more active during mind-wandering or relaxation, creating distinct networks.",
+        "Participants in the study reported high levels of satisfaction with using the combined fNIRS and VR system, particularly praising its safety and ease of use, suggesting potential for user acceptance of such neurotechnologies."
+    ],
+    "Lateral_parietal_contributions_to_memory_impairment_in_posterior_cortical_atrophy.txt": [
+        "Posterior Cortical Atrophy (PCA) is marked by a gradual decline in visual and spatial abilities, not due to eye problems, often involving difficulties with recognizing objects and navigating spaces.",
+        "While memory issues are not always considered a primary symptom, research indicates that PCA patients can experience noticeable memory problems, especially with learning new verbal information.",
+        "Brain scans of PCA patients show less involvement of the medial temporal lobes, areas usually linked to memory, and more impact on the parieto-occipital regions, particularly the right superior parietal lobe.",
+        "The study found that memory difficulties in PCA correlate with changes in the parietal lobe, a brain area not traditionally associated with memory but potentially important for integrating memories.",
+        "PCA impacts attentional networks in the brain, and this can cause reduced memory performance, and early memory testing can aid in early and accurate diagnoses of PCA."
+    ],
+    "The_EEGBased_Fusion_EntropyFeatured_Identification_of_Isometric_Contraction_Forces_under_the_Same_Action.txt": [
+        "Upper extremity movement involves coordinated actions of the brain and muscles for daily activities, requiring posture control, directional accuracy, and appropriate force, crucial for skills like grasping and writing.",
+        "EEG-based brain-computer interfaces (BCIs) are a non-invasive neurotechnology that can detect brain signals related to movement intention, potentially retraining the brain to regain motor control after impairments.",
+        "Entropy, when used in EEG analysis, measures the unpredictability of a signal, providing a quantitative way to capture the complexity and information content of brain activity during different tasks.",
+        "This study used 'fusion entropy,' combining seven common entropies, to classify different levels of hand-grasping force from EEG data, offering insights into how the brain coordinates force application.",
+        "The study found that fusion entropy, a combination of multiple entropy measures, can accurately classify different levels of isometric force during hand grasping using EEG data, showing potential for rehabilitation."
+    ],
+    "SimilarityBased_Fusion_of_MEG_and_fMRI_Reveals_SpatioTemporal_Dynamics_in_Human_Cortex_During_Visual_Object_Recognition.txt": [
+        "This study combined magnetoencephalography (MEG) and functional magnetic resonance imaging (fMRI) to map brain activity with high spatial and temporal resolution during visual object recognition.",
+        "The research found that visual processing begins at the occipital pole approximately 50-80 milliseconds after seeing an image, then spreads through the brain's visual pathways.",
+        "Two experiments were conducted where participants viewed images of real-world objects while their brain activity was measured using MEG and fMRI techniques.",
+        "The study used 'representational similarity analysis,' which assumes that similar brain representations in fMRI and MEG indicate similar neural processes.",
+        "Researchers found that activity in the dorsal and ventral visual streams, which process different aspects of visual information, occurs later than activity in the early visual cortex."
+    ],
+    "LowFrequency_Deep_Brain_Stimulation_in.txt": [
+        "Neurodegenerative disorders, impacting millions worldwide, progressively destroy neurons, leading to neural network dysfunction and significant disabilities such as memory impairment.",
+        "Deep brain stimulation (DBS), typically used at high frequencies for Parkinson's motor symptoms, may be adapted to low frequencies during sleep to potentially improve memory.",
+        "A recent study explored how low frequency (4 Hz) deep brain stimulation (DBS) during early non-rapid eye movement (NREM) sleep could improve memory retention in Parkinson's patients.",
+        "Electroencephalography (EEG) was used to monitor patients' brain activity during the study, filtering signals between 1 and 30 Hz to avoid recording DBS artifacts.",
+        "Researchers found that low frequency DBS during sleep enhanced memory retention in Parkinson's patients and increased low frequency oscillations in the prefrontal cortex."
+    ],
+    "Impact_of_menstrual_cycle_phase_and_oral_contraceptives_on_sleep_and_overnight_memory_consolidation.txt": [
+        "Sleep spindles, which are brain waves occurring at 11-16 Hz during non-rapid eye movement sleep, may be an electrophysiological marker for memory consolidation during sleep.",
+        "Progesterone levels fluctuate across a woman's menstrual cycle, peaking during the luteal phase, which has been associated with improved memory abilities in some studies.",
+        "Oral contraceptives containing synthetic progestins have been linked to improved memory performance, raising questions about the impact of these hormones on sleep and memory.",
+        "During the luteal phase of the menstrual cycle, women show increased EEG activity in the 12-15 Hz range, which is thought to reflect an increase in sleep spindles that strengthen with progesterone.",
+        "Synthetic progestins found in oral contraceptives can bind to progesterone receptors with higher affinities and have longer elimination half-lives than the body's naturally produced progesterone."
+    ],
+    "Sleep_and_Prospective_Memory_A_Retrospective_Study_in_Different_Clinical_Populations.txt": [
+        "Prospective memory, or PM, is the ability to remember to carry out an action sometime in the future, and it's essential for many everyday tasks, like remembering to take medication on schedule.",
+        "The Dynamic Multiprocess Framework suggests that both strategic monitoring and spontaneous retrieval can be used in the same prospective task, but at different times and in different situations.",
+        "There are three main types of prospective memory tasks: time-based (remembering to do something at a specific time), event-based (triggered by an external cue), and activity-based (before or after an activity).",
+        "Actigraphy, which uses a device worn on the wrist to track movement, can objectively monitor sleep patterns over long periods, providing data on sleep timing, quantity, and quality in a person's home.",
+        "A study involving 360 participants with and without sleep disorders found that only those with narcolepsy type 1 had significantly impaired prospective memory, suggesting a possible disease-specific cognitive deficit."
+    ],
+    "Modulating_dream_experience_Noninvasive_brain_stimulation_over_the_sensorimotor_cortex_reduces_dream_movement.txt": [
+        "Dreams often involve vivid and emotionally intense experiences where individuals feel immersed in alternative worlds and interact with others, creating a strong sense of reality during sleep.",
+        "During REM sleep, the motor cortex is highly active, suggesting a strong connection between brain activity and the movements and bodily sensations experienced in dreams.",
+        "Applying a mild electrical current to the sensorimotor cortex during REM sleep can influence dream content, particularly reducing the occurrence of repetitive actions like running or walking.",
+        "Although dreams frequently involve movement, other bodily sensations such as touch, balance, and alterations to the body's form are reported less often by dreamers.",
+        "Dream experiences may not always need physical movement, as some individuals report dreams without movement, suggesting that observed motion or other senses could sustain dreams."
+    ],
+    "Speech_Auditory_Brainstem_Responses_in_Adult_Hearing_Aid_Users_Effects_of_Aiding_and_Background_Noise_and_Prediction_of_Behavioral_Measures.txt": [
+        "Speech-ABRs, or auditory brainstem responses to speech, can be used to objectively measure how well the brainstem encodes speech sounds, even in the presence of background noise.",
+        "Researchers use terms like complex-ABR (c-ABR), envelope following responses (EFRs), and frequency following responses (FFRs) to describe speech-ABRs when studying how the brain processes sound.",
+        "The study used a synthesized 40ms [da] stimulus, consisting of an onset burst and vowel formant transition to evoke speech-ABRs and examine how the brain processes the quick changes in sound.",
+        "This research study fitted participants with one Oticon opn1 miniRITE hearing aid, to avoid complications that could arise from asymmetrical hearing loss while testing.",
+        "Researchers used linear mixed models to analyze the data, which allows for the inclusion of participants even if they have some missing data points, which helps to make the study more robust."
+    ]
+}
