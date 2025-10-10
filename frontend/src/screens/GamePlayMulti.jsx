@@ -35,6 +35,7 @@ const GamePlayMulti = () => {
   const [showVotes, setShowVotes] = useState(false)
   const [votes, setVotes] = useState([]);
   const [totalPlayers, setTotalPlayers] = useState(1);
+  const [fetchVoteData, setFetchVoteData] = useState(true);
   // --- Staged reveal for multiplayer ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
@@ -72,11 +73,11 @@ const {
     queryKey: ["question", roomCode, sessionId, turn],
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
-        setShowVotes(true);
-        setIsReady(false);
-      const result = await getQuestion(sessionId, roomCode, turn);
+      setIsReady(false);
+      console.log(year);
+      const result = await getQuestion(sessionId, roomCode, turn, year);
       console.log("the result was " + result)
-      if (!result || result.question === currentTurn.question) {
+      if (!result) {
         setScreen("loading");
         setLoadingState("question");           
         await fetchFunFacts();
@@ -84,11 +85,13 @@ const {
         return null;
       } else {
         setScreen("question");
+        setShowVotes(true);
         console.log("currentTurn after getQuestion:", currentTurn);
         console.log("queryFn result:", result);
         setCurrentTurn(result);
         console.log("show votes turned on line 75")
         setTurn(result.turn_id);
+        //setFetchQuestion(false);
 
         setLoadingState("scenario")
 
@@ -280,7 +283,7 @@ const { data: votingData } = useQuery({
       setShowVotes(false);
     }
       },
-      enabled: screen === "question" && currentTurn != null && loadingState != "question",
+      enabled: screen === "question" && currentTurn != null && loadingState != "question" && showVotes === false,
       refetchInterval: currentTurn ? 3000 : false, // poll every 3s
         onError: (err) => {
         console.error("[VotingQuery] onError triggered:", err);
@@ -451,6 +454,7 @@ const getFadeClass = (idx) => {
               action={() => {
                 setScreen("question");
                 setLoadingState("question");
+                //setFetchQuestion(true);
                 setScenarioData(null);
                 
 

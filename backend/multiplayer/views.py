@@ -326,7 +326,7 @@ def start_prerendering(request):
 
 # send the existing work
 # everytime this is called update turn id 
-def display_question_and_options(request, session_id, room_code, turn_id):
+def display_question_and_options(request, session_id, room_code, turn_id, year):
     """ 
     Display the question and options for the current turn.
     Args:
@@ -363,9 +363,10 @@ def display_question_and_options(request, session_id, room_code, turn_id):
         logger.info(f"Using turn_id from room state: {turn_id}")
         # first turn, get the latest turn (or none)
     if int(turn_id) == -1:
+        logger.info("year:" + year)
         latest_turn = (
             Turn.objects
-            .filter(session_id=existing_session.id)
+            .filter(session_id=existing_session.id, year=year)
             .order_by('-year', '-id')
             .first()
         )

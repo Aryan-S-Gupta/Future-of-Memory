@@ -50,9 +50,9 @@ export const getVotingInfo = async (roomCode, turn_id) => {
  * console.log(question.question);
  * console.log(question.options);
  */
-export async function getQuestion(sessionId, roomCode, turn_id) {
+export async function getQuestion(sessionId, roomCode, turn_id, year) {
   try {
-    const res = await api.get(`/storyline/${sessionId}/question/${roomCode}/${turn_id}`);
+    const res = await api.get(`/storyline/${sessionId}/question/${roomCode}/${turn_id}/${year}`);
     console.log("got output: " + res)
     console.log(res.data)
     return res.data;
