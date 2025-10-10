@@ -349,6 +349,8 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     existing_session = get_object_or_404(Session, id=session_id)
     logger.debug(f"Found session: {existing_session}")
     logger.debug(f"turn_id received: {turn_id}")
+    new_year = year
+    logger.info(f'fetching for {new_year}')
 
     if not rm.room_exists(room_code):
         return JsonResponse({'success': False, 'room_exists': False})
@@ -366,13 +368,16 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
         logger.info("year:" + year)
         latest_turn = (
             Turn.objects
-            .filter(session_id=existing_session.id, year=year)
+            .filter(session_id=existing_session.id)
             .order_by('-year', '-id')
             .first()
         )
         if not latest_turn:
             logger.warning("No turns found for this session")
             return JsonResponse({'error': 'No turn found for this session'}, status=404)
+        if latest_turn.year != int(new_year): 
+            logger.info("got here")
+            return JsonResponse({'error': 'new. year not ready yet'}, status=404)
         turn_id = latest_turn.id
         VotingSessions[(room_code, int(turn_id))]  = VotingSession(room_code, int(turn_id))
         if VotingSessions[(room_code, int(turn_id))].is_timer_on() == False:
