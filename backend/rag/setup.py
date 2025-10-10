@@ -13,8 +13,8 @@ from shared.utils import get_ollama_embeddings
 from shared.constants import VECTOR_DB_PATH
 
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 DOCUMENT_PATH = os.path.abspath(os.path.join("rag", "cleaned_data"))
 
@@ -33,10 +33,10 @@ def load_documents() -> list[Document]:
 
 
 def create_vector_score(documents: list[Document]) -> None:
-    """Create the vector store from given documents and save to DB_PATH. Do not call if 
+    """Create the vector store from given documents and save to DB_PATH. Do not call if
     DB already exists, it takes a long time.
     """
-    
+
     logger.info(f"Loaded {len(documents)} documents from {DOCUMENT_PATH}")
 
     text_splitter = RecursiveCharacterTextSplitter(

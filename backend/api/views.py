@@ -9,13 +9,14 @@ import logging
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from rag.retrieve import retrieve_chunks
 
-logging.basicConfig(level=logging.DEBUG)
+
 logger = logging.getLogger(__name__)
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+logger.setLevel(logging.DEBUG)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data", "static_stories.json")
@@ -67,6 +68,7 @@ def get_story_question(request):
             "options": entry["options"],
         }
     )
+
 
 def get_story_result_by_choice(request):
     """
@@ -152,11 +154,11 @@ def rag_retrieve(request):
     return JsonResponse({"items": items})
 
 
-
 # new views
 from shared.models import Session, Option, Turn
 
 # home page
+
 
 # need to call this somewhere - as soon as the game is created
 def create_session(request):
@@ -164,22 +166,27 @@ def create_session(request):
     Create a new Session and return its ID as JSON.
     """
     session = Session.objects.create()
-    logger.debug(f'session id created: {session.id}')
-    return JsonResponse({'session_id': session.id}, status=201)
+    logger.debug(f"session id created: {session.id}")
+    return JsonResponse({"session_id": session.id}, status=201)
+
 
 # intro page
 
-# need a call in background page - it starts gebnerating question and options and images and scenario
+# need a call in background page - it starts generating question and options and images and scenario
 from shared.tasks import start_turn_pipeline
+
+
 def start_prerendering(request):
     year = request.GET.get("year")
     session_id = request.GET.get("session_id")
     logger.debug("start_turn_pipeline.send() called")
     start_turn_pipeline.send(session_id, year)
     logger.debug("start_turn_pipeline.send() called")
-    return JsonResponse({'status': 'generation_started'})
+    return JsonResponse({"status": "generation_started"})
+
 
 # question and options display page
+
 
 # send the existing work
 def display_question_and_options(request, session_id):
@@ -190,39 +197,39 @@ def display_question_and_options(request, session_id):
 
     # find the latest turn for this session
     latest_turn = (
-        Turn.objects
-        .filter(session_id=existing_session.id)
-        .order_by('-year', '-id')
+        Turn.objects.filter(session_id=existing_session.id)
+        .order_by("-year", "-id")
         .first()
     )
     if latest_turn is None:
         logger.warning("No turn found for this session")
-        return JsonResponse({'error': 'No turn found for this session'}, status=404)
+        return JsonResponse({"error": "No turn found for this session"}, status=404)
     logger.debug(f"Latest turn for session: {latest_turn}")
     # use the latest turn's id to fetch its question and related options
-    question_text = latest_turn.question or ''  # ensure a string
-    options = Option.objects.filter(turn_id=latest_turn.id).order_by('label')
+    question_text = latest_turn.question or ""  # ensure a string
+    options = Option.objects.filter(turn_id=latest_turn.id).order_by("label")
     logger.debug(f"Options for turn {latest_turn.id}: {list(options)}")
 
     # serialize the options as exactly: option_id, label, option_text
     options_payload = [
         {
-            'option_id': option.id,
-            'label': option.label,
-            'option_text': option.option_text or ''
+            "option_id": option.id,
+            "label": option.label,
+            "option_text": option.option_text or "",
         }
         for option in options
     ]
 
     # build the final JSON payload that the frontend can render directly
     response_payload = {
-        'turn_id': latest_turn.id,
-        'year': latest_turn.year,
-        'question': question_text,
-        'options': options_payload,
+        "turn_id": latest_turn.id,
+        "year": latest_turn.year,
+        "question": question_text,
+        "options": options_payload,
     }
     logger.debug(f"Payload to return: {response_payload}")
-    return JsonResponse({'message': 'ok', 'data': response_payload}, status=200)
+    return JsonResponse({"message": "ok", "data": response_payload}, status=200)
+
 
 # scenario and image display page
 from shared.services import display_world_view
@@ -240,13 +247,15 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
             try:
                 # start generating next turn in background
                 start_turn_pipeline.send(session_id, next_year)
-                logger.info(f"Started generating next turn (year {next_year}) in background")
+                logger.info(
+                    f"Started generating next turn (year {next_year}) in background"
+                )
             except Exception as e:
                 logger.warning(f"Failed to start next turn generation: {e}")
         return JsonResponse(world_view_data)
-        
+
     except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f'Failed to display world view: {str(e)}'
-        }, status=500)
+        return JsonResponse(
+            {"success": False, "error": f"Failed to display world view: {str(e)}"},
+            status=500,
+        )

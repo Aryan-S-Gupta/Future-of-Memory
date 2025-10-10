@@ -7,8 +7,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rag.retrieve import retrieve_chunks
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "../api/data/static_stories.json")
@@ -16,18 +16,24 @@ DATA_FILE = os.path.join(BASE_DIR, "../api/data/static_stories.json")
 with open(DATA_FILE, "r", encoding="utf-8") as f:
     story_data = json.load(f)
 
-from .room_manager import create_room, join_room, update_state, get_state, get_room_codes
+from .room_manager import (
+    create_room,
+    join_room,
+    update_state,
+    get_state,
+    get_room_codes,
+)
 
 
 @csrf_exempt
 def create_multiplayer_room(request):
     """
     Creates a new multiplayer room.
-    
+
     Expects JSON POST request with:
       - "host": Name of the player creating the room
       - "room_code" (optional): custom room code (not currently used)
-    
+
     Returns JSON response:
       - "room_code": Generated room identifier
     """
@@ -39,14 +45,14 @@ def create_multiplayer_room(request):
         # Validate that host name is provided
         if not host_name:
             return HttpResponseBadRequest("Missing 'host' parameter.")
-        
+
         # Create a new room using room_manager
         room_code = create_room(host_name)
         logger.info(f"Created room: {room_code}")
 
         # Return room code as JSON
         return JsonResponse({"room_code": room_code})
-    
+
     except json.JSONDecodeError:
         # Return 400 Bad Request if JSON is invalid
         return HttpResponseBadRequest("Invalid JSON")
@@ -55,7 +61,7 @@ def create_multiplayer_room(request):
 def list_room_codes(request):
     """
     Returns a list of all active room codes.
-    
+
     Response JSON:
       - "rooms": List of active room codes
     """
@@ -66,16 +72,16 @@ def list_room_codes(request):
 def join_multiplayer_room(request):
     """
     Adds a player to an existing multiplayer room.
-    
+
     Expects JSON POST request with:
       - "roomCode": Code of the room to join
       - "playerName": Name of the joining player
-    
+
     Returns JSON response:
       - "success": True/False depending on whether join succeeded
     """
     data = json.loads(request.body.decode("utf-8"))
-    logger.info("request: "+ str(data))
+    logger.info("request: " + str(data))
 
     room_code = data.get("roomCode")
     player_name = data.get("playerName")
@@ -91,11 +97,11 @@ def join_multiplayer_room(request):
 def sync_state(request):
     """
     Updates the game state for a given room.
-    
+
     Expects JSON POST request with:
       - "room_code": The room to update
       - "state": The new state dictionary
-    
+
     Returns JSON response:
       - "success": True
     """
@@ -105,17 +111,17 @@ def sync_state(request):
 
     # Update room state using room_manager
     update_state(room_code, state)
-    
+
     return JsonResponse({"success": True})
 
 
 def get_current_state(request, room_code):
     """
     Retrieves the current state of a specific room.
-    
+
     Args:
         room_code (str): The room identifier
-    
+
     Returns JSON response:
       - "state": Current state of the room
     """

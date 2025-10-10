@@ -3,11 +3,11 @@
 import xml.etree.ElementTree as ET
 import logging
 import os
-from rag.utils.utils import sanitise_string
-import re
 
-logging.basicConfig(level=logging.DEBUG)
+from rag.utils.utils import sanitise_string
+
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 RAG_DIR = os.path.abspath("rag")
 

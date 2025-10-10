@@ -13,8 +13,8 @@ from rag.setup import setup_rag_system
 from rag.config import SKIP_RAG_SETUP
 
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Number of chunks to retrieve per query
 NUM_CHUNKS_PER_QUERY = 6

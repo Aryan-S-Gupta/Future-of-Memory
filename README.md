@@ -174,8 +174,6 @@ If not inside the `backend` folder already, run `cd backend` first.
 ```bash
 pip install -r requirements.txt
 pip install -U pip wheel setuptools
-# If running for the first time:
-pip install django-dramatiq
 ```
 
 > **Note**: The `requirements.txt` file automatically installs the correct `python-magic` package for your platform:
@@ -260,6 +258,8 @@ Extra step for Windows:
   memorysim_user > properties > privileges > enable all (superuser)
 
 ### Step 7: Run migration
+
+These commands may set up the RAG system, which may take some time.
 
 ```bash
 python manage.py makemigrations

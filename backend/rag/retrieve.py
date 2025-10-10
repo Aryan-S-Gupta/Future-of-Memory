@@ -6,8 +6,8 @@ from rag.__init__ import retriever
 from rag.config import SKIP_RAG_SETUP
 
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def retrieve_chunks(query: str) -> list[dict]:
