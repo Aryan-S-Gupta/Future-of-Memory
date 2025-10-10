@@ -1,36 +1,39 @@
-# Memory Futures Game
+# Future of Memory
 
-Instructions on running the project
+Interested to know what how memories will be used, modified and treated in the future?
 
-#  Setup Instructions
+# Setup Instructions
 
-## Front End:
-Make sure you have the latest versions of Node and npm:
+Follow these instructions to set up both the frontend and backend to run the project.
 
-```bash
-node -v
-npm -v
-```
+First ensure you have cloned the repository if not already cloned, from `https://github.com/manya-k/DECO3801---Data-Busters.git`
 
-### If versions are fine, run:
-```bash
-brew install node
-```
+## Frontend Setup
 
-1. On MacOS run```brew install node```. 
-On another OS: follow the instructions on [Node's website](https://nodejs.org/en/download)
-   
+1. Make sure you have the latest versions of Node and npm:
+   ```
+   node -v
+   npm -v
+   ```
+   If not, you'll need to install them. On MacOS run
+   ```bash
+   brew install node
+   ```
+   On another OS: follow the instructions on [Node's website](https://nodejs.org/en/download).
+
 Steps to follow everytime a new branch is pulled:
 
-2. clone the repository if not already cloned: 
-```https://github.com/manya-k/DECO3801---Data-Busters.git```
-3. ```cd frontend/src```
-4. ```npm install```
-5. ```npm run dev``` -- to actually run the game
+2. Run these commands:
+   ```
+   cd frontend/src
+   npm install
+   npm run dev
+   ```
+3. Navigate to the displayed `localhost` link to open the game in your browser.
 
-## Back End: 
+## Backend Setup
 
-##  Project Structure
+### Project Structure
 
 ```
 ├── api/                    # API endpoints and static data
@@ -40,8 +43,8 @@ Steps to follow everytime a new branch is pulled:
 │       ├── static_questions.json
 │       └── static_stories.json
 ├── core/                   # (Optional) Turn system, gameplay routes
-├── llm/                    # Local LLM call interface (planned)
-├── rag/                    # RAG logic and prompt templates (planned)
+├── llm/                    # Local LLM call interface
+├── rag/                    # RAG logic and prompt templates
 ├── images/                 # Image generation script placeholder
 ├── memory_sim/             # Django settings and config
 │   ├── settings.py
@@ -53,13 +56,12 @@ Steps to follow everytime a new branch is pulled:
 ├── .gitignore              # Files to be ignored by git
 ```
 
----
-
-## Prerequisites (System-level Dependencies)
+### Prerequisites (System-level Dependencies)
 
 These are OS-level packages required by document parsing libraries:
 
-### macOS (Homebrew)
+#### macOS (Homebrew)
+
 ```bash
 brew update
 brew install libmagic
@@ -67,9 +69,10 @@ brew install libmagic
 brew install poppler tesseract
 ```
 
-### Windows
+#### Windows
 
-#### Option 1: Using Chocolatey (Recommended)
+##### Option 1: Using Chocolatey (Recommended)
+
 ```cmd
 # Install Chocolatey if not already installed (run as Administrator)
 # Visit https://chocolatey.org/install for installation instructions
@@ -80,7 +83,8 @@ choco install poppler
 choco install tesseract
 ```
 
-#### Option 2: Manual Installation
+##### Option 2: Manual Installation
+
 1. **Python**: Download from https://www.python.org/downloads/windows/
 2. **Poppler**: Download from https://github.com/oschwartz10612/poppler-windows/releases/
    - Extract to `C:\Program Files\poppler-xx\` and add `C:\Program Files\poppler-xx\Library\bin\` to PATH
@@ -88,70 +92,65 @@ choco install tesseract
    - Install and add installation directory to PATH (usually `C:\Program Files\Tesseract-OCR\`)
 4. **libmagic**: Will be automatically installed via pip when running `pip install -r requirements.txt`
 
-#### Verify Installation (Windows)
+##### Verify Installation (Windows)
+
 ```cmd
 python --version
 pdftoppm -h
 tesseract --version
 ```
 
----
-
-## 🛠️ How to Run Locally
-
-### Ollama Installation & Setup
+### Step 1: Ollama Installation & Setup
 
 First ensure you have Ollama installed:
 
 #### macOS/Linux
+
 - Download from https://ollama.com/download/
 - You may need to open the app the first time to install the command-line tools
 
-#### Windows  
+#### Windows
+
 - Download the Windows installer from https://ollama.com/download/
 - Run the installer and follow the setup wizard
 - The CLI tools will be automatically added to your PATH
 
 #### Verify Installation (All Platforms)
+
 Check that the CLI tools are installed properly:
+
 ```bash
 ollama --version
 ```
+
 Should display a version number.
 
 #### Download Required Models
+
 ```bash
 ollama pull phi3:3.8b
 ollama pull nomic-embed-text
 ```
 
 #### Start Ollama Server
-- **Desktop App**: Open the Ollama desktop application, or
+
+- **Desktop App**: Open the Ollama desktop application; or
 - **Command Line**: Run `ollama serve` in terminal/command prompt
-
-
-
-### Step 1: Clone the Repository
-
-```bash
-git clone https://github.com/manya-k/DECO3801---Data-Busters.git
-cd DECO3801---Data-Busters
-git checkout feature/backend-init
-```
-
-> Replace the branch name if using another branch.
-
----
 
 ### Step 2: Set Up a Python Virtual Environment
 
 #### macOS/Linux
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
+> If using VSCode, you may want to add this virtual environment as a Python Environment in the UI so
+> it will be activated on startup.
+
 #### Windows
+
 ```cmd
 # Using Command Prompt
 python -m venv venv
@@ -163,23 +162,25 @@ venv\Scripts\Activate.ps1
 ```
 
 > **Note for Windows**: If you encounter execution policy issues in PowerShell, run:
+>
 > ```powershell
 > Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 > ```
 
----
-
 ### Step 3: Install Dependencies
+
+If not inside the `backend` folder already, run `cd backend` first.
 
 ```bash
 pip install -r requirements.txt
 pip install -U pip wheel setuptools
-# If running for the first time: 
-pip install django-dramatiq  
+# If running for the first time:
+pip install django-dramatiq
 ```
 
 > **Note**: The `requirements.txt` file automatically installs the correct `python-magic` package for your platform:
-> - **macOS/Linux**: `python-magic` 
+>
+> - **macOS/Linux**: `python-magic`
 > - **Windows**: `python-magic-bin` (includes required libmagic binaries)
 
 ---
@@ -187,6 +188,9 @@ pip install django-dramatiq
 ### Step 4: Download NLTK Data & Setup (first-time only)
 
 #### macOS
+
+You may need to replace 3.12 with your Python installation version.
+
 ```bash
 # Fix certificates
 /Applications/Python\ 3.12/Install\ Certificates.command
@@ -195,12 +199,14 @@ python -m nltk.downloader punkt punkt_tab averaged_perceptron_tagger_eng
 ```
 
 #### Windows
+
 ```cmd
 # Download NLTK data (no certificate fixing needed)
 python -m nltk.downloader punkt punkt_tab averaged_perceptron_tagger_eng
 ```
 
 #### Verify NLTK Installation (All Platforms)
+
 ```bash
 python - <<'PY'
 from nltk.tokenize import sent_tokenize
@@ -210,93 +216,34 @@ PY
 ```
 
 **For Windows Command Prompt users**, use this alternative verification:
+
 ```cmd
 python -c "from nltk.tokenize import sent_tokenize; print(sent_tokenize('Hello world. This is a test.')); print('NLTK OK')"
 ```
 
----
-
-### Step 5: Build the Vector Store (First time or files changed) 
-
-#### Option A (recommended, inside backend) (This step might cost 1-2 mins)
+### Step 5: Set up database
 
 **macOS/Linux:**
-```bash
-python - <<'PY'
-from rag.setup import setup_rag_system
-setup_rag_system()
-print("RAG setup done")
-PY
-```
 
-**Windows Command Prompt:**
-```cmd
-python -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
-```
-
-#### Option B (from project root)
-
-**macOS/Linux:**
-```bash
-python backend/manage.py shell -c "from rag.setup import setup; setup_rag_system(); print('RAG setup done')"
-```
-
-**Windows:**
-```cmd
-python backend\manage.py shell -c "from rag.setup import setup_rag_system; setup_rag_system(); print('RAG setup done')"
-```
-
-#### Verify Setup (All Platforms)
-```bash
-# macOS/Linux
-ls -lah backend/rag/db/faiss_db
-
-# Windows
-dir backend\rag\db\faiss_db
-```
-Should contain `index.faiss` and `index.pkl`
-
-#### Quick Retrieval Test
-
-**macOS/Linux:**
-```bash
-python manage.py shell -c "
-from rag.retrieve import retrieve_chunks;
-print('\n---\n'.join(chunk['text'] for chunk in retrieve_chunks('sleep memory consolidation')))
-"
-```
-
-**Windows:**
-```cmd
-python manage.py shell -c "from rag.retrieve import retrieve_chunks; print(retrieve_chunks('sleep memory consolidation')[:1])"
-```
-
----
-
-Now make sure to navigate to the backend directory:
-
-**macOS/Linux:**
-```bash
-cd backend
-```
-
-**Windows:**
-```cmd
-cd backend
-```
-
-### Step 6: Set up database
-
-**macOS/Linux:**
 ```bash
 brew install postgresql
 brew services start postgresql
 ```
+
 **Windows:**
+
 - Download from: https://www.postgresql.org/download/windows/
 - Use default setup and remember username/password, enable pgadmin
+- After installation, set environment path (may need to change the 18 depending on your version):
 
-### Step 7: Create DB user
+```bash
+C:\Program Files\PostgreSQL\18\bin
+```
+
+### Step 6: Create DB user
+
+Note that the `createdb` line may or may not be necessary on your device.
+
 ```bash
 createdb $(yourname)
 psql -U postgres
@@ -307,47 +254,81 @@ GRANT ALL PRIVILEGES ON DATABASE memorysim_db TO memorysim_user;
 \q
 ```
 
-### Step 8: Run migration
+Extra step for Windows:
 
-``` bash
+- Use default setup and remember username/password, enable pgadmin:
+  memorysim_user > properties > privileges > enable all (superuser)
+
+### Step 7: Run migration
+
+```bash
 python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser # only if you want to access the db interface
 ```
-then follow the instructions, you need to set name, email and pwd for admin access, later you can visit http://127.0.0.1:9000/admin/, login and view data
 
-### Step 9: Set up bg manager
+When creating a superuser, follow the instructions given. You need to set name, email and password.
+for admin access. Later, you can visit `http://127.0.0.1:9000/admin/` to login and view data in the
+database.
+
+**First time only, after database migration:**
+
+Initialise database content:
+
+```bash
+# Create world background story
+python create_background.py
+
+# Load default query keywords (if keywords file exists)
+python load_keywords_script.py
+```
+
+### Step 8: Set up background manager
+
+First, install Redis:
 
 **macOS/Linux:**
-``` bash
+
+```bash
 brew install redis
 ```
 
 **Windows:**
+
 - Download Redis from this community-maintained build: https://github.com/microsoftarchive/redis/releases
 - Choose Redis-x64-3.2.100.msi and install
 
+Then start the server:
+
 **on MacOs**
-``` bash
+
+```bash
 redis-server
 ```
+
 **on Windows**
+
 ```bash
 redis-server.exe --port 6380 --bind 127.0.0.1
 ```
 
-### Step 10: create 3 worker (each from a different terminal)
-``` bash
+### Step 9: create 3 workers (each from a different terminal)
+
+todo update this section with Aryan's tasks.json if needed
+
+Ensure your working directory is the `backend` folder, and then:
+
+```bash
 python manage.py rundramatiq --queues default --processes 1 --threads 1
 python manage.py rundramatiq --queues image_queue --processes 1 --threads 1
 python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1
 ```
 
-### Step 11: Set up ComfyUI for image generation
+### Step 10: Set up ComfyUI for image generation
 
 See `backend/images/README.md` for instructions.
 
-### Step 12: Start the Development Server at port 9000
+### Step 11: Start the Development Server at port 9000
 
 ```bash
 python manage.py runserver 0.0.0.0:9000
@@ -355,18 +336,50 @@ python manage.py runserver 0.0.0.0:9000
 
 Then open your browser or use terminal tools like `curl` to test the following round-based endpoints:
 
----
-
 ## Pseudo API Endpoints (Round-by-Round)
 
 Each round includes:
+
 1. Year-based background story
 2. Ethical yes/no question
 3. Branching result based on player choice
 
-## Testing the RAG retrieval API
+## Testing the RAG system
 
-MacOS/Linux: Try this `curl` query to test the RAG chunk retrieval API once the backend is running.
+### Verify existence of RAG files
+
+```bash
+# macOS/Linux
+ls -lah backend/rag/db/faiss_db
+
+# Windows
+dir backend\rag\db\faiss_db
+```
+
+Should contain `index.faiss` and `index.pkl`
+
+### Quick Retrieval Test
+
+**macOS/Linux:**
+
+```bash
+python manage.py shell -c "
+from rag.retrieve import retrieve_chunks;
+print('\n---\n'.join(chunk['text'] for chunk in retrieve_chunks('sleep memory consolidation')))
+"
+```
+
+**Windows:**
+
+```cmd
+python manage.py shell -c "from rag.retrieve import retrieve_chunks; print(retrieve_chunks('sleep memory consolidation')[:1])"
+```
+
+### RAG API test
+
+**MacOS/Linux:**
+
+Try this `curl` query to test the RAG chunk retrieval API once the backend is running.
 
 ```bash
 curl --header "Content-Type: application/json" \
@@ -382,9 +395,7 @@ http://127.0.0.1:8000/api/rag/retrieve
 - Please create a new branch before developing (e.g., `feature/rag-module`, `feature/llm-api`)
 - Make sure to pull latest changes before working
 - Don’t commit `venv/` or `.sqlite3` files — they’re excluded via `.gitignore`
-- For frontend testing instructions and API usage, see [WIKI API Usage Guide for Frontend](https://github.com/manya-k/DECO3801---Data-Busters/wiki/API-Usage-Guide-for-Frontend)
-
----
+- For frontend testing instructions and API usage, see [API Usage Guide for Frontend (wiki page)](https://github.com/manya-k/DECO3801---Data-Busters/wiki/API-Usage-Guide-for-Frontend)
 
 ### Frontend Integration Notes (CORS)
 
@@ -399,14 +410,3 @@ fetch("http://127.0.0.1:9000/api/storyline/start?year=2035")
 ```
 
 > No additional proxy settings are required for local development.
-
----
-
-## To-Do (Backend Roadmap)
-
-- [ ] RAG embedding + chunk loader
-- [ ] LLM story/question generation
-- [ ] Timeline & turn loop controller
-- [ ] AI image integration (ComfyUI or SD)
-
-
