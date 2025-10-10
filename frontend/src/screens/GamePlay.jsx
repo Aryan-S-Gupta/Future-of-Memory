@@ -213,6 +213,9 @@ const GamePlay = () => {
     return "";
   };
 
+  // If user hits Mute in the toolbar, kill any ongoing speech immediately
+  useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
+
 
   // handle choice click
   const handleChoice = async (option_id) => {
