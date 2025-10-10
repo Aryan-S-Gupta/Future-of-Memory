@@ -8,7 +8,7 @@ from langchain_ollama import OllamaEmbeddings
 from shared.constants import OLLAMA_EMBED_MODEL
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

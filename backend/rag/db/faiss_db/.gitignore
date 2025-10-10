@@ -1,3 +1,6 @@
-# ignore everything except this file
-*
+index.faiss
+index.pkl
+current_version.txt
+
+# Do not ignore this file
 !.gitignore
