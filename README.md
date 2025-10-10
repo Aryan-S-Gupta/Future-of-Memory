@@ -343,19 +343,9 @@ python manage.py rundramatiq --queues image_queue --processes 1 --threads 1
 python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1
 ```
 
-### Step 11: Start the ComfyUI Server
-- download ComfyUI https://www.comfy.org/download
-- download dreamshaper model ver 7 https://civitai.com/models/4384?modelVersionId=109123
-- put the model under `ComfyUI/models/checkpoints`
-- starts ComfyUI server, make sure it is running at port 8080, if default not 8080, run it from terminal, switch to port 8080
-    ```bash
-    cd /path/to/ComfyUI
-    python main.py --port 8080
-    ```
-   ### on windows: 
-   ```
-   cd C:\Users\<username>\AppData\Local\Programs\ComfyUI\resources\ComfyUI\models\checkpoints
-   ```
+### Step 11: Set up ComfyUI for image generation
+
+See `backend/images/README.md` for instructions.
 
 ### Step 12: Start the Development Server at port 9000
 
