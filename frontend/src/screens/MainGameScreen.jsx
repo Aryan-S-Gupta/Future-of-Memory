@@ -5,6 +5,7 @@ import { createSession } from "../../api/single-player/GameApi.js";
 import { useSession } from "../../SessionContext.jsx";
 import { startPrerender } from "../../api/single-player/GameApi.js";
 import { Typewriter } from "react-simple-typewriter";
+import Screensaver from "../components/Screensaver.jsx";
 
 /**
  * MainGameScreen component
@@ -24,13 +25,12 @@ import { Typewriter } from "react-simple-typewriter";
 const MainGameScreen = () => {
   // Hook for navigation between routes
   const navigate = useNavigate();
-  const {sessionId, setSessionId} = useSession();
-
+  const { sessionId, setSessionId } = useSession();
 
   const start_single_session = async () => {
     try {
       const response = await createSession();
-      setSessionId(response.session_id); 
+      setSessionId(response.session_id);
       //await startPrerender(sessionId);
       console.log("session is" + sessionId);
       navigate("/story");
@@ -51,6 +51,15 @@ const MainGameScreen = () => {
 
   return (
     <BasePage>
+      {/* Screensaver: visible immediately; hides on click; reappears on idle */}
+      <Screensaver
+        initialShow={true}
+        idleMs={60000} // 1 minute in the museum
+        onDismiss={() => {
+          // optional: you could preload, warm up audio, etc.
+        }}
+      />
+
       {/* Game title */}
       <h1 className="title">
         <Typewriter

@@ -6,17 +6,19 @@ import HowToScreen from "./screens/HowToScreen.jsx";
 import GamePlay from "./screens/GamePlay.jsx";
 import MultiplayerLobby from "./screens/MultiPlayerLobby.jsx";
 import GalleryScreen from "./screens/GalleryScreen.jsx";
+
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
+import '@fontsource/orbitron/500.css'; // NEW
 
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
-import galleryTheme from "./assets/DeepMeditation_DavidFesliyan.mp3"
+import galleryTheme from "./assets/DeepMeditation_DavidFesliyan.mp3";
 import { SessionProvider } from "../SessionContext.jsx";
+import IdleHomeReset from "./components/IdleHomeReset.jsx";
 
 function App() {
-
   const routeAudioMap = {
     "/gallery*": [
       { src: mainTheme, loop: true, volume: 0.1 },
@@ -30,6 +32,7 @@ function App() {
       <AudioProvider routeAudioMap={routeAudioMap} crossfadeMs={1000} initialVolume={0.38}>
         <BackgroundWrapper>
           <SessionProvider>
+            <IdleHomeReset idleMs={600000} />
             <Routes>
               <Route path="/" element={<MainGameScreen />} />
               <Route path="/story" element={<BackgroundScreen />} />
@@ -41,7 +44,7 @@ function App() {
           </SessionProvider>
         </BackgroundWrapper>
       </AudioProvider>
-    </Router >
+    </Router>
   );
 }
 
