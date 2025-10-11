@@ -15,6 +15,10 @@ import FeedbackScreen from "./components/FeedbackScreen/FeedbackScreen.jsx";
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
+import MiniGameIntro from "./screens/MiniGameIntro.jsx";
+import MiniGame from "./screens/MiniGame.jsx";
+import MiniGameResult from "./screens/MiniGameResult.jsx";
+import galleryTheme from "./assets/DeepMeditation_DavidFesliyan.mp3"
 import { SessionProvider } from "../SessionContext.jsx";
 
 function App() {
