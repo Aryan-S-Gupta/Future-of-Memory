@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
-import "../styles/BackgroundScreen.css";
+import "../styles/tokens.css";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import { startPrerender } from "../../api/single-player/GameApi.js";
 import { useSession } from "../../SessionContext.jsx";
+import "../styles/tokens.css"
+
 
 /**
  * BackgroundScreen component
@@ -23,7 +25,7 @@ import { useSession } from "../../SessionContext.jsx";
  */
 const BackgroundScreen = () => {
   const navigate = useNavigate();
-  const {sessionId} = useSession();
+  const { sessionId } = useSession();
 
   const pre_render = async () => {
     await startPrerender(sessionId);
@@ -32,27 +34,27 @@ const BackgroundScreen = () => {
 
   return (
     <BasePage>
-      <h1 className="title">Background</h1>
-        {/* Story crawl container with immersive narrative */}
-        <div className="crawl-container">
-          <div className="crawl-text">
-            <p>
-              Welcome to 2035 <br /> <br />
-              Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /> <br />
-              You are the chosen voice of your people, standing between promise and peril.  <br /> <br />
-              Every law you shape will ripple through lives and futures,              
-              redefining what it means to be human.<br /> <br />
-              Will you shield your community, pursue progress, or uphold your ethics? <br /> <br />
-              The destiny of millions rests in your hands! <br /> <br />  
-            </p>
-          </div>
+      <div className="menu-glass howto">
+        <div className="menu-glass-inner">
+          <h2 className="title">Background</h2>
+          <p className="text2">
+            <br />
+            Welcome to 2035 <br /> <br />
+            Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /><br />
+            You are the chosen voice of your people, standing between promise and peril. <br /><br />
+            Every law you shape will ripple through lives and futures, redefining what it means to be human. <br /><br />
+            Will you shield your community, pursue progress, or uphold your ethics? <br /><br />
+            The destiny of millions rests in your hands!
+          </p>
+          <Button baseButton="btn-next" action={() => pre_render()} title="Next" />
         </div>
+      </div>
+
       {/* Navigation buttons (Back to home, Next to gameplay) */}
       <div className="button-container">
         <ExitExperience />
--       <Button baseButton="btn-next next-fade-in" action={() => pre_render()} title="Next" />
       </div>
-      </BasePage>
-    );
+    </BasePage>
+  );
 };
 export default BackgroundScreen;

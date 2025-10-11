@@ -411,24 +411,6 @@ html {
 }
 
 /* === Centered Glass Panel for Title + Buttons (Fixed Layout) === */
-.menu-glass {
-    position: relative;
-    width: 65vw;
-    height: 65vh;
-    margin: 8vh auto 0;
-
-    /* Glassmorphism effect */
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 20px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-
-    text-align: center;
-    z-index: 2;
-    overflow: hidden;
-}
 
 /* Light theme enhancement */
 :root[data-theme="light"] .menu-glass {
@@ -437,44 +419,78 @@ html {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
-/* --- Inner Layout --- */
-.menu-glass-inner {
+/* ===== MainGameScreen layout restore (scoped to menu-glass) ===== */
+
+/* Centered glass card with predictable size (like before) */
+.menu-glass {
+    position: relative;
+    width: min(980px, 72vw);
+    height: min(620px, 72vh);
+    margin: 10vh auto 0;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    text-align: center;
+    z-index: 2;
+    /* sits above background, below any overlays */
+}
+
+/* Inner flex: keep everything perfectly centered until buttons appear */
+.menu-glass .menu-glass-inner {
     position: absolute;
     inset: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: transform 1s ease;
+    /* title centered initially */
+    padding: 0 2rem;
 }
 
-/* Title: starts fully centered and large */
+/* Title: single line, consistent space reserved (prevents jump during typing) */
 .menu-glass .title {
-    font-size: clamp(52px, 8vw, 100px);
+    font-size: clamp(48px, 8vw, 100px);
     line-height: 1.05;
     margin: 0;
     white-space: nowrap;
+    /* “Future of Memory” stays one line */
+    text-overflow: ellipsis;
+    overflow: hidden;
+    min-height: 1.05em;
+    /* reserve height while Typewriter animates */
     transform: translateY(0);
-    transition: transform 1.5s ease, font-size 1.5s ease;
+    transition: transform 700ms ease, margin 700ms ease, font-size 700ms ease;
 }
 
-/* When buttons appear — move title up & shrink */
+/* When buttons are revealed, move the title up a bit — not too far */
 .menu-glass.show-buttons .title {
     transform: translateY(-18vh) scale(0.65);
 }
 
-/* Buttons start hidden (do not affect centering) */
+/* Button group: hidden until showButtons; doesn’t affect centering */
 .menu-glass .button-group {
     position: absolute;
-    bottom: 20%;
+    bottom: 16%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
+    gap: 1rem;
+    /* restored tidy spacing */
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 400ms ease, transform 400ms ease;
 }
 
+/* Respect aria-hidden without changing your JSX */
+.menu-glass .button-group[aria-hidden="true"] {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+}
 
 .menu-glass.show-buttons .button-group {
     opacity: 1;
@@ -521,6 +537,22 @@ html {
     margin-top: clamp(6px, 2.2vh, 24px);
 }
 
+.menu-glass .button-group {
+  position: absolute;
+  bottom: 16%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.menu-glass .button-group[aria-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+}
+
+
 /* === How-to content layout (minimal override) === */
 .menu-glass.howto {
     /* fixed-ish card centered; auto height for content */
@@ -552,7 +584,7 @@ html {
 /* Title: single line, centered, less bottom space */
 .menu-glass.howto .title {
     font-size: clamp(26px, 3.2vw, 42px);
-    line-height: 1.05;
+    line-height: 1.5;
     margin: 0 0 0.25rem 0;
     white-space: nowrap;
     /* one line */
@@ -595,4 +627,82 @@ html {
 
 .menu-glass.howto::-webkit-scrollbar-track {
     background: transparent;
+}
+
+
+.text-container2 {
+    background-color: var(--color-text-container-bg);
+    padding: var(--space-md);
+    border-radius: var(--radius-sm);
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Body text */
+.text2 {
+    font-family: var(--font-body);
+    font-size: var(--fs-body-strong);
+    font-weight: 400;
+    text-align: center;
+    color: var(--color-accent);
+    text-shadow: var(--shadow-subheading);
+    max-width: 900px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.menu-glass {
+    position: relative;
+    margin: 10vh auto 0;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    text-align: center;
+}
+
+.menu-glass.howto {
+    width: min(900px, 72vw);
+    max-height: 72vh;
+    padding: clamp(20px, 2.2vw, 32px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    overflow: auto;
+    scrollbar-gutter: stable both-edges;
+}
+
+.menu-glass-inner {
+    position: relative;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.menu-glass.howto .btn-next {
+    margin-top: 0.5rem;
+    padding: 0.9rem 3rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-radius: 14px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.25);
+}
+
+.menu-glass.howto .text2 {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 1.6vw, 20px);
+  line-height: 1.1;
+  letter-spacing: 0.4px;
+  color: var(--color-text);
+  text-shadow: var(--shadow-text);
+  max-width: 70ch;
+  margin: 0 auto 3rem auto; /* space below paragraph before button */
 }
