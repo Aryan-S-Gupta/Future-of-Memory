@@ -4,9 +4,9 @@
     {
       "label": "Check venv exists",
       "type": "shell",
-      "command": "if [ -d \"${workspaceFolder}/.venv\" ]; then echo '✅ .venv found'; else echo '❌ .venv not found in project root'; exit 1; fi",
+      "command": "if [ -d \"${workspaceFolder}/.venv\" ]; then echo '.venv found'; else echo '.venv not found in project root'; exit 1; fi",
       "windows": {
-        "command": "if exist \"${workspaceFolder}\\.venv\" (echo ✅ .venv found) else (echo ❌ .venv not found in project root && exit /b 1)"
+        "command": "if exist \"${workspaceFolder}\\.venv\" (echo .venv found) else (echo .venv not found in project root && exit /b 1)"
       },
       "problemMatcher": [],
       "isBackground": false
