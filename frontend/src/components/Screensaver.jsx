@@ -168,6 +168,7 @@ export default function Screensaver({
                     >
                         <div className="logo">{title}</div>
                         <p className="subtitle">{subtitle}</p>
+                        <br />
                         <p className="hint">{hint}</p>
                     </motion.div>
                 </motion.div>
