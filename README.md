@@ -58,13 +58,27 @@ Steps to follow everytime a new branch is pulled:
 
 ### Prerequisites (System-level Dependencies)
 
-These are OS-level packages required by document parsing libraries:
+#### Install Redis
+
+**macOS/Linux:**
+
+```bash
+brew install redis
+```
+
+**Windows:**
+
+- Download Redis from this community-maintained build: https://github.com/microsoftarchive/redis/releases
+- Choose Redis-x64-3.2.100.msi and install
+
+#### OS-level packages required by document parsing libraries
 
 #### macOS (Homebrew)
 
 ```bash
 brew update
 brew install libmagic
+
 # Recommended for robust PDF/Image parsing:
 brew install poppler tesseract
 ```
@@ -139,11 +153,13 @@ ollama pull nomic-embed-text
 
 ### Step 2: Set Up a Python Virtual Environment
 
+Create the virtual environment from the project root.
+
 #### macOS/Linux
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
 > If using VSCode, you may want to add this virtual environment as a Python Environment in the UI so
@@ -153,12 +169,12 @@ source venv/bin/activate
 
 ```cmd
 # Using Command Prompt
-python -m venv venv
-venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\activate
 
 # Using PowerShell
-python -m venv venv
-venv\Scripts\Activate.ps1
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 ```
 
 > **Note for Windows**: If you encounter execution policy issues in PowerShell, run:
@@ -285,22 +301,17 @@ python create_background.py
 python load_keywords_script.py
 ```
 
-### Step 8: Set up background manager
+**VSCode tasks**
 
-First, install Redis:
+If using VSCode, the following commands to run the project can be run automatically from the Command
+Palette.
 
-**macOS/Linux:**
+- To run the project, run "Tasks: Run Task" > "Run project".
+- To terminate the project, run "Tasks: Terminate Task" > "All tasks".
 
-```bash
-brew install redis
-```
+### Step 8: Start background manager
 
-**Windows:**
-
-- Download Redis from this community-maintained build: https://github.com/microsoftarchive/redis/releases
-- Choose Redis-x64-3.2.100.msi and install
-
-Then start the server:
+Start the redis server:
 
 **on MacOs**
 
@@ -316,8 +327,6 @@ redis-server.exe --port 6380 --bind 127.0.0.1
 
 ### Step 9: create 3 workers (each from a different terminal)
 
-todo update this section with Aryan's tasks.json if needed
-
 Ensure your working directory is the `backend` folder, and then:
 
 ```bash
@@ -332,7 +341,12 @@ See `backend/images/README.md` for instructions.
 
 ### Step 11: Start the Development Server at port 9000
 
+Set `UPDATE_RAG` to `False` in `backend/rag/config.py` if you don't want the RAG system to be
+updated (updating it takes some time). Note however that you must have some version of the RAG
+system set up to run the project.
+
 ```bash
+python setup_rag.py
 python manage.py runserver 0.0.0.0:9000
 ```
 
@@ -394,6 +408,7 @@ http://127.0.0.1:9000/api/rag/retrieve
 ```
 
 On Windows:
+
 ```
 curl.exe -H "Content-Type: application/json" -X POST http://127.0.0.1:9000/api/rag/fun_facts
 ```

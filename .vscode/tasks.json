@@ -1,0 +1,122 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+
+    {
+      "label": "Check venv exists",
+      "type": "shell",
+      "command": "if [ -d \"${workspaceFolder}/.venv\" ]; then echo '✅ .venv found'; else echo '❌ .venv not found in project root'; exit 1; fi",
+      "windows": {
+        "command": "if exist \"${workspaceFolder}\\.venv\" (echo ✅ .venv found) else (echo ❌ .venv not found in project root && exit /b 1)"
+      },
+      "problemMatcher": [],
+      "isBackground": false
+    },
+    {
+      "label": "Update RAG",
+      "type": "shell",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && python setup_rag.py",
+      "windows": {
+        "command": "${workspaceFolder}\\.venv\\Scripts\\activate && python setup_rag.py"
+      },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": [],
+      "isBackground": false
+    },
+    {
+      "label": "Setup tasks",
+      "type": "shell",
+      "dependsOn": ["Check venv exists", "Update RAG"],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "isBackground": false
+    },
+
+    {
+      "label": "Backend: redis",
+      "type": "shell",
+      "command": "redis-server",
+      "windows": {
+        "command": "redis-server.exe --port 6380 --bind 127.0.0.1"
+      },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: dramatiq default",
+      "type": "shell",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && python manage.py rundramatiq --queues default --processes 1 --threads 1",
+      "windows": {
+        "command": "${workspaceFolder}\\.venv\\Scripts\\activate && python manage.py rundramatiq --queues default --processes 1 --threads 1"
+      },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: dramatiq image_queue",
+      "type": "shell",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && python manage.py rundramatiq --queues image_queue --processes 1 --threads 1",
+      "windows": {
+        "command": "${workspaceFolder}\\.venv\\Scripts\\activate && python manage.py rundramatiq --queues image_queue --processes 1 --threads 1"
+      },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: dramatiq llm_queue",
+      "type": "shell",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1",
+      "windows": {
+        "command": "${workspaceFolder}\\.venv\\Scripts\\activate && python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1"
+      },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: runserver",
+      "type": "shell",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && python manage.py runserver 0.0.0.0:9000",
+      "windows": {
+        "command": "${workspaceFolder}\\.venv\\Scripts\\activate && python manage.py runserver 0.0.0.0:9000"
+      },
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend: npm dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Parallel tasks",
+      "dependsOn": [
+        "Backend: redis",
+        "Backend: dramatiq default",
+        "Backend: dramatiq image_queue",
+        "Backend: dramatiq llm_queue",
+        "Backend: runserver",
+        "Frontend: npm dev"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+
+    {
+      "label": "Run project",
+      "dependsOn": [
+        "Setup tasks",
+        "Parallel tasks"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    }
+  ]
+}

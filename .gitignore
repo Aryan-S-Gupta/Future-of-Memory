@@ -8,9 +8,12 @@ venv/
 .env/
 
 # Ignore IDE / system files
-.vscode/
+.vscode/*
 .idea/
 .DS_Store
+
+# Include VSCode tasks file
+!.vscode/tasks.json
 
 # Ignore image repo
 backend/media/
