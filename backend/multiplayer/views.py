@@ -9,6 +9,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rag.retrieve import retrieve_chunks
 from .game_logic import VotingSession, VotingSessions
+from shared.services import display_world_view
+from django.http import JsonResponse
+from shared.models import Session, Option, Turn
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -325,9 +328,6 @@ def get_voting_status_with_options(request, room_code, turn_id):
     logger.info(payload)
     return JsonResponse(payload)
 
-# new views
-from shared.models import Session, Option, Turn
-
 
 # need to call this somewhere - as soon as the game is created
 def create_session(request):
@@ -453,62 +453,6 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     return JsonResponse(response_payload)
 
 
-# scenario and image display page
-from shared.services import display_world_view
-
-
-def display_scenario_and_image(request, session_id, turn_id, year, option_id, room_code):
-    """
-    Display the world view after user makes a choice.
-    """
-    player_name = request.GET.get("playerName")
-    logger.debug(f"playername is {player_name}")
-    if not rm.room_exists(room_code):
-        return JsonResponse({'success': False, 'room_exists': False})
-    final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
-    if final_option is None:
-        logger.debug("Not all players have voted yet.")
-        print("Not all players have voted yet.")
-        return JsonResponse({
-            'success': False,
-            'image': {"status": "waiting"},
-            'message': 'Waiting for other players to vote.' 
-            }, status=404)
-    logger.debug(f"Voting result is {final_option}")
-    logger.debug(f"votes so far {VOTING_SESSION.votes}")
-    logger.debug(f"num responses so far {VOTING_SESSION.num_responses}")
-    logger.debug(f"votes for option {option_id} is {VOTING_SESSION.votes.get(option_id)}")
-    
-
-    # when you receive request check no of players, check number of responses, create a map of option id, and num votes, then get the votes from the reqwuest 
-    # the max voted option id, and use that to generate the world view
-    try:
-        world_view_data = display_world_view(session_id, turn_id, int(year), final_option)
-
-        if world_view_data.get("success"):
-            next_year = int(year) + 1
-            next_turn = Turn.objects.filter(session_id=session_id, year=next_year).first()
-            if next_turn:
-                world_view_data["next_turn_id"] = next_turn.id 
-            try:
-                # start generating next turn in background
-                start_turn_pipeline.send(session_id, next_year)
-                logger.info(f"Started generating next turn (year {next_year}) in background")
-            except Exception as e:
-                logger.warning(f"Failed to start next turn generation: {e}")
-        print("world view data: " + str(world_view_data))
-        return JsonResponse(world_view_data)
-        
-    except Exception as e:
-        print(f"Error displaying world view: {e}")
-        return JsonResponse({
-            'success': False,
-            'status': 'error',
-            'error': f'Failed to display world view: {str(e)}'
-        }, status=500)
-
-from shared.services import display_world_view
-from django.http import JsonResponse
 
 def display_scenario_and_image(request, session_id, turn_id, year, option_id, room_code):
     """
