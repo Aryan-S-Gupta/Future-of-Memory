@@ -1,7 +1,6 @@
 {
   "version": "2.0.0",
   "tasks": [
-
     {
       "label": "Check venv exists",
       "type": "shell",
@@ -19,7 +18,9 @@
       "windows": {
         "command": "${workspaceFolder}\\.venv\\Scripts\\activate && python setup_rag.py"
       },
-      "options": { "cwd": "${workspaceFolder}/backend" },
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
       "problemMatcher": [],
       "isBackground": false
     },
@@ -35,9 +36,9 @@
     {
       "label": "Backend: redis",
       "type": "shell",
-      "command": "redis-server",
+      "command": "redis-server --daemonize no",
       "windows": {
-        "command": "redis-server.exe --port 6380 --bind 127.0.0.1"
+        "command": "redis-server.exe --port 6380 --bind 127.0.0.1 --daemonize no"
       },
       "options": { "cwd": "${workspaceFolder}/backend" },
       "isBackground": true,
@@ -50,7 +51,9 @@
       "windows": {
         "command": "${workspaceFolder}\\.venv\\Scripts\\activate && python manage.py rundramatiq --queues default --processes 1 --threads 1"
       },
-      "options": { "cwd": "${workspaceFolder}/backend" },
+      "options": {
+        "cwd": "${workspaceFolder}/backend",
+      },
       "isBackground": true,
       "problemMatcher": []
     },
@@ -61,18 +64,22 @@
       "windows": {
         "command": "${workspaceFolder}\\.venv\\Scripts\\activate && python manage.py rundramatiq --queues image_queue --processes 1 --threads 1"
       },
-      "options": { "cwd": "${workspaceFolder}/backend" },
+      "options": {
+        "cwd": "${workspaceFolder}/backend",
+      },
       "isBackground": true,
       "problemMatcher": []
     },
     {
       "label": "Backend: dramatiq llm_queue",
       "type": "shell",
-      "command": "source ${workspaceFolder}/.venv/bin/activate && python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1",
+      "command": "source ${workspaceFolder}/.venv/bin/activate && export DYLD_LIBRARY_PATH=$(brew --prefix libomp)/lib && export OMP_NUM_THREADS=1 && python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1",
       "windows": {
         "command": "${workspaceFolder}\\.venv\\Scripts\\activate && python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1"
       },
-      "options": { "cwd": "${workspaceFolder}/backend" },
+      "options": {
+        "cwd": "${workspaceFolder}/backend",
+      },
       "isBackground": true,
       "problemMatcher": []
     },
@@ -83,7 +90,10 @@
       "windows": {
         "command": "${workspaceFolder}\\.venv\\Scripts\\activate && python manage.py runserver 0.0.0.0:9000"
       },
-      "options": { "cwd": "${workspaceFolder}/backend" },
+      "options": {
+        "cwd": "${workspaceFolder}/backend",
+      },
+
       "isBackground": true,
       "problemMatcher": []
     },
@@ -96,7 +106,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Parallel tasks",
+      "label": "Project run tasks",
       "dependsOn": [
         "Backend: redis",
         "Backend: dramatiq default",
@@ -111,10 +121,7 @@
 
     {
       "label": "Run project",
-      "dependsOn": [
-        "Setup tasks",
-        "Parallel tasks"
-      ],
+      "dependsOn": ["Setup tasks", "Project run tasks"],
       "dependsOrder": "sequence",
       "problemMatcher": []
     }
