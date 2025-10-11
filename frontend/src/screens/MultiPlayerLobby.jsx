@@ -26,6 +26,7 @@ const MultiplayerLobby = () => {
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const { sessionId, setSessionId } = useSession();
+  const [mode, setMode] = useState("peer"); // "peer" or "host"
   const navigate = useNavigate();
 
   // Fetch list of available rooms using React Query
@@ -49,18 +50,21 @@ const MultiplayerLobby = () => {
     if (!playerName) {
         return alert("Please Enter a NickName");
     }
-    const data = await createRoom(playerName);
+    const data = await createRoom(playerName, mode);
     setSessionId(data.session_id);
-   // await new Promise(res => setTimeout(res, 50));
-
     await startPrerender(data.session_id, 2035);
     setRoomCode(data.room_code);
     console.log(roomCode);
-            navigate(`/background-multi/${data.room_code}?playerName=${name}`);
+      if (mode === "peer") {
+    navigate(`/background-multi/${data.room_code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
+  } else {
+    navigate(`/projection-host/${data.room_code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
+  }
     // Navigate to multiplayer room screen
     // navigate(`/multiplayer-room/${data.room_code}/${playerName}`);
     console.log("navigated with session id " + data.session_id);
   };
+
 
   /**
    * Handle joining an existing multiplayer room.
@@ -85,8 +89,21 @@ const MultiplayerLobby = () => {
       if (data.success == "True") {
         setSessionId(data.session_id);
         console.log("session id is " + data.session_id);
-        navigate(`/background-multi/${code}?playerName=${name}`);
-        console.log("navigated")
+        console.log("the host of this room is: " + data.host)
+        console.log("the game has started? " + data.game_started)
+
+        if (data.mode == "host") {
+          if (data.game_started == "False") {
+            console.log("went to background screen");
+              navigate(`/projection-host/${code}?playerName=${playerName}&hostName=${data.host}&mode=${mode}`);
+          } else {
+              navigate(`/projection-room/${code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
+          }
+        } else { 
+          navigate(`/background-multi/${code}?playerName=${name}&mode=${mode}`);
+          console.log("navigated")
+        }
+
       } else {
         alert("Sorry, unable to join the room. Please try again.");
       }
@@ -99,6 +116,23 @@ const MultiplayerLobby = () => {
   return (
     <BasePage>
     <div className="multiplayer-lobby">
+      <div className="mode-selector">
+        <h4 className="mode-title">Select Game Mode</h4>
+        <div className="mode-buttons">
+          <Button
+            baseButton={`mode-btn ${mode === "host" ? "selected" : ""}`}
+            action={() => setMode("host")}
+            title="Host Mode"
+          />
+          <button
+            className={`mode-btn ${mode === "peer" ? "selected" : ""}`}
+            onClick={() => setMode("peer")}
+          >
+            👥 Peer-to-Peer
+          </button>
+        </div>
+      </div>
+
     <h2 className="title">Multiplayer Lobby</h2>
       <div className="room-input-container">
         <input

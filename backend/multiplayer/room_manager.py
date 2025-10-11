@@ -14,12 +14,15 @@ Maps room codes to session IDs
 room_sessions = {}
 
 # Room lifecyle
-def create_room(host_name):
+def create_room(host_name, mode):
     """
-    Create a new room with a unique room code.
+    Create a new room with a unique room code with host as a player.
+    This function can be used when the host is also a player 
+    For exmaple, in kiosks or peer - peer without the interaction with host.
     
     Args:
         host_name (str): Name of the player creating the room.
+        mode (str): the mode (eg host or peer-peer mode they are playing)
 
     Attr:s:
         rooms (dict): Global dictionary storing all rooms.
@@ -30,19 +33,53 @@ def create_room(host_name):
     # Generate a room code based on current number of rooms, padded to 4 digits
     room_code = str(len(rooms) + 1).zfill(4)
     session = Session.objects.create()
-    logging.debug(f'session id created: {session.id}')
+    logging.info(f'session id created: {session.id}')
     room_sessions[room_code] = session.id
 
     # Initialize room data: host, list of players, and game state
     rooms[room_code] = {
         "host": host_name,
         "players": [host_name],  # host is the first player
+        "mode": mode,
         "state": {
             "turn_id": -1,
             "year": 2035
-        }             # placeholder for game state
+        },
+        "game_started": False
     }   
     logging.info(f"Room created with code {room_code} by host {host_name}")
+    logging.info(f'Current rooms: {rooms}')
+    return room_code, session.id
+
+def create_host_room(host_name, mode): 
+    """
+    Creates a new room without the host as a player. 
+    This function can be used while playing in server-host mode
+
+    Args:
+        host_name (str); Name of the player creating the room.
+
+    Attrs:
+        room (dict): glocal dictionary storing all rooms.
+
+    Returns: 
+        str: The room code of the newly created room.
+    """
+    room_code = str(len(rooms) + 1).zfill(4)
+    session = Session.objects.create()
+    logging.info(f'session if created: {session.id}')
+    room_sessions[room_code] = session.id
+    rooms[room_code] = {
+        "host": host_name,
+        "players": [],  # don't add the host 
+        "mode": mode,
+        "state": {
+            "turn_id": -1,
+            "year": 2035
+        },
+        "game_started": False      
+    }
+    logging.info(f"Host room created with code {room_code} by host {host_name}")
     logging.info(f'Current rooms: {rooms}')
     return room_code, session.id
 
@@ -129,6 +166,28 @@ def leave_room(room_code, player_name):
         return True
     return False
 
+def get_mode(room_code): 
+    return rooms[room_code]["mode"]
+
+
+def set_mode(room_code, mode):
+    if not room_exists(room_code):
+        return False 
+    rooms[room_code]["mode"] = mode
+    return True
+
+
+def is_game_started(room_code):
+    if not room_exists(room_code):
+        return False 
+    return get_room(room_code)["game_started"] == True
+    
+def set_game_started(room_code): 
+    if not room_exists(room_code):
+        return False 
+    get_room(room_code)["game_started"] = True 
+
+    
 # Core Accessors
 def get_room_codes():
     """

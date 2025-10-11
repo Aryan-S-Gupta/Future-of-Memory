@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "../api/data/static_stories.json")
-VOTING_SESSION = {} # Global variable to hold the current voting session
+
+
 with open(DATA_FILE, "r", encoding="utf-8") as f:
     story_data = json.load(f)
 
-from .room_manager import create_room, join_room, update_state, get_state, get_room_codes
 
 
 @csrf_exempt
@@ -38,25 +38,49 @@ def create_multiplayer_room(request):
         # Parse JSON body from request
         data = json.loads(request.body.decode("utf-8"))
         host_name = data.get("host")
+        mode = data.get("mode")
 
         # Validate that host name is provided
         if not host_name:
             return HttpResponseBadRequest("Missing 'host' parameter.")
         
-        # Create a new room using room_manager
-        room_code, session = create_room(host_name)
+        if mode == "host": 
+            room_code, session = rm.create_host_room(host_name, mode)
+        else: 
+            room_code, session = rm.create_room(host_name, mode)
+
         turn_id = rm.get_state(room_code).get("turn_id", -1)
         VotingSessions[(room_code, turn_id)] = VotingSession(room_code, turn_id)
         logger.info(f"Initialized VotingSession for room {room_code}")
         logger.info(f"Created room: {room_code}")
 
         # Return room code as JSON
-        return JsonResponse({"room_code": room_code, "session_id": session})
+        return JsonResponse({"room_code": room_code, "session_id": session, "mode": mode})
     
     except json.JSONDecodeError:
         # Return 400 Bad Request if JSON is invalid
         return HttpResponseBadRequest("Invalid JSON")
 
+def get_host(request, room_code): 
+    host = rm.get_host(room_code)
+    return JsonResponse({'host': host})
+
+def check_game_started(request, room_code):
+    if rm.get_mode(room_code) != "host":
+        return JsonResponse({"unable to perform this action"})
+    return JsonResponse({"game_started": rm.is_game_started(room_code)})
+    
+def start_game(request, room_code):
+
+    if not rm.room_exists(room_code):
+        logger.info("rooom does not exist")
+        return JsonResponse({'error': 'Room not found'}, status=404)
+    else: 
+        if rm.get_mode(room_code) != "host":
+            return JsonResponse({"unable to perform this action"})
+        
+    rm.set_game_started(room_code)
+    return JsonResponse({'state': rm.is_game_started(room_code)})
 
 def list_room_codes(request):
     """
@@ -65,7 +89,7 @@ def list_room_codes(request):
     Response JSON:
       - "rooms": List of active room codes
     """
-    return JsonResponse({"rooms": get_room_codes()})
+    return JsonResponse({"rooms": rm.get_room_codes()})
 
 
 @csrf_exempt
@@ -90,9 +114,11 @@ def join_multiplayer_room(request):
     if not rm.room_exists: 
         JsonResponse({"Success": False, "room_exists": False})
     # Attempt to join the room
-    success = join_room(room_code, player_name)
+    success = rm.join_room(room_code, player_name)
     session = None
     if success:
+        room_host = rm.get_host(room_code)
+        mode = rm.get_mode(room_code)
         turn = rm.get_state(room_code)
         VotingSessions[(room_code, turn.get('turn_id'))].update_players()
         logger.info(f"Current turn for room {room_code} is {turn.get('turn_id')} and year is {turn.get('year')}")
@@ -103,7 +129,14 @@ def join_multiplayer_room(request):
         logger.warning(f"Failed to join room {room_code}: Room does not exist")
     logger.info("the result of join_room " + str(success))
 
-    return JsonResponse({"success": str(success), "session_id": session, "turn_id" : str(turn)})
+    return JsonResponse({
+        "success": str(success),
+        "session_id": session, 
+        "turn_id" : str(turn), 
+        "host": room_host,
+        "mode": mode,
+        "game_started": str(rm.is_game_started(room_code))
+    })
 
 
 @csrf_exempt
@@ -126,7 +159,7 @@ def sync_state(request):
         return JsonResponse({'success': False, 'room_exists': False})
 
     # Update room state using room_manager
-    update_state(room_code, state)
+    rm.update_state(room_code, state)
     
     return JsonResponse({"success": True})
 
@@ -140,7 +173,7 @@ def get_current_state(request, room_code):
     Returns JSON response:
       - "state": Current state of the room
     """
-    return JsonResponse({"state": get_state(room_code)})
+    return JsonResponse({"state": rm.get_state(room_code)})
 
 
 @csrf_exempt
@@ -418,94 +451,6 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     }
 
     return JsonResponse(response_payload)
-
-
-# send the existing work
-# everytime this is called update turn id 
-# def display_question_and_options(request, session_id, room_code, turn_id, year):
-#     """ 
-#     Display the question and options for the current turn.
-#     Args:
-#         request: HTTP request object.
-#         session_id (int): ID of the game session.
-#         room_code (str): Code of the multiplayer room.
-#         turn_id (int): ID of the current turn. If -1, fetch the latest turn.
-#     Returns:
-#         JsonResponse with question, options, and turn details.
-
-#     attributes of response payload:
-#         - room_code: The code of the multiplayer room.
-#         - turn_id: The ID of the current turn.
-#         - year: The year associated with the current turn.
-#         - question: The question text for the current turn.
-#         - options: A list of options, each with:        
-#     """
-#     logger.debug(f"display_question_and_options called for session_id={session_id}")
-#     existing_session = get_object_or_404(Session, id=session_id)
-#     logger.debug(f"Found session: {existing_session}")
-#     logger.debug(f"turn_id received: {turn_id}")
-#     new_year = -1
-#     logger.info(f'fetching for {new_year}')
-
-#     if not rm.room_exists(room_code):
-#         return JsonResponse({'success': False, 'room_exists': False})
-#     # goes here if turn_id unknonwn -> when player joins in the middle fo the game
-#     if int(turn_id) == -1:
-#         rm.log_all_rooms()
-#         logger.info("room_code is " + str(room_code))
-#         rm_state = rm.get_state(str(room_code))
-#         logger.info(f"Room state for room {room_code}: {rm_state}")
-#         turn_id = rm_state.get("turn_id", -1)
-#         new_year = rm_state.get("year", 2035)
-#         logger.info(f"Using turn_id from room state: {turn_id}")
-#     # if the room is at -1 then it is the first turn thne get the first ever scenario generator
-#         if turn_id == -1:
-#             latest_turn = Turn.objects.filter(session_id=existing_session.id).order_by('-year', '-id').first()
-#             if not latest_turn:
-#                 return JsonResponse({'error': 'No turn found for this session'}, status=404)
-#             turn_id = latest_turn.id
-#             new_year = latest_turn.year
-#         else:
-#             latest_turn = get_object_or_404(Turn, id=turn_id)
-#     # goes here if it finds a new turn id
-#     else:
-#         logger.info("checking in else")
-#         # get specific turn by ID
-#         latest_turn = get_object_or_404(Turn, id=int(turn_id))
-#         turn_id = latest_turn.id    
-#         new_year = latest_turn.year
-
-#         logger.debug(f"Latest turn for session: {latest_turn}")
-
-#     if new_year != int(year): 
-#         logger.info(f'the year different is {new_year} vs {year}')
-#         return JsonResponse({'error': 'new. year not ready yet'}, status=404)
-    
-
-#     if (room_code, int(turn_id)) not in VotingSessions:
-#         VotingSessions[(room_code, int(turn_id))] = VotingSession(room_code, int(turn_id))
-#         rm.update_state(room_code, {"turn_id": turn_id, "year": year})
-#         VotingSessions[(room_code, int(turn_id))].start_voting()
-#         logger.debug(f"Latest turn determined: {latest_turn}")
-
-
-#     # fetch options
-#     options = Option.objects.filter(turn_id=latest_turn.id).order_by('label')
-#     options_payload = [
-#         {'option_id': o.id, 'label': o.label, 'option_text': o.option_text or ''}
-#         for o in options
-#     ]
-
-#     response_payload = {
-#         'message': 'ok',
-#         'room_code': room_code,
-#         'turn_id': turn_id,
-#         'year': new_year,
-#         'question': latest_turn.question or '',
-#         'options': options_payload,
-#     }
-
-#     return JsonResponse(response_payload)
 
 
 # scenario and image display page

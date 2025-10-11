@@ -9,12 +9,13 @@ import MultiplayerLobby from "./screens/MultiPlayerLobby.jsx";
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
 import GamePlayMulti from "./screens/GamePlayMulti.jsx";
-import HostScreen from "./screens/HostScreen.jsx";
+import HostScreen from "./screens/HostGame/HostScreen.jsx";
 import FeedbackScreen from "./components/FeedbackScreen/FeedbackScreen.jsx";
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
 import { SessionProvider } from "../SessionContext.jsx";
+import HostBackgroundScreen from "./screens/HostGame/HostBackgroundScreen.jsx";
 
 function App() {
 
@@ -34,9 +35,11 @@ function App() {
               <Route path="/game-play" element={<GamePlay />} />
               <Route path="/multiplayer-lobby" element={<MultiplayerLobby/>} />
               <Route path="/background-multi/:roomCode" element={<BackgroundScreenMulti/>} />
+              <Route path="/projection-host/:roomCode" element={<HostBackgroundScreen />} />
               <Route path="/feedback" element={<FeedbackScreen/>} />
               <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
-              <Route path="/multiplayer-room/:roomCode/:playerName" element={<HostScreen />} />
+              <Route path="/projector-room/:roomCode/" element={<HostScreen />} />
+
             </Routes>
           </SessionProvider>
         </BackgroundWrapper>
