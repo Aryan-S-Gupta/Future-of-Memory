@@ -70,8 +70,8 @@ const MainGameScreen = () => {
       <div className="button-group">
         <Button baseButton="btn-primary" action={() => start_single_session()} title="Start" />
         <Button baseButton="btn-secondary" action={() => navigate("/how-to-play")} title="How To Play" />
-        <Button baseButton="btn-secondary" action={() =>       navigate("/multiplayer-lobby")} title="Multiplayer" />
-        <Button baseButton="btn-secondary" action={() =>          navigate("/mini-game/intro")} title="Play Memory Game" />
+        <Button baseButton="btn-secondary" action={() => navigate("/multiplayer-lobby")} title="Multiplayer" />
+        <Button baseButton="btn-secondary" action={() => navigate("/mini-game/intro")} title="Play Memory Game" />
 
       </div>
       {/* Floating feedback button */}

@@ -108,3 +108,30 @@ export const getMemoryScores = async () => {
   const res = await api.get("/mini-game/scores");
   return res.data.scores; // { player_name: score, ... }
 };
+
+
+/**
+ * Submit multiplayer minigame score for tie-break resolution.
+ * @param {string} playerName
+ * @param {string} roomCode
+ * @param {number} turnId
+ * @param {number} score
+ */
+export const submitTiebreakScore = async (playerName, roomCode, turnId, score) => {
+  const res = await api.post("/mini-game/submit_tiebreak_score", {
+    room_code: roomCode,
+    turn_id: turnId,
+    player_name: playerName,
+    score,
+  });
+  return res.data;
+};
+
+/**
+ * Get current tie-break status.
+ * Returns: { tie_mode, tie_players, tie_scores, final_option }
+ */
+export const getTiebreakStatus = async (roomCode, turnId) => {
+  const res = await api.get(`/mini-game/tiebreak_status/${roomCode}/${turnId}`);
+  return res.data;
+};

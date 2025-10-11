@@ -9,10 +9,11 @@ const cardSymbols = ["🍎","🍌","🍇","🍉","🍓","🍒","🥝","🍍"];
 // Shuffle function
 const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
 
-const MiniGame = () => {
+const MiniGame = ({ playerName: PlayerName, roomCode, turnId, onFinish }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const playerName = location.state?.playerName || "Player";
+
+  const playerName = PlayerName || location.state?.playerName || "Player";
 
   const [cards, setCards] = useState([]);
   const [flipped, setFlipped] = useState([]);
@@ -49,13 +50,19 @@ const MiniGame = () => {
     }
   };
 
-  // Navigate to result when all matched
   useEffect(() => {
-    if (matched.length === cards.length && cards.length > 0) {
-      const score = Math.max(0, 100 - moves * 2);
+  if (matched.length === cards.length && cards.length > 0) {
+    const score = Math.max(0, 100 - moves * 2);
+
+    if (onFinish) {
+      // Multiplayer tie-break callback
+      onFinish(score); 
+    } else {
+      // Standalone mini-game flow
       navigate("/mini-game/result", { state: { playerName, score } });
     }
-  }, [matched, cards, moves, playerName, navigate]);
+  }
+}, [matched, cards, moves, playerName, navigate, onFinish]);
 
   return (
     <div className="mini-game-intro">
@@ -63,9 +70,11 @@ const MiniGame = () => {
       <p>Player: {playerName}</p>
 
       {/* Back button */}
-      <div className="button-group" style={{ marginBottom: "1rem" }}>
-        <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
-      </div>
+      {!onFinish && (
+        <div className="button-group" style={{ marginBottom: "1rem" }}>
+          <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
+        </div>
+      )}
 
       {/* 4x4 Grid */}
       <div className="emoji-grid">

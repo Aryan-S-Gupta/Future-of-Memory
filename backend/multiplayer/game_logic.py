@@ -54,6 +54,10 @@ class VotingSession:
         self.inactive_players = set()
         self.final_option = None
         self.lock = threading.Lock()
+        self.tie_mode = False           # True when in tie-breaker mode
+        self.tie_scores = {}            # {player_name: score}
+        self.tie_options = []           # Options that tied
+        self.tie_players = []           # Players who voted for tied options
         logging.info(f"VotingSession initialized for room {room_code} with {self.total_players} players.")
 
 
@@ -93,7 +97,7 @@ class VotingSession:
             # Start global timer
             
             self.vote_timer.start()
-            self.vote_timer = True
+            #self.vote_timer = True
 
             logging.info(f"AFK timer started for {self.vote_timeout} seconds in room {self.room_code}")
 
@@ -120,10 +124,13 @@ class VotingSession:
             """Called when the vote timeout expires."""
             all_players = set(rm.get_players(self.room_code))
             self.inactive_players = all_players - set(self.voted_players)
+            logging.info(f"[Inactive Players] {self.inactive_players} in room {self.room_code}")
             logging.info(f"Skipping votes for inactive players: {self.inactive_players} in room {self.room_code}")
             self.num_responses += len(self.inactive_players)
 
             final_option = self.compute_final_vote()
+            logging.info(f"[Vote Timeout] Voting session ended. Final option: {final_option}")
+            logging.info(f"[Final Player Votes] {self.p_votes}")
             logging.info(f"Voting session ended. Final option: {final_option}")
 
     
@@ -166,12 +173,17 @@ class VotingSession:
                 return None
             self.votes[option_id] = self.votes.get(option_id, 0) + 1
             logging.info(f"Current votes tally: {self.votes}")
+            logging.info(f"[Vote] Player {player_name} voted for {option_id} in room {room}")
+            logging.info(f"[Vote Tally] Current votes: {self.votes}")
+            logging.info(f"[Player Votes Map] {self.p_votes}")  
 
+            self.update_players()  # update total_players from current room players
             # check if everyone voted early and end voting
             if self.num_responses >= self.total_players:
                 if self.vote_timer:
                     self.vote_timer.cancel()
                 self.final_option = self.compute_final_vote()
+                logging.info(f"[Final Option] Voting completed. Final option: {self.final_option}")
                 return self.final_option
             return None
     
@@ -193,29 +205,106 @@ class VotingSession:
         if not self.votes:
             return None
 
-        final_option =random.choice(list(self.votes.keys()))
-        if not self.votes:
-            logging.info("No votes were cast. Selecting a random option or returning None.")
-            return final_option
+        # Count votes and check for ties
+        max_votes = max(self.votes.values())
+        # Find the options that received the highest number of votes.
 
-        # all players have voted, compute final option
-        max_votes = -1
-        for option, vote in self.votes.items():
-            logging.info(f"Option {option} has {vote} votes")
-            if vote > max_votes:
-                max_votes = vote
-                final_option = option
-                logging.info(f"New leading option: {final_option} with {max_votes} votes") 
-        # self.votes = {}
-        # self.num_responses = 0
-        # self.voted_players = []
-        # self.inactive_players = set()
-        if self.vote_timer:
-            self.vote_timer.cancel()
-            self.vote_timer = None
-        logging.info(f"Final option selected: {final_option}") 
-        # reset for next round
+        top_options = []  # This will store all option IDs that are tied for first place.
+
+        # Loop through every option and its vote count in the votes dictionary.
+        for option_id, count in self.votes.items():
+            # Check if this option has more of votes as the maximum found.
+            if count >= max_votes:
+                # If yes, add it to the list of top options.
+                top_options.append(option_id)
+
+        if len(top_options) > 1:
+            logging.info(f"Tie detected among options {top_options}")
+            self.final_option = None  # frontend handles minigame
+            self.tie_options = top_options  # store tie options
+            self.tie_mode = True
+            # identify all players who voted for tied options
+            self.tie_players = [player for player, opt in self.p_votes.items() if opt in top_options]
+            self.tie_scores = {}  # reset tie-break scores
+            return "TIE"
+
+
+        # Normal winner
+        final_option = top_options[0]
+        self.final_option = final_option
+        logging.info(f"Final option selected: {final_option}")
         return final_option
+
+
+
+        
+        # if not self.votes:
+        #     return None
+
+        # final_option =random.choice(list(self.votes.keys()))
+        # if not self.votes:
+        #     logging.info("No votes were cast. Selecting a random option or returning None.")
+        #     return final_option
+
+        # # all players have voted, compute final option
+        # max_votes = -1
+        # for option, vote in self.votes.items():
+        #     logging.info(f"Option {option} has {vote} votes")
+        #     if vote > max_votes:
+        #         max_votes = vote
+        #         final_option = option
+        #         logging.info(f"New leading option: {final_option} with {max_votes} votes") 
+        # if self.vote_timer:
+        #     self.vote_timer.cancel()
+        #     self.vote_timer = None
+        # logging.info(f"Final option selected: {final_option}") 
+        # # reset for next round
+        # return final_option
+
+
+
+
+    def submit_tiebreak_score(self, player_name, score):
+        """Store a tie-breaker minigame score for a tied player."""
+        if not self.tie_mode:
+            logging.info("Tie-break score received when tie_mode=False")
+            return None
+
+        if player_name not in self.tie_players:
+            logging.warning(f"{player_name} is not part of tie-breaker players.")
+            return None
+
+        self.tie_scores[player_name] = score
+       
+        logging.info(f"[Tie-break] Score submitted: {player_name} -> {score}")
+        logging.info(f"[Tie-break Current Scores] {self.tie_scores}")
+
+        # Check if all tied players have submitted scores
+        if len(self.tie_scores) == len(self.tie_players):
+            return self.resolve_tiebreak_winner()
+        return None
+
+    def resolve_tiebreak_winner(self):
+        """Decide the winner of the tie-break based on minigame scores."""
+        if not self.tie_scores:
+            return None
+
+        highest_score = max(self.tie_scores.values())
+        top_players = [p for p, s in self.tie_scores.items() if s == highest_score]
+
+        # Handle another tie
+        winner = random.choice(top_players) if len(top_players) > 1 else top_players[0]
+        winning_option = self.p_votes[winner]
+        self.final_option = winning_option
+        self.tie_mode = False
+
+        logging.info(f"Tie-break resolved: {winner} won with {highest_score}. Option chosen: {winning_option}")
+        return {
+            "winner": winner,
+            "score": highest_score,
+            "winning_option": winning_option
+        }
+
 
     def get_room_code(self):
         """Get the room code for this voting session.
@@ -461,7 +550,7 @@ class VotingSession:
             else:
                 votes_so_far[player] = "Pending"
 
-        logging.debug(f"Vote status for room {self.room_code}: {votes_so_far}")
+        logging.info(f"Vote status for room {self.room_code}: {votes_so_far}")
         return votes_so_far
 
 

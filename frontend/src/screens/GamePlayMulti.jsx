@@ -19,6 +19,7 @@ import { getVotingInfo} from "../../api/multiplayer/GameFlowApi";
 
 
 
+
 const GamePlayMulti = () => {
   const navigate = useNavigate()
   const { roomCode } = useParams(); 
@@ -37,6 +38,9 @@ const GamePlayMulti = () => {
   const [votes, setVotes] = useState([]);
   const [totalPlayers, setTotalPlayers] = useState(1);
   const [fetchVoteData, setFetchVoteData] = useState(true);
+  const [tiePlayers, setTiePlayers] = useState([]); // tied players
+  const [tieOptions, setTieOptions] = useState([]); // tied options
+
   // --- Staged reveal for multiplayer ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
@@ -257,7 +261,11 @@ const GamePlayMulti = () => {
         console.log(
           `[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`
         );
-        if (allVoted) {
+        if (allVoted && data.tie_mode) {
+          setTiePlayers(data.tie_players);
+          setTieOptions(data.tie_options);
+          setScreen("mini-game-tiebreak");
+        } else if (allVoted) {
           console.log("All players voted!");
           setScreen("loading")
           setLoadingState("scenario")
@@ -434,8 +442,6 @@ const getFadeClass = (idx) => {
           </div>
 
 
-
-
           {/* Continue button at bottom */}
           <div className="scenario-footer">
             <Button
@@ -473,13 +479,41 @@ const getFadeClass = (idx) => {
               />
             </div>
           </div>
-          
+
           <div className="voting-sidebar">
             <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
           </div>
         </div>
       )}
 
+      {screen === "mini-game-tiebreak" && (
+        <MiniGame
+          playerName={playerName}      // passed automatically from multiplayer state
+          roomCode={roomCode}
+          turnId={currentTurn.turn_id}
+          onFinish={async (score) => {
+            // Submit score to backend for tie-break resolution
+            await submitTiebreakScore(playerName, roomCode, currentTurn.turn_id, score);
+
+            // Poll backend until tie-break winner is determined
+            let status = await getTiebreakStatus(roomCode, currentTurn.turn_id);
+            while (!status.final_option) {
+              await new Promise(r => setTimeout(r, 2000));
+              status = await getTiebreakStatus(roomCode, currentTurn.turn_id);
+            }
+
+            console.log("Tie-break winner:", status.final_option);
+
+            // Reset tie state and continue scenario
+            setTiePlayers([]);
+            setTieOptions([]);
+            setTieFinished(true);
+            setScreen("loading");
+            setLoadingState("scenario");
+            await fetchFunFacts();
+          }}
+        />
+      )}
 
     </BasePage>
   );
