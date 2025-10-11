@@ -50,15 +50,16 @@ export const getVotingInfo = async (roomCode, turn_id) => {
  * console.log(question.question);
  * console.log(question.options);
  */
-export const getQuestion = async (session_id, roomCode, turn_id) => {
-  console.log("called question api for session:", session_id);
-  const res = await api.get(`/storyline/${session_id}/question/${roomCode}/${turn_id}`);
-  console.log("got output:", res.data);  // prints the actual object
-  console.log("question:", res.data.data.question);
-  console.log("options:", res.data.data.options);
-
-  return res.data.data; // { message, data: { turn_id, year, question, options } }
-};
+export async function getQuestion(sessionId, roomCode, turn_id, year) {
+  try {
+    const res = await api.get(`/storyline/${sessionId}/question/${roomCode}/${turn_id}/${year}`);
+    console.log("got output: " + res)
+    console.log(res.data)
+    return res.data;
+  } catch (err) {
+    return null;
+  }
+}
 /**
  * Submit a player's choice.
  * @param {string} roomCode
@@ -69,10 +70,14 @@ export const getQuestion = async (session_id, roomCode, turn_id) => {
  */
 
 export const submitChoice = async (playerName, roomCode, session_id, turn_id, year, option_id) => {
+  try {
   const res = await api.get(
     `/storyline/choice/${session_id}/${turn_id}/${year}/${option_id}/${roomCode}`, { params: { playerName }}
   );
   return res.data; // { scenario, image, ...
+} catch (err) {
+  return null;
+}
 }
 
 export const getFunFacts = async () => {

@@ -1,100 +1,104 @@
-ADHD
-Attention-deficit hyperactivity disorder
-Neurodevelopmental disorder
-Hyperactivity
-Impulsivity
-Inattention
-Executive function
-Prospective memory
-Time-based PM
-Event-based PM
-Activity-based PM
-Cognitive performance
-Prefrontal cortex
-Sleep inertia
-Actigraphy
-Motor activity
-Ecological validity
-Experimental data
-Children
-Adults
-Healthy controls
-Accuracy
-Wake-up time
-Response time
-Functional Linear Modeling
-Fourier expansion
-Zeigarnik effect
-Memory intention
-Declarative memory
-Self-initiated retrieval
-Cognitive development
-Neural connections
-Optogenetics
-Artificial intelligence
-Light-based computing
-Black phosphorus
-Neurons
-Synapses
-Brain chip
-Alzheimer’s disease
-Dementia
-Posterior cortical atrophy
-Episodic memory
-Semantic memory
-Default mode network
-Dorsal attention network
-Functional connectivity
-Deep brain stimulation
-False memory
-Fuzzy-trace theory
-Activation-monitoring theory
-Encoding
-Retrieval
-Consolidation
-Narrative identity
-Moral responsibility
-Ethical permissibility
-Memory modification technologies
-Neuromodulation
-Inhibitory networks
-Emotional responsiveness
-Behavioral habituation
-Autonomy
-Self-narrative
-Philanthropy
-Identity coherence
-Narrative construction
-Personal identity
-Self-characteristics
-Moral emotions
-Counterfactual reasoning
-Cognitive disorders
-Trauma
-PTSD
-Neuroethics
-Informed consent
-Clinical translation
-Neural implants
-Cochlear implant
-Retinal implant
-Visual prosthesis
-Speech BCI
-Brain-computer interface
-AI-driven neural implant
-Usability
-Reliability
-Accuracy
-User autonomy
-Neurorights
-Mental privacy
-Data security
-Ethical technology
-Social implications
-Regulatory framework
-Clinical trials
-Surgical risks
-End-user involvement
-Speculative futures
-Interactive storytelling
-Digital art
+memory
+neurotechnology
+ethics
+identity
+consciousness
+cognition
+neural
+data
+privacy
+ownership
+modification
+editing
+sharing
+transfer
+brain
+mind
+augmentation
+prosthesis
+interface
+biotechnology
+AI
+artificial intelligence
+machine learning
+algorithm
+simulation
+narrative
+storytelling
+society
+culture
+law
+policy
+regulation
+consent
+autonomy
+selfhood
+experience
+subjectivity
+emotion
+empathy
+recall
+forgetting
+storage
+retrieval
+encoding
+perception
+neuroscience
+psychology
+philosophy
+morality
+responsibility
+control
+agency
+memory rights
+memory markets
+commodification
+surveillance
+data security
+cybernetics
+transhumanism
+digital art
+representation
+interaction
+collaboration
+simulation
+future
+forecast
+prediction
+technology ethics
+bioethics
+mental health
+cognitive liberty
+neurorights
+free will
+determinism
+behavior
+learning
+neural plasticity
+biometric data
+digital identity
+virtual reality
+mixed reality
+interface design
+HCI
+embodiment
+affect
+collective memory
+public memory
+archives
+heritage
+erasure
+trauma
+therapy
+rehabilitation
+augmentation ethics
+gene editing
+neural implants
+social systems
+technological progress
+speculative futures
+human–machine interaction
+artificial consciousness
+AI ethics
+cultural imagination
+creative expression

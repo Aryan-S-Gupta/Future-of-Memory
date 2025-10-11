@@ -41,7 +41,7 @@ const BackgroundScreenMulti = () => {
 
       {/* Navigation buttons */}
       <div className="button-container">
-        <ExitExperience />
+        <ExitExperience code={roomCode} player={playerName}/>
         <Button 
           baseButton="btn-next next-fade-in" 
           action={goToGame} 

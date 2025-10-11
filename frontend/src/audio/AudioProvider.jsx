@@ -12,7 +12,7 @@ const clamp01 = (v) => Math.max(0, Math.min(1, Number.isFinite(v) ? v : 0)); //c
 // Provides Context - single <audio> element and manage bgm based on route
 export default function AudioProvider({ children, routeAudioMap, initialVolume = 0.35 }) {
     const location = useLocation(); // See route changes
-    const audioRef = useRef(null); // Single Audio Player (save reference - don't replace)
+    const audioRefs = useRef([]);
 
     // Track current loudness (volume), muted state, and which track is playing
     const [volume, setVolume] = useState(clamp01(initialVolume));
@@ -25,79 +25,97 @@ export default function AudioProvider({ children, routeAudioMap, initialVolume =
     // Flag - if user interacted (true for autoplay) - can be changed
     const hasUserInteracted = true;
 
-    // Setup <audio> element - first RUN
-    if (!audioRef.current) {
-        const el = new Audio(); //Audio Player
-        el.preload = "auto"; //Avoid delayer
-        el.loop = true;
-        el.volume = clamp01(initialVolume); //use volume set
-
-        // Minimal event wiring for play/pause status
-        el.addEventListener("play", () => setIsPlaying(true));
-        el.addEventListener("pause", () => setIsPlaying(false));
-        el.addEventListener("ended", () => setIsPlaying(false));
-
-        audioRef.current = el; //Save reference
+    // Multi-track: don’t pre-create a single <audio>.
+    // Ensure the ref is an array; actual players are created in the route effect.
+    if (!audioRefs.current) {
+        audioRefs.current = [];
     }
 
     // Decide what music to play for the current route
-    const trackFor = useMemo(() => { //cache - optimize
+    const trackFor = useMemo(() => {
         const entries = Object.entries(routeAudioMap || {});
-        return (p) =>
-            // Check for exact path
-            (entries.find(([k]) => k === p)?.[1]) ??
-            // Globally - fallback
-            (entries.find(([k]) => k === "*")?.[1]) ??
-            // Don't play
-            null;
+        return (p) => {
+            const exact = entries.find(([k]) => k === p)?.[1];
+            if (exact) return exact;
+            const pref = entries.find(([k]) => k.endsWith("*") && p.startsWith(k.slice(0, -1)))?.[1];
+            if (pref) return pref;
+            return entries.find(([k]) => k === "*")?.[1] ?? null;
+        };
     }, [routeAudioMap]);
 
     // Whenever the page changes, check if we need to change the track
-    useEffect(() => { //Perform sideeffect after rendering
-        const el = audioRef.current;
-        const t = trackFor(location.pathname);
-        if (!el) return;
+    useEffect(() => {
+        const tracks = trackFor(location.pathname);
 
-        // No track - pause and clear the current song
-        if (!t) {
-            el.pause();
+        // stop & clear old
+        audioRefs.current.forEach((a) => {
+            try { a.pause(); } catch { }
+        });
+        audioRefs.current = [];
+
+        if (!tracks) {
             setCurrentSrc(null);
             return;
         }
 
-        // Different track on page
-        if (t.src !== currentSrc) {
-            el.src = t.src; //change source
-            el.loop = t.loop ?? true; //check loop setting, else default to true
-            el.play().catch(() => { }); // ignore autoplay rejection
-            setCurrentSrc(t.src); // save reference for current song playing
-        }
-    }, [location.pathname, trackFor, currentSrc]);
+        const list = Array.isArray(tracks) ? tracks : [tracks];
+        const defaultGain = list.length > 1 ? 1 / list.length : 1; // e.g., 0.5 + 0.5
+
+        list.forEach((t, idx) => {
+            const a = new Audio();
+            a.preload = "auto";
+            a.loop = t.loop ?? true;
+            a.src = t.src;
+            // store per-track gain on the element
+            a._gain = Number.isFinite(t.gain) ? t.gain : defaultGain;
+            // apply initial volume (master * gain, respecting mute)
+            a.volume = isMuted ? 0 : clamp01(volume * a._gain);
+            // basic play/pause listeners update isPlaying
+            const update = () => setIsPlaying(audioRefs.current.some(el => !el.paused && !el.ended));
+            a.addEventListener("play", update);
+            a.addEventListener("pause", update);
+            a.addEventListener("ended", update);
+            a.play().catch(() => { });
+            audioRefs.current.push(a);
+        });
+
+        // keep a simple currentSrc for debugging/consumers (first track)
+        const first = list[0];
+        setCurrentSrc(first?.src ?? null);
+    }, [location.pathname, trackFor/* keep dependencies minimal */, /* remove currentSrc here */]);
 
     // Keep the actual audio element volume in sync with state
     useEffect(() => {
-        if (audioRef.current) {
-            // Apply volume / mute instantly
-            audioRef.current.volume = isMuted ? 0 : clamp01(volume);
-        }
+        audioRefs.current.forEach((a) => {
+            const g = Number.isFinite(a._gain) ? a._gain : 1;
+            a.volume = isMuted ? 0 : clamp01(volume * g);
+        });
     }, [isMuted, volume]);
 
     // Common control for all pages
     const controls = useMemo(() => ({
         // Manually start music
         play: () => {
-            const r = audioRef.current?.play().catch(() => { });
+            const ps = audioRefs.current.map(a => a.play().catch(() => { }));
             // NEW: dispatch a tiny event so screens can “replay narration” on Play press
             try { window.dispatchEvent(new CustomEvent("bgm-play")); } catch { }
-            return r;
+            return Promise.allSettled(ps);
         },
         // Manually pause music
-        pause: () => audioRef.current?.pause(),
+        pause: () => audioRefs.current.forEach(a => a.pause()),
         // Change loudness (0 = silent, 1 = max)
         setVolume: (v) => setVolume(clamp01(v)),
         // Instantly mute/unmute
         mute: () => setIsMuted(true),
-        unmute: () => setIsMuted(false),
+        unmute: () => {
+            setIsMuted(false);
+            // ensure background resumes if any track got paused
+            audioRefs.current.forEach(a => {
+                if (a && a.paused) {
+                    a.play().catch(() => { });
+                }
+            });
+        },
 
         isMuted,// Current mute state (true/false)
         volume, // Current volume (number between 0–1)

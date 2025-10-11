@@ -49,7 +49,8 @@ class VotingSession:
         self.total_players = len(rm.get_players(room_code))
         self.voted_players = []
         self.vote_timeout = vote_timeout
-        self.vote_timer = None
+        self.vote_timer = self.vote_timer = threading.Timer(self.vote_timeout, self.end_voting)
+        self.time_started = False
         self.inactive_players = set()
         self.final_option = None
         self.lock = threading.Lock()
@@ -90,11 +91,14 @@ class VotingSession:
             logging.info(f"Voting started for room {self.room_code} with {self.total_players} players.")
 
             # Start global timer
-            self.vote_timer = threading.Timer(self.vote_timeout, self.end_voting)
+            
             self.vote_timer.start()
+            self.vote_timer = True
+
             logging.info(f"AFK timer started for {self.vote_timeout} seconds in room {self.room_code}")
 
-
+    def is_timer_on(self):
+        return self.vote_timer 
 
     def end_voting(self):
         """
@@ -158,7 +162,8 @@ class VotingSession:
             logging.info(f"Total responses: {self.num_responses}/{self.total_players}")
 
             # tally the vote
-
+            if self.votes is None:
+                return None
             self.votes[option_id] = self.votes.get(option_id, 0) + 1
             logging.info(f"Current votes tally: {self.votes}")
 
@@ -185,6 +190,8 @@ class VotingSession:
             - final_option (str): The option that won the vote.
             - lock (threading.Lock): Lock for thread-safe operations.
         """
+        if not self.votes:
+            return None
 
         final_option =random.choice(list(self.votes.keys()))
         if not self.votes:

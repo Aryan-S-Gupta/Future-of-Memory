@@ -125,9 +125,7 @@ def leave_room(room_code, player_name):
             destroy_room(room_code)
 
         elif get_host(room_code) == player_name:
-            new_host = rooms[room_code]["players"][0]
-            transfer_host(room_code, new_host)
-            logging.info(f'Host {player_name} left; new host is {new_host}')
+            destroy_room(room_code)
         return True
     return False
 
@@ -219,8 +217,9 @@ def player_in_room_exists(room_code, player_name):
     Returns:
         bool: True if player is in the room, False otherwise.
     """
-    if room_code in rooms:
+    if room_exists(room_code):
         return player_name in rooms[room_code]["players"]
+    logging.info("player does not exist in the room")
     return False
 
 def get_players(room_code):
@@ -286,7 +285,7 @@ def remove_player(room_code, player_name):
     if not room_exists(room_code):
         logging.warning(f'Remove failed: room {room_code} not found.')
         return False
-    
+
     if player_in_room_exists(room_code, player_name):
         rooms[room_code]["players"].remove(player_name)
         logging.info(f'Player {player_name} removed from room {room_code}')

@@ -50,7 +50,6 @@ def create_multiplayer_room(request):
         room_code, session = create_room(host_name)
         turn_id = rm.get_state(room_code).get("turn_id", -1)
         VotingSessions[(room_code, turn_id)] = VotingSession(room_code, turn_id)
-        VotingSessions[(room_code, turn_id)].start_voting()
         logger.info(f"Initialized VotingSession for room {room_code}")
         logger.info(f"Created room: {room_code}")
 
@@ -91,6 +90,8 @@ def join_multiplayer_room(request):
     room_code = data.get("roomCode")
     player_name = data.get("playerName")
 
+    if not rm.room_exists: 
+        JsonResponse({"Success": False, "room_exists": False})
     # Attempt to join the room
     success = join_room(room_code, player_name)
     session = None
@@ -123,12 +124,14 @@ def sync_state(request):
     data = json.loads(request.body.decode("utf-8"))
     room_code = data.get("room_code")
     state = data.get("state")
+    
+    if not rm.room_exists(room_code):
+        return JsonResponse({'success': False, 'room_exists': False})
 
     # Update room state using room_manager
     update_state(room_code, state)
     
     return JsonResponse({"success": True})
-
 
 def get_current_state(request, room_code):
     """
@@ -141,6 +144,52 @@ def get_current_state(request, room_code):
       - "state": Current state of the room
     """
     return JsonResponse({"state": get_state(room_code)})
+
+
+@csrf_exempt
+def leave_multiplayer_room(request):
+    room_code = request.GET.get("roomCode")
+    player_name = request.GET.get("playerName")
+
+    if not rm.room_exists(room_code):
+        logging.info(f'the room code {room_code} does not exist')
+        return JsonResponse({'success': False, 'room_exists': False})
+    
+    success = rm.leave_room(room_code, player_name)
+    logging.info(f'the output of leave is {success}')
+    data_payload = {}
+    if success:
+        # delete all voting sessions
+        logging.info("Emptied out all voting sessions and left the room")
+        if rm.room_exists(room_code):
+            rem_players = rm.get_players(room_code)
+            logging.info(f'One player removed but the room exists. ' +
+                         f'The remaining players are {rem_players}')
+            data_payload = {
+                'success': success,
+                'room_code': room_code,
+                'player_name': player_name,
+                'destroy': False,
+                'message': f'player removed but {room_code} still exists'
+            }
+        else:
+            data_payload = {
+                'success': success,
+                'room_code': room_code,
+                'player_name': player_name,
+                'destroy': True,
+                'message': f'Host removed and {room_code} does not exists'
+            }
+
+    else: 
+        data_payload = {
+            'success': success,
+            'room_code': room_code,
+            'player_name': player_name,
+            'message': f'Failed to leave room {room_code}'
+        }
+        logger.warning(f'Failed to leave room {room_code}')
+    return JsonResponse(data_payload)
 
 
 
@@ -277,10 +326,9 @@ def start_prerendering(request):
     logger.debug("start_turn_pipeline.send() called: " + response)
     return JsonResponse({'status': 'generation_started'})
 
-
 # send the existing work
 # everytime this is called update turn id 
-def display_question_and_options(request, session_id, room_code, turn_id):
+def display_question_and_options(request, session_id, room_code, turn_id, year):
     """ 
     Display the question and options for the current turn.
     Args:
@@ -298,39 +346,62 @@ def display_question_and_options(request, session_id, room_code, turn_id):
         - question: The question text for the current turn.
         - options: A list of options, each with:        
     """
-    global VOTING_SESSION
     logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
     logger.debug(f"Found session: {existing_session}")
     logger.debug(f"turn_id received: {turn_id}")
+    new_year = -1
+    logger.info(f'fetching for {new_year}')
 
+    if not rm.room_exists(room_code):
+        return JsonResponse({'success': False, 'room_exists': False})
+    
+    #front end unsure about turn
     if int(turn_id) == -1:
         rm.log_all_rooms()
         logger.info("room_code is " + str(room_code))
         rm_state = rm.get_state(str(room_code))
         logger.info(f"Room state for room {room_code}: {rm_state}")
+        # get the rooms turn 
         turn_id = rm_state.get("turn_id", -1)
+        new_year = rm_state.get("year")
         VotingSessions[(room_code, int(turn_id))] = VotingSession(room_code, int(turn_id))
         logger.info(f"Using turn_id from room state: {turn_id}")
         # first turn, get the latest turn (or none)
+    # gets here if the room is at the first turn 
     if int(turn_id) == -1:
+        logger.info("year:" + year)
         latest_turn = (
             Turn.objects
             .filter(session_id=existing_session.id)
             .order_by('-year', '-id')
             .first()
         )
+        # if the turn is not rrady yet 
         if not latest_turn:
             logger.warning("No turns found for this session")
             return JsonResponse({'error': 'No turn found for this session'}, status=404)
-        turn_id = latest_turn.id
-        logger.debug(f"Latest turn determined: {latest_turn}")
-
-        rm.update_state(room_code, {"turn_id": turn_id, "year": latest_turn.year})
+    
     else:
         # get specific turn by ID
-        latest_turn = get_object_or_404(Turn, id=int(turn_id))
+        turn_id = int(turn_id) + 1
+        latest_turn = get_object_or_404(Turn, year=int(year),  id=int(turn_id))
+        
+    
+    if latest_turn.year != int(year): 
+        logger.info("got here")
+        return JsonResponse({'error': 'new. year not ready yet'}, status=404)
+    
+    turn_id = latest_turn.id
+    
+    if (room_code, int(turn_id)) not in VotingSessions.keys():
+        VotingSessions[(room_code, int(turn_id))]  = VotingSession(room_code, int(turn_id))
+    
+    if VotingSessions[(room_code, int(turn_id))].is_timer_on() == False:
+            VotingSessions[(room_code, int(turn_id))].start_voting()
+    logger.debug(f"Latest turn determined: {latest_turn}")
 
+    rm.update_state(room_code, {"turn_id": turn_id, "year": latest_turn.year})
     logger.debug(f"Latest turn for session: {latest_turn}")
 
     # fetch options
@@ -341,16 +412,158 @@ def display_question_and_options(request, session_id, room_code, turn_id):
     ]
 
     response_payload = {
+        'message': 'ok',
         'room_code': room_code,
-        'turn_id': latest_turn.id,
-        'year': latest_turn.year,
+        'turn_id': turn_id,
+        'year': new_year,
         'question': latest_turn.question or '',
         'options': options_payload,
     }
 
-    return JsonResponse({'message': 'ok', 'data': response_payload}, status=200)
+    return JsonResponse(response_payload)
 
 
+# send the existing work
+# everytime this is called update turn id 
+# def display_question_and_options(request, session_id, room_code, turn_id, year):
+#     """ 
+#     Display the question and options for the current turn.
+#     Args:
+#         request: HTTP request object.
+#         session_id (int): ID of the game session.
+#         room_code (str): Code of the multiplayer room.
+#         turn_id (int): ID of the current turn. If -1, fetch the latest turn.
+#     Returns:
+#         JsonResponse with question, options, and turn details.
+
+#     attributes of response payload:
+#         - room_code: The code of the multiplayer room.
+#         - turn_id: The ID of the current turn.
+#         - year: The year associated with the current turn.
+#         - question: The question text for the current turn.
+#         - options: A list of options, each with:        
+#     """
+#     logger.debug(f"display_question_and_options called for session_id={session_id}")
+#     existing_session = get_object_or_404(Session, id=session_id)
+#     logger.debug(f"Found session: {existing_session}")
+#     logger.debug(f"turn_id received: {turn_id}")
+#     new_year = -1
+#     logger.info(f'fetching for {new_year}')
+
+#     if not rm.room_exists(room_code):
+#         return JsonResponse({'success': False, 'room_exists': False})
+#     # goes here if turn_id unknonwn -> when player joins in the middle fo the game
+#     if int(turn_id) == -1:
+#         rm.log_all_rooms()
+#         logger.info("room_code is " + str(room_code))
+#         rm_state = rm.get_state(str(room_code))
+#         logger.info(f"Room state for room {room_code}: {rm_state}")
+#         turn_id = rm_state.get("turn_id", -1)
+#         new_year = rm_state.get("year", 2035)
+#         logger.info(f"Using turn_id from room state: {turn_id}")
+#     # if the room is at -1 then it is the first turn thne get the first ever scenario generator
+#         if turn_id == -1:
+#             latest_turn = Turn.objects.filter(session_id=existing_session.id).order_by('-year', '-id').first()
+#             if not latest_turn:
+#                 return JsonResponse({'error': 'No turn found for this session'}, status=404)
+#             turn_id = latest_turn.id
+#             new_year = latest_turn.year
+#         else:
+#             latest_turn = get_object_or_404(Turn, id=turn_id)
+#     # goes here if it finds a new turn id
+#     else:
+#         logger.info("checking in else")
+#         # get specific turn by ID
+#         latest_turn = get_object_or_404(Turn, id=int(turn_id))
+#         turn_id = latest_turn.id    
+#         new_year = latest_turn.year
+
+#         logger.debug(f"Latest turn for session: {latest_turn}")
+
+#     if new_year != int(year): 
+#         logger.info(f'the year different is {new_year} vs {year}')
+#         return JsonResponse({'error': 'new. year not ready yet'}, status=404)
+    
+
+#     if (room_code, int(turn_id)) not in VotingSessions:
+#         VotingSessions[(room_code, int(turn_id))] = VotingSession(room_code, int(turn_id))
+#         rm.update_state(room_code, {"turn_id": turn_id, "year": year})
+#         VotingSessions[(room_code, int(turn_id))].start_voting()
+#         logger.debug(f"Latest turn determined: {latest_turn}")
+
+
+#     # fetch options
+#     options = Option.objects.filter(turn_id=latest_turn.id).order_by('label')
+#     options_payload = [
+#         {'option_id': o.id, 'label': o.label, 'option_text': o.option_text or ''}
+#         for o in options
+#     ]
+
+#     response_payload = {
+#         'message': 'ok',
+#         'room_code': room_code,
+#         'turn_id': turn_id,
+#         'year': new_year,
+#         'question': latest_turn.question or '',
+#         'options': options_payload,
+#     }
+
+#     return JsonResponse(response_payload)
+
+
+# scenario and image display page
+from shared.services import display_world_view
+
+
+def display_scenario_and_image(request, session_id, turn_id, year, option_id, room_code):
+    """
+    Display the world view after user makes a choice.
+    """
+    player_name = request.GET.get("playerName")
+    logger.debug(f"playername is {player_name}")
+    if not rm.room_exists(room_code):
+        return JsonResponse({'success': False, 'room_exists': False})
+    final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
+    if final_option is None:
+        logger.debug("Not all players have voted yet.")
+        print("Not all players have voted yet.")
+        return JsonResponse({
+            'success': False,
+            'image': {"status": "waiting"},
+            'message': 'Waiting for other players to vote.' 
+            }, status=404)
+    logger.debug(f"Voting result is {final_option}")
+    logger.debug(f"votes so far {VOTING_SESSION.votes}")
+    logger.debug(f"num responses so far {VOTING_SESSION.num_responses}")
+    logger.debug(f"votes for option {option_id} is {VOTING_SESSION.votes.get(option_id)}")
+    
+
+    # when you receive request check no of players, check number of responses, create a map of option id, and num votes, then get the votes from the reqwuest 
+    # the max voted option id, and use that to generate the world view
+    try:
+        world_view_data = display_world_view(session_id, turn_id, int(year), final_option)
+
+        if world_view_data.get("success"):
+            next_year = int(year) + 1
+            next_turn = Turn.objects.filter(session_id=session_id, year=next_year).first()
+            if next_turn:
+                world_view_data["next_turn_id"] = next_turn.id 
+            try:
+                # start generating next turn in background
+                start_turn_pipeline.send(session_id, next_year)
+                logger.info(f"Started generating next turn (year {next_year}) in background")
+            except Exception as e:
+                logger.warning(f"Failed to start next turn generation: {e}")
+        print("world view data: " + str(world_view_data))
+        return JsonResponse(world_view_data)
+        
+    except Exception as e:
+        print(f"Error displaying world view: {e}")
+        return JsonResponse({
+            'success': False,
+            'status': 'error',
+            'error': f'Failed to display world view: {str(e)}'
+        }, status=500)
 
 from shared.services import display_world_view
 from django.http import JsonResponse
@@ -371,7 +584,8 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     """
     player_name = request.GET.get("playerName")
     logger.info(f"playername is {player_name}")
-
+    if not rm.room_exists(room_code):
+        return JsonResponse({'success': False, 'room_exists': False})
 
     logger.info(f"Voting session state before processing response: {VotingSessions}")
     # Process player response and determine the winning option if all voted

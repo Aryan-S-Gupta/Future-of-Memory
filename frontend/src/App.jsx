@@ -6,22 +6,25 @@ import BackgroundScreenMulti from "./screens/BackgroundScreenMulti.jsx";
 import HowToScreen from "./screens/HowToScreen.jsx";
 import GamePlay from "./screens/GamePlay.jsx";
 import MultiplayerLobby from "./screens/MultiPlayerLobby.jsx";
+import GalleryScreen from "./screens/GalleryScreen.jsx";
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
 import GamePlayMulti from "./screens/GamePlayMulti.jsx";
+import HostScreen from "./screens/HostScreen.jsx";
 import FeedbackScreen from "./components/FeedbackScreen/FeedbackScreen.jsx";
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
-import MiniGameIntro from "./screens/MiniGameIntro.jsx";
-import MiniGame from "./screens/MiniGame.jsx";
-import MiniGameResult from "./screens/MiniGameResult.jsx";
 import { SessionProvider } from "../SessionContext.jsx";
 
 function App() {
 
   const routeAudioMap = {
-    "*": { src: mainTheme, loop: true },
+    "/gallery*": [
+      { src: mainTheme, loop: true, volume: 0.1 },
+      { src: galleryTheme, loop: true, volume: 0.2 },
+    ],
+    "*": [{ src: mainTheme, loop: true }],
   };
 
   return (
@@ -38,6 +41,8 @@ function App() {
               <Route path="/background-multi/:roomCode" element={<BackgroundScreenMulti/>} />
               <Route path="/feedback" element={<FeedbackScreen/>} />
               <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
+              <Route path="/multiplayer-room/:roomCode/:playerName" element={<HostScreen />} />
+              <Route path="/gallery/:sessionId" element={<GalleryScreen />} />
               <Route path="/mini-game/intro" element={<MiniGameIntro />} />
               <Route path="/mini-game/play" element={<MiniGame />} />
               <Route path="/mini-game/result" element={<MiniGameResult />} /> 
