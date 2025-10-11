@@ -100,7 +100,7 @@ export default function Screensaver({
                     exit={{ scale: 1.3, opacity: 0 }}
                     transition={{
                         scale: { duration: 0.8, ease: "easeOut" },
-                        opacity: { duration: 5, ease: "easeInOut" },
+                        opacity: { duration: 3, ease: "easeInOut" },
                     }}
                 >
                     {/* Animated circular text halos */}

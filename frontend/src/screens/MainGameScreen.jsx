@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
@@ -27,6 +28,17 @@ const MainGameScreen = () => {
   const navigate = useNavigate();
   const { sessionId, setSessionId } = useSession();
 
+  const [showButtons, setShowButtons] = useState(false);
+
+  const [begun, setBegun] = useState(false);
+
+  // Delay to match typing duration (~4.5s)
+  useEffect(() => {
+    if (!begun) return;
+    const timer = setTimeout(() => setShowButtons(true), 4500);
+    return () => clearTimeout(timer);
+  }, [begun]);
+
   const start_single_session = async () => {
     try {
       const response = await createSession();
@@ -54,32 +66,39 @@ const MainGameScreen = () => {
       {/* Screensaver: visible immediately; hides on click; reappears on idle */}
       <Screensaver
         initialShow={true}
-        idleMs={60000} // 1 minute in the museum
+        idleMs={600000}
         onDismiss={() => {
-          // optional: you could preload, warm up audio, etc.
+          if (!begun) setBegun(true);
         }}
       />
 
       {/* Game title */}
-      <h1 className="title">
-        <Typewriter
-          words={["WELCOME TO", "FUTURE OF MEMORY"]}
-          loop={1}              // run through once
-          cursor
-          cursorStyle="|"
-          typeSpeed={100}
-          deleteSpeed={30}
-          delaySpeed={1000}     // pause before deleting
-        />
-      </h1>
+      <div className={`menu-glass ${showButtons ? "show-buttons" : ""}`}>
+        <div className="menu-glass-inner">
+          <h1 className="title">
+            {begun && (
+              <Typewriter
+                words={["WELCOME TO", "FUTURE OF MEMORY"]}
+                loop={1}
+                cursor
+                cursorStyle="|"
+                typeSpeed={100}
+                deleteSpeed={30}
+                delaySpeed={1000}
+              />
+            )}
+          </h1>
 
-      {/* Menu buttons */}
-      <div className="button-group">
-        <Button baseButton="btn-primary" action={() => start_single_session()} title="Start" />
-        <Button baseButton="btn-secondary" action={() => navigate("/how-to-play")} title="How To Play" />
-        <Button baseButton="btn-secondary" action={() => start_multiple_session()} title="Multiplayer" />
+
+          <div className="button-group" aria-hidden={!showButtons}>
+
+            <Button baseButton="btn-primary" action={() => start_single_session()} title="Start" />
+            <Button baseButton="btn-secondary" action={() => start_multiple_session()} title="Multiplayer" />
+            <Button baseButton="btn-secondary" action={() => navigate("/how-to-play")} title="How To Play" />
+          </div>
+        </div>
       </div>
-    </BasePage>
+    </BasePage >
   );
 };
 
