@@ -98,52 +98,57 @@ const GamePlay = () => {
     }
   };
 
-  const speak = (text) => {
-    if (!synthRef.current || !text) return;
+  const speak = (text, onDone) => {
+    if (!synthRef.current || !text) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
     // Cancel any previous narration
     cancelTTS();
 
     // Only narrate if BGM is playing (toolbar controls this)
-    if (!isPlaying) return;
+    if (!isPlaying) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
 
     // Lower BGM volume temporarily (minimal approach)
     prevVolRef.current = volume;
     setVolume(Math.max(0, Math.min(1, volume * duckFactor)));
 
     const utter = new SpeechSynthesisUtterance(String(text));
-    // --- choose voice here ---
     const voices = synthRef.current.getVoices();
     const prefs = [
-      /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i, // Edge (neural)
-      /Microsoft Jenny Online \(Natural\).*English \(United States\)/i,  // Edge (neural)
-      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i,                    // macOS built-ins
-      /Google UK English Female/i                                        // Chrome fallback
+      /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i,
+      /Microsoft Jenny Online \(Natural\).*English \(United States\)/i,
+      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i,
+      /Google UK English Female/i
     ];
-    const picked = prefs
-      .map(rx => voices.find(v => rx.test(v.name)))
-      .find(Boolean) || voices[0];
+    const picked = prefs.map(rx => voices.find(v => rx.test(v.name))).find(Boolean) || voices[0];
     utter.voice = picked;
-    // tweak for more “majestic” feel
-    utter.rate = 0.7;  // slower (was 0.9) — lower is slower
-    utter.pitch = 1.0;   // deeper
-    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));   // tie TTS loudness to the global toolbar
 
-    utter.onend = utter.onerror = () => {
-      // Restore BGM volume
+    utter.rate = 0.7;
+    utter.pitch = 1.0;
+    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
+
+    const restore = () => {
       if (prevVolRef.current !== null) {
         setVolume(prevVolRef.current);
         prevVolRef.current = null;
       }
+      if (typeof onDone === "function") onDone();
     };
 
-    try { synthRef.current.speak(utter); } catch {
-      // In case of any error, restore
-      if (prevVolRef.current !== null) {
-        setVolume(prevVolRef.current);
-        prevVolRef.current = null;
-      }
+    utter.onend = restore;
+    utter.onerror = restore;
+
+    try {
+      synthRef.current.speak(utter);
+    } catch {
+      restore();
     }
   };
+
 
   // Build readout for question + options
   const questionReadout = useMemo(() => {
@@ -166,45 +171,84 @@ const GamePlay = () => {
   }, [screen, scenarioData?.scenario, isPlaying]); // tie to playing state
 
   // Auto-read Question + Options when it shows (and BGM is playing)
-  useEffect(() => {
-    if (screen === "question" && questionReadout) {
-      speak(questionReadout);
-    }
-    return () => cancelTTS();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, questionReadout, isPlaying]);
+  // useEffect(() => {
+  //   if (screen === "question" && questionReadout) {
+  //     speak(questionReadout);
+  //   }
+  //   return () => cancelTTS();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [screen, questionReadout, isPlaying]);
 
   // --- Staged reveal ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
   const fadeDuration = 1000; //
   useEffect(() => {
-    if (screen === "question" && currentTurn) {
+    if (screen !== "question" || !currentTurn) return;
+
+    let cleared = false;
+    let t1, t2, t3;
+
+    const fallback = () => {
       setStage(1); // show question
-      speak(currentTurn.question);
+      t1 = setTimeout(() => setStage(2), 12000 - fadeDuration);
+      t2 = setTimeout(() => setStage(3), 18000 - fadeDuration);
+      t3 = setTimeout(() => setStage(4), 24000 - fadeDuration);
+    };
 
-      const timer1 = setTimeout(() => {
-        setStage(2);
-        speak(currentTurn.options[0].option_text);
-      }, 10000 - fadeDuration);
+    const optA = currentTurn?.options?.[0]?.option_text;
+    const optB = currentTurn?.options?.[1]?.option_text;
 
-      const timer2 = setTimeout(() => {
-        setStage(3);
-        speak(currentTurn.options[1].option_text);
-      }, 15000 - fadeDuration);
-
-      const timer3 = setTimeout(() => {
-        setStage(4); // show all together, no TTS
-      }, 20000 - fadeDuration);
-
+    // If no TTS or not playing, just run fallback timers
+    if (!synthRef.current || !isPlaying) {
+      fallback();
       return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-        clearTimeout(timer3);
+        cleared = true;
+        clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
         cancelTTS();
       };
     }
-  }, [screen, currentTurn]);
+
+    // TTS-driven chain
+    setStage(1);
+    speak(currentTurn.question, () => {
+      if (cleared) return;
+      setStage(2);
+      if (optA) {
+        speak(optA, () => {
+          if (cleared) return;
+          setStage(3);
+          if (optB) {
+            speak(optB, () => {
+              if (cleared) return;
+              setStage(4);
+            });
+          } else {
+            setStage(4);
+          }
+        });
+      } else {
+        // No A? Jump forward.
+        setStage(3);
+        if (optB) {
+          speak(optB, () => {
+            if (cleared) return;
+            setStage(4);
+          });
+        } else {
+          setStage(4);
+        }
+      }
+    });
+
+    return () => {
+      cleared = true;
+      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+      cancelTTS();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, currentTurn, isPlaying]);
+
 
   // Map button stage
   const getButtonStageClass = (idx) => {
