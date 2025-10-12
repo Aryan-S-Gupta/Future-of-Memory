@@ -17,6 +17,27 @@
   color: var(--color-text);
   margin-bottom: var(--space-md);
 }
+h2 {
+  font-family: var(--font-body);
+  font-size: var(--fs-question);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+
+.winner-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  animation: fadeIn 1s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 /* Fade-in animation for scenario/question text */
 .fade-in {

@@ -516,8 +516,10 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
         "total_players": VotingSessions[(room_code, current)].total_players,
     }
     if final_option == "TIE":
+        logger.info("senfing tie")
         return JsonResponse({
-            "success": False,
+            'success': False,
+            'room_exists': True,
             "tie": True,
             "votes_info": votes_info,
             "message": "Votes tied, switching to minigame."
@@ -623,11 +625,11 @@ def submit_tiebreak_score_view(request):
     except (KeyError, ValueError, json.JSONDecodeError):
         return HttpResponseBadRequest("Invalid or missing parameters")
 
-    session = VotingSessions.get((room_code, turn_id))
-    if not session:
+    voting_sesh = VotingSessions.get((room_code, turn_id))
+    if not voting_sesh:
         return JsonResponse({"error": "No active voting session found"}, status=404)
 
-    result = session.submit_tiebreak_score(player_name, score)
+    result = voting_sesh.submit_tiebreak_score(player_name, score)
     if result:
         return JsonResponse({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})
     else:

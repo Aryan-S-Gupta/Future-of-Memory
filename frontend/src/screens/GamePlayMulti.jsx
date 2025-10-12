@@ -16,7 +16,8 @@ import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 import VotingDisplay from "../components/Voting Display/VotingDisplay.jsx";
 import { getVotingInfo} from "../../api/multiplayer/GameFlowApi";
-
+import MiniGame from "./MiniGame.jsx";
+import { submitTiebreakScore } from "../../api/multiplayer/GameFlowApi.js";
 
 
 
@@ -37,9 +38,10 @@ const GamePlayMulti = () => {
   const [showVotes, setShowVotes] = useState(false)
   const [votes, setVotes] = useState([]);
   const [totalPlayers, setTotalPlayers] = useState(1);
-  const [fetchVoteData, setFetchVoteData] = useState(true);
-  const [tiePlayers, setTiePlayers] = useState([]); // tied players
-  const [tieOptions, setTieOptions] = useState([]); // tied options
+  const [miniGameOccurred, setMiniGameOccurred] = useState(false);
+  const [winnerInfo, setWinnerInfo] = useState(null);
+  const [showWinner, setShowWinner] = useState(false);
+  const [played, setPlayed] = useState(false)
 
   // --- Staged reveal for multiplayer ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
@@ -262,7 +264,14 @@ const GamePlayMulti = () => {
         console.log(
           `[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`
         );
+
+        if (screen === "mini-game-tiebreak") {
+          return null;
+        }
         if (allVoted) {
+          if (tiebreak) {
+            return null;
+          }
           console.log("All players voted!");
           setScreen("loading")
           setLoadingState("scenario")
@@ -278,7 +287,9 @@ const GamePlayMulti = () => {
           }
         }
         return result;
-      }, enabled: loadingState === "none", 
+      }, enabled: loadingState === "none" &&   screen !== "mini-game-tiebreak" &&
+          screen !== "waiting-for-others" &&
+          screen !== "winner-display",  
       refetchInterval: 300
   })
 
@@ -298,7 +309,6 @@ const GamePlayMulti = () => {
     setOptionId(option_id);
   }
 
-
   const {
     data: out,
     isLoading: isTurnLoading,
@@ -309,26 +319,50 @@ const GamePlayMulti = () => {
       queryFn: async () => {
         console.log("submitting option", sessionId);
         const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
+        console.log(out)
         if (!out || !out.scenario || !out.scenario.text) {
           if (!out.room_exists) {
             setRoomDestroyed(true); 
             setScreen("destroyed");
           }
+          if (!out.success) {
+            console.log("not success")
+            if ( out.tie && allVoted && played) {
+              // console.log("waiting fr others")
+              // setScreen("waiting-for-others");
+              // setTimeout(() => {
+              //   setScreen("scenario");
+              // }, 5000);
+              // console.log("waiting done");
+
+            } else if(out.tie && allVoted) {
+              console.log(allVoted);
+              console.log("Tie detected, launching mini-game");
+              setMiniGameOccurred(true);
+              setScreen("mini-game-tiebreak");
+              return null;
+            } 
+          } 
           console.log("dont have scenario yet");
           return null;
-      }
+      } if (allVoted && miniGameOccurred) {
+            // console.log("win announcement")
+            // setScreen("winner-display");
+            // setTimeout(() => {
+            //   setScreen("scenario");
+            // }, 5000);
+            // console.log("announcement done")
+            // setMiniGameOccurred(false);
+            // setPlayed(false);
+            setScreen("scenario");
+            return null
+        } 
+
       console.log("the data is", out );
       const mapped = {
         scenario: out.scenario.text,
         image: out.image.url
       };
-
-      if (!out.success) {
-        if(out.tie && allVoted) {
-          console.log("reached minigame");
-          setScreen("mini-game-tiebreak");
-        }
-      }
 
       console.log("Submit choice response:", mapped);
       setScreen("scenario");
@@ -337,7 +371,7 @@ const GamePlayMulti = () => {
       setOptionId(null);
       return out;
     },
-    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed",
+    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" ,
     onError: (err) => {
       console.log("onError:", err);
     }, 
@@ -401,10 +435,6 @@ const getFadeClass = (idx) => {
   }
 };
 
-
-
-
-
     // Fetch fun facts when loading scenario
     const fetchFunFacts = async () => {
       try {
@@ -454,6 +484,7 @@ const getFadeClass = (idx) => {
               action={() => {
                 setScreen("loading");
                 setLoadingState("question");
+                setAllVoted(false);
                 setCurrentTurn(null);
                 //setFetchQuestion(true);
                 setScenarioData(null);
@@ -490,35 +521,36 @@ const getFadeClass = (idx) => {
           </div>
         </div>
       )}
-
       {screen === "mini-game-tiebreak" && (
         <MiniGame
-          playerName={playerName}      // passed automatically from multiplayer state
+          playerName={playerName}
           roomCode={roomCode}
           turnId={currentTurn.turn_id}
           onFinish={async (score) => {
-            // Submit score to backend for tie-break resolution
-            await submitTiebreakScore(playerName, roomCode, currentTurn.turn_id, score);
+            console.log(`[MiniGame] ${playerName} finished with score ${score}`);
+            const res = await submitTiebreakScore(playerName, roomCode, currentTurn.turn_id, score);
+            setPlayed(true)
+            if (res.status === "resolved") {
+                setWinnerInfo(res.winner)
 
-            // Poll backend until tie-break winner is determined
-            let status = await getTiebreakStatus(roomCode, currentTurn.turn_id);
-            while (!status.final_option) {
-              await new Promise(r => setTimeout(r, 2000));
-              status = await getTiebreakStatus(roomCode, currentTurn.turn_id);
             }
-
-            console.log("Tie-break winner:", status.final_option);
-
-            // Reset tie state and continue scenario
-            setTiePlayers([]);
-            setTieOptions([]);
-            setTieFinished(true);
-            setScreen("loading");
-            setLoadingState("scenario");
-            await fetchFunFacts();
           }}
         />
       )}
+      {screen === "winner-display" && winnerInfo && (
+        <div className="fade-in">
+          <h2>{winnerInfo} has won the round!</h2>
+          <p>Their decision will be used for the next scenario.</p>
+        </div>
+      )}
+      {screen === "waiting-for-others" && (
+        <div className="waiting-screen fade-in">
+          <h2>Well done {playerName}!</h2>
+          <p>Please wait while other players finish their mini-game...</p>
+        </div>
+      )}
+
+
 
     </BasePage>
   );
