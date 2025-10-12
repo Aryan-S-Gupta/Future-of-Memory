@@ -500,11 +500,14 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     current = rm.get_state(room_code).get("turn_id", -1)
     logger.info(f"turn_id received: {turn_id}")
     final_option = VotingSessions[(room_code, int(current))].process_player_response(room_code, player_name, option_id)
+
     logger.info(f"[Vote Submitted] {player_name} voted for {option_id} in room {room_code}")
     logger.info(f"[Current Votes] {VotingSessions[(room_code, int(current))].get_p_votes()}")
     if final_option is None: 
         final_option = VotingSessions[(room_code, int(current))].final_option
         logger.info(f"Voting result is {final_option}")
+
+
 
     # Prepare vote tracking info
     votes_info = {
@@ -512,6 +515,13 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
         "players_voted": list(VotingSessions[(room_code, current)].voted_players), # player names who voted
         "total_players": VotingSessions[(room_code, current)].total_players,
     }
+    if final_option == "TIE":
+        return JsonResponse({
+            "success": False,
+            "tie": True,
+            "votes_info": votes_info,
+            "message": "Votes tied, switching to minigame."
+        })
 
     # If not all players have voted, return votes info only
     if final_option is None:
@@ -519,6 +529,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
         return JsonResponse({
             "success": False,
             "scenario": "",
+            "tie": False,
             "votes_info": votes_info,
             "message": "Waiting for other players to vote."
         }, status=404)
@@ -622,19 +633,4 @@ def submit_tiebreak_score_view(request):
     else:
         return JsonResponse({"status": "pending"})
 
-def get_tiebreak_status_view(request, room_code, turn_id):
-    """
-    Returns current tie-break status.
-    Useful for frontend polling.
-    """
-    session = VotingSessions.get((room_code, int(turn_id)))
-    if not session:
-        return JsonResponse({"error": "No session found"}, status=404)
 
-    payload = {
-        "tie_mode": session.tie_mode,
-        "tie_players": session.tie_players,
-        "tie_scores": session.tie_scores,
-        "final_option": session.final_option,
-    }
-    return JsonResponse(payload)

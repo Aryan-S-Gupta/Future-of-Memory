@@ -47,8 +47,7 @@ const GamePlayMulti = () => {
   
   const [hasAnimated, setHasAnimated] = useState(false); 
   const fadeDuration = 2000;
-
-
+  const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
   scenario: 
@@ -253,7 +252,9 @@ const GamePlayMulti = () => {
         console.log("[VotingQuery] Mapped votes:", mappedVotes);
         const votesCount = data.num_responses;
         const totalCount = data.total_players;
-        const allVoted = votesCount >= totalCount;
+        if (votesCount >= totalCount) {
+          setAllVoted(true);
+        }
         setVotes(mappedVotes);
         setTotalPlayers(data.total_players);
 
@@ -261,11 +262,7 @@ const GamePlayMulti = () => {
         console.log(
           `[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`
         );
-        if (allVoted && data.tie_mode) {
-          setTiePlayers(data.tie_players);
-          setTieOptions(data.tie_options);
-          setScreen("mini-game-tiebreak");
-        } else if (allVoted) {
+        if (allVoted) {
           console.log("All players voted!");
           setScreen("loading")
           setLoadingState("scenario")
@@ -325,6 +322,14 @@ const GamePlayMulti = () => {
         scenario: out.scenario.text,
         image: out.image.url
       };
+
+      if (!out.success) {
+        if(out.tie && allVoted) {
+          console.log("reached minigame");
+          setScreen("mini-game-tiebreak");
+        }
+      }
+
       console.log("Submit choice response:", mapped);
       setScreen("scenario");
       setScenarioData(mapped);
