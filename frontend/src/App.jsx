@@ -40,8 +40,7 @@ function App() {
               <Route path="/feedback" element={<FeedbackScreen/>} />
               <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
               <Route path="/projector-room/:roomCode/" element={<HostScreen />} />
-              <Route path="/player-rppm/:roomCode/" element={<PlayerScreen />} />
-
+              <Route path="/player-room/:roomCode/" element={<PlayerScreen />} />
             </Routes>
           </SessionProvider>
         </BackgroundWrapper>
