@@ -14,9 +14,6 @@ import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
 import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 
-// show room code on the top of the screen 
-// change the api logic so that it gets the votes 
-// 
 const HostScreen = () => {
   const { roomCode } = useParams(); 
   const [searchParams] = useSearchParams();
@@ -232,7 +229,7 @@ const HostScreen = () => {
           );
           if (allVoted) {
             console.log("All players voted!");
-            setOptionId(data.option_id);
+            setOptionId(data.final_option);
             setScreen("loading");
             setLoadingState("scenario");
             await fetchFunFacts();
@@ -288,11 +285,11 @@ const HostScreen = () => {
         setOptionId(null);
         return out;
       },
-      enabled: screen == "scenario",
+      enabled: loadingState == "scenario",
       onError: (err) => {
         console.log("onError:", err);
       }, 
-      refetchInterval: 3000
+      refetchInterval: 1000
   });
   
   useEffect(() => {
@@ -383,9 +380,6 @@ const HostScreen = () => {
               <img src={scenarioData.image} alt="scenario" className="scenario-img" />
             </div>
           )}
-          <div className="text-container">
-            <h2>{scenarioData.scenario}</h2>
-          </div>
           {/* Continue button at bottom */}
           <div className="scenario-footer">
             <Button

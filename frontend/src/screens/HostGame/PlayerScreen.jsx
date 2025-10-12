@@ -40,7 +40,7 @@ const PlayerScreen = () => {
   const fadeDuration = 2000;
 
 
-  const [loadingState, setLoadingState] = useState("question")
+  const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -74,7 +74,7 @@ const PlayerScreen = () => {
           setScreen("loading");
           setLoadingState("question");
           await fetchFunFacts();
-          console("loading at the moment");
+          console.log("loading at the moment");
           return null;
         } else {
           setCurrentTurn(result);
@@ -86,13 +86,7 @@ const PlayerScreen = () => {
           return result;
         }
     }, enabled: loadingState == "question", 
-    refetchInterval: (result) => {
-        if (result != null) {
-          return false;
-        } else {
-          3000;
-        }
-    }
+      refetchInterval: (result) => result ? false : 3000
   })
 
 
@@ -324,7 +318,7 @@ const PlayerScreen = () => {
     onError: (err) => {
       console.log("onError:", err);
     }, 
-    refetchInterval: 3000
+    refetchInterval: 1000
 });
 
 
@@ -417,20 +411,10 @@ const getFadeClass = (idx) => {
     )}
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
-              {/* Image in middle */}
-          {scenarioData.image && ( 
-            <div className="scenario-image">
-              <img src={scenarioData.image} alt="scenario" className="scenario-img" />
-            </div>
-          )}
           {/* Scenario text at top */}
           <div className="text-container">
             <h2 className="fade-in">{scenarioData.scenario}</h2>
           </div>
-
-
-
-
           {/* Continue button at bottom */}
           <div className="scenario-footer">
             <Button
