@@ -31,7 +31,9 @@ const {
         if (res.data.game_started) {
             console.log("game started")
             navigate(`/projector-room/${roomCode}?playerName=${playerName}&mode=${mode}`);
+            return res
         }
+        return null;
     },
     enabled: host !== playerName,
     onError: (err) => {
@@ -57,7 +59,9 @@ const {
 
       <div className="crawl-container">
         <div className="crawl-text">
-          <p>
+
+            {host === playerName && (
+            <p>
             Welcome to 2035 <br /> <br />
             Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /> <br />
             Together with other leaders, you stand between promise and peril. <br /> <br />
@@ -65,7 +69,9 @@ const {
             redefining what it means to be human. <br /> <br />
             Will you forge alliances, push for progress, or defend your people’s values? <br /> <br />
             The destiny of millions rests in your collective hands! <br /> <br />  
-          </p>
+            </p>
+            )}
+
         </div>
       </div>
 

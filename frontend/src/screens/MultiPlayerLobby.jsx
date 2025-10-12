@@ -97,7 +97,7 @@ const MultiplayerLobby = () => {
             console.log("went to background screen");
               navigate(`/projection-host/${code}?playerName=${playerName}&hostName=${data.host}&mode=${mode}`);
           } else {
-              navigate(`/projection-room/${code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
+              navigate(`/player-room/${code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
           }
         } else { 
           navigate(`/background-multi/${code}?playerName=${name}&mode=${mode}`);

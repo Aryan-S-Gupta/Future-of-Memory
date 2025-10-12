@@ -10,8 +10,9 @@ import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
-import VotingDisplay from "../../components/VotingDisplay/VotingDisplay.jsx";
-import { useBgm } from "../../audio/AudioProvider.jsx";
+import { getFunFacts } from "../../../api/single-player/GameApi.js";
+import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
+import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 
 // show room code on the top of the screen 
 // change the api logic so that it gets the votes 
@@ -29,8 +30,13 @@ const HostScreen = () => {
   const [option_id, setOptionId] = useState(null);
   const [turn, setTurn] = useState(-1);
   const [loadingState, setLoadingState] = useState("none");
+    const [stage, setStage] = useState(0);
+      const fadeDuration = 2000;
   const [roomDestroyed, setRoomDestroyed] = useState(false);
   const [votes, setVotes] = useState([]);
+    const [hasAnimated, setHasAnimated] = useState(false); 
+    // --- Tie narration to BGM ---
+    const { isPlaying, volume, setVolume } = useBgm();
   const [totalPlayers, setTotalPlayers] = useState(1);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
@@ -226,8 +232,9 @@ const HostScreen = () => {
           );
           if (allVoted) {
             console.log("All players voted!");
-            setScreen("loading")
-            setLoadingState("scenario")
+            setOptionId(data.option_id);
+            setScreen("loading");
+            setLoadingState("scenario");
             await fetchFunFacts();
             if (!scenarioData || !scenarioData.scenario) {
               console.log("Scenario not ready → go to loading screen");
@@ -281,14 +288,12 @@ const HostScreen = () => {
         setOptionId(null);
         return out;
       },
-      enabled: currentTurn != null &&  option_id != null && screen == "loading",
+      enabled: screen == "scenario",
       onError: (err) => {
         console.log("onError:", err);
       }, 
       refetchInterval: 3000
   });
-  
-  
   
   useEffect(() => {
     if (screen === "question") {
@@ -345,9 +350,6 @@ const HostScreen = () => {
   };
   
   
-  
-  
-  
       // Fetch fun facts when loading scenario
       const fetchFunFacts = async () => {
         try {
@@ -384,8 +386,20 @@ const HostScreen = () => {
           <div className="text-container">
             <h2>{scenarioData.scenario}</h2>
           </div>
+          {/* Continue button at bottom */}
           <div className="scenario-footer">
-            <Button baseButton="btn-primary" action={handleContinue} title="Continue" />
+            <Button
+              baseButton="btn-primary"
+              action={() => {
+                setScreen("loading");
+                setLoadingState("question");
+                setCurrentTurn(null);
+                //setFetchQuestion(true);
+                setScenarioData(null);
+                console.log("Session ID:", sessionId);
+              }}
+              title="Continue"
+            />
           </div>
         </div>
       )}

@@ -16,6 +16,7 @@ import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
 import { SessionProvider } from "../SessionContext.jsx";
 import HostBackgroundScreen from "./screens/HostGame/HostBackgroundScreen.jsx";
+import PlayerScreen from "./screens/HostGame/PlayerScreen.jsx";
 
 function App() {
 
@@ -39,6 +40,7 @@ function App() {
               <Route path="/feedback" element={<FeedbackScreen/>} />
               <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
               <Route path="/projector-room/:roomCode/" element={<HostScreen />} />
+              <Route path="/player-rppm/:roomCode/" element={<PlayerScreen />} />
 
             </Routes>
           </SessionProvider>
