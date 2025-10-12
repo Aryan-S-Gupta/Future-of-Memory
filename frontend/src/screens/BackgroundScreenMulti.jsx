@@ -1,7 +1,7 @@
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
-import "../styles/BackgroundScreen.css";
+import "../styles/tokens.css";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 
 /**

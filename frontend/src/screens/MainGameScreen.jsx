@@ -106,6 +106,7 @@ const MainGameScreen = () => {
             />
           </div>
         </div>
+      </div>
     </BasePage >
   );
 };
