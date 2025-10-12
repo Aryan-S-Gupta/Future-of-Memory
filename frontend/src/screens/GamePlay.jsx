@@ -11,7 +11,7 @@ import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/contro
 import { useMemo, useRef } from "react";
 import "../styles/GamePlay.css";
 import { getFunFacts } from "../../api/single-player/GameApi.js";
-
+import { useNavigate } from "react-router-dom";
 
 
 /**
