@@ -21,7 +21,7 @@ class SessionAdmin(admin.ModelAdmin):
 
 @admin.register(Turn)
 class TurnAdmin(admin.ModelAdmin):
-    list_display = ['year', 'session', 'has_question', 'user_choice', 'question_generated_at']
+    list_display = ['year', 'session', 'has_question', 'user_choice', 'has_story_state', 'question_generated_at']
     list_filter = ['session', 'user_choice', 'question_generated_at']
     search_fields = ['question']
     ordering = ['year']
@@ -38,6 +38,11 @@ class TurnAdmin(admin.ModelAdmin):
             'fields': ('user_choice',),
             'classes': ('collapse',)
         }),
+        ('Story State Management', {
+            'fields': ('story_state',),
+            'classes': ('collapse',),
+            'description': 'Compressed story state for efficient LLM context processing'
+        }),
         ('Image Management', {
             'fields': ('displayed_image_rel',),
             'classes': ('collapse',)
@@ -48,12 +53,17 @@ class TurnAdmin(admin.ModelAdmin):
         return bool(obj.question)
     has_question.boolean = True
     has_question.short_description = 'Has Question'
+    
+    def has_story_state(self, obj):
+        return bool(obj.story_state and obj.story_state != {})
+    has_story_state.boolean = True
+    has_story_state.short_description = 'Has Story State'
 
 @admin.register(Option)
 class OptionAdmin(admin.ModelAdmin):
-    list_display = ['turn_year', 'label', 'has_option_text', 'has_image_text', 'has_scenario', 'render_count']
+    list_display = ['turn_year', 'label', 'has_option_text', 'has_image_text', 'has_scenario', 'has_scenario_summary', 'render_count']
     list_filter = ['label', 'turn__session']
-    search_fields = ['option_text', 'image_text', 'scenario', 'scenario_query_text', 'question_query_text', 'turn__year']
+    search_fields = ['option_text', 'image_text', 'scenario', 'scenario_summary', 'scenario_query_text', 'question_query_text', 'turn__year']
     ordering = ['turn__year', 'label']
     
     def turn_year(self, obj):
@@ -74,6 +84,11 @@ class OptionAdmin(admin.ModelAdmin):
         return bool(obj.scenario)
     has_scenario.boolean = True
     has_scenario.short_description = 'Has Scenario'
+    
+    def has_scenario_summary(self, obj):
+        return bool(obj.scenario_summary)
+    has_scenario_summary.boolean = True
+    has_scenario_summary.short_description = 'Has Summary'
     
     def render_count(self, obj):
         return obj.renders.count()
