@@ -26,7 +26,8 @@ Steps to follow everytime a new branch is pulled:
 ```https://github.com/manya-k/DECO3801---Data-Busters.git```
 3. ```cd frontend/src```
 4. ```npm install```
-5. ```npm run dev``` -- to actually run the game
+5. ```npm run dev -- --host``` -- on mac
+    ```npm run dev --host``` -- on windows
 
 ## Back End: 
 

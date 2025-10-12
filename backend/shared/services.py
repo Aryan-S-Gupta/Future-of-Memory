@@ -670,23 +670,34 @@ def display_world_view(session_id: int, turn_id: int, year: int, option_id: int)
             "success": False
         }
     
-    # Step 3: Combine everything into a JSON response
+        # Step 3: Check readiness
+    scenario_ready = bool(scenario_to_display.strip())
+    image_ready = bool(image_info.get("image_url"))
+
+    if not (scenario_ready and image_ready):
+        logger.info(f"World view not ready yet (scenario_ready={scenario_ready}, image_ready={image_ready})")
+        return {
+            "success": False,
+            "status": "waiting",
+            "scenario_ready": scenario_ready,
+            "image_ready": image_ready,
+        }
+
+    # Step 4: Combine everything into a ready response
     world_view_response = {
         "success": True,
+        "status": "ready",
         "session_id": session_id,
         "turn_id": turn_id,
         "year": year,
-        "scenario": {
-            "text": scenario_to_display,
-        },
+        "scenario": {"text": scenario_to_display},
         "image": {
             "status": image_info.get("status", "unknown"),
             "url": image_info.get("image_url", ""),
         },
     }
-    
+
     logger.info(f"World view display completed for session {session_id}, turn {turn_id}, option {option.label}")
-    
     return world_view_response
 
 
