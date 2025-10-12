@@ -205,6 +205,11 @@ const GamePlay = () => {
       setScreen("scenario");
       setYear(year + 1);
       };
+  useEffect(() => {
+    if (year >= 2035 + 50) {
+      navigate(`/gallery/${sessionId}`);
+    }
+  }, [year, navigate, sessionId]);
 
   return (
     <BasePage>
