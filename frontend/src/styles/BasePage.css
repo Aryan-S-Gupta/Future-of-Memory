@@ -87,7 +87,7 @@ body,
 /* Text container */
 .text-container {
   background: var(--color-text-container-bg);
-  padding: var(--space-xxl);
+  /* padding: var(--space-xxl); */
   border-radius: var(--radius-lg);
   max-width: 800px;
   text-align: center;

@@ -1,42 +1,39 @@
 @import url('/src/styles/tokens.css');
 
-/* ===== Shared container ===== */
+/* Button container */
 .button-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 1rem;
   pointer-events: auto;
 }
 
-/* ===== Base button (glass) ===== */
-.btn-primary,
-.btn-secondary,
-.btn-exit,
-.btn-confirm,
-.btn-cancel {
-  -webkit-appearance: none;
-  appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 14px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #fff;
+/* PRIMARY */
+.btn-primary {
+  padding: 1rem 3rem;
+  font-size: 1.3rem;
   font-family: var(--btn-font-display);
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+  font-weight: bold;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(145deg, var(--btn-primary-grad-start), var(--btn-primary-grad-end));
+  color: var(--btn-primary-text);
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 0 8px rgba(255, 255, 255, 0.12);
-  transition: transform 160ms var(--ease-standard), box-shadow 200ms var(--ease-standard), background 200ms var(--ease-standard);
+  box-shadow: var(--btn-primary-shadow);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s var(--ease-standard);
 }
 
-/* Sizes */
-.btn-primary,
+.btn-primary:hover {
+  background: linear-gradient(145deg, var(--btn-primary-hover-start), var(--btn-primary-hover-end));
+  box-shadow: var(--btn-primary-shadow-hover);
+  transform: scale(1.05);
+}
+
+/* SECONDARY */
 .btn-secondary {
   padding: 1rem 3rem;
-  font-size: 1rem;
   font-size: 1.8rem;
   font-family: var(--btn-font-display);
   font-weight: bold;
@@ -51,136 +48,18 @@
   transition: all 0.3s var(--ease-standard);
 }
 
-.btn-primary:hover,
-.btn-secondary:hover,
-.btn-confirm:hover,
-.btn-cancel:hover {
+.btn-secondary:hover {
+  background: linear-gradient(145deg, var(--btn-secondary-hover-start), var(--btn-secondary-hover-end));
+  box-shadow: var(--btn-secondary-shadow-hover);
   transform: translateY(-2px);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.12));
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32), inset 0 0 10px rgba(255, 255, 255, 0.18);
 }
 
-/* Subtle tinting to differentiate variants (keeps glass) */
-.btn-primary {
-  /* light tint from your primary tokens */
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.25),
-    0 0 0 1px color-mix(in srgb, var(--btn-primary-grad-end) 35%, transparent) inset,
-    inset 0 0 8px rgba(255, 255, 255, 0.12);
-}
-
-.btn-secondary {
-  /* slightly calmer tint */
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.25),
-    0 0 0 1px color-mix(in srgb, var(--btn-secondary-grad-end) 28%, transparent) inset,
-    inset 0 0 8px rgba(255, 255, 255, 0.12);
-}
-
-/* ===== Exit button — fixed top-left ===== */
+/* BACK */
 .btn-exit {
   position: fixed;
   top: 1.5rem;
   left: 1.5rem;
-  /* top-left as requested */
-  z-index: 1000;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  border-radius: 8px;
-  letter-spacing: 1px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
-  color: #e5e7eb;
-  /* neutral, readable */
-}
-
-.btn-exit:hover {
-  transform: translateY(-1px);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.10));
-}
-
-/* ===== (Optional) Popup styles used by exit confirm ===== */
-.popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1100;
-}
-
-.popup-box {
-  background: rgba(255, 255, 255, 0.9);
-  color: #0f172a;
-  padding: 24px;
-  border-radius: 12px;
-  max-width: 420px;
-  width: 86%;
-  text-align: center;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.popup-actions {
-  margin-top: 18px;
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.btn-confirm,
-.btn-cancel {
-  padding: 10px 16px;
-  font-size: 0.95rem;
-  border-radius: 10px;
-}
-
-.btn-confirm {
-  background: #28a745;
-}
-
-.btn-cancel {
-  background: #6c757d;
-}
-
-.btn-confirm:hover {
-  background: #218838;
-}
-
-.btn-next {
-  -webkit-appearance: none;
-  appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 14px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #fff;
-  font-family: var(--btn-font-display);
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  transition: all 0.3s var(--ease-standard);
-}
-
-.btn-primary:hover,
-.btn-secondary:hover,
-.btn-confirm:hover,
-.btn-cancel:hover {
-  transform: translateY(-2px);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.12));
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32), inset 0 0 10px rgba(255, 255, 255, 0.18);
-}
-
-/* FEEDBACK BUTTON */
-.btn-feedback {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-
-  padding: 0.8rem 1.6rem;
+  padding: 0.5rem 1.25rem;
   font-size: 1rem;
   font-family: var(--btn-font-display);
   font-weight: bold;
@@ -202,70 +81,21 @@
 
 .choice-container {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1100;
+  gap: 24px;
+  z-index: 10;
 }
 
-.popup-box {
-  background: rgba(255, 255, 255, 0.9);
-  color: #0f172a;
-  padding: 24px;
-  border-radius: 12px;
-  max-width: 420px;
-  width: 86%;
-  text-align: center;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.popup-actions {
-  margin-top: 18px;
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.btn-confirm,
-.btn-cancel {
-  padding: 10px 16px;
-  font-size: 0.95rem;
-  border-radius: 10px;
-}
-
-.btn-confirm {
-  background: #28a745;
-}
-
-.btn-cancel {
-  background: #6c757d;
-}
-
-.btn-confirm:hover {
-  background: #218838;
-}
-
-.btn-next {
-  -webkit-appearance: none;
-  appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 14px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #fff;
-  font-family: var(--btn-font-display);
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+.choice-btn {
+  width: 600px;
+  height: 350px;
+  border: 0;
+  border-radius: 50px;
   cursor: pointer;
-  box-shadow: 0 0 15px rgba(96, 219, 250, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.7);
-  transition: all 0.3s ease;
-  z-index: 99;
 
   /* Typography */
   font-family: var(--btn-font-body);
@@ -303,10 +133,11 @@
   pointer-events: none;
 }
 
-.btn-next:hover {
-  transform: translateY(-2px);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.12));
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32), inset 0 0 10px rgba(255, 255, 255, 0.18);
+.choice-btn:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 0 0 1px rgba(173, 216, 255, 0.55) inset,
+    var(--choice-shadow-hover);
 }
 
 /* FEEDBACK BUTTON */
@@ -338,4 +169,154 @@
   color: #ffffff;
   box-shadow: 0 0 20px rgba(96, 219, 250, 0.9), 0 0 40px rgba(96, 219, 250, 0.6);
   transform: translateY(-2px) scale(1.05);
+}
+
+
+/* next button fade-in */
+.next-fade-in {
+  opacity: 0;
+  animation: nextfadeIn var(--dur-next-fade) var(--ease-standard) forwards;
+  animation-delay: 12s;
+}
+
+@keyframes nextfadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    /* subtle upward motion */
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.text-container2 {
+  background-color: var(--color-text-container-bg);
+  padding: var(--space-md);
+  border-radius: var(--radius-sm);
+  max-width: 400px;
+  text-align: center;
+}
+
+/* Body text */
+.text2 {
+  font-family: var(--font-body);
+  font-size: var(--fs-body-strong);
+  font-weight: 400;
+  text-align: center;
+  color: var(--color-accent);
+  text-shadow: var(--shadow-subheading);
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+
+.crawl-container {
+  perspective: 800px;
+  /* creates the 3D effect */
+  height: 500px;
+  /* height of the visible area */
+  width: 800px;
+  overflow: hidden;
+  position: relative;
+}
+
+.crawl-text {
+  position: absolute;
+  bottom: -35rem;
+  /* start slightly below the panel */
+  width: 100%;
+  transform-origin: 50% 100%;
+  transform: rotateX(22deg);
+  animation: crawl3d var(--dur-crawl, 20s) linear forwards;
+  /* forwards = freeze */
+  font-family: var(--font-display, 'Orbitron'), system-ui, sans-serif;
+  text-align: justify;
+  text-shadow: var(--shadow-text, 1px 1px 4px rgb(0 0 0 / 1));
+  z-index: 1;
+}
+
+.crawl-text p {
+  margin: 0 auto;
+  width: min(46ch, 80%);
+  line-height: 1.65;
+  letter-spacing: 0.02em;
+
+  /* bigger, readable, responsive */
+  font-size: clamp(18px, calc(var(--fs-crawl, 2.5rem) * 0.6), 28px);
+  font-weight: 600;
+
+  /* subtle sci-fi tint with strong contrast on glass */
+  background: linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-accent) 88%, #ffffff 0%) 0%,
+      rgba(255, 255, 255, 0.98) 40%,
+      color-mix(in srgb, var(--color-accent-2) 85%, #ffffff 0%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Tweak end state so the paragraph is fully in view (adjust -120% if needed) */
+@keyframes crawl3d {
+  0% {
+    transform: rotateX(22deg) translateY(0) translateZ(0);
+    opacity: 0;
+  }
+
+  6% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: rotateX(22deg) translateY(-120%) translateZ(-240px);
+    opacity: 1;
+  }
+}
+
+/* === Choice area: responsive layout + fluid type, scoped to this screen === */
+.choice-container {
+  /* keep your positioning, but allow wrapping */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(12px, 2vw, 24px);
+  align-items: stretch;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* On short viewports, unfix from bottom so content can scroll */
+@media (max-height: 680px) {
+  .choice-container {
+    position: static;
+    padding: 0 20px 20px;
+  }
+}
+
+/* Button cards: responsive size + multi-line text */
+.choice-btn {
+  width: min(100%, clamp(260px, 42vw, 520px));
+  height: clamp(120px, 28vh, 260px);
+  padding: clamp(12px, 2.2vh, 24px);
+  border-radius: clamp(18px, 5vw, 50px);
+  overflow: hidden;                 /* let JS auto-shrink avoid overflow */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  /* Fluid type; JS will shrink further only if still overflowing */
+  font-size: clamp(0.95rem, 1.1vw + 0.35rem, 1.35rem);
+  line-height: 1.25;
+  white-space: normal;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Keep hover motion subtle on small screens */
+@media (max-width: 480px) {
+  .choice-btn:hover { transform: translateY(-3px); }
 }

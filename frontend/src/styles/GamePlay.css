@@ -1,12 +1,11 @@
 @import url('/src/styles/tokens.css');
 
 .question-container {
-  padding: 3rem; 
   border-radius: 10px;
   position: fixed;
-  top: 50px;
-  left: 25px;
-  right: 25px;
+  top: 45px;
+  left: 20px;
+  right: 20px;
   text-align: center;
 }
 
@@ -137,3 +136,50 @@
   position: sticky;
   top: 2rem;
 }
+
+/* Question text: scales with viewport, stays readable on long lines */
+.question-container h2 {
+  /* min 1rem, fluid middle, max 2.2rem */
+  font-size: clamp(1rem, 2.2vw + 0.5rem, 2.2rem);
+  line-height: 1.25;            /* tighter to fit more lines */
+  text-wrap: balance;           /* nicer multi-line breaks */
+  word-break: normal;           /* avoid ugly mid-word breaks */
+  margin-top: 0;
+}
+
+/* Options: scale slightly smaller than the question */
+.choice-btn {
+  /* min 0.9rem, fluid middle, max 1.2rem */
+  font-size: clamp(0.9rem, 1.2vw + 0.35rem, 1.2rem);
+  line-height: 1.25;
+}
+
+/* If your Button component uses a nested text element, keep this as a fallback */
+.choice-container button {
+  font-size: clamp(0.9rem, 1.2vw + 0.35rem, 1.2rem);
+  line-height: 1.25;
+}
+
+/* Extra safety on shorter screens (e.g., laptops in split view) */
+@media (max-height: 800px) {
+  .question-container h2 {
+    font-size: clamp(0.95rem, 1.8vw + 0.45rem, 2rem);
+    line-height: 1.22;
+  }
+  .choice-btn,
+  .choice-container button {
+    font-size: clamp(0.85rem, 1.1vw + 0.3rem, 1.1rem);
+  }
+}
+
+/* Very small widths (mobile portrait) — nudge text down a notch */
+@media (max-width: 420px) {
+  .question-container h2 {
+    font-size: clamp(0.95rem, 3.5vw + 0.35rem, 1.6rem);
+  }
+  .choice-btn,
+  .choice-container button {
+    font-size: clamp(0.85rem, 2.8vw + 0.3rem, 1rem);
+  }
+}
+

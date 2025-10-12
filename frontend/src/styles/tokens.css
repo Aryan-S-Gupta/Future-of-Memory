@@ -40,7 +40,7 @@
     --fs-body: 1rem;
     --fs-body-strong: 1.05rem;
     --fs-crawl: 2.5rem;
-    --fs-question: 3rem;
+    --fs-question: 2rem;
     --fs-btn: 1rem;
 
     /* Text zoom tokens */
@@ -65,7 +65,7 @@
     --dur-fade: 1.2s;
     --dur-choice-fade: 2s;
     --dur-next-fade: 3s;
-    --dur-crawl: 30s;
+    --dur-crawl: 20s;
 
     --vignette-outer-opaque: rgba(0, 0, 0, 1);
 
@@ -688,6 +688,7 @@ html {
 
 .menu-glass.howto .btn-next {
     margin-top: 0.5rem;
+    margin-bottom: 3rem;
     padding: 0.9rem 3rem;
     font-size: 1.2rem;
     font-weight: 600;
