@@ -10,7 +10,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 1.25rem;
 
   background: rgba(10, 15, 25, 0.7);
   padding: 1.5rem 2rem;
@@ -21,7 +23,6 @@
   border: 2px solid rgba(96, 219, 250, 0.6);
   box-shadow: 0 0 20px rgba(96, 219, 250, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.8);
 
-  max-width: 600px;
 }
 
 /* Sci-fi input */
@@ -110,3 +111,82 @@
   color: #ffffff;
   text-shadow: 0 0 5px #00f7ff;
 }
+
+/* ===== Mode Toggle (Inline version inside Create Room box) ===== */
+
+
+.inline-mode-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0 0 8px 8px;
+
+}
+/* Toggle base */
+.mode-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+}
+
+/* Hide the checkbox input */
+.mode-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider background */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: linear-gradient(145deg, rgba(30, 40, 50, 0.9), rgba(15, 25, 35, 0.9));
+  border: 2px solid rgba(96, 219, 250, 0.6);
+  border-radius: 40px;
+  box-shadow: 0 0 10px rgba(96, 219, 250, 0.4);
+}
+
+/* Toggle handle */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 5px;
+  bottom: 4px;
+  background-color: #60dbfa;
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(96, 219, 250, 0.6);
+}
+
+/* Checked (host mode) state */
+.mode-switch input:checked + .slider {
+  background: linear-gradient(145deg, rgba(120, 60, 255, 0.9), rgba(40, 10, 90, 0.9));
+  border-color: #b76eff;
+  box-shadow: 0 0 20px rgba(183, 110, 255, 0.6);
+
+}
+
+.mode-switch input:checked + .slider:before {
+  transform: translateX(28px);
+  background-color: #ffffff;
+  box-shadow: 0 0 15px rgba(183, 110, 255, 0.8);
+}
+
+/* Label beside the toggle */
+.mode-inline-label {
+  font-family: 'Orbitron', sans-serif;
+  color: #b8f3ff;
+  font-size: 1rem;
+  text-shadow: 0 0 8px rgba(96, 219, 250, 0.5);
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+

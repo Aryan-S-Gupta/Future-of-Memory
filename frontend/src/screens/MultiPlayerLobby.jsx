@@ -56,10 +56,10 @@ const MultiplayerLobby = () => {
     setRoomCode(data.room_code);
     console.log(roomCode);
       if (mode === "peer") {
-        navigate(`/background-multi/${data.room_code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
-      } else {
-        navigate(`/projection-host/${data.room_code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
-      }
+    navigate(`/background-multi/${data.room_code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
+  } else {
+    navigate(`/projection-host/${data.room_code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
+  }
     // Navigate to multiplayer room screen
     // navigate(`/multiplayer-room/${data.room_code}/${playerName}`);
     console.log("navigated with session id " + data.session_id);
@@ -90,7 +90,6 @@ const MultiplayerLobby = () => {
         setSessionId(data.session_id);
         console.log("session id is " + data.session_id);
         console.log("the host of this room is: " + data.host)
-        console.log("the mode is: " + data.mode)
         console.log("the game has started? " + data.game_started)
 
         if (data.mode == "host") {
@@ -116,51 +115,61 @@ const MultiplayerLobby = () => {
 
   return (
     <BasePage>
-    <div className="multiplayer-lobby">
-      <div className="mode-selector">
-        <h4 className="mode-title">Select Game Mode</h4>
-        <div className="mode-buttons">
-          <Button
-            baseButton={`mode-btn ${mode === "host" ? "selected" : ""}`}
-            action={() => setMode("host")}
-            title="Host Mode"
-          />
-          <button
-            className={`mode-btn ${mode === "peer" ? "selected" : ""}`}
-            onClick={() => setMode("peer")}
-          >
-            👥 Peer-to-Peer
-          </button>
+      <div className="multiplayer-lobby">
+        <h2 className="title">Multiplayer Lobby</h2>
+        <div className="room-input-container">
+          <div className="input-row">
+            <input
+              className="player-input"
+              type="text"
+              placeholder="Enter your name"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+            />
+            <button className="btn-create-room" onClick={handleCreateRoom}>
+              Create Room
+            </button>
+          </div>
+
+          {/* Toggle moved below input + button */}
+          <div className="inline-mode-toggle">
+            <label className={`mode-switch ${mode}`}>
+              <input
+                type="checkbox"
+                checked={mode === "host"}
+                onChange={(e) => setMode(e.target.checked ? "host" : "peer")}
+              />
+              <span className="slider"></span>
+            </label>
+            <span className="mode-inline-label">
+              {mode === "host" ? (
+                <>
+                  🖥️ Host Mode
+                </>
+              ) : (
+                <>
+                  👥 Peer-to-Peer
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+
+
+        <h3 className="subheading">Available Rooms</h3>
+        <ul className="room-list">
+          {roomList?.rooms?.map((code) => (
+            <li key={code} className="room-item">
+              <span className="room-code">{code}</span>
+              <button className="btn-create-room" onClick={() => handleJoinRoom(code)}>Join</button>
+            </li>
+          ))}
+        </ul>
+        <div className="button-container">
+          <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
         </div>
       </div>
-
-    <h2 className="title">Multiplayer Lobby</h2>
-      <div className="room-input-container">
-        <input
-          className="player-input"
-          type="text"
-          placeholder="Enter your name"
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-        />
-        <button className="btn-create-room" onClick={handleCreateRoom}>
-          Create Room
-        </button>
-      </div>
-    <h3 className="subheading">Available Rooms</h3>
-    <ul className="room-list">
-      {roomList?.rooms?.map((code) => (
-        <li key={code} className="room-item">
-          <span className="room-code">{code}</span>
-          <button className="btn-create-room" onClick={() => handleJoinRoom(code)}>Join</button>
-        </li>
-        ))}
-    </ul>
-    <div className="button-container">
-      <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
-    </div>
-  </div>
-  </BasePage>
+    </BasePage >
   );
 };
 
