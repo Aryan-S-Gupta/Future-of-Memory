@@ -19,6 +19,5 @@ urlpatterns = [
     path("mini-game/submit_score", views.submit_score_single_view),
     path("mini-game/scores", views.get_scores_view),
     path("mini-game/submit_tiebreak_score", views.submit_tiebreak_score_view),
-    path("mini-game/tiebreak_status/<str:room_code>/<int:turn_id>", views.get_tiebreak_status_view),
 
 ]
