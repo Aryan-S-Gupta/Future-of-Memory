@@ -94,7 +94,7 @@ const MainGameScreen = () => {
           {/* Menu buttons */}
           <div className="button-group" aria-hidden={!showButtons}>
             <Button baseButton="btn-primary" action={() => start_single_session()} title="Start" />
-            <Button baseButton="btn-secondary" action={() => navigate("/multiplayer-lobby")} title="Multiplayer" />
+            <Button baseButton="btn-primary" action={() => navigate("/multiplayer-lobby")} title="Multiplayer" />
             <Button baseButton="btn-secondary" action={() => navigate("/how-to-play")} title="How To Play" />
           </div>
           {/* Floating feedback button */}
