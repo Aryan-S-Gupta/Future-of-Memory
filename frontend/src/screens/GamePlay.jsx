@@ -11,7 +11,7 @@ import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/contro
 import { useMemo, useRef } from "react";
 import "../styles/GamePlay.css";
 import { getFunFacts } from "../../api/single-player/GameApi.js";
-
+import { useNavigate } from "react-router-dom";
 
 
 /**
@@ -80,7 +80,7 @@ const GamePlay = () => {
     enabled: screen != "scenario", // only fetch when not on scenario screen
     onError: (err) => {
       console.error("onError:", err);
-    }
+    }, refetchIntervalInBackground: true
   });
 
   // --- Minimal TTS: inline (no extra files/deps) ---
@@ -261,7 +261,7 @@ const {
     enabled: screen !== "question" && currentTurn != null,
     onError: (err) => {
       console.error("onError:", err);
-    }
+    }, refetchIntervalInBackground: true
 });
   const questionClass =
     stage === 1 || stage === 4 ? "fade-in-out show" :

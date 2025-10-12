@@ -112,6 +112,7 @@ Should display a version number.
 ```bash
 ollama pull phi3:3.8b
 ollama pull nomic-embed-text
+ollama pull gemma3:1b-it-qat
 ```
 
 #### Start Ollama Server

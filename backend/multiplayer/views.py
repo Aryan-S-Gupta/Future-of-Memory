@@ -359,18 +359,7 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     if not rm.room_exists(room_code):
         return JsonResponse({'success': False, 'room_exists': False})
     
-    #front end unsure about turn
-    if int(turn_id) == -1:
-        rm.log_all_rooms()
-        logger.info("room_code is " + str(room_code))
-        rm_state = rm.get_state(str(room_code))
-        logger.info(f"Room state for room {room_code}: {rm_state}")
-        # get the rooms turn 
-        turn_id = rm_state.get("turn_id", -1)
-        new_year = rm_state.get("year")
-        VotingSessions[(room_code, int(turn_id))] = VotingSession(room_code, int(turn_id))
-        logger.info(f"Using turn_id from room state: {turn_id}")
-        # first turn, get the latest turn (or none)
+
     # gets here if the room is at the first turn 
     if int(turn_id) == -1:
         logger.info("year:" + year)

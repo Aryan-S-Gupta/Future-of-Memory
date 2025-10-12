@@ -33,6 +33,9 @@ class Turn(models.Model):
     question = models.TextField(blank=True) # Generated question text
     question_generated_at = models.DateTimeField(null=True, blank=True)
     
+    # Story state management - NEW: Compressed story context for efficient LLM processing
+    story_state = models.JSONField(default=dict, blank=True) # Compressed story state (key events, themes, tension, decisions)
+    
     # User interaction (for shared session voting/consensus)
     user_choice = models.ForeignKey('Option', on_delete=models.SET_NULL, null=True, blank=True, related_name='chosen_by_turns') # Reference to the chosen option
     
@@ -62,6 +65,7 @@ class Option(models.Model):
 
     # Scenario description
     scenario = models.TextField(blank=True) # Generated scenario description for this option (can be empty initially)
+    scenario_summary = models.TextField(blank=True) # Brief summary of scenario for story state management (20-30 words)
     
     # RAG and LLM interaction data
     scenario_query_text = models.TextField(blank=True) # Query text for generating next scenario based on this option (can be empty initially)

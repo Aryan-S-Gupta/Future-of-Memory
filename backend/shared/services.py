@@ -2,7 +2,22 @@
 Business Service Layer for MemorySim
 
 This module provides high-level business logic functions that coordinate between
-different components (LLM, RAG, Database) to implement game functionality.
+different components (LLM, RAG, Database) to     # Step 6: Create new Turn record with story state
+    try:
+        new_turn = Turn.objects.create(
+            session=session,
+            year=year,
+            question=question_result.get('question', ''),
+            question_generated_at=timezone.now(),
+            story_state=current_story_state or {}
+        )
+        logger.info(f"Created new turn {new_turn.id} for year {year}")
+        
+    except Exception as e:
+        logger.error(f"Failed to create Turn record: {e}")
+        raise
+    
+    # Step 7: Create two Option recordsunctionality.
 """
 
 import json
@@ -15,11 +30,11 @@ from django.utils import timezone
 from .models import Session, Turn, Option, WorldBackground, DefaultQueryList
 
 # Import LLM generation functions
-from llm.generate import generate_question
+from llm.generate import generate_question, create_story_state, update_story_state
 
 # Import RAG functionality
 from rag.retrieve import retrieve_chunks
-from llm.rag_adapter import format_rag_context_for_llm
+from llm.rag_preprocessor import preprocess_rag_chunks
 from images.render_pipeline import generate_two_images_blocking
 
 logger = logging.getLogger(__name__)
@@ -63,27 +78,22 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         logger.warning(f"Failed to retrieve world background: {e}")
         background = ""  # Use empty string as fallback
     
-    # Step 2: Get previous turn and user choice
+    # Step 2: Get RAG context from previous turn or default keywords
     context_block = ""
-    last_description = ""
     
     if year > 2035:  # Not the first turn
         try:
             previous_turn = Turn.objects.get(session=session, year=year-1)
             if previous_turn.user_choice:
-                # Step 3: Get scenario_query_text from previous choice
+                # Get scenario_query_text from previous choice for RAG context
                 query_text = previous_turn.user_choice.scenario_query_text
                 logger.debug(f"Retrieved query text: {query_text[:50]}...")
                 
-                # Step 4: Call RAG to get context_block
+                # Call RAG to get context_block
                 if query_text.strip():
                     rag_chunks = retrieve_chunks(query_text)
-                    context_block = format_rag_context_for_llm(rag_chunks)
+                    context_block = preprocess_rag_chunks(rag_chunks)
                     logger.debug(f"Generated context block length: {len(context_block)}")
-                
-                # Step 5: Get scenario from previous choice (last_description)
-                last_description = previous_turn.user_choice.scenario or ""
-                logger.debug(f"Retrieved last description length: {len(last_description)}")
             else:
                 logger.warning(f"Previous turn {year-1} has no user choice")
         except Turn.DoesNotExist:
@@ -109,23 +119,61 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         if default_keywords:
             default_query = " ".join(default_keywords)
             rag_chunks = retrieve_chunks(default_query)
-            context_block = format_rag_context_for_llm(rag_chunks)
+            context_block = preprocess_rag_chunks(rag_chunks)
         else:
             context_block = ""
-        
-        last_description = "This is the beginning of your memory editing journey." # is this not supposed to be the initial world view???
     
-    # Step 6: Call LLM generation
+    # Step 3: Prepare or retrieve story state for efficient LLM processing
+    logger.info("Preparing story state for LLM generation...")
+    try:
+        if year == 2035:
+            # First turn: Create initial story state
+            current_story_state = create_story_state(
+                scenario_summary="Government announces new memory editing technology capabilities, raising questions about ethics, policy, and societal impact"
+            )
+            logger.info("Created initial story state for first turn")
+        else:
+            # Subsequent turns: Get previous story state and update it
+            try:
+                previous_turn = Turn.objects.get(session=session, year=year-1)
+                current_story_state = previous_turn.story_state or {}
+                
+                # Update story state based on previous turn's scenario summary
+                if previous_turn.user_choice and previous_turn.user_choice.scenario_summary:
+                    scenario_summary = previous_turn.user_choice.scenario_summary
+                    logger.debug(f"Using previous choice scenario summary: {scenario_summary[:50]}...")
+                else:
+                    # Fallback if no scenario_summary available
+                    scenario_summary = f"Story continues from year {year-1} with ongoing developments in memory editing technology and policy"
+                    logger.debug("Using fallback scenario summary")
+                
+                current_story_state = update_story_state(
+                    current_state=current_story_state,
+                    new_scenario_summary=scenario_summary
+                )
+                logger.info(f"Updated story state for year {year} with scenario summary from previous choice")
+                    
+            except Turn.DoesNotExist:
+                logger.warning(f"Previous turn {year-1} not found, creating fresh story state")
+                current_story_state = create_story_state(
+                    scenario_summary=f"Continuing from year {year-1} developments in memory editing technology and policy"
+                )
+    except Exception as e:
+        logger.error(f"Story state preparation failed: {e}")
+        # Fallback to empty state
+        current_story_state = None
+
+    # Step 4: Call LLM generation with story state
     logger.info("Calling LLM question generation...")
     try:
         question_result_json = generate_question(
             year=year,
             background=background,
             context_block=context_block,
-            last_description=last_description
+            story_state=current_story_state
         )
         
-        # Step 7: Parse the JSON result
+        # Step 5: Parse the JSON result
         question_result = json.loads(question_result_json)
         logger.debug(f"LLM generated question: {question_result.get('question', '')[:50]}...")
         
@@ -133,13 +181,14 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         logger.error(f"LLM question generation failed: {e}")
         raise
     
-    # Step 8: Create new Turn record
+    # Step 9: Create new Turn record with story state
     try:
         new_turn = Turn.objects.create(
             session=session,
             year=year,
             question=question_result.get('question', ''),
-            question_generated_at=timezone.now()
+            question_generated_at=timezone.now(),
+            story_state=current_story_state or {}
         )
         logger.info(f"Created new turn {new_turn.id} for year {year}")
         
@@ -147,7 +196,7 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         logger.error(f"Failed to create Turn record: {e}")
         raise
     
-    # Step 9: Create two Option records
+    # Step 10: Create two Option records
     options_data = question_result.get('options', [])
     option_queries = question_result.get('option_queries', [])
     
@@ -176,7 +225,7 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         logger.error(f"Failed to create Option records: {e}")
         raise
     
-    # Step 10: Return result summary
+    # Step 8: Return result summary
     result = {
         'turn_id': new_turn.id,
         'session_id': session_id,
@@ -270,7 +319,7 @@ def generate_and_save_scenario(session_id: int, turn_id: int, year: int) -> Dict
         if query_text and query_text.strip():
             try:
                 rag_chunks = retrieve_chunks(query_text)
-                context_block = format_rag_context_for_llm(rag_chunks)
+                context_block = preprocess_rag_chunks(rag_chunks)
                 context_blocks.append(context_block)
                 logger.debug(f"Generated context block {i+1} length: {len(context_block)}")
             except Exception as e:
@@ -285,21 +334,18 @@ def generate_and_save_scenario(session_id: int, turn_id: int, year: int) -> Dict
         logger.warning(f"Expected 2 context blocks, got {len(context_blocks)}. Using empty fallbacks.")
         context_blocks = ["", ""]
     
-    # Step 5: Get last_description from previous turn
-    last_description = ""
+        # Step 5: Get story state from current turn for scenario generation
+    current_story_state = None
     if year > 2035:
         try:
-            previous_turn = Turn.objects.get(session=session, year=year-1)
-            if previous_turn.user_choice and previous_turn.user_choice.scenario:
-                last_description = previous_turn.user_choice.scenario
-                logger.debug(f"Retrieved last description length: {len(last_description)}")
-            else:
-                logger.warning(f"Previous turn {year-1} has no user choice or scenario")
-        except Turn.DoesNotExist:
-            logger.warning(f"Previous turn {year-1} not found for session {session_id}")
+            # Get story state from current turn (same as question generation)
+            current_story_state = current_turn.story_state or {}
+            logger.debug(f"Retrieved story state with {len(current_story_state.get('history', []))} history entries")
+        except Exception as e:
+            logger.warning(f"Failed to retrieve story state: {e}")
     else:
-        logger.info("First turn (2035) detected, using empty last_description")
-    
+        logger.info("First turn (2035) detected, using no story state")
+
     # Step 6: Call LLM generation for option descriptions
     logger.info("Calling LLM scenario generation...")
     try:
@@ -309,9 +355,9 @@ def generate_and_save_scenario(session_id: int, turn_id: int, year: int) -> Dict
             year=year + 1,  # Next year for scenario projection
             background=background,
             context_blocks=context_blocks,  # Pass list of 2 context blocks
-            last_description=last_description,
             current_question=current_question,
-            options=option_texts
+            options=option_texts,
+            story_state=current_story_state
         )
         
         # Step 7: Parse the JSON result
@@ -331,8 +377,9 @@ def generate_and_save_scenario(session_id: int, turn_id: int, year: int) -> Dict
             if label in descriptions_result:
                 description_data = descriptions_result[label]
                 
-                # Update scenario and question_query_text fields
+                # Update scenario, scenario_summary and question_query_text fields
                 option.scenario = description_data.get('scenario', '')
+                option.scenario_summary = description_data.get('scenario_summary', '')
                 option.question_query_text = description_data.get('query_text', '')
                 option.save()
                 
@@ -512,158 +559,6 @@ def generate_and_save_image_text(session_id: int, turn_id: int, year: int) -> Di
     logger.info(f"Image text generation completed successfully for session {session_id}, year {year}")
     return result
 
-# this is refactored by start_turn_pipeline in tasks.py
-@transaction.atomic
-def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int] = None) -> Dict[str, Any]:
-    """
-    Generate a complete turn including question, image texts, and scenarios.
-    
-    This function orchestrates the complete turn generation workflow:
-    1. Check or create session
-    2. Determine the appropriate year
-    3. Generate question and options
-    4. Generate image texts for options
-    5. Generate scenarios for options
-    
-    Args:
-        session_id: Optional existing session ID. If None, creates new session
-        year: Optional target year. If None, determines next available year
-        
-    Returns:
-        Dict containing all generated data and metadata
-        
-    Raises:
-        ValueError: If year exceeds 2085 limit
-        Exception: If any generation step fails
-    """
-    logger.info(f"Starting complete turn generation for session {session_id}, year {year}")
-    
-    start_time = timezone.now()
-    
-    # Step 1: Handle session creation/validation
-    # Brynn: I do not think session should be created here, it should be at the home page view
-    # is there any year limit?
-    try:
-        if session_id is None:
-            # Create new session
-            session = Session.objects.create(created_at=timezone.now())
-            session_id = session.id
-            target_year = 2035  # Start from first year
-            logger.info(f"Created new session {session_id}")
-        else:
-            # Validate existing session
-            try:
-                session = Session.objects.get(id=session_id)
-                logger.debug(f"Retrieved existing session {session_id}")
-                
-                # Determine next year if not provided
-                if year is None:
-                    latest_turn = Turn.objects.filter(session=session).order_by('-year').first()
-                    target_year = latest_turn.year + 1 if latest_turn else 2035
-                else:
-                    target_year = year
-                    
-            except Session.DoesNotExist:
-                logger.warning(f"Session {session_id} not found, creating new session")
-                session = Session.objects.create(created_at=timezone.now())
-                session_id = session.id
-                target_year = year if year is not None else 2035
-        
-        # Step 2: Validate year limit
-        if target_year > 2085:
-            logger.error(f"Year {target_year} exceeds maximum limit of 2085")
-            # Create new session for a fresh start
-            session = Session.objects.create(created_at=timezone.now())
-            session_id = session.id
-            target_year = 2035
-            logger.info(f"Created new session {session_id} due to year limit, starting from 2035")
-        
-        logger.info(f"Target generation: Session {session_id}, Year {target_year}")
-        
-    except Exception as e:
-        logger.error(f"Failed to handle session setup: {e}")
-        raise
-    
-    # Step 3: Generate question and options
-    step_start = timezone.now()
-    try:
-        logger.info("Step 1/3: Generating question and options...")
-        question_result = generate_and_save_question(session_id, target_year)
-        turn_id = question_result['turn_id']
-        step_duration = (timezone.now() - step_start).total_seconds()
-        logger.info(f"Question generation completed in {step_duration:.2f}s, Turn ID: {turn_id}")
-        
-    except Exception as e:
-        logger.error(f"Question generation failed: {e}")
-        raise
-    
-    # Step 4: Generate image texts
-    step_start = timezone.now()
-    try:
-        logger.info("Step 2/3: Generating image texts...")
-        image_result = generate_and_save_image_text(session_id, turn_id, target_year)
-        step_duration = (timezone.now() - step_start).total_seconds()
-        logger.info(f"Image text generation completed in {step_duration:.2f}s")
-        logger.debug(f"Session {session_id}, Turn {turn_id}")
-        # TODO: Reserved space for image generation function
-        generate_two_images_blocking(session_id, turn_id)
-        
-    except Exception as e:
-        logger.error(f"Image text generation failed: {e}")
-        raise
-    
-    # Step 5: Generate scenarios
-    step_start = timezone.now()
-    try:
-        logger.info("Step 3/3: Generating scenarios...")
-        scenario_result = generate_and_save_scenario(session_id, turn_id, target_year)
-        step_duration = (timezone.now() - step_start).total_seconds()
-        logger.info(f"Scenario generation completed in {step_duration:.2f}s")
-        
-    except Exception as e:
-        logger.error(f"Scenario generation failed: {e}")
-        raise
-    
-    # Step 6: Compile complete result
-    total_duration = (timezone.now() - start_time).total_seconds()
-    
-    result = {
-        'session_id': session_id,
-        'turn_id': turn_id,
-        'year': target_year,
-        'created_new_session': session_id != session_id if session_id else True,  # Simplified logic
-        'total_duration': total_duration,
-        'generation_steps': {
-            'question': {
-                'success': True,
-                'turn_id': question_result['turn_id'],
-                'question': question_result['question'],
-                'options': question_result['options'],
-                'generated_at': question_result['generated_at']
-            },
-            'image_texts': {
-                'success': True,
-                'image_texts': image_result['image_texts'],
-                'generated_at': image_result['generated_at']
-            },
-            'images': {
-                'success': True,
-            },
-            'scenarios': {
-                'success': True,
-                'scenarios': scenario_result['scenarios'],
-                'generated_at': scenario_result['generated_at']
-            }
-        },
-        'completed_at': timezone.now().isoformat()
-    }
-    
-    logger.info(f"Complete turn generation finished successfully")
-    logger.info(f"Session: {session_id}, Turn: {turn_id}, Year: {target_year}")
-    logger.info(f"Total duration: {total_duration:.2f}s")
-    
-    return result
-
 def get_session_status(session_id: int) -> Dict[str, Any]:
     """
     Get the current status and progress of a game session.
@@ -692,7 +587,6 @@ def get_session_status(session_id: int) -> Dict[str, Any]:
         
     except Session.DoesNotExist:
         return {'error': f'Session {session_id} not found'}
-
 
 def record_user_choice(turn_id: int, option_id: int) -> Dict[str, Any]:
     """
@@ -805,3 +699,155 @@ def display_world_view(session_id: int, turn_id: int, year: int, option_id: int)
 
     logger.info(f"World view display completed for session {session_id}, turn {turn_id}, option {option.label}")
     return world_view_response
+
+
+# # this is refactored by start_turn_pipeline in tasks.py
+# @transaction.atomic
+# def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int] = None) -> Dict[str, Any]:
+#     """
+#     Generate a complete turn including question, image texts, and scenarios.
+    
+#     This function orchestrates the complete turn generation workflow:
+#     1. Check or create session
+#     2. Determine the appropriate year
+#     3. Generate question and options
+#     4. Generate image texts for options
+#     5. Generate scenarios for options
+    
+#     Args:
+#         session_id: Optional existing session ID. If None, creates new session
+#         year: Optional target year. If None, determines next available year
+        
+#     Returns:
+#         Dict containing all generated data and metadata
+        
+#     Raises:
+#         ValueError: If year exceeds 2085 limit
+#         Exception: If any generation step fails
+#     """
+#     logger.info(f"Starting complete turn generation for session {session_id}, year {year}")
+    
+#     start_time = timezone.now()
+    
+#     # Step 1: Handle session creation/validation
+#     # Brynn: I do not think session should be created here, it should be at the home page view
+#     # is there any year limit?
+#     try:
+#         if session_id is None:
+#             # Create new session
+#             session = Session.objects.create(created_at=timezone.now())
+#             session_id = session.id
+#             target_year = 2035  # Start from first year
+#             logger.info(f"Created new session {session_id}")
+#         else:
+#             # Validate existing session
+#             try:
+#                 session = Session.objects.get(id=session_id)
+#                 logger.debug(f"Retrieved existing session {session_id}")
+                
+#                 # Determine next year if not provided
+#                 if year is None:
+#                     latest_turn = Turn.objects.filter(session=session).order_by('-year').first()
+#                     target_year = latest_turn.year + 1 if latest_turn else 2035
+#                 else:
+#                     target_year = year
+                    
+#             except Session.DoesNotExist:
+#                 logger.warning(f"Session {session_id} not found, creating new session")
+#                 session = Session.objects.create(created_at=timezone.now())
+#                 session_id = session.id
+#                 target_year = year if year is not None else 2035
+        
+#         # Step 2: Validate year limit
+#         if target_year > 2085:
+#             logger.error(f"Year {target_year} exceeds maximum limit of 2085")
+#             # Create new session for a fresh start
+#             session = Session.objects.create(created_at=timezone.now())
+#             session_id = session.id
+#             target_year = 2035
+#             logger.info(f"Created new session {session_id} due to year limit, starting from 2035")
+        
+#         logger.info(f"Target generation: Session {session_id}, Year {target_year}")
+        
+#     except Exception as e:
+#         logger.error(f"Failed to handle session setup: {e}")
+#         raise
+    
+#     # Step 3: Generate question and options
+#     step_start = timezone.now()
+#     try:
+#         logger.info("Step 1/3: Generating question and options...")
+#         question_result = generate_and_save_question(session_id, target_year)
+#         turn_id = question_result['turn_id']
+#         step_duration = (timezone.now() - step_start).total_seconds()
+#         logger.info(f"Question generation completed in {step_duration:.2f}s, Turn ID: {turn_id}")
+        
+#     except Exception as e:
+#         logger.error(f"Question generation failed: {e}")
+#         raise
+    
+#     # Step 4: Generate image texts
+#     step_start = timezone.now()
+#     try:
+#         logger.info("Step 2/3: Generating image texts...")
+#         image_result = generate_and_save_image_text(session_id, turn_id, target_year)
+#         step_duration = (timezone.now() - step_start).total_seconds()
+#         logger.info(f"Image text generation completed in {step_duration:.2f}s")
+#         # TODO: Reserved space for image generation function
+#         generate_two_images_blocking(session_id, turn_id)
+        
+#     except Exception as e:
+#         logger.error(f"Image text generation failed: {e}")
+#         raise
+    
+#     # Step 5: Generate scenarios
+#     step_start = timezone.now()
+#     try:
+#         logger.info("Step 3/3: Generating scenarios...")
+#         scenario_result = generate_and_save_scenario(session_id, turn_id, target_year)
+#         step_duration = (timezone.now() - step_start).total_seconds()
+#         logger.info(f"Scenario generation completed in {step_duration:.2f}s")
+        
+#     except Exception as e:
+#         logger.error(f"Scenario generation failed: {e}")
+#         raise
+    
+#     # Step 6: Compile complete result
+#     total_duration = (timezone.now() - start_time).total_seconds()
+    
+#     result = {
+#         'session_id': session_id,
+#         'turn_id': turn_id,
+#         'year': target_year,
+#         'created_new_session': session_id != session_id if session_id else True,  # Simplified logic
+#         'total_duration': total_duration,
+#         'generation_steps': {
+#             'question': {
+#                 'success': True,
+#                 'turn_id': question_result['turn_id'],
+#                 'question': question_result['question'],
+#                 'options': question_result['options'],
+#                 'generated_at': question_result['generated_at']
+#             },
+#             'image_texts': {
+#                 'success': True,
+#                 'image_texts': image_result['image_texts'],
+#                 'generated_at': image_result['generated_at']
+#             },
+#             'images': {
+#                 'success': True,
+#             },
+#             'scenarios': {
+#                 'success': True,
+#                 'scenarios': scenario_result['scenarios'],
+#                 'generated_at': scenario_result['generated_at']
+#             }
+#         },
+#         'completed_at': timezone.now().isoformat()
+#     }
+    
+#     logger.info(f"Complete turn generation finished successfully")
+#     logger.info(f"Session: {session_id}, Turn: {turn_id}, Year: {target_year}")
+#     logger.info(f"Total duration: {total_duration:.2f}s")
+    
+#     return result
