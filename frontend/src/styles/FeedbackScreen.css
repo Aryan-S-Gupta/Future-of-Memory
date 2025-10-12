@@ -168,14 +168,14 @@
 
 /* Scale only the direct children (title, form, etc.), not the background */
 .feedback-screen > * {
-  transform: scale(0.6);              /* adjust 0.8–0.9 for your liking */
+  transform: scale(0.5);              /* adjust 0.8–0.9 for your liking */
   transform-origin:  center;        /* preserves layout alignment */
 }
 
 /* Slight vertical compensation so it stays visually centered */
 @media (max-height: 900px) {
   .feedback-screen > * {
-    transform: scale(0.6);
+    transform: scale(0.5);
     transform-origin:  center;
     margin-top: -5vh;  /* adjust as needed */
   }
