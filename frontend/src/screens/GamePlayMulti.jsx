@@ -45,7 +45,7 @@ const GamePlayMulti = () => {
   const fadeDuration = 2000;
 
 
-  const [loadingState, setLoadingState] = useState("question")
+  const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -97,7 +97,7 @@ const GamePlayMulti = () => {
         } else {
           3000;
         }
-    }
+    }, refetchIntervalInBackground: true, 
   })
 
 
@@ -274,8 +274,7 @@ const GamePlayMulti = () => {
         }
         return result;
       }, enabled: loadingState === "none", 
-      refetchInterval: 3000
-    
+      refetchInterval: 300
   })
 
 
@@ -329,7 +328,8 @@ const GamePlayMulti = () => {
     onError: (err) => {
       console.log("onError:", err);
     }, 
-    refetchInterval: 3000
+    refetchInterval: 3000, 
+    refetchIntervalInBackground: true, 
 });
 
 
@@ -432,9 +432,6 @@ const getFadeClass = (idx) => {
           <div className="text-container">
             <h2 className="fade-in">{scenarioData.scenario}</h2>
           </div>
-
-
-
 
           {/* Continue button at bottom */}
           <div className="scenario-footer">

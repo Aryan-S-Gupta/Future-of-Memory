@@ -71,8 +71,8 @@ const GamePlay = () => {
     enabled: screen === "question",
     onError: (err) => {
       console.error("onError:", err);
-    }
-});
+    }, refetchIntervalInBackground: true
+  });
 
   // --- Minimal TTS: inline (no extra files/deps) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
@@ -203,8 +203,37 @@ const GamePlay = () => {
       setScenarioData(mapped);
       setScreen("scenario");
       setYear(year + 1);
-      };
 
+    },
+    enabled: screen !== "question" && currentTurn != null,
+    onError: (err) => {
+      console.error("onError:", err);
+    }, refetchIntervalInBackground: true
+});
+  const questionClass =
+    stage === 1 || stage === 4 ? "fade-in-out show" :
+      stage > 1 ? "fade-in-out hide" : "fade-in-out";
+
+  const optionAClass =
+    stage === 2 || stage === 4 ? "choice-btn fade-in-out show" :
+      stage > 2 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
+
+  const optionBClass =
+    stage === 3 || stage === 4 ? "choice-btn fade-in-out show" :
+      stage > 3 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
+    
+
+
+  // Fetch fun facts when loading scenario
+  const fetchFunFacts = async () => {
+    try {
+      const facts = await getFunFacts(); // Fetch 3 fun facts
+      setLoadingFacts(facts.data);
+      console.log("Fun facts loaded:", facts);
+    } catch (error) {
+        console.error("Error fetching fun facts:", error);
+    }
+  }
   return (
     <BasePage>
       <ExitExperience/>
