@@ -30,7 +30,3 @@ node_modules/
 # Networking
 .env
 decisions.json
-
-# Redis dump files
-dump.rdb
-*.rdb
