@@ -30,4 +30,7 @@ node_modules/
 # Networking
 .env
 decisions.json
-backend/ollama_env/
+
+# Redis dump files
+dump.rdb
+*.rdb
