@@ -30,3 +30,4 @@ node_modules/
 # Networking
 .env
 decisions.json
+backend/ollama_env/

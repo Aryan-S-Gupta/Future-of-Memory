@@ -1,0 +1,161 @@
+@import url('/src/styles/tokens.css');
+
+/* Main container */
+.feedback-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: #e0f7ff;
+}
+
+/* Title */
+.feedback-title {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 800;
+  text-align: center;
+  text-shadow: 0 0 15px rgba(96, 219, 250, 0.7);
+  color: #60dbfa;
+  margin-bottom: 1.5rem;
+}
+
+/* Individual question container */
+.feedback-question {
+  width: 100%;
+  background: rgba(10, 20, 30, 0.9);
+  border-radius: 12px;
+  padding: 1.8rem 2rem;
+  box-shadow: 0 0 20px rgba(96, 219, 250, 0.25),
+              inset 0 0 10px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(96, 219, 250, 0.3);
+}
+
+/* Question text */
+.feedback-question p {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(96, 219, 250, 0.6);
+  margin-bottom: 1.2rem;
+}
+
+/* Rating area */
+.rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Rating buttons container */
+.rating-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Individual rating button */
+.rating-btn {
+  flex: 1;
+  min-width: 60px;
+  padding: 1rem 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(30, 40, 50, 0.9), rgba(20, 30, 40, 0.9));
+  border: 2px solid rgba(96, 219, 250, 0.5);
+  color: #b8f3ff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 10px rgba(96, 219, 250, 0.25);
+}
+
+/* Active (selected) state */
+.rating-btn.active {
+  background: linear-gradient(145deg, rgba(96, 219, 250, 0.9), rgba(40, 120, 180, 0.8));
+  color: #ffffff;
+  box-shadow: 0 0 25px rgba(96, 219, 250, 0.8);
+  border-color: #60dbfa;
+  transform: scale(1.05);
+}
+
+/* Hover */
+.rating-btn:hover {
+  box-shadow: 0 0 20px rgba(96, 219, 250, 0.6);
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Rating labels */
+.rating-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 0.6rem;
+}
+
+.rating-label {
+  font-size: 1rem;
+  font-family: var(--font-display);
+  color: #80eaff;
+  text-shadow: 0 0 6px rgba(96, 219, 250, 0.7);
+}
+
+/* Textarea for feedback */
+.feedback-textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 1.2rem;
+  font-size: 1.1rem;
+  font-family: var(--font-display);
+  border-radius: 12px;
+  border: 2px solid #60dbfa;
+  background: rgba(10, 20, 30, 0.9);
+  color: #e0f7ff;
+  box-shadow: inset 0 0 10px rgba(96, 219, 250, 0.4);
+  resize: vertical;
+  margin-top: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.feedback-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 20px rgba(96, 219, 250, 0.6);
+  transform: scale(1.02);
+}
+
+/* Futuristic Submit Button */
+.btn-submit-feedback {
+  padding: 0.9rem 2.5rem;
+  font-size: 1.3rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+  border: 2px solid #60dbfa;
+  border-radius: 6px;
+  background: linear-gradient(145deg, rgba(20, 30, 40, 0.95), rgba(15, 25, 35, 0.85));
+  color: #60dbfa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(96, 219, 250, 0.4);
+  margin-top: 2rem;
+}
+
+.btn-submit-feedback:hover {
+  background: rgba(96, 219, 250, 0.2);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(96, 219, 250, 0.8),
+              0 0 40px rgba(96, 219, 250, 0.5);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.btn-submit-feedback:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 0 12px rgba(96, 219, 250, 0.6);
+}

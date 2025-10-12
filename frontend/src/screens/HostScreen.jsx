@@ -1,42 +1,32 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getQuestion, submitChoice,  } from "../../api/single-player/GameApi";
+import { getQuestion, submitChoice } from "../../api/multiplayer/GameFlowApi.js";
+import { getRoomState } from "../../api/multiplayer/RoomManagementApi.js";
+import Button from "../components/Button/Button.jsx";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import "../styles/GamePlay.css";
 import { useSession } from "../../SessionContext.jsx";
 import background from "../assets/background.jpg";
+import { getFunFacts } from "../../api/single-player/GameApi.js";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
-import Button from "../components/Button/Button.jsx";
-import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import BasePage from "./BasePage.jsx";
 import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
-import "../styles/GamePlay.css";
-import { getFunFacts } from "../../api/single-player/GameApi.js";
+import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
+import RoomDestroyedPopup from "../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 
-
-
-/**
- * GamePlay component
- * This screen drives the main gameplay loop. It alternates between:
- * - Displaying a scenario for the given year.
- * - Displaying a decision-making question** with multiple choices.
- *
- * Features:
- * - Uses React Query to fetch scenario/question data from backend APIs.
- * - Tracks the current year ('year') and current screen ('screen').
- * - Handles user choices and progresses the game timeline forward.
- * - Provides navigation back to the home screen.
- *
- * @component
- * @returns {JSX.Element} The interactive gameplay screen with scenario/question flow.
- */
-const GamePlay = () => {
+const HostScreen = () => {
+  const { roomCode } = useParams(); 
+  const [searchParams] = useSearchParams();
+  const playerName = searchParams.get("playerName");
   const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
-  const [loadingFacts, setLoadingFacts] = useState([]);
-  const [option_id, setOptionId] = useState(null);
-  const [isReady, setIsReady] = useState(false);
+    const [loadingFacts, setLoadingFacts] = useState([]);
+    const [isReady, setIsReady] = useState(false);
+    const [option_id, setOptionId] = useState(null);
+  const [turn, setTurn] = useState(-1);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -48,40 +38,44 @@ const GamePlay = () => {
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
 });
+  const [roomDestroyed, setRoomDestroyed] = useState(false);
 
-  const navigate = useNavigate();
 
   // --- Tie narration to BGM ---
-  const { isPlaying, isMuted, volume, setVolume } = useBgm();
+  const { isPlaying, volume, setVolume } = useBgm();
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
-  // Fetches the scenario whenever we are on the "scenario" screen.
+// Fetches the scenario whenever we are on the "scenario" screen.
  const {
   data: questionData,
   isLoading: isQuestionLoading,
   error: questionError,
   status,
   } = useQuery({
-    queryKey: ["question", sessionId],
+    queryKey: ["question", roomCode, sessionId, turn],
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
-      const result = await getQuestion(sessionId);
-      if (!result) {
-        setScreen("loading");
-        setIsReady(false);
-        await fetchFunFacts();
-        return null;
+      const result = await getQuestion(roomCode, sessionId, turn);
+      if (!result.success) {
+        if (!result.room_exists) {
+          setRoomDestroyed(true);
+          console.log("the room does not exists")
+          setScreen("destroyed")
+          // handle room doesnt exist
+        }
       }
+      console.log("currentTurn after getQuestion:", currentTurn);
       console.log("queryFn result:", result);
-      setCurrentTurn(result)
+      setCurrentTurn(result);
+      setTurn(result.data.turn_id);
       return result;
     },
-    enabled: screen != "scenario", // only fetch when not on scenario screen
+    enabled: screen === "question",
     onError: (err) => {
       console.error("onError:", err);
     }
-  });
+});
 
   // --- Minimal TTS: inline (no extra files/deps) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
@@ -123,9 +117,9 @@ const GamePlay = () => {
       .find(Boolean) || voices[0];
     utter.voice = picked;
     // tweak for more “majestic” feel
-   utter.rate = 0.7;  // slower (was 0.9) — lower is slower
-  utter.pitch = 1.0;   // deeper
-    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));   // tie TTS loudness to the global toolbar
+    utter.rate = 0.90;  // slower = more weighty
+    utter.pitch = 1.12;  // deeper
+    utter.volume = 1;   // full, since we ducked bgm
 
     utter.onend = utter.onerror = () => {
       // Restore BGM volume
@@ -173,10 +167,25 @@ const GamePlay = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, questionReadout, isPlaying]);
 
-  // --- Staged reveal ---
+  // Replay narration when toolbar Play is clicked (even if already playing)
+  useEffect(() => {
+    const handler = () => {
+      if (screen === "scenario" && scenarioData?.scenario) {
+        speak(scenarioData.scenario);
+      } else if (screen === "question" && questionReadout) {
+        speak(questionReadout);
+      }
+    };
+    window.addEventListener("bgm-play", handler);
+    return () => window.removeEventListener("bgm-play", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
+
+    // --- Staged reveal for multiplayer ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
-  const fadeDuration = 1000; //
+  const fadeDuration = 2000;
+
   useEffect(() => {
     if (screen === "question" && currentTurn) {
       setStage(1); // show question
@@ -185,16 +194,16 @@ const GamePlay = () => {
       const timer1 = setTimeout(() => {
         setStage(2);
         speak(currentTurn.options[0].option_text);
-      }, 10000 - fadeDuration);
+      }, 12000 - fadeDuration);
 
       const timer2 = setTimeout(() => {
         setStage(3);
         speak(currentTurn.options[1].option_text);
-      }, 15000 - fadeDuration);
+      }, 17000 - fadeDuration);
 
       const timer3 = setTimeout(() => {
         setStage(4); // show all together, no TTS
-      }, 20000 - fadeDuration);
+      }, 22000 - fadeDuration);
 
       return () => {
         clearTimeout(timer1);
@@ -205,64 +214,6 @@ const GamePlay = () => {
     }
   }, [screen, currentTurn]);
 
-  // Map button stage
-  const getButtonStageClass = (idx) => {
-    if (stage === 4) return "show";
-    if (stage === idx + 2) return "show";
-    if (stage > idx + 2) return "hide";
-    return "";
-  };
-
-  // If user hits Mute in the toolbar, kill any ongoing speech immediately
-  useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
-
-
-  // handle choice click
-  const handleChoice = async (option_id) => {
-    if (!currentTurn) return;
-    cancelTTS(); 
-    setScreen("loading");
-    setOptionId(option_id);
-    console.log("handleChoice called with option_id:", option_id);
-    setIsReady(false);
-    await fetchFunFacts();
-  
-
-  };
-
-const {
-  data: out,
-  isLoading: isTurnLoading,
-  error: turnError,
-  status: turnStatus,
-  } = useQuery({
-    queryKey: ["scenario", currentTurn, sessionId, year, option_id],
-    queryFn: async () => {
-      console.log("submitting option", option_id);
-      const out = await submitChoice(sessionId,currentTurn.turn_id, year, option_id);
-
-      if (!out.scenario || !out.scenario.text || !out.image?.url) {
-        console.log("Scenario/image not ready yet...");
-        return;
-    } else if (out.scenario.text === scenarioData?.scenario) {
-      console.log("Scenario/image unchanged, waiting...");
-      return;
-    }
-      const mapped = {
-        scenario: out.scenario.text,
-        image: out.image.url
-      };
-      console.log("Submit choice response:", mapped);
-      setIsReady(true);
-      setScenarioData(mapped);
-      setYear(year + 1);
-
-    },
-    enabled: screen !== "question" && currentTurn != null,
-    onError: (err) => {
-      console.error("onError:", err);
-    }
-});
   const questionClass =
     stage === 1 || stage === 4 ? "fade-in-out show" :
       stage > 1 ? "fade-in-out hide" : "fade-in-out";
@@ -274,35 +225,42 @@ const {
   const optionBClass =
     stage === 3 || stage === 4 ? "choice-btn fade-in-out show" :
       stage > 3 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
-    
+  /**
+   * Handles a player's choice when answering a question.
+   *
+   * @param {string} answer - The key of the chosen option.
+   */
 
 
-  // Fetch fun facts when loading scenario
-  const fetchFunFacts = async () => {
-    try {
-      const facts = await getFunFacts(); // Fetch 3 fun facts
-      setLoadingFacts(facts.data);
-      console.log("Fun facts loaded:", facts);
-    } catch (error) {
-        console.error("Error fetching fun facts:", error);
+    // Fetch fun facts when loading scenario
+    const fetchFunFacts = async () => {
+      try {
+        const facts = await getFunFacts(); // Fetch 3 fun facts
+        setLoadingFacts(facts.data);
+        console.log("Fun facts loaded:", facts);
+      } catch (error) {
+          console.error("Error fetching fun facts:", error);
+      }
     }
-  }
+
   return (
     <BasePage>
-      <ExitExperience roomCode={"-1"} playerName={"single-player"}/>
-      {screen === "loading" && (
+      <ExitExperience code={roomCode} player={playerName}/>
+      {screen == "destroyed" && (
+        <RoomDestroyedPopup/>
+      )}
+            {screen === "loading" && (
       <LoadingScreen
         isReady={isReady}
         funFacts={loadingFacts}
         onContinue={() => {
           setScreen("scenario");
-        }}
+        }} 
       />
     )}
-
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
-          {/* Image in middle */}
+              {/* Image in middle */}
           {scenarioData.image && (
             <div className="scenario-image">
               <img src={scenarioData.image} alt="scenario" className="scenario-img" />
@@ -312,6 +270,8 @@ const {
           <div className="text-container">
             <h2 className="fade-in">{scenarioData.scenario}</h2>
           </div>
+
+
 
           {/* Continue button at bottom */}
           <div className="scenario-footer">
@@ -328,10 +288,10 @@ const {
       )}
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
-        <div className="question-container">
-          <h2 className={questionClass}>
-            {currentTurn.question}
-          </h2>
+        <div>
+          <div className="question-container">
+            <h2 className={questionClass}>{currentTurn.question}</h2>
+          </div>
           <div className="choice-container">
             <Button
               baseButton={optionAClass}
@@ -351,4 +311,4 @@ const {
   );
 };
 
-export default GamePlay;
+export default HostScreen;

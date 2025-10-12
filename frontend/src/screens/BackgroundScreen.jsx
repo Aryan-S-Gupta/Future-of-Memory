@@ -27,11 +27,10 @@ const BackgroundScreen = () => {
   const navigate = useNavigate();
   const { sessionId } = useSession();
 
-  const pre_render = async () => {
+  const start = async () => {
     await startPrerender(sessionId);
     navigate("/game-play");
   }
-
   return (
     <BasePage>
       <div className="menu-glass howto">
@@ -46,13 +45,13 @@ const BackgroundScreen = () => {
             Will you shield your community, pursue progress, or uphold your ethics? <br /><br />
             The destiny of millions rests in your hands!
           </p>
-          <Button baseButton="btn-next" action={() => pre_render()} title="Next" />
+          <Button baseButton="btn-next next-fade-in" action={start} title="Next" />
         </div>
       </div>
 
       {/* Navigation buttons (Back to home, Next to gameplay) */}
       <div className="button-container">
-        <ExitExperience />
+        <ExitExperience />   
       </div>
     </BasePage>
   );
