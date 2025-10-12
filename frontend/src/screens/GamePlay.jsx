@@ -30,8 +30,7 @@ import "../styles/GamePlay.css";
  * @returns {JSX.Element} The interactive gameplay screen with scenario/question flow.
  */
 const GamePlay = () => {
-  // const { sessionId } = useSession();
-  const  sessionId  = 37;
+  const { sessionId } = useSession();
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
