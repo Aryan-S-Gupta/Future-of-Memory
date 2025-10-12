@@ -80,7 +80,7 @@ const GamePlay = () => {
     enabled: screen != "scenario", // only fetch when not on scenario screen
     onError: (err) => {
       console.error("onError:", err);
-    }
+    }, refetchIntervalInBackground: true
   });
 
   // --- Minimal TTS: inline (no extra files/deps) ---
@@ -261,7 +261,7 @@ const {
     enabled: screen !== "question" && currentTurn != null,
     onError: (err) => {
       console.error("onError:", err);
-    }
+    }, refetchIntervalInBackground: true
 });
   const questionClass =
     stage === 1 || stage === 4 ? "fade-in-out show" :
