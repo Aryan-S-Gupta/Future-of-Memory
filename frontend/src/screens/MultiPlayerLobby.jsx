@@ -90,6 +90,7 @@ const MultiplayerLobby = () => {
         setSessionId(data.session_id);
         console.log("session id is " + data.session_id);
         console.log("the host of this room is: " + data.host)
+        console.log("the mode is: " + data.mode)
         console.log("the game has started? " + data.game_started)
 
         if (data.mode == "host") {
