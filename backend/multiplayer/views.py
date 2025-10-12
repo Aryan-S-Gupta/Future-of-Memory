@@ -453,6 +453,23 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     return JsonResponse(response_payload)
 
 
+world_view_data = {}
+def get_world_view(request, session_id, turn_id, room_code):
+    votes_info = {
+        "num_responses": VotingSessions[(room_code, turn_id)].num_responses,
+        "players_voted": list(VotingSessions[(room_code, turn_id)].voted_players), # player names who voted
+        "total_players": VotingSessions[(room_code, turn_id)].total_players,
+    }
+    if world_view_data == {}:
+        return JsonResponse({
+            "success": False,
+            "scenario": "",
+            "votes_info": votes_info,
+            "message": "Waiting for other players to vote."
+        }, status=404)
+    else:
+
+        return world_view_data
 
 def display_scenario_and_image(request, session_id, turn_id, year, option_id, room_code):
     """

@@ -84,3 +84,8 @@ export const getFunFacts = async () => {
   const res = await api.get("/fun_facts");
   return res.data; // array of { fact, link, link_text }
 }
+
+export const getWorldView = async () => {
+  const res = await api.get("/world_view");
+  return res;
+}

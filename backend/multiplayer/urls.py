@@ -13,6 +13,7 @@ urlpatterns = [
     path("sync", views.sync_state),
     path("leave", views.leave_multiplayer_room),
     path("host", views.get_host), 
+    path("world_view", views.get_world_view),
     path("check_game_started/<str:room_code>", views.check_game_started),
     path("start_game/<str:room_code>", views.start_game),
     path("create_session", views.create_session),
