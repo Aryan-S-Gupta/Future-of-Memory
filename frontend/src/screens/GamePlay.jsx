@@ -31,7 +31,7 @@ import { useNavigate } from "react-router-dom";
  */
 const GamePlay = () => {
   // const { sessionId } = useSession(); // <-- get session from context
-  const  sessionId  = 37;
+  const sessionId = 37;
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
@@ -304,17 +304,17 @@ const GamePlay = () => {
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
           {/* Image in middle */}
-          {scenarioData.image && (
-            <div className="scenario-image">
-              <img src={scenarioData.image} alt="scenario" className="scenario-img" />
-            </div>
-          )}
-          {/* Scenario text at top */}
-          <div className="text-container">
-            <h2 className="fade-in">{scenarioData.scenario}</h2>
-          </div>
 
-          {/* Continue button at bottom */}
+          {/* Scenario text at top */}
+          <div className="text-container menu-glass">
+            {scenarioData.image && (
+              <div className="scenario-image">
+                <img src={scenarioData.image} alt="scenario" className="scenario-img" />
+              </div>
+            )}
+            <h2 className="fade-in">{scenarioData.scenario}</h2>
+
+          </div>
           <div className="scenario-footer">
             <Button
               baseButton="btn-primary"

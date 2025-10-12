@@ -427,8 +427,8 @@ html {
 /* Centered glass card with predictable size (like before) */
 .menu-glass {
     position: relative;
-    width: min(980px, 72vw);
-    height: min(620px, 72vh);
+    width: min(980px, 76vw);
+    height: min(690px, 76vh);
     margin: 10vh auto 0;
     background: rgba(255, 255, 255, 0.18);
     border: 1px solid rgba(255, 255, 255, 0.45);
