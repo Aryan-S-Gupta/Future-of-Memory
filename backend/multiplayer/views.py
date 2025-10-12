@@ -440,14 +440,22 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     return JsonResponse(response_payload)
 
 
-world_view_data = {}
-def get_world_view(request, session_id, turn_id, room_code):
-    votes_info = {
-        "num_responses": VotingSessions[(room_code, turn_id)].num_responses,
-        "players_voted": list(VotingSessions[(room_code, turn_id)].voted_players), # player names who voted
-        "total_players": VotingSessions[(room_code, turn_id)].total_players,
-    }
-    if world_view_data == {}:
+# scenario and image display page
+from shared.services import display_world_view
+
+
+def display_scenario_and_image(request, session_id, turn_id, year, option_id, room_code):
+    """
+    Display the world view after user makes a choice.
+    """
+    player_name = request.GET.get("playerName")
+    logger.debug(f"playername is {player_name}")
+    if not rm.room_exists(room_code):
+        return JsonResponse({'success': False, 'room_exists': False})
+    final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
+    if final_option is None:
+        logger.debug("Not all players have voted yet.")
+        print("Not all players have voted yet.")
         return JsonResponse({
             "success": False,
             "scenario": "",

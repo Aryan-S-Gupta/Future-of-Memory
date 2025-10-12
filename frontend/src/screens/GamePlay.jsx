@@ -11,7 +11,7 @@ import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/contro
 import { useMemo, useRef } from "react";
 import "../styles/GamePlay.css";
 import { getFunFacts } from "../../api/single-player/GameApi.js";
-
+import { useNavigate } from "react-router-dom";
 
 
 /**
@@ -47,10 +47,12 @@ const GamePlay = () => {
     "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
-  });
- // --- Tie narration to BGM ---
-  const { isPlaying, volume, setVolume } = useBgm();
-  
+});
+
+  const navigate = useNavigate();
+
+  // --- Tie narration to BGM ---
+  const { isPlaying, isMuted, volume, setVolume } = useBgm();
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
@@ -78,7 +80,7 @@ const GamePlay = () => {
     enabled: screen != "scenario", // only fetch when not on scenario screen
     onError: (err) => {
       console.error("onError:", err);
-    }
+    }, refetchIntervalInBackground: true
   });
 
   // --- Minimal TTS: inline (no extra files/deps) ---
@@ -123,7 +125,7 @@ const GamePlay = () => {
     // tweak for more “majestic” feel
    utter.rate = 0.7;  // slower (was 0.9) — lower is slower
   utter.pitch = 1.0;   // deeper
-    utter.volume = 1;   // full, since we ducked bgm
+    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));   // tie TTS loudness to the global toolbar
 
     utter.onend = utter.onerror = () => {
       // Restore BGM volume
@@ -211,6 +213,9 @@ const GamePlay = () => {
     return "";
   };
 
+  // If user hits Mute in the toolbar, kill any ongoing speech immediately
+  useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
+
 
   // handle choice click
   const handleChoice = async (option_id) => {
@@ -256,7 +261,7 @@ const {
     enabled: screen !== "question" && currentTurn != null,
     onError: (err) => {
       console.error("onError:", err);
-    }
+    }, refetchIntervalInBackground: true
 });
   const questionClass =
     stage === 1 || stage === 4 ? "fade-in-out show" :

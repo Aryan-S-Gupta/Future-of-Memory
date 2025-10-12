@@ -4,60 +4,102 @@ def build_question_prompt(
     year: int,
     background: str,
     context_block: str,
-    last_description: str,
 ) -> str:
     """
-    STEP A: Ask the model to return a multiple-choice style question with two options AND two corresponding RAG queries.
-    OUTPUT must be STRICT JSON with fields: question, options[2], option_queries[2]
+    Generate a prompt for LLM to create a progressive, time-aware 2-option question
+    with per-option RAG queries. Includes anti-repetition and theme progression.
+    
+    Returns:
+        A single JSON object (no markdown).
     """
-    return f"""
-You are a narrative engine for a turn-based story.
+    # Map year to developmental phase and thematic focus
+    if year < 2045:
+        phase = "early-adoption"
+        phase_themes = "regulation, safety, clinical oversight, commercialization onset, privacy concerns"
+    elif year < 2060:
+        phase = "social-integration" 
+        phase_themes = "labor market shifts, insurance, education, unequal access, platform monopolies, cross-border trade"
+    elif year < 2075:
+        phase = "governance-and-geopolitics"
+        phase_themes = "international standards, sanctions, memory IP, state surveillance, collective archives, cultural conflict"
+    else:
+        phase = "long-term-consequences"
+        phase_themes = "intergenerational effects, historical revision, identity fragmentation, collective trauma, black markets"
 
-TASK
-1) Propose ONE clear, decision-driving question WITH EXACTLY TWO OPTIONS (A, B). 
-   Each option must be short, mutually exclusive, and lead to meaningfully different outcomes.
-2) Build TWO specific retrieval queries (one for each option) to fetch 3–6 highly relevant factual snippets for grounding each option's consequences.
+    # Check if context_block contains compressed context from story state
+    if "Story History:" in context_block:
+        world_ctx = f"""CURRENT WORLD STATE
+Year: {year}
+Phase: {phase}
+Phase-Themes: {phase_themes}
 
-STORY FRAME
-Current Year: {year}
-
-Background:
-{background}
-
-Previous Story Summary:
-{last_description}
-
-Retrieved Context (if any, distilled):
+Story History (HIGH PRIORITY):
 {context_block}
 
+Initial Setting (reference only): {background}
+"""
+    else:
+        world_ctx = f"""CURRENT WORLD STATE
+Year: {year}
+Phase: {phase}
+Phase-Themes: {phase_themes}
 
-HARD CONSTRAINTS
-- Return ONLY valid JSON (no markdown, no code fences).
-- The question must be specific and consequential for the next plot turn.
-- "options": an array of EXACTLY 2 strings. Avoid "Yes/No".
-- Each retrieval query must be standalone (<= 110 chars) and safe to send to RAG.
-- Each option must be short (6–14 words), mutually exclusive, concrete, and must NOT repeat the question text.
-- Do NOT include labels like "A." or "B." inside option strings.
-- The two options MUST represent distinctly different approaches or philosophies.
-- Options should be self-contained and understandable without repeating the whole question.
-- Frame the question at the societal, policy, or community level (e.g., citizens, regulators, clinics, researchers).
+Setting (first turn or RAG-only):
+{background}
 
-OUTPUT FORMAT (STRICT)
-Return ONLY valid JSON with this exact schema:
-{{
-  "question": "<one question ending with a question mark>",
-  "options": ["<option A>", "<option B>"],
-  "option_queries": ["<query for option A>", "<query for option B>"]
-}}
+Available Context:
+{context_block}
+"""
+    
+    return f"""
+ROLE
+You are a narrative engine for a turn-based story about humanity's relationship with memory editing technology.
 
-EXAMPLE (ONLY to learn the shape; DO NOT copy content):
-{{
-  "question": "Which approach should the regulatory committee prioritize?",
-  "options": ["Establish mandatory waiting periods for all procedures", "Create independent patient advocate programs"],
-  "option_queries": ["clinical protocols waiting periods memory editing safety", "patient advocacy programs memory editing support"]
-}}
+CORE MISSION
+Produce a story-progressive, time-aware question that reflects CURRENT world state and introduces NEW challenges appropriate for the '{phase}' phase.
 
-Return ONLY valid JSON. Do not include markdown, code fences, or commentary.
+WORLD STATE & HISTORY (read carefully; highest priority)
+{world_ctx}
+
+WORLD STATE EVOLUTION PRINCIPLES
+- The story progresses through distinct phases of societal change
+- Historical Continuity: Each question must build upon previous developments and decisions  
+- Thematic Evolution: Move beyond basic "is memory editing ethical" to explore complex consequences
+- PRIORITY: Story Context/History above takes precedence over static background information
+
+NARRATIVE PROGRESSION REQUIREMENTS
+- MANDATORY: Analyze the Story Context/History above to understand what has already happened
+- FORBIDDEN: Do NOT repeat basic questions like "Should memory editing be allowed?" or "Is this technology ethical?"
+- REQUIRED: Focus on SPECIFIC consequences, complications, or new developments that arise from previous decisions
+- ADVANCEMENT: Each question should introduce novel challenges that emerge as technology and society evolve
+- SPECIFICITY: Address concrete scenarios (new regulations, technological breakthroughs, social conflicts, international tensions, economic impacts, cultural shifts)
+
+QUESTION DEVELOPMENT GUIDELINES
+- Build upon previous story developments rather than rehashing basic ethical debates
+- ALIGN WITH CURRENT PHASE: Focus on the Phase-Themes listed in the world state above
+- Focus on EMERGING issues that society hasn't faced before in this timeline
+- Present dilemmas that arise FROM the world state, not abstract philosophical questions
+- Phase-Specific Focus: Address challenges that naturally emerge during the current developmental phase
+- Consider secondary effects: economic disruption, generational divides, international competition, cultural evolution
+
+TASK SPECIFICATION
+1) Generate ONE story-progressive question WITH EXACTLY TWO OPTIONS (A, B)
+   - Question must reflect current world developments and introduce NEW challenges
+   - Options must be concrete responses to this specific situation, not generic approaches
+   - Each option should lead to meaningfully different societal trajectories
+2) Create TWO targeted retrieval queries (one for each option) for factual grounding
+
+OUTPUT REQUIREMENTS
+- MUST return valid JSON with fields: question, options, option_queries
+- Question: 18-30 words, specific, time-aware, builds on history
+- Options: Exactly 2 COMPLETE SENTENCES/POLICIES (10-18 words each), NOT keywords
+- Do NOT include labels like "A." or "B." inside option strings
+- Frame at societal/institutional level (governments, organizations, communities)
+- Option queries: Exactly 2 KEYWORD PHRASES for research (≤80 characters each, no questions)
+- CRITICAL: Options are full policy descriptions, option_queries are research keywords
+- Example option: "Establish mandatory memory editing licenses for all practitioners"
+- Example option_query: "memory editing safety protocols clinical trials"
+- FORBIDDEN: Never include template variables, placeholders, or markup syntax
 """.strip()
 
 
@@ -65,99 +107,119 @@ def build_description_prompt(
     year: int,
     background: str,
     context_block: str,
-    last_description: str,
     current_question: str,
-    selected_option: str,   # one of the strings from the options array
+    selected_option: str,
 ) -> str:
     """
-    STEP B: Given the player's selected option, produce the Scenario + follow-up RAG query.
-    OUTPUT must be STRICT JSON:
-    - scenario: single paragraph string which is vivid and engaging.
-    - query_text: declarative keyword phrase (no questions) for the NEXT turn's retrieval.
+    Generate a prompt for LLM to create a progressive, time-aware scenario description
+    based on the selected option. Includes world state evolution and narrative continuity.
+    
+    Returns:
+        A single JSON object with scenario, scenario_summary, and query_text fields.
     """
-    return f"""
-You are continuing a turn-based story. Incorporate the selected option and produce:
-1) A concrete scenario paragraph which is vivid and engaging.
-2) A focused follow-up retrieval query as a declarative keyword phrase (not a question).
+    
+    # Map year to developmental phase and thematic focus
+    if year < 2045:
+        phase = "early-adoption"
+        phase_themes = "regulation, safety, clinical oversight, commercialization onset, privacy concerns"
+    elif year < 2060:
+        phase = "social-integration" 
+        phase_themes = "labor market shifts, insurance, education, unequal access, platform monopolies, cross-border trade"
+    elif year < 2075:
+        phase = "governance-and-geopolitics"
+        phase_themes = "international standards, sanctions, memory IP, state surveillance, collective archives, cultural conflict"
+    else:
+        phase = "long-term-consequences"
+        phase_themes = "intergenerational effects, historical revision, identity fragmentation, collective trauma, black markets"
 
-CRITICAL VALIDATION REQUIREMENTS (Your response will be automatically validated):
-1. MUST return valid JSON format (no extra text before/after)
-2. MUST include "scenario" field as a string paragraph
-3. MUST include "query_text" field as a string
-4. Total word count for the scenario paragraph must be between 80-150 words
-5. If any of these requirements are not met, your response will be rejected and retried
+    # Build world context with conditional handling (like build_question_prompt)
+    if "Story History:" in context_block:
+        world_ctx = f"""CURRENT WORLD STATE
+Year: {year}
+Phase: {phase}
+Phase-Themes: {phase_themes}
 
-STORY FRAME
-Current Year: {year}
-
-Background:
-{background}
-
-Previous Story Summary:
-{last_description}
-
-Retrieved Context (if any, distilled):
+Story History (HIGH PRIORITY):
 {context_block}
 
-Current Question:
-{current_question}
+Current Question: {current_question}
 
-Selected Option:
-{selected_option}
+Selected Option: {selected_option}
 
-SCENARIO REQUIREMENTS
-- Output "scenario" as a single coherent paragraph string.
-- CRITICAL: Total word count MUST be between 80-150 words (count words by spaces). Your response will be REJECTED if under 80 words.
-- Write as one flowing narrative paragraph with multiple detailed sentences (aim for 4-6 sentences minimum).
-- Focus on institutional actors (clinics, agencies, councils, governments, consortia). Do not center individual doctors or patients; avoid personal names.
-- Overall causal arc: an institutional actor takes an action → visible consequences or public reactions. You do not need to repeat this structure inside every sentence.
-- Use simple, everyday language suitable for museum visitors or high-school students.
-- Make it vivid and engaging: include sensory details (lights, sounds, crowds) and small dramatic contrasts; at least one sentence should invite reflection with a question.
-- Add specific details: mention concrete locations, times, numbers, reactions, and outcomes to reach the required length.
-- Do not use arrows, symbols, headings, or labels like "result:"; write only natural sentences.
+Initial Setting (reference only): {background}
+"""
+    else:
+        world_ctx = f"""CURRENT WORLD STATE
+Year: {year}
+Phase: {phase}
+Phase-Themes: {phase_themes}
 
-ANTI-COPYING & VARIATION
-- Do not copy wording from any example. Use different phrasing and fresh details.
-- Avoid these phrases entirely: "brightly lit", "holograms", "bustling public square", "marble walls", "glowing buttons".
-- Use different cities/venues than any example; vary institutions and settings.
+Setting (first turn or RAG-only):
+{background}
 
-EXAMPLE TEMPLATE (structure only, NOT content to copy - this example is approximately 95 words):
-"scenario": "<Government/Agency/Clinic/Consortium> announces a comprehensive policy/action at <specific venue and city> on <specific date>, explaining detailed goals and multiple safeguards while diverse audiences react with curiosity and measured caution about identity preservation and privacy implications. <Regulatory body/Clinic network> demonstrates standardized procedures under strict multi-step consent checks, describing verification protocols and displaying preliminary results as visitors carefully weigh potential cognitive benefits against possible psychological risks and societal consequences. <Council/Agency> hosts an extensive public session in <concrete setting and time>, where detailed signage, ambient sounds, and interactive screen visuals shape the contemplative mood and make complex scientific ideas feel tangible and accessible. <Government/Consortium> coordinates systematically with regional partners, promising rigorous oversight and transparent reporting, while ongoing debates and news coverage amplify both hopes alongside growing doubts about long-term consequences. What fundamental aspects of human identity should be protected if memories become editable in daily life?"
+Available Context:
+{context_block}
 
-CRITICAL LENGTH REQUIREMENT
-- YOUR RESPONSE WILL BE AUTOMATICALLY REJECTED IF THE SCENARIO IS UNDER 80 WORDS.
-- Target 100-120 words for optimal length (well within the 80-150 range).
-- Include multiple detailed sentences with specific examples, locations, reactions, and consequences.
-- Add descriptive elements: specific venues, participant reactions, timeline details, policy specifics.
-- Count words carefully before finalizing your response.
-- Never include banned phrases.
+Current Question: {current_question}
+
+Selected Option: {selected_option}
+"""
+    
+    return f"""
+ROLE
+You are a narrative engine for a turn-based story about humanity's relationship with memory editing technology.
+
+CORE MISSION
+Produce a vivid, time-aware scenario description that incorporates the selected option and advances the story timeline appropriate for the '{phase}' phase.
+
+WORLD STATE & DECISION CONTEXT (read carefully; highest priority)
+{world_ctx}
+
+WORLD STATE EVOLUTION PRINCIPLES
+- The story progresses through distinct phases of societal change
+- Historical Continuity: Each scenario must build upon previous developments and decisions
+- Thematic Evolution: Move beyond basic implementations to explore complex consequences and reactions
+- PRIORITY: Story Context/History above takes precedence over static background information
+
+NARRATIVE PROGRESSION REQUIREMENTS
+- MANDATORY: Analyze the Story Context/History to understand what has already happened
+- FORBIDDEN: Do NOT retreat to earlier stages or repeat resolved conflicts
+- REQUIRED: Focus on SPECIFIC outcomes, reactions, or new developments that arise from the selected option
+- ADVANCEMENT: Each scenario should show how the world has changed and introduce emerging challenges
+- SPECIFICITY: Address concrete consequences (policy implementations, public reactions, institutional changes, social conflicts)
+
+SCENARIO DEVELOPMENT GUIDELINES
+- Include specific details referencing the current year ({year}): concrete dates, locations, institution names, participant reactions, policy details, and sensory atmosphere
+- Write as one flowing narrative paragraph with multiple detailed sentences (minimum 5-7 sentences for adequate length)
+- Focus on institutional actors (clinics, agencies, councils, governments, consortia). Do not center individual doctors or patients; avoid personal names
+- Structure: Institution takes action → Consequences unfold → Public reacts → Reflection question (don't force this pattern into every sentence)
+- Use simple, accessible language with fresh expressions and varied institutional settings
+- Make it vivid and engaging: include sensory details (lights, sounds, crowds) and small dramatic contrasts; at least one sentence should invite reflection with a question
+- Write only natural sentences using fresh language; avoid overused phrases like "brightly lit", "holograms", "bustling public square" and technical symbols/labels
 
 FOLLOW-UP RAG QUERY REQUIREMENTS
-- Base the query strictly on entities, mechanisms, or ethical dilemmas explicitly raised in the scenario.
-- Do not introduce unrelated topics.
-- CRITICAL: Write as a DECLARATIVE STATEMENT, not a question.
-- Format: "topic keywords and concepts" or "subject matter and related terms"
-- Examples: "memory editing consent procedures and safety protocols" | "clinical trial regulations and patient rights" | "institutional oversight and ethical guidelines"
-- Do NOT use question words (what, how, why, should, can, will, etc.) or question marks (?)
+- Extract key entities and concepts from the scenario as a declarative keyword phrase
+- Format: "topic keywords and concepts" (no questions or question marks)
+- Examples: "memory editing consent procedures" | "clinical trial regulations" | "institutional oversight guidelines"
 
-OUTPUT FORMAT (STRICT)
-CRITICAL: Your response will be validated automatically. It MUST pass these checks:
-1. Valid JSON format (starts with {{ and ends with }})
-2. Contains "scenario" field as a string paragraph
-3. MANDATORY: Total word count of the scenario paragraph must be between 80-150 words (WILL BE REJECTED IF UNDER 80)
-4. Contains "query_text" field as a string
-5. No extra text outside the JSON structure
+SCENARIO SUMMARY REQUIREMENTS
+- Analyze how the selected option changes the world described in the Story Context
+- Capture the key transformation: what shifts from the previous state to the new state
+- Length: 20-30 words focusing on concrete institutional, social, or policy changes
+- Example: "New international memory editing standards create citizen registry system, while underground modification networks emerge in response to restrictions"
 
-BEFORE SUBMITTING: Count the words in your scenario. If under 80 words, add more specific details, institutional reactions, timeline information, or consequences until you reach at least 80 words.
+TASK SPECIFICATION
+1) Generate a concrete scenario paragraph which is vivid and engaging
+2) Create a focused follow-up retrieval query as a declarative keyword phrase
+3) Provide a scenario summary that captures world state changes
 
-Return ONLY valid JSON with this exact schema:
-{{
-  "scenario": "<one coherent paragraph with 80-150 words total>",
-  "query_text": "<declarative keyword phrase - no questions or question marks>"
-}}
-
-REMINDER: If the total word count is not between 80-150 words, your response will be rejected.
-Return ONLY valid JSON. Do not include markdown, code fences, or commentary.
+OUTPUT FORMAT (automatically validated):
+- Valid JSON with exactly these fields: scenario, scenario_summary, query_text
+- Scenario: Single coherent paragraph, 80-150 words (WILL BE REJECTED IF UNDER 80 words)
+- Scenario summary: 20-30 words focusing on world state changes and story progression
+- Query text: Declarative keyword phrase (no questions)
+- FORBIDDEN: Template variables, brackets, HTML-like syntax, placeholder text
+- No markdown, code fences, or extra commentary
 """.strip()
 
 

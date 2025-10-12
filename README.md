@@ -26,9 +26,24 @@ Steps to follow everytime a new branch is pulled:
 ```https://github.com/manya-k/DECO3801---Data-Busters.git```
 3. ```cd frontend/src```
 4. ```npm install```
-5. ```npm run dev``` -- to actually run the game
+5. ```npm run dev -- --host``` -- on mac
+    ```npm run dev --host``` -- on windows
 
 ## Back End: 
+
+## Features
+
+- Django 4.x backend scaffolded and structured for local development
+- Static story content and yes/no questions (starting from year 2035)
+- One working API endpoints:
+  - `/api/static-story?year=YYYY` – returns full round data (background, question, yes/no outcomes)
+- Modular folder structure for future components:
+  - `rag/` for retrieval-augmented generation
+  - `llm/` for local LLM integration
+  - `images/` for image generation (e.g. via ComfyUI)
+  - `core/` for turn logic and timeline control
+
+---
 
 ##  Project Structure
 
@@ -123,6 +138,7 @@ Should display a version number.
 ```bash
 ollama pull phi3:3.8b
 ollama pull nomic-embed-text
+ollama pull gemma3:1b-it-qat
 ```
 
 #### Start Ollama Server
@@ -174,8 +190,6 @@ venv\Scripts\Activate.ps1
 ```bash
 pip install -r requirements.txt
 pip install -U pip wheel setuptools
-# If running for the first time: 
-pip install django-dramatiq  
 ```
 
 > **Note**: The `requirements.txt` file automatically installs the correct `python-magic` package for your platform:
@@ -270,11 +284,24 @@ brew services start postgresql
 ```
 **Windows:**
 - Download from: https://www.postgresql.org/download/windows/
-- Use default setup and remember username/password, enable pgadmin
+- After installation, set environment path:
+```bash
+C:\Program Files\PostgreSQL\18\bin
+```
 
 ### Step 7: Create DB user
+
+**macOS/Linux:**
+```bash
+psql postgres
+```
+**Windows:**
+Note that the `createdb` command may or may not be necessary to set up the database on your device.
 ```bash
 psql -U postgres
+```
+
+```bash
 # inside the shell, enter
 CREATE DATABASE memorysim_db;
 CREATE USER memorysim_user WITH PASSWORD 'password123';
@@ -283,6 +310,9 @@ GRANT ALL PRIVILEGES ON DATABASE memorysim_db TO memorysim_user;
 GRANT ALL ON SCHEMA public TO memorysim_user;
 \q
 ```
+extra step for Windows:
+- Use default setup and remember username/password, enable pgadmin: memorysim_user > properties > privelages > enable all (superuser)
+
 
 ### Step 8: Run migration
 
@@ -292,6 +322,16 @@ python manage.py migrate
 python manage.py createsuperuser # only if you want to access the db interface
 ```
 then follow the instructions, you need to set name, email and pwd for admin access, later you can visit http://127.0.0.1:9000/admin/, login and view data
+
+Initialize Database Content (First-time only, after database migration, populate initial content)
+```bash
+# Create world background story
+python create_background.py
+
+# Load default query keywords (if keywords file exists)
+python load_keywords_script.py
+```
+
 
 ### Step 9: Set up bg manager
 
@@ -304,16 +344,16 @@ brew install redis
 - Download Redis from this community-maintained build: https://github.com/microsoftarchive/redis/releases
 - Choose Redis-x64-3.2.100.msi and install
 
-**on MacOs**
+**macOS/Linux:**
 ``` bash
 redis-server
 ```
-**on Windows**
+
+**Windows:**
 ```bash
 redis-server.exe --port 6380 --bind 127.0.0.1
 ```
-
-### Step 10: create 3 worker (each from a different terminal)
+### Step 10: create 3 worker (each from a different terminal and 'cd backend' in the (venv))
 ``` bash
 python manage.py rundramatiq --queues default --processes 1 --threads 1
 python manage.py rundramatiq --queues image_queue --processes 1 --threads 1
@@ -324,20 +364,16 @@ python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1
 - download ComfyUI https://www.comfy.org/download
 - download dreamshaper model ver 7 https://civitai.com/models/4384?modelVersionId=109123
 - put the model under `ComfyUI/models/checkpoints`
-- starts ComfyUI server, make sure it is running at port 8080, if default not 8080, run it from terminal, switch to port 8080
+- starts ComfyUI server, make sure it is running at port 8000, if default not 8000, run it from terminal, switch to port 8000
     ```bash
     cd /path/to/ComfyUI
-    python main.py --port 8080
+    python main.py --port 8000
     ```
-   ### on windows: 
-   ```
-   cd C:\Users\<username>\AppData\Local\Programs\ComfyUI\resources\ComfyUI\models\checkpoints
-   ```
 
 ### Step 12: Start the Development Server at port 9000
 
 ```bash
-python manage.py runserver 0.0.0.0:9000
+python manage.py runserver 9000
 ```
 
 Then open your browser or use terminal tools like `curl` to test the following round-based endpoints:
@@ -363,10 +399,17 @@ http://127.0.0.1:9000/api/rag/retrieve
 ```
 
 To test fun facts API:
+
+On MacOS/Linux:
 ```bash
 curl --header "Content-Type: application/json" \
 --request POST \
 http://127.0.0.1:9000/api/rag/fun_facts
+```
+
+On Windows:
+```
+curl.exe -H "Content-Type: application/json" -X POST http://127.0.0.1:9000/api/rag/fun_facts
 ```
 
 ---
@@ -395,10 +438,3 @@ fetch("http://127.0.0.1:9000/api/storyline/start?year=2035")
 > No additional proxy settings are required for local development.
 
 ---
-
-## To-Do (Backend Roadmap)
-
-- [ ] RAG embedding + chunk loader
-- [ ] LLM story/question generation
-- [ ] Timeline & turn loop controller
-- [ ] AI image integration (ComfyUI or SD)
