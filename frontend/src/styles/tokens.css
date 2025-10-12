@@ -40,7 +40,7 @@
     --fs-body: 1rem;
     --fs-body-strong: 1.05rem;
     --fs-crawl: 2.5rem;
-    --fs-question: 3rem;
+    --fs-question: 2rem;
     --fs-btn: 1rem;
 
     /* Text zoom tokens */
@@ -65,7 +65,17 @@
     --dur-fade: 1.2s;
     --dur-choice-fade: 2s;
     --dur-next-fade: 3s;
-    --dur-crawl: 30s;
+    --dur-crawl: 20s;
+
+    --vignette-outer-opaque: rgba(0, 0, 0, 1);
+
+    /* (Optional) micro text tweaks for better readability */
+    --fs-body: 1rem;
+    /* keep */
+    --fs-btn: 1rem;
+    /* keep */
+    --text-zoom-min: 0.9;
+    /* slightly higher lower bound for readability */
 }
 
 html {
@@ -212,67 +222,488 @@ html {
 :root {
     /* Canvas base behind the glitch */
     --bg-canvas: #000000;
-
-    /* Glitch glyph palette (hex for interpolation) */
-    --glitch-1: #2b4539;
-    /* deep green */
-    --glitch-2: #61dca3;
-    /* mint */
-    --glitch-3: #61b3dc;
-    /* cyan */
-
-    /* Vignette ramps */
-    --vignette-center-opaque: rgba(0, 0, 0, 0.7);
-    --vignette-center-clear: rgba(0, 0, 0, 0.5);
-    --vignette-outer-clear: rgba(255, 255, 255, 0.05);
-
-    --vignette-outer-bg: radial-gradient(circle,
-            var(--vignette-outer-clear) 60%,
-            var(--vignette-outer-opaque) 100%);
-
-    --vignette-bg: radial-gradient(circle,
-            var(--vignette-center-opaque) 40%,
-            var(--vignette-center-clear) 55%);
 }
 
 /* Theme overrides (adjust to taste later) */
 :root[data-theme="light"] {
     --bg-canvas: #f6f9fc;
-    --glitch-1: #e9eff6;
-    --glitch-2: #cfd9e8;
-    --glitch-3: #aabbd3;
-
-    --vignette-center-opaque: rgba(0, 0, 0, 0.3);
-    --vignette-center-clear: rgba(0, 0, 0, 0.5);
-    --vignette-outer-clear: rgba(255, 255, 255, 0.15);
-
-    --vignette-outer-bg: radial-gradient(circle,
-            var(--vignette-outer-clear) 60%,
-            var(--vignette-outer-opaque) 100%);
-
-    --vignette-bg: radial-gradient(circle,
-            var(--vignette-center-opaque) 40%,
-            var(--vignette-center-clear) 55%);
 }
 
 :root[data-theme="dark"] {
     --bg-canvas: #000000;
     /* same as current */
-    --glitch-1: #2b4539;
-    --glitch-2: #61dca3;
-    --glitch-3: #61b3dc;
-    /* vignettes unchanged */
+}
 
-    --vignette-center-opaque: rgba(0, 0, 0, 0.7);
-    --vignette-center-clear: rgba(0, 0, 0, 0.5);
-    --vignette-outer-clear: rgba(255, 255, 255, 0.05);
+.screensaver {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    background-color: #000;
+    background-image: var(--vignette-bg, radial-gradient(circle,
+                rgba(0, 0, 0, 0.90) 40%, rgba(0, 0, 0, 1) 65%));
+    user-select: none;
+    cursor: pointer;
+    pointer-events: auto;
+    outline: none;
+    overflow: hidden;
+}
 
-    --vignette-outer-bg: radial-gradient(circle,
-            var(--vignette-outer-clear) 60%,
-            var(--vignette-outer-opaque) 100%);
+.halo {
+    position: absolute;
+    width: min(80vmin, 800px);
+    height: auto;
+    filter: drop-shadow(0 0 20px rgba(170, 230, 255, 0.25));
+    opacity: 0.95;
+    z-index: 1;
+    will-change: transform;
+    aspect-ratio: 1 / 1;
+}
 
-    --vignette-bg: radial-gradient(circle,
-            var(--vignette-center-opaque) 40%,
-            var(--vignette-center-clear) 55%);
+.ring {
+    transform-origin: 50% 50%;
+}
 
+.ring--outer {
+    animation: spin 25s linear infinite;
+}
+
+.ring--inner {
+    animation: spinReverse 20s linear infinite;
+}
+
+.txt {
+    font-family: var(--font-body, Kanit), system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    fill: color-mix(in srgb, var(--color-text, #fff) 88%, transparent);
+    paint-order: stroke;
+    stroke: rgba(0, 0, 0, 0.28);
+    stroke-width: 0.45px;
+}
+
+.center {
+    position: relative;
+    text-align: center;
+    color: var(--color-text, #fff);
+    z-index: 2;
+}
+
+.logo {
+    font-family: var(--font-display, Orbitron), system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    font-size: clamp(38px, 7vmin, 72px);
+    text-shadow: var(--shadow-title, 2px 2px 8px rgba(0, 0, 0, 0.7));
+}
+
+.subtitle {
+    margin-top: 8px;
+    opacity: 0.9;
+    font-size: clamp(14px, 2.4vmin, 22px);
+    letter-spacing: 0.2em;
+    text-shadow: var(--shadow-subheading, 1px 1px 6px rgba(123, 0, 255, 0.7));
+}
+
+.hint {
+    position: relative;
+    margin-top: 16px;
+    opacity: 0.9;
+    font-size: clamp(12px, 2vmin, 18px);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-shadow:
+        0 0 8px rgba(255, 255, 255, 0.9),
+        0 0 16px rgba(255, 255, 255, 0.6),
+        0 0 24px rgba(255, 255, 255, 0.4);
+    animation: pulseHint 2s ease-in-out infinite;
+}
+
+.hint::before {
+    content: "";
+    position: absolute;
+    inset: -10px -18px;
+    border-radius: 12px;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+}
+
+@keyframes pulseHint {
+
+    0%,
+    100% {
+        opacity: 1;
+        text-shadow:
+            0 0 8px rgba(255, 255, 255, 0.1),
+            0 0 16px rgba(255, 255, 255, 0.2),
+            0 0 24px rgba(255, 255, 255, 0.1);
+    }
+
+    50% {
+        opacity: 1;
+        text-shadow:
+            0 0 12px rgba(255, 255, 255, 0.5),
+            0 0 28px rgba(255, 255, 255, 0.2),
+            0 0 48px rgba(255, 255, 255, 0.5);
+    }
+}
+
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spinReverse {
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ring--outer,
+    .ring--inner {
+        animation: none;
+    }
+}
+
+.txt {
+    letter-spacing: 1.6px;
+    text-rendering: geometricPrecision;
+}
+
+.txt--inner {
+    opacity: 0.8;
+    fill: color-mix(in srgb, var(--color-text, #fff) 65%, transparent);
+    font-size: 0.5em;
+}
+
+/* Light mode: gentle, eye-friendly background flip */
+:root[data-theme="light"] .bg-layer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    /* Flip blacks→light grays, not pure white */
+    backdrop-filter: invert(0.9) brightness(0.95) contrast(0.9);
+    -webkit-backdrop-filter: invert(0.9) brightness(0.95) contrast(0.9);
+
+    /* add a light gray veil instead of white */
+    background: rgba(245, 247, 250, 0.15);
+}
+
+/* Softer overlay tint for light mode */
+:root[data-theme="light"] .bg-layer::after {
+    background:
+        radial-gradient(circle at center,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.15) 100%),
+        linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.08),
+            rgba(255, 255, 255, 0.18));
+    opacity: 1;
+}
+
+/* === Centered Glass Panel for Title + Buttons (Fixed Layout) === */
+
+/* Light theme enhancement */
+:root[data-theme="light"] .menu-glass {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== MainGameScreen layout restore (scoped to menu-glass) ===== */
+
+/* Centered glass card with predictable size (like before) */
+.menu-glass {
+    position: relative;
+    width: min(980px, 72vw);
+    height: min(620px, 72vh);
+    margin: 10vh auto 0;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    text-align: center;
+    z-index: 2;
+    /* sits above background, below any overlays */
+}
+
+/* Inner flex: keep everything perfectly centered until buttons appear */
+.menu-glass .menu-glass-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* title centered initially */
+    padding: 0 2rem;
+}
+
+/* Title: single line, consistent space reserved (prevents jump during typing) */
+.menu-glass .title {
+    font-size: clamp(48px, 8vw, 100px);
+    line-height: 1.05;
+    margin: 0;
+    white-space: nowrap;
+    /* “Future of Memory” stays one line */
+    text-overflow: ellipsis;
+    overflow: hidden;
+    min-height: 1.05em;
+    /* reserve height while Typewriter animates */
+    transform: translateY(0);
+    transition: transform 700ms ease, margin 700ms ease, font-size 700ms ease;
+}
+
+/* When buttons are revealed, move the title up a bit — not too far */
+.menu-glass.show-buttons .title {
+    transform: translateY(-18vh) scale(0.65);
+}
+
+/* Button group: hidden until showButtons; doesn’t affect centering */
+.menu-glass .button-group {
+    position: absolute;
+    bottom: 16%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    /* restored tidy spacing */
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 400ms ease, transform 400ms ease;
+}
+
+/* Respect aria-hidden without changing your JSX */
+.menu-glass .button-group[aria-hidden="true"] {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+}
+
+.menu-glass.show-buttons .button-group {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.8s ease 0.8s, transform 0.8s ease 0.8s;
+}
+
+.menu-glass.show-buttons .button-group:is(:hover, :focus-within) {
+    pointer-events: auto;
+}
+
+
+/* Buttons sizing consistency */
+.button-group .btn-primary,
+.button-group .btn-secondary {
+    min-width: 16rem;
+    padding-block: 0.9rem;
+}
+
+.menu-glass .button-group {
+    gap: clamp(10px, 1.6vh, 18px);
+}
+
+/* Fit buttons to the glass: comfortable width, readable type */
+.menu-glass .button-group .btn-primary,
+.menu-glass .button-group .btn-secondary {
+    /* Width hugs the glass without stretching too wide */
+    width: clamp(220px, 38vw, 520px);
+    max-width: 72%;
+
+    /* Comfortable padding that scales with viewport */
+    padding: clamp(10px, 1.2vw, 16px) clamp(20px, 3vw, 40px);
+
+    /* Readable but not loud */
+    font-size: clamp(14px, 1.6vw, 20px);
+    letter-spacing: 1.5px;
+    /* slightly calmer */
+    border-radius: 14px;
+    /* keeps your look */
+}
+
+/* Extra breathing room before "How To Play" */
+.menu-glass .button-group> :nth-child(3) {
+    margin-top: clamp(6px, 2.2vh, 24px);
+}
+
+.menu-glass .button-group {
+  position: absolute;
+  bottom: 16%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.menu-glass .button-group[aria-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+}
+
+
+/* === How-to content layout (minimal override) === */
+.menu-glass.howto {
+    /* fixed-ish card centered; auto height for content */
+    width: min(900px, 72vw);
+    max-height: 72vh;
+    margin: 10vh auto 0;
+    padding: clamp(20px, 2.2vw, 32px);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    /* tighter default spacing */
+
+    /* allow scroll if content overflows on small screens */
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
+}
+
+/* keep the glass look consistent, just a touch stronger for legibility */
+.menu-glass.howto {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+/* Title: single line, centered, less bottom space */
+.menu-glass.howto .title {
+    font-size: clamp(26px, 3.2vw, 42px);
+    line-height: 1.5;
+    margin: 0 0 0.25rem 0;
+    white-space: nowrap;
+    /* one line */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* safe on narrow screens */
+}
+
+/* Paragraph text: comfortable width, tighter rhythm */
+.menu-glass.howto .text {
+    max-width: 70ch;
+    margin: 0.25rem auto 0.25rem;
+    line-height: 1.1;
+    text-align: center;
+}
+
+/* Section headings: smaller and closer to content */
+.menu-glass.howto .subheading {
+    font-size: clamp(16px, 2.2vw, 22px);
+    margin: 0.75rem 0 0.25rem;
+}
+
+/* Light theme: a bit brighter for readability */
+:root[data-theme="light"] .menu-glass.howto {
+    background: rgba(255, 255, 255, 0.26);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.18);
+}
+
+/* Subtle scrollbars only when needed */
+.menu-glass.howto::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+}
+
+.menu-glass.howto::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+}
+
+.menu-glass.howto::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.text-container2 {
+    background-color: var(--color-text-container-bg);
+    padding: var(--space-md);
+    border-radius: var(--radius-sm);
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Body text */
+.text2 {
+    font-family: var(--font-body);
+    font-size: var(--fs-body-strong);
+    font-weight: 400;
+    text-align: center;
+    color: var(--color-accent);
+    text-shadow: var(--shadow-subheading);
+    max-width: 900px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.menu-glass {
+    position: relative;
+    margin: 10vh auto 0;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    text-align: center;
+}
+
+.menu-glass.howto {
+    width: min(900px, 72vw);
+    max-height: 72vh;
+    padding: clamp(20px, 2.2vw, 32px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    overflow: auto;
+    scrollbar-gutter: stable both-edges;
+}
+
+.menu-glass-inner {
+    position: relative;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.menu-glass.howto .btn-next {
+    margin-top: 0.5rem;
+    margin-bottom: 3rem;
+    padding: 0.9rem 3rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-radius: 14px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.25);
+}
+
+.menu-glass.howto .text2 {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 1.6vw, 20px);
+  line-height: 1.1;
+  letter-spacing: 0.4px;
+  color: var(--color-text);
+  text-shadow: var(--shadow-text);
+  max-width: 70ch;
+  margin: 0 auto 3rem auto; /* space below paragraph before button */
 }

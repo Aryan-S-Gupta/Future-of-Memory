@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQuestion, submitChoice,  } from "../../api/single-player/GameApi";
+import Button from "../components/Button/Button";
+import { useNavigate } from "react-router-dom";
 import { useSession } from "../../SessionContext.jsx";
 import background from "../assets/background.jpg";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
-import Button from "../components/Button/Button.jsx";
-import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import BasePage from "./BasePage.jsx";
-import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
+import { useBgm } from "../audio/AudioProvider.jsx";
 import { useMemo, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
 import "../styles/GamePlay.css";
-import { getFunFacts } from "../../api/single-player/GameApi.js";
-import { useNavigate } from "react-router-dom";
 
 
 /**
  * GamePlay component
+ *
  * This screen drives the main gameplay loop. It alternates between:
  * - Displaying a scenario for the given year.
  * - Displaying a decision-making question** with multiple choices.
@@ -30,13 +30,11 @@ import { useNavigate } from "react-router-dom";
  * @returns {JSX.Element} The interactive gameplay screen with scenario/question flow.
  */
 const GamePlay = () => {
-  const { sessionId } = useSession(); // <-- get session from context
+  // const { sessionId } = useSession();
+  const  sessionId  = 37;
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
-  const [loadingFacts, setLoadingFacts] = useState([]);
-  const [option_id, setOptionId] = useState(null);
-  const [isReady, setIsReady] = useState(false);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -56,7 +54,7 @@ const GamePlay = () => {
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
-  // Fetches the scenario whenever we are on the "scenario" screen.
+// Fetches the scenario whenever we are on the "scenario" screen.
  const {
   data: questionData,
   isLoading: isQuestionLoading,
@@ -67,21 +65,15 @@ const GamePlay = () => {
     queryFn: async () => {
       console.log("queryFn running for", sessionId);
       const result = await getQuestion(sessionId);
-      if (!result) {
-        setScreen("loading");
-        setIsReady(false);
-        await fetchFunFacts();
-        return null;
-      }
       console.log("queryFn result:", result);
       setCurrentTurn(result)
       return result;
     },
-    enabled: screen != "scenario", // only fetch when not on scenario screen
+    enabled: screen === "question",
     onError: (err) => {
       console.error("onError:", err);
-    }, refetchIntervalInBackground: true
-  });
+    }
+});
 
   // --- Minimal TTS: inline (no extra files/deps) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
@@ -123,8 +115,8 @@ const GamePlay = () => {
       .find(Boolean) || voices[0];
     utter.voice = picked;
     // tweak for more “majestic” feel
-   utter.rate = 0.7;  // slower (was 0.9) — lower is slower
-  utter.pitch = 1.0;   // deeper
+    utter.rate = 0.90;  // slower = more weighty
+    utter.pitch = 1.12;  // deeper
     utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));   // tie TTS loudness to the global toolbar
 
     utter.onend = utter.onerror = () => {
@@ -173,136 +165,53 @@ const GamePlay = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, questionReadout, isPlaying]);
 
-  // --- Staged reveal ---
-  // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
-  const [stage, setStage] = useState(0);
-  const fadeDuration = 1000; //
+  // Replay narration when toolbar Play is clicked (even if already playing)
   useEffect(() => {
-    if (screen === "question" && currentTurn) {
-      setStage(1); // show question
-      speak(currentTurn.question);
-
-      const timer1 = setTimeout(() => {
-        setStage(2);
-        speak(currentTurn.options[0].option_text);
-      }, 10000 - fadeDuration);
-
-      const timer2 = setTimeout(() => {
-        setStage(3);
-        speak(currentTurn.options[1].option_text);
-      }, 15000 - fadeDuration);
-
-      const timer3 = setTimeout(() => {
-        setStage(4); // show all together, no TTS
-      }, 20000 - fadeDuration);
-
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-        clearTimeout(timer3);
-        cancelTTS();
-      };
-    }
-  }, [screen, currentTurn]);
-
-  // Map button stage
-  const getButtonStageClass = (idx) => {
-    if (stage === 4) return "show";
-    if (stage === idx + 2) return "show";
-    if (stage > idx + 2) return "hide";
-    return "";
-  };
+    const handler = () => {
+      if (screen === "scenario" && scenarioData?.scenario) {
+        speak(scenarioData.scenario);
+      } else if (screen === "question" && questionReadout) {
+        speak(questionReadout);
+      }
+    };
+    window.addEventListener("bgm-play", handler);
+    return () => window.removeEventListener("bgm-play", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
 
   // If user hits Mute in the toolbar, kill any ongoing speech immediately
   useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
 
+  /**
+   * Handles a player's choice when answering a question.
+   *
+   * @param {string} answer - The key of the chosen option.
+   */
 
   // handle choice click
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
     cancelTTS(); 
-    setScreen("loading");
-    setOptionId(option_id);
-    console.log("handleChoice called with option_id:", option_id);
-    setIsReady(false);
-    await fetchFunFacts();
-  
-
-  };
-
-const {
-  data: out,
-  isLoading: isTurnLoading,
-  error: turnError,
-  status: turnStatus,
-  } = useQuery({
-    queryKey: ["scenario", currentTurn, sessionId, year, option_id],
-    queryFn: async () => {
-      console.log("submitting option", option_id);
-      const out = await submitChoice(sessionId,currentTurn.turn_id, year, option_id);
-
-      if (!out.scenario || !out.scenario.text || !out.image?.url) {
-        console.log("Scenario/image not ready yet...");
-        return;
-    } else if (out.scenario.text === scenarioData?.scenario) {
-      console.log("Scenario/image unchanged, waiting...");
-      return;
-    }
-      const mapped = {
+    const out = await submitChoice(sessionId, currentTurn.turn_id, year, option_id)
+        const mapped = {
         scenario: out.scenario.text,
         image: out.image.url
       };
+      if (out.image.status !== "ready" ) {
+        console.log("Failed to submit choice:", out.message);
+      }
       console.log("Submit choice response:", mapped);
-      setIsReady(true);
       setScenarioData(mapped);
+      setScreen("scenario");
       setYear(year + 1);
+      };
 
-    },
-    enabled: screen !== "question" && currentTurn != null,
-    onError: (err) => {
-      console.error("onError:", err);
-    }, refetchIntervalInBackground: true
-});
-  const questionClass =
-    stage === 1 || stage === 4 ? "fade-in-out show" :
-      stage > 1 ? "fade-in-out hide" : "fade-in-out";
-
-  const optionAClass =
-    stage === 2 || stage === 4 ? "choice-btn fade-in-out show" :
-      stage > 2 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
-
-  const optionBClass =
-    stage === 3 || stage === 4 ? "choice-btn fade-in-out show" :
-      stage > 3 ? "choice-btn fade-in-out hide" : "choice-btn fade-in-out";
-    
-
-
-  // Fetch fun facts when loading scenario
-  const fetchFunFacts = async () => {
-    try {
-      const facts = await getFunFacts(); // Fetch 3 fun facts
-      setLoadingFacts(facts.data);
-      console.log("Fun facts loaded:", facts);
-    } catch (error) {
-        console.error("Error fetching fun facts:", error);
-    }
-  }
   return (
     <BasePage>
-      <ExitExperience roomCode={"-1"} playerName={"single-player"}/>
-      {screen === "loading" && (
-      <LoadingScreen
-        isReady={isReady}
-        funFacts={loadingFacts}
-        onContinue={() => {
-          setScreen("scenario");
-        }}
-      />
-    )}
-
+      <ExitExperience/>
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
-          {/* Image in middle */}
+              {/* Image in middle */}
           {scenarioData.image && (
             <div className="scenario-image">
               <img src={scenarioData.image} alt="scenario" className="scenario-img" />
@@ -312,6 +221,8 @@ const {
           <div className="text-container">
             <h2 className="fade-in">{scenarioData.scenario}</h2>
           </div>
+
+
 
           {/* Continue button at bottom */}
           <div className="scenario-footer">
@@ -328,21 +239,19 @@ const {
       )}
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
-        <div className="question-container">
-          <h2 className={questionClass}>
-            {currentTurn.question}
-          </h2>
+        <div className="menu-glass  question-screen-container">
+          <div className="question-container">
+            <h2 className="fade-in">{currentTurn.question}</h2>
+          </div>
           <div className="choice-container">
-            <Button
-              baseButton={optionAClass}
-              action={() => handleChoice(currentTurn.options[0].option_id)}
-              title={`${currentTurn.options[0].label}. ${currentTurn.options[0].option_text}`}
-            />
-            <Button
-              baseButton={optionBClass}
-              action={() => handleChoice(currentTurn.options[1].option_id)}
-              title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
-            />
+            {currentTurn.options.map((opt) => (
+              <Button
+                baseButton="choice-btn choice-fade-in"
+                key={opt.option_id}
+                action={() => handleChoice(opt.option_id)}
+                title={`${opt.label}. ${opt.option_text}`}
+              />
+            ))}
           </div>
         </div>
       )}
