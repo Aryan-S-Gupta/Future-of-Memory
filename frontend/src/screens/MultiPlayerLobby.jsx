@@ -56,7 +56,7 @@ const MultiplayerLobby = () => {
     setRoomCode(data.room_code);
     console.log(roomCode);
       if (mode === "peer") {
-    navigate(`/background-multi/${data.room_code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
+ navigate(`/background-multi/${data.room_code}/${playerName}`);
   } else {
     navigate(`/projection-host/${data.room_code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
   }
@@ -100,7 +100,7 @@ const MultiplayerLobby = () => {
               navigate(`/player-room/${code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
           }
         } else { 
-          navigate(`/background-multi/${code}?playerName=${name}&mode=${mode}`);
+          navigate(`/background-multi/${code}/${name}&mode=${mode}`);
           console.log("navigated")
         }
 

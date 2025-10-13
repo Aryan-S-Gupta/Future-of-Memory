@@ -8,6 +8,9 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rag.retrieve import retrieve_chunks
+from django.http import JsonResponse
+import json
+from .mini_game import get_scores, submit_score_single
 from .game_logic import VotingSession, VotingSessions
 from shared.services import display_world_view
 from django.http import JsonResponse
@@ -230,7 +233,9 @@ def leave_multiplayer_room(request):
 def submit_choice(request):
     data = json.loads(request.body.decode("utf-8"))
     mode = data.get("mode")
-    get_multiplayer_result(request)
+    return get_multiplayer_result(request)
+
+
 def get_multiplayer_result(data):
         room_code = data.get("room_code")
         player_name = data.get("player_name")
@@ -323,7 +328,8 @@ def get_voting_status_with_options(request, room_code, turn_id):
         "turn_id": turn_id,
         "num_responses": voting_session.num_responses,
         "total_players": voting_session.total_players,
-        "final_option": voting_session.final_option
+        "final_option": voting_session.final_option,
+        "player_votes": voting_session.get_p_votes()
     }
     logger.info(payload)
     return JsonResponse(payload)
@@ -438,7 +444,7 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     }
 
     return JsonResponse(response_payload)
-
+ 
 
 # scenario and image display page
 from shared.services import display_world_view
@@ -452,7 +458,11 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     logger.debug(f"playername is {player_name}")
     if not rm.room_exists(room_code):
         return JsonResponse({'success': False, 'room_exists': False})
+    
+    
     final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
+    logger.info(f"[Vote Submitted] {player_name} voted for {option_id} in room {room_code}")
+    logger.info(f"[Current Votes] {VotingSessions[(room_code, int(current))].get_p_votes()}")
     if final_option is None:
         logger.debug("Not all players have voted yet.")
         print("Not all players have voted yet.")
@@ -490,9 +500,14 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
     current = rm.get_state(room_code).get("turn_id", -1)
     logger.info(f"turn_id received: {turn_id}")
     final_option = VotingSessions[(room_code, int(current))].process_player_response(room_code, player_name, option_id)
+
+    logger.info(f"[Vote Submitted] {player_name} voted for {option_id} in room {room_code}")
+    logger.info(f"[Current Votes] {VotingSessions[(room_code, int(current))].get_p_votes()}")
     if final_option is None: 
         final_option = VotingSessions[(room_code, int(current))].get_final_option()
         logger.info(f"Voting result is {final_option}")
+
+
 
     # Prepare vote tracking info
     votes_info = {
@@ -501,6 +516,15 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
         "total_players": VotingSessions[(room_code, current)].total_players,
         "final_option": final_option
     }
+    if final_option == "TIE":
+        logger.info("senfing tie")
+        return JsonResponse({
+            'success': False,
+            'room_exists': True,
+            "tie": True,
+            "votes_info": votes_info,
+            "message": "Votes tied, switching to minigame."
+        })
 
     # If not all players have voted, return votes info only
     if final_option is None:
@@ -508,6 +532,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
         return JsonResponse({
             "success": False,
             "scenario": "",
+            "tie": False,
             "votes_info": votes_info,
             "message": "Waiting for other players to vote."
         }, status=404)
@@ -543,3 +568,84 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
             'votes_info': votes_info,
             'error': f'Failed to display world view: {str(e)}'
         }, status=500)
+
+
+
+
+@csrf_exempt
+@require_POST
+def submit_score_single_view(request):
+    """
+    Handle POST request to submit a score for the single-player memory mini-game.
+
+    Expects JSON request body with:
+      - player_name (str): The name of the player.
+      - score (int): The player's score.
+
+    Returns:
+        JsonResponse: A JSON object with either a success message or error details.
+    """
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        player_name = data.get("player_name")
+        score = data.get("score")
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON")
+
+    if player_name is None or score is None:
+        return HttpResponseBadRequest("Missing 'player_name' or 'score'")
+
+    result = submit_score_single(player_name, score)
+    return JsonResponse(result)
+
+
+@csrf_exempt
+def get_scores_view(request):
+    """
+    Retrieve all submitted single-player scores.
+    """
+    scores = get_scores()
+    return JsonResponse({"scores": scores})
+
+
+@csrf_exempt
+@require_POST
+def submit_tiebreak_score_view(request):
+    """
+        Handle POST request for multiplayer tie-break score submissions.
+
+        Expects JSON request body with:
+        {
+            "room_code": "ABC123",   # unique game room identifier
+            "turn_id": 5,            # numeric turn or round ID
+            "player_name": "Alice",  # player's display name
+            "score": 92              # player's tie-break score
+        }
+
+        Returns:
+            JsonResponse: Indicates the status of the tie-break session:
+                        - {"status": "pending"} if still unresolved
+                        - {"status": "resolved", "winner": <name>, "winning_option": <option>}
+        """
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        room_code = data["room_code"]
+        turn_id = int(data["turn_id"])
+        player_name = data["player_name"]
+        score = int(data["score"])
+    except (KeyError, ValueError, json.JSONDecodeError):
+        return HttpResponseBadRequest("Invalid or missing parameters")
+
+    voting_sesh = VotingSessions.get((room_code, turn_id))
+    if not voting_sesh:
+        return JsonResponse({"error": "No active voting session found"}, status=404)
+
+    result = voting_sesh.submit_tiebreak_score(player_name, score)
+    if result:
+        logger.info({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})
+        return JsonResponse({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})
+    else:
+        logger.info({"status": "pending"})
+        return JsonResponse({"status": "pending"})
+
+
