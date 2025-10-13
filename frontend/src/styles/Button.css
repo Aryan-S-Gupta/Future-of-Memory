@@ -272,7 +272,7 @@
   }
 
   100% {
-    transform: rotateX(22deg) translateY(-120%) translateZ(-240px);
+    transform: rotateX(22deg) translateY(-90%) translateZ(-240px);
     opacity: 1;
   }
 }
@@ -302,7 +302,8 @@
   height: clamp(120px, 28vh, 260px);
   padding: clamp(12px, 2.2vh, 24px);
   border-radius: clamp(18px, 5vw, 50px);
-  overflow: hidden;                 /* let JS auto-shrink avoid overflow */
+  overflow: hidden;
+  /* let JS auto-shrink avoid overflow */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -318,5 +319,7 @@
 
 /* Keep hover motion subtle on small screens */
 @media (max-width: 480px) {
-  .choice-btn:hover { transform: translateY(-3px); }
+  .choice-btn:hover {
+    transform: translateY(-3px);
+  }
 }
