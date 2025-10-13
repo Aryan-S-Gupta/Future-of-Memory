@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/RoomManagementApi.js";
+import "../styles/MultiplayerLobby.css"; // Import CSS for styling
 import Button from "../components/Button/Button.jsx";
+import BasePage from "./BasePage.jsx";
+import { useSession } from "../../SessionContext.jsx";
+import { startPrerender } from "../../api/single-player/GameApi.js";
 
 /**
  * MultiplayerLobby Component
@@ -21,6 +25,7 @@ const MultiplayerLobby = () => {
   // Local state to store player name and room code
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
+  const { sessionId, setSessionId } = useSession();
   const navigate = useNavigate();
 
   // Fetch list of available rooms using React Query
@@ -45,11 +50,16 @@ const MultiplayerLobby = () => {
         return alert("Please Enter a NickName");
     }
     const data = await createRoom(playerName);
+    setSessionId(data.session_id);
+   // await new Promise(res => setTimeout(res, 50));
+
+    await startPrerender(data.session_id, 2035);
     setRoomCode(data.room_code);
     console.log(roomCode);
+            navigate(`/background-multi/${data.room_code}?playerName=${name}`);
     // Navigate to multiplayer room screen
-    navigate(`/multiplayer-room/${data.room_code}?playerName=${playerName}`);
-    console.log("navigated")
+    // navigate(`/multiplayer-room/${data.room_code}/${playerName}`);
+    console.log("navigated with session id " + data.session_id);
   };
 
   /**
@@ -73,7 +83,9 @@ const MultiplayerLobby = () => {
     try {
       const data = await joinRoom(code, name);
       if (data.success == "True") {
-        navigate(`/multiplayer-room/${code}?playerName=${name}`);
+        setSessionId(data.session_id);
+        console.log("session id is " + data.session_id);
+        navigate(`/background-multi/${code}?playerName=${name}`);
         console.log("navigated")
       } else {
         alert("Sorry, unable to join the room. Please try again.");
@@ -85,28 +97,39 @@ const MultiplayerLobby = () => {
   };
 
   return (
-    <div>
-      <Button baseButton="btn-back" action={() => navigate("/")} title="Exit Experience" />
-      <h2>Multiplayer Lobby</h2>
-      <input
-        type="text"
-        placeholder="Your Name"
-        value={playerName}
-        onChange={(e) => setPlayerName(e.target.value)}
-      />
-      <button onClick={handleCreateRoom}>Create Room</button>
-
-      <h3>Available Rooms</h3>
-      <ul>
+    <BasePage>
+    <div className="multiplayer-lobby">
+    <h2 className="title">Multiplayer Lobby</h2>
+      <div className="room-input-container">
+        <input
+          className="player-input"
+          type="text"
+          placeholder="Enter your name"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+        />
+        <button className="btn-create-room" onClick={handleCreateRoom}>
+          Create Room
+        </button>
+      </div>
+    <h3 className="subheading">Available Rooms</h3>
+    <ul className="room-list">
       {roomList?.rooms?.map((code) => (
-        <li key={code}>
-          {code}
-          <button onClick={() => handleJoinRoom(code)}>Join</button>
+        <li key={code} className="room-item">
+          <span className="room-code">{code}</span>
+          <button className="btn-create-room" onClick={() => handleJoinRoom(code)}>Join</button>
         </li>
-      ))}
-      </ul>
+        ))}
+    </ul>
+    <div className="button-container">
+      <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
     </div>
+  </div>
+  </BasePage>
   );
 };
 
 export default MultiplayerLobby;
+
+
+

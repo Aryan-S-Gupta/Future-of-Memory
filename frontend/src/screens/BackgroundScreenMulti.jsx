@@ -1,36 +1,25 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
 import "../styles/tokens.css";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
-import { startPrerender } from "../../api/single-player/GameApi.js";
-import { useSession } from "../../SessionContext.jsx";
-import "../styles/tokens.css"
-
 
 /**
- * BackgroundScreen component
+ * BackgroundScreenMulti component
  *
- * This screen introduces the narrative background of the game.
- * It provides immersive story context before gameplay begins, 
- * styled with a "crawl" effect (scrolling text).
- *
- * Features:
- * - Narrative text explaining the year 2040 and the player's role.
- * - A "Back" button to return to the home screen.
- * - A "Next" button to proceed into the GamePlay screen.
- *
- * @component
- * @returns {JSX.Element} A styled introductory background screen with story text and navigation.
+ * Multiplayer background intro before gameplay begins.
+ * Just shows the story crawl, no API calls needed.
  */
-const BackgroundScreen = () => {
+const BackgroundScreenMulti = () => {
   const navigate = useNavigate();
-  const { sessionId } = useSession();
+  const { roomCode } = useParams();
+  const [searchParams] = useSearchParams();
+  const playerName = searchParams.get("playerName");
 
-  const start = async () => {
-    await startPrerender(sessionId);
-    navigate("/game-play");
-  }
+  const goToGame = () => {
+    navigate(`/multiplayer-room/${roomCode}?playerName=${playerName}`);
+  };
+
   return (
     <BasePage>
       <div className="menu-glass howto">
@@ -49,15 +38,16 @@ const BackgroundScreen = () => {
               </p>
             </div>
           </div>
-          <Button baseButton="btn-confirm btn-next next-fade-in" action={start} title="Next" />
+          <Button baseButton="btn-confirm btn-next next-fade-in" action={goToGame} title="Next" />
         </div>
       </div>
 
-      {/* Navigation buttons (Back to home, Next to gameplay) */}
+      {/* Navigation buttons */}
       <div className="button-container">
-        <ExitExperience />
+        <ExitExperience code={roomCode} player={playerName} />
       </div>
     </BasePage>
   );
 };
-export default BackgroundScreen;
+
+export default BackgroundScreenMulti;

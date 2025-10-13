@@ -1,9 +1,5 @@
 import api from "./api";
 
-export const createMultiplayerSession = async () => {
-  const response = await api.get("/create_session");
-  return response.data;
-};
 /**
  * List all available rooms.
  * @returns {Promise<object[]>} Array of room objects.
@@ -34,6 +30,19 @@ export const joinRoom = async (roomCode, playerName) => {
   return response.data;
 };
 
+/**
+ * Leave the current room player is in
+ * @param {String} roomCode - Code of the room to leave
+ * @param {*} playerName - The player's chosen name.
+ * @returns {Promise<object>} Room state after leave
+ */
+export const leaveRoom = async (roomCode, playerName) => {
+  console.log(roomCode)
+const response = await api.get(`/leave`, {
+    params: { roomCode, playerName }
+  });
+  return response.data;
+}
 /**
  * Get the current room state (players, choices, etc.)
  * @param {string} roomCode - Room identifier.

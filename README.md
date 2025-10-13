@@ -28,12 +28,26 @@ Steps to follow everytime a new branch is pulled:
    cd frontend/src
    npm install
    npm run dev
+   npm run dev -- --host # to host on Mac; or
+   npm run dev --host # to host on Windows
    ```
-3. Navigate to the displayed `localhost` link to open the game in your browser.
+3. Navigate to one of the displayed `localhost` links to open the game in your browser.
 
-## Backend Setup
+## Backend
 
-### Project Structure
+### Features
+
+- Django 4.x backend scaffolded and structured for local development
+- Static story content and yes/no questions (starting from year 2035)
+- One working API endpoints:
+  - `/api/static-story?year=YYYY` – returns full round data (background, question, yes/no outcomes)
+- Modular folder structure for future components:
+  - `rag/` for retrieval-augmented generation
+  - `llm/` for local LLM integration
+  - `images/` for image generation (e.g. via ComfyUI)
+  - `core/` for turn logic and timeline control
+
+###  Project Structure
 
 ```
 ├── api/                    # API endpoints and static data
@@ -78,9 +92,6 @@ brew install redis
 ```bash
 brew update
 brew install libmagic
-
-# Recommended for robust PDF/Image parsing:
-brew install poppler tesseract
 ```
 
 #### Windows
@@ -144,6 +155,7 @@ Should display a version number.
 ```bash
 ollama pull phi3:3.8b
 ollama pull nomic-embed-text
+ollama pull gemma3:1b-it-qat
 ```
 
 #### Start Ollama Server
@@ -157,13 +169,13 @@ Create the virtual environment from the project root.
 
 #### macOS/Linux
 
+> If you want to use the existing `tasks.json` file to run the project using VSCode Tasks, the
+> virtual environment should be made in the project root.
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
-
-> If using VSCode, you may want to add this virtual environment as a Python Environment in the UI so
-> it will be activated on startup.
 
 #### Windows
 
@@ -175,6 +187,9 @@ python -m venv .venv
 # Using PowerShell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
+
+> If using VSCode, you may want to add this virtual environment as a Python Environment in the UI so
+> it will be activated on startup.
 ```
 
 > **Note for Windows**: If you encounter execution policy issues in PowerShell, run:
@@ -185,7 +200,7 @@ python -m venv .venv
 
 ### Step 3: Install Dependencies
 
-If not inside the `backend` folder already, run `cd backend` first.
+Run these commands from the `backend` folder.
 
 ```bash
 pip install -r requirements.txt
@@ -247,21 +262,23 @@ brew services start postgresql
 **Windows:**
 
 - Download from: https://www.postgresql.org/download/windows/
-- Use default setup and remember username/password, enable pgadmin
 - After installation, set environment path (may need to change the 18 depending on your version):
 
-```bash
+```
 C:\Program Files\PostgreSQL\18\bin
 ```
 
 ### Step 6: Create DB user
 
-Note that the `createdb` line may or may not be necessary on your device.
+Note that the `createdb` command may or may not be necessary to set up the database on your device.
 
 ```bash
 createdb $(yourname)
 psql -U postgres
-# inside the shell, enter
+```
+
+```sql
+-- inside the psql shell, enter
 CREATE DATABASE memorysim_db;
 CREATE USER memorysim_user WITH PASSWORD 'password123';
 GRANT ALL PRIVILEGES ON DATABASE memorysim_db TO memorysim_user;
@@ -277,15 +294,13 @@ Extra step for Windows:
 
 ### Step 7: Run migration
 
-These commands may set up the RAG system, which may take some time.
-
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser # only if you want to access the db interface
 ```
 
-When creating a superuser, follow the instructions given. You need to set name, email and password.
+If creating a superuser, follow the instructions given. You need to enter your name, email and password
 for admin access. Later, you can visit `http://127.0.0.1:9000/admin/` to login and view data in the
 database.
 
@@ -313,14 +328,12 @@ Palette.
 
 Start the redis server:
 
-**on MacOs**
-
-```bash
+**macOS/Linux:**
+``` bash
 redis-server
 ```
 
-**on Windows**
-
+**Windows:**
 ```bash
 redis-server.exe --port 6380 --bind 127.0.0.1
 ```
@@ -347,7 +360,7 @@ system set up to run the project.
 
 ```bash
 python setup_rag.py
-python manage.py runserver 0.0.0.0:9000
+python manage.py runserver 9000
 ```
 
 Then open your browser or use terminal tools like `curl` to test the following round-based endpoints:
@@ -372,7 +385,7 @@ ls -lah backend/rag/db/faiss_db
 dir backend\rag\db\faiss_db
 ```
 
-Should contain `index.faiss` and `index.pkl`
+Should contain `index.faiss` and `index.pkl`.
 
 ### Quick Retrieval Test
 

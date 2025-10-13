@@ -6,10 +6,11 @@ Provides endpoints to fetch story background, questions, and results based on us
 import json
 import os
 import logging
+import multiplayer.room_manager as rm
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-
+from django.views.decorators.http import require_POST
 from rag.retrieve import retrieve_chunks
 from rag.fun_facts.retrieve_fun_facts import retrieve_fun_facts
 
@@ -26,6 +27,8 @@ logger.setLevel(logging.DEBUG)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data", "static_stories.json")
+VOTING_SESSIONS = {}
+
 
 with open(DATA_FILE, "r", encoding="utf-8") as f:
     story_data = json.load(f)
@@ -106,6 +109,33 @@ def get_story_result_by_choice(request):
         }
     )
 
+@csrf_exempt
+def submit_choice(request):
+    data = json.loads(request.body.decode("utf-8"))
+    mode = data.get("mode")
+    get_multiplayer_result(request)
+
+
+def get_multiplayer_result(data):
+        room_code = data.get("room_code")
+        player_name = data.get("player_name")
+        choice = data.get("choice")
+
+        room = rm.get_rooms[room_code]
+        player = room["players"].get[player_name]
+        player.last_choice = choice
+        player.save()
+
+        # check if all players have submitted
+        all_answered = all(p.last_choice for p in room.players.all())
+        outcome = None
+        if all_answered:
+            from collections import Counter
+            votes = [p.last_choice for p in room.players.all()]
+            outcome = Counter(votes).most_common(1)[0][0]
+            room.current_year += 1
+            room.save()
+        return JsonResponse({"all_answered": all_answered, "outcome": outcome})
 
 @csrf_exempt
 @require_POST
@@ -164,12 +194,18 @@ def rag_retrieve(request):
 from shared.models import Session, Option, Turn, ImageRender
 
 # home page
-
-
 # need to call this somewhere - as soon as the game is created
 def create_session(request):
     """
     Create a new Session and return its ID as JSON.
+    Returns:
+        JsonResponse: {'session_id': int} 
+        Status code: 201 Created
+    attributes:
+        - session_id (int): The ID of the newly created session. 
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+
     """
     session = Session.objects.create()
     logger.debug(f"session id created: {session.id}")
@@ -185,17 +221,44 @@ from shared.tasks import start_turn_pipeline
 def start_prerendering(request):
     year = request.GET.get("year")
     session_id = request.GET.get("session_id")
-    logger.debug("start_turn_pipeline.send() called")
+    logger.info("start_turn_pipeline.send() called")
     start_turn_pipeline.send(session_id, year)
-    logger.debug("start_turn_pipeline.send() called")
+    logger.info("start_turn_pipeline.send() called")
     return JsonResponse({"status": "generation_started"})
-
 
 # question and options display page
 
 
 # send the existing work
 def display_question_and_options(request, session_id):
+
+    """
+    Display the question and options for the latest turn of a given session.
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+        session_id (int): The ID of the session to retrieve the turn for.
+    Returns:
+        JsonResponse: {
+            'message': 'ok',
+            'data': {
+                'turn_id': int,
+                'year': int,
+                'question': str,
+                'options': [
+                    {'option_id': int, 'label': str, 'option_text': str},
+                    ...
+                ]
+            }
+        }
+        Status code: 200 OK
+    attributes:
+        - turn_id (int): The ID of the latest turn.
+        - year (int): The year of the latest turn.
+        - question (str): The question text of the latest turn. 
+        - options (list): List of options with their IDs, labels, and texts.
+    Raises:
+        - 404 Not Found: If the session or turn does not exist.     
+    """
     # get session
     logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
@@ -243,32 +306,67 @@ from shared.services import display_world_view
 
 def display_scenario_and_image(request, session_id, turn_id, year, option_id):
     """
-    Display the world view after user makes a choice.
+    Display the scenario and image for a given session, turn, year, and option.
+    If the world view is ready, it also triggers the generation of the next turn in the background.
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+        session_id (int): The ID of the session.
+        turn_id (int): The ID of the turn.
+        year (int): The year of the turn.
+        option_id (int): The ID of the selected option.
+    Returns:
+        JsonResponse: {
+            'success': bool,
+            'status': str,  # "ready", "processing", "error"
+            'scenario': str,  # scenario text if ready
+            'image_url': str,  # image URL if ready
+            'error': str,  # error message if any
+        }
+        Status code: 200 OK if successful, 500 Internal Server Error if an exception occurs
+    attributes:
+        - success (bool): True if the operation was successful, False otherwise.
+        - status (str): The status of the world view ("ready", "processing", "  
+"error").
+        - scenario (str): The scenario text if the world view is ready.
+        - image_url (str): The image URL if the world view is ready.
+        - error (str): An error message if any error occurred.
+    Raises:
+        - 500 Internal Server Error: If an exception occurs during processing.
+
     """
     try:
         world_view_data = display_world_view(session_id, turn_id, year, option_id)
-
-        if world_view_data.get("success"):
+        if world_view_data.get("success") and world_view_data.get("scenario").get("text") != "":
             next_year = int(year) + 1
+            next_turn = Turn.objects.filter(session_id=session_id, year=next_year).first()
+            if next_turn:
+                world_view_data["next_turn_id"] = next_turn.id
+            # start generating next turn in background
             try:
-                # start generating next turn in background
                 start_turn_pipeline.send(session_id, next_year)
                 logger.info(
                     f"Started generating next turn (year {next_year}) in background"
                 )
             except Exception as e:
                 logger.warning(f"Failed to start next turn generation: {e}")
-        return JsonResponse(world_view_data)
 
+
+            return JsonResponse(world_view_data)
+        else:
+            return JsonResponse({'error': 'No turn found for this session'}, status=404)
     except Exception as e:
+        logger.exception("Error in display_scenario_and_image")
         return JsonResponse({
-            'success': False,
-            'error': f'Failed to display world view: {str(e)}'
+            "success": False,
+            "status": "error",
+            "error": f"Failed to display world view: {str(e)}"
         }, status=500)
+    
+
 
 @csrf_exempt
-@require_POST
 def retrieve_fun_facts_api(request) -> JsonResponse:
+    logger.debug("retrieve_fun_facts_api called")
     """Retrieve fun facts based on the most recent retrieved chunks.
     
     Input format: no data given
@@ -286,7 +384,7 @@ def retrieve_fun_facts_api(request) -> JsonResponse:
     }
     
     The constant NUM_FUN_FACTS in backend/rag/fun_facts/retrieve_fun_facts.py will determine the 
-    number of fun facts retrieved on eac call.
+    number of fun facts retrieved on each call.
     """
     return JsonResponse({"data": retrieve_fun_facts()})
 
