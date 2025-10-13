@@ -108,7 +108,9 @@ const MultiplayerLobby = () => {
           value={playerName}
           onChange={(e) => setPlayerName(e.target.value)}
         />
-        <button className="btn-create-room" onClick={handleCreateRoom}>
+        <button 
+          baseButton="btn-create-room" 
+          onClick={handleCreateRoom}>
           Create Room
         </button>
       </div>
@@ -117,12 +119,20 @@ const MultiplayerLobby = () => {
       {roomList?.rooms?.map((code) => (
         <li key={code} className="room-item">
           <span className="room-code">{code}</span>
-          <button className="btn-create-room" onClick={() => handleJoinRoom(code)}>Join</button>
+          <button 
+            className="btn-create-room" 
+            onClick={() => handleJoinRoom(code)}
+          >
+            Join
+          </button>
         </li>
         ))}
     </ul>
     <div className="button-container">
-      <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
+      <Button 
+        baseButton="btn-exit" 
+        action={() => navigate("/")} 
+        title="Back" />
     </div>
   </div>
   </BasePage>

@@ -362,6 +362,12 @@ def reset_state(room_code):
 def room_summary(room_code):
     """
     Return a quick summary of a room for debuging or display.
+
+    Args:
+        room_code (str): The room code to query.
+
+    Returns:
+        dict: A summary of all rooms
     """
     if room_code not in rooms:
         return None

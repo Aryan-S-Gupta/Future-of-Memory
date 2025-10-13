@@ -24,7 +24,7 @@ class TestRoomCreationAndJoining(BaseMultiplayerTest):
 
     @patch("multiplayer.views.create_room", return_value=("1234", 99))
     @patch("multiplayer.views.rm.get_state", return_value={"turn_id": -1})
-    def test_create_multiplayer_room(self, mock_state, mock_create):
+    def test_create_multiplayer_room(self):
         """Should create a room and initialize VotingSession."""
         response = self.client.post(
             "/multiplayer/create-room/",
@@ -47,7 +47,7 @@ class TestRoomCreationAndJoining(BaseMultiplayerTest):
         self.assertEqual(response.status_code, 400)
 
     @patch("multiplayer.views.get_room_codes", return_value=["1234", "5678"])
-    def test_list_room_codes(self, mock_codes):
+    def test_list_room_codes(self):
         """Should return all active room codes."""
         response = self.client.get("/multiplayer/rooms/")
         self.assertJSONEqual(response.content, {"rooms": ["1234", "5678"]})
