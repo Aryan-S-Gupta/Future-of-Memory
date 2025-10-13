@@ -11,7 +11,7 @@
 /* PRIMARY */
 .btn-primary {
   padding: 1rem 3rem;
-  font-size: 1.8rem;
+  font-size: 1.3rem;
   font-family: var(--btn-font-display);
   font-weight: bold;
   border: none;
@@ -115,8 +115,8 @@
   position: relative;
   overflow: hidden;
   transition: transform 160ms var(--ease-standard),
-              box-shadow 220ms var(--ease-standard),
-              background 220ms var(--ease-standard);
+    box-shadow 220ms var(--ease-standard),
+    background 220ms var(--ease-standard);
 }
 
 .choice-btn::after {
@@ -169,4 +169,157 @@
   color: #ffffff;
   box-shadow: 0 0 20px rgba(96, 219, 250, 0.9), 0 0 40px rgba(96, 219, 250, 0.6);
   transform: translateY(-2px) scale(1.05);
+}
+
+
+/* next button fade-in */
+.next-fade-in {
+  opacity: 0;
+  animation: nextfadeIn var(--dur-next-fade) var(--ease-standard) forwards;
+  animation-delay: 12s;
+}
+
+@keyframes nextfadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    /* subtle upward motion */
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.text-container2 {
+  background-color: var(--color-text-container-bg);
+  padding: var(--space-md);
+  border-radius: var(--radius-sm);
+  max-width: 400px;
+  text-align: center;
+}
+
+/* Body text */
+.text2 {
+  font-family: var(--font-body);
+  font-size: var(--fs-body-strong);
+  font-weight: 400;
+  text-align: center;
+  color: var(--color-accent);
+  text-shadow: var(--shadow-subheading);
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+
+.crawl-container {
+  perspective: 800px;
+  /* creates the 3D effect */
+  height: 500px;
+  /* height of the visible area */
+  width: 800px;
+  overflow: hidden;
+  position: relative;
+}
+
+.crawl-text {
+  position: absolute;
+  bottom: -35rem;
+  /* start slightly below the panel */
+  width: 100%;
+  transform-origin: 50% 100%;
+  transform: rotateX(22deg);
+  animation: crawl3d var(--dur-crawl, 20s) linear forwards;
+  /* forwards = freeze */
+  font-family: var(--font-display, 'Orbitron'), system-ui, sans-serif;
+  text-align: justify;
+  text-shadow: var(--shadow-text, 1px 1px 4px rgb(0 0 0 / 1));
+  z-index: 1;
+}
+
+.crawl-text p {
+  margin: 0 auto;
+  width: min(46ch, 80%);
+  line-height: 1.65;
+  letter-spacing: 0.02em;
+
+  /* bigger, readable, responsive */
+  font-size: clamp(18px, calc(var(--fs-crawl, 2.5rem) * 0.6), 28px);
+  font-weight: 600;
+
+  /* subtle sci-fi tint with strong contrast on glass */
+  background: linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-accent) 88%, #ffffff 0%) 0%,
+      rgba(255, 255, 255, 0.98) 40%,
+      color-mix(in srgb, var(--color-accent-2) 85%, #ffffff 0%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Tweak end state so the paragraph is fully in view (adjust -120% if needed) */
+@keyframes crawl3d {
+  0% {
+    transform: rotateX(22deg) translateY(0) translateZ(0);
+    opacity: 0;
+  }
+
+  6% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: rotateX(22deg) translateY(-90%) translateZ(-240px);
+    opacity: 1;
+  }
+}
+
+/* === Choice area: responsive layout + fluid type, scoped to this screen === */
+.choice-container {
+  /* keep your positioning, but allow wrapping */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(12px, 2vw, 24px);
+  align-items: stretch;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* On short viewports, unfix from bottom so content can scroll */
+@media (max-height: 680px) {
+  .choice-container {
+    position: static;
+    padding: 0 20px 20px;
+  }
+}
+
+/* Button cards: responsive size + multi-line text */
+.choice-btn {
+  width: min(100%, clamp(260px, 42vw, 520px));
+  height: clamp(120px, 28vh, 260px);
+  padding: clamp(12px, 2.2vh, 24px);
+  border-radius: clamp(18px, 5vw, 50px);
+  overflow: hidden;
+  /* let JS auto-shrink avoid overflow */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  /* Fluid type; JS will shrink further only if still overflowing */
+  font-size: clamp(0.95rem, 1.1vw + 0.35rem, 1.35rem);
+  line-height: 1.25;
+  white-space: normal;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Keep hover motion subtle on small screens */
+@media (max-width: 480px) {
+  .choice-btn:hover {
+    transform: translateY(-3px);
+  }
 }

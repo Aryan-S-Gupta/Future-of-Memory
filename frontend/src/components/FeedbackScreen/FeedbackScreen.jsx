@@ -2,6 +2,7 @@ import { useState } from "react";
 import BasePage from "../../screens/BasePage.jsx";
 import Button from "../../components/Button/Button.jsx";
 import "../../styles/FeedbackScreen.css";
+import { useNavigate } from "react-router-dom";
 
 /**
  * FeedbackScreen component
@@ -13,6 +14,7 @@ import "../../styles/FeedbackScreen.css";
  * On submit, sends the collected feedback to the backend as JSON.
  */
 const FeedbackScreen = () => {
+  const navigate = useNavigate();
   const questions = [
     "How clear was the game's story?",
     "How engaging were the choices in the game?",
@@ -64,42 +66,45 @@ const FeedbackScreen = () => {
 
   return (
     <BasePage>
+      <div className="button-group">
+        <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
+      </div>
       <div className="feedback-screen">
         <h1 className="feedback-title">Player Feedback</h1>
         <form className="feedback-form" onSubmit={(e) => e.preventDefault()}>
-        {questions.map((q, i) => (
-          <div key={i} className="feedback-question">
-            <p>{q}</p>
-            <div className="rating">
-              <div className="rating-buttons">
-                {Array(5)
-                  .fill(0)
-                  .map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      className={`rating-btn ${ratings[i] === idx + 1 ? "active" : ""}`}
-                      onClick={() => handleRating(i, idx + 1)}
-                    >
-                      {idx + 1}
-                    </button>
+          {questions.map((q, i) => (
+            <div key={i} className="feedback-question">
+              <p>{q}</p>
+              <div className="rating">
+                <div className="rating-buttons">
+                  {Array(5)
+                    .fill(0)
+                    .map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        className={`rating-btn ${ratings[i] === idx + 1 ? "active" : ""}`}
+                        onClick={() => handleRating(i, idx + 1)}
+                      >
+                        {idx + 1}
+                      </button>
+                    ))}
+                </div>
+                <div className="rating-labels" style={{ display: "flex", justifyContent: "space-between", marginTop: "0.3rem" }}>
+                  {ratingLabels.map((label, idx) => (
+                    <span key={idx} className="rating-label">{label}</span>
                   ))}
-              </div>
-              <div className="rating-labels" style={{ display: "flex", justifyContent: "space-between", marginTop: "0.3rem" }}>
-                {ratingLabels.map((label, idx) => (
-                  <span key={idx} className="rating-label">{label}</span>
-                ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        <textarea
-          className="feedback-textarea"
-          placeholder="Additional feedback (optional)..."
-          value={feedbackText}
-          onChange={(e) => setFeedbackText(e.target.value)}
-        />
+          <textarea
+            className="feedback-textarea"
+            placeholder="Additional feedback (optional)..."
+            value={feedbackText}
+            onChange={(e) => setFeedbackText(e.target.value)}
+          />
 
           <button
             className="btn-submit-feedback"

@@ -120,7 +120,7 @@
   color: #e0f7ff;
   box-shadow: inset 0 0 10px rgba(96, 219, 250, 0.4);
   resize: vertical;
-  margin-top: 1.5rem;
+  margin-top: 1.1rem;
   transition: all 0.3s ease;
 }
 
@@ -144,7 +144,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 0 15px rgba(96, 219, 250, 0.4);
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .btn-submit-feedback:hover {
@@ -158,4 +158,25 @@
 .btn-submit-feedback:active {
   transform: translateY(1px) scale(0.98);
   box-shadow: 0 0 12px rgba(96, 219, 250, 0.6);
+}
+
+/* === Additions: scale down only child elements, keep background intact === */
+.feedback-screen {
+  position: relative;
+  overflow: hidden; /* keeps scaled content from spilling */
+}
+
+/* Scale only the direct children (title, form, etc.), not the background */
+.feedback-screen > * {
+  transform: scale(0.5);              /* adjust 0.8–0.9 for your liking */
+  transform-origin:  center;        /* preserves layout alignment */
+}
+
+/* Slight vertical compensation so it stays visually centered */
+@media (max-height: 900px) {
+  .feedback-screen > * {
+    transform: scale(0.5);
+    transform-origin:  center;
+    margin-top: -5vh;  /* adjust as needed */
+  }
 }
