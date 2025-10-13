@@ -330,7 +330,8 @@ const GamePlay = () => {
     } catch (error) {
       console.error("Error fetching fun facts:", error);
     }
-  }  useEffect(() => {
+  }  
+  useEffect(() => {
     if (year >= 2035 + 50) {
       navigate(`/gallery/${sessionId}`);
     }
