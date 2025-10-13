@@ -35,7 +35,7 @@ const BackgroundScreenMulti = () => {
               </p>
             </div>
           </div>
-          <Button baseButton="btn-confirm btn-next next-fade-in" action={goToGame} title="Next" />
+          <Button baseButton="btn-primary btn-next next-fade-in" action={goToGame} title="Next" />
         </div>
       </div>
 
