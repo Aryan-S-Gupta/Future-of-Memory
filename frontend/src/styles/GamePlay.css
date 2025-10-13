@@ -1,12 +1,11 @@
 @import url('/src/styles/tokens.css');
 
 .question-container {
-  padding: 3rem; 
   border-radius: 10px;
   position: fixed;
-  top: 50px;
-  left: 25px;
-  right: 25px;
+  top: 45px;
+  left: 20px;
+  right: 2px;
   text-align: center;
 }
 
@@ -117,8 +116,15 @@ h2 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Fade-in for buttons */
@@ -151,6 +157,7 @@ h2 {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -161,7 +168,7 @@ h2 {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  padding: 2rem;
+  padding: 0rem;
   gap: 2rem;
 }
 
@@ -171,14 +178,15 @@ h2 {
   align-items: flex-start;
   justify-content: center;
   text-align: center;
-  font-size: 1rem; 
+  font-size: 1rem;
   line-height: 1.6;
-  max-width: 80%; 
+  max-width: 80%;
   margin: 0 auto;
   overflow-y: auto;
   color: #ffffff;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
-  padding: 3rem; /* FIXED: removed space between '3' and 'rem' */
+  padding: 3rem;
+  /* FIXED: removed space between '3' and 'rem' */
   background-color: rgba(0, 0, 0, 0.7);
 }
 
@@ -196,14 +204,14 @@ h2 {
   height: 250px;
   object-fit: cover;
   border-radius: 12px;
-  box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
 }
 
 .scenario-footer {
   flex: 0 0 auto;
   display: flex;
   justify-content: center;
-  margin-top: 2rem;
+  margin-top: 0rem;
 }
 
 .question-screen {
@@ -217,7 +225,8 @@ h2 {
 }
 
 .question-main {
-  flex: 2; /* FIXED */
+  flex: 2;
+  /* FIXED */
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -228,4 +237,120 @@ h2 {
   max-width: 350px;
   position: sticky;
   top: 2rem;
+}
+
+/* Question text: scales with viewport, stays readable on long lines */
+.question-container h2 {
+  /* min 1rem, fluid middle, max 2.2rem */
+  font-size: clamp(1rem, 2.2vw + 0.5rem, 2.2rem);
+  line-height: 1.25;
+  /* tighter to fit more lines */
+  text-wrap: balance;
+  /* nicer multi-line breaks */
+  word-break: normal;
+  /* avoid ugly mid-word breaks */
+  margin-top: 0;
+}
+
+/* Options: scale slightly smaller than the question */
+.choice-btn {
+  /* min 0.9rem, fluid middle, max 1.2rem */
+  font-size: clamp(0.9rem, 1.2vw + 0.35rem, 1.2rem);
+  line-height: 1.25;
+}
+
+/* If your Button component uses a nested text element, keep this as a fallback */
+.choice-container button {
+  font-size: clamp(0.9rem, 1.2vw + 0.35rem, 1.2rem);
+  line-height: 1.25;
+}
+
+/* Extra safety on shorter screens (e.g., laptops in split view) */
+@media (max-height: 800px) {
+  .question-container h2 {
+    font-size: clamp(0.95rem, 1.8vw + 0.45rem, 2rem);
+    line-height: 1.22;
+  }
+
+  .choice-btn,
+  .choice-container button {
+    font-size: clamp(0.85rem, 1.1vw + 0.3rem, 1.1rem);
+  }
+}
+
+/* Very small widths (mobile portrait) — nudge text down a notch */
+@media (max-width: 420px) {
+  .question-container h2 {
+    font-size: clamp(0.95rem, 3.5vw + 0.35rem, 1.6rem);
+  }
+
+  .choice-btn,
+  .choice-container button {
+    font-size: clamp(0.85rem, 2.8vw + 0.3rem, 1rem);
+  }
+}
+
+.text-container.menu-glass {
+  /* clear any caps first */
+  max-width: none !important;
+  /* set width via logical property (sometimes wins where width doesn't) */
+  inline-size: min(1200px, 90vw) !important;
+  /* also set width as fallback */
+  width: min(1200px, 90vw) !important;
+
+  /* keep centering & reduced top margin you liked */
+  margin: 10vh auto 0 !important;
+
+  padding: 30px;
+
+  /* prevent flex shrink from squeezing it */
+  flex: 0 0 auto !important;
+  box-sizing: border-box;
+}
+
+/* Layout for image + text side-by-side */
+.text-container.menu-glass {
+  display: flex;
+  flex-direction: row;          /* side-by-side layout */
+  align-items: center;          /* vertical centering */
+  justify-content: center;      /* balanced horizontally */
+  gap: 2rem;                    /* space between image & text */
+  padding: 2rem;
+  width: min(1100px, 90vw);
+  margin: 5vh auto;
+  flex-wrap: wrap;              /* allows wrap on smaller screens */
+}
+
+/* Keep image predictable */
+.text-container.menu-glass .scenario-image {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.text-container.menu-glass .scenario-img {
+  width: clamp(240px, 26vw, 400px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Text section */
+.text-container.menu-glass h2 {
+  flex: 1;
+  text-align: left;
+  font-family: var(--font-body);
+  line-height: 1.4;
+  color: var(--color-text);
+  text-shadow: var(--shadow-text);
+  margin: 0;
+}
+
+/* Continue button at the bottom of the right side */
+.text-container.menu-glass .btn-primary {
+  align-self: flex-end;
+  margin-top: 2rem;
 }

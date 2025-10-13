@@ -1,6 +1,4 @@
 @import url('/src/styles/tokens.css');
-
-/* Fonts actually used below */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
 
 html,
@@ -14,28 +12,26 @@ body,
   inset: 0;
   width: 100vw;
   height: 100vh;
-  /* use 100dvh if you prefer mobile-safe viewport */
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   /* prevents scrollbars from background overflow */
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-color: var(--bg-canvas);
+  background: var(--bg-canvas) center/cover no-repeat;
+  /* image set inline via JSX */
+  isolation: isolate;
+  /* predictable overlay stacking */
 }
 
-/* Background container ensures LetterGlitch fills the screen and sits behind content */
+/* Background container sits behind content */
 .bg-layer {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  /* clicks go to content layer */
 }
 
-/* In case LetterGlitch renders a <canvas>/<svg>/<div>, force it to fill */
+/* Force any bg child (canvas/svg/div) to fill */
 .bg-layer canvas,
 .bg-layer svg,
 .bg-layer>* {
@@ -46,7 +42,7 @@ body,
   display: block;
 }
 
-/* Foreground content sits above the background */
+/* Foreground content */
 .content {
   position: relative;
   z-index: 1;
@@ -59,32 +55,27 @@ body,
   padding: 2rem;
 }
 
-/* Title styling */
+/* Title */
 .title {
-  font-family: var(--font-display);
-  font-size: var(--fs-title);
-  font-weight: 800;
+  font: 800 var(--fs-title) var(--font-display);
   text-align: center;
   color: var(--color-text);
   text-shadow: var(--shadow-title);
   margin-bottom: var(--space-xxl);
 }
 
+/* Subheading */
 .subheading {
-  font-family: var(--font-display);
-  font-size: var(--fs-subheading);
-  font-weight: 500;
+  font: 500 var(--fs-subheading) var(--font-display);
   text-align: center;
   color: var(--color-accent);
   text-shadow: var(--shadow-subheading);
-  margin: var(--space-lg) 0 var(--space-md) 0;
+  margin: var(--space-lg) 0 var(--space-md);
 }
 
 /* Body text */
 .text {
-  font-family: var(--font-body);
-  font-size: var(--fs-body);
-  font-weight: 400;
+  font: 400 var(--fs-body) var(--font-body);
   text-align: center;
   color: var(--color-text);
   text-shadow: var(--shadow-text);
@@ -93,30 +84,63 @@ body,
   line-height: 1.2;
 }
 
+/* Text container */
 .text-container {
-  background-color: var(--color-text-container-bg);
-  padding: var(--space-xxl);
+  background: var(--color-text-container-bg);
+  /* padding: var(--space-xxl); */
   border-radius: var(--radius-lg);
   max-width: 800px;
   text-align: center;
 }
 
 .text-container h2 {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  /* could be a token later if you like */
-  font-weight: 700;
+  font: 700 1rem var(--font-body);
   color: var(--color-text);
-  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
+  text-shadow: 1px 1px 6px rgba(0, 0, 0, .7);
   margin-bottom: var(--space-md);
 }
 
 .text-container p {
-  font-family: var(--font-body);
-  font-size: var(--fs-body-strong);
-  font-weight: 500;
+  font: 500 var(--fs-body-strong) var(--font-body);
   text-align: center;
   color: var(--color-text);
   text-shadow: var(--shadow-text-invert);
   line-height: 1.2;
+}
+
+/* Dark overlay on top of background image (helps text stay readable) */
+.bg-layer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* fill the whole screen */
+  pointer-events: none;
+  /* let clicks pass through */
+
+  /* Two soft black gradients: center fade + top-to-bottom fade */
+  background:
+    radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.45) 100%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.45));
+
+  opacity: 1;
+  /* overall darkness, can be lowered if too dark */
+}
+
+/* Slightly darker overlay when system is in dark mode */
+@media (prefers-color-scheme: dark) {
+  .bg-layer::after {
+    background:
+      radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.55) 100%),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.55));
+  }
+}
+
+/* If user prefers less visual effects, use a simple flat shade */
+@media (prefers-reduced-transparency: reduce) {
+  .bg-layer::after {
+    background: rgba(0, 0, 0, 0.45);
+  }
 }

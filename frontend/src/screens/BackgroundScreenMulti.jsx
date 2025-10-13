@@ -1,7 +1,7 @@
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
-import "../styles/BackgroundScreen.css";
+import "../styles/tokens.css";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 
 /**
@@ -19,31 +19,29 @@ const BackgroundScreenMulti = () => {
 
   return (
     <BasePage>
-      <h1 className="title">Background</h1>
-
-      {/* Story crawl container with immersive narrative */}
-      <div className="crawl-container">
-        <div className="crawl-text">
-          <p>
-            Welcome to 2035 <br /> <br />
-            Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /> <br />
-            Together with other leaders, you stand between promise and peril. <br /> <br />
-            Every decision you debate and every law you pass will ripple across nations,              
-            redefining what it means to be human. <br /> <br />
-            Will you forge alliances, push for progress, or defend your people’s values? <br /> <br />
-            The destiny of millions rests in your collective hands! <br /> <br />  
-          </p>
+      <div className="menu-glass howto">
+        <div className="menu-glass-inner">
+          <h2 className="title">Background</h2>
+          <div className="crawl-container">
+            <div className="crawl-text">
+              <p>
+                Welcome to 2035 <br /> <br />
+                Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /> <br />
+                You are the chosen voice of your people, standing between promise and peril.  <br /> <br />
+                Every law you shape will ripple through lives and futures,
+                redefining what it means to be human.<br /> <br />
+                Will you shield your community, pursue progress, or uphold your ethics? <br /> <br />
+                The destiny of millions rests in your hands! <br /> <br />
+              </p>
+            </div>
+          </div>
+          <Button baseButton="btn-confirm btn-next next-fade-in" action={goToGame} title="Next" />
         </div>
       </div>
 
       {/* Navigation buttons */}
       <div className="button-container">
-        <ExitExperience code={roomCode} player={playerName}/>
-        <Button 
-          baseButton="btn-next next-fade-in" 
-          action={goToGame} 
-          title="Next" 
-        />
+        <ExitExperience code={roomCode} player={playerName} />
       </div>
     </BasePage>
   );
