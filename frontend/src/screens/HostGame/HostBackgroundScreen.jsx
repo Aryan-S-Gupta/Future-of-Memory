@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import BasePage from "../BasePage.jsx";
 import Button from "../../components/Button/Button.jsx";
-import "../../styles/BackgroundScreen.css";
+import "../../styles/";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import { checkGameStarted } from "../../../api/multiplayer/RoomManagementApi.js";
 import { startGame } from "../../../api/multiplayer/RoomManagementApi.js";
