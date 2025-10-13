@@ -409,10 +409,10 @@ const getFadeClass = (idx) => {
         }}  
       />
     )}
-      {screen === "scenario" && scenarioData && (
+     {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
-          {/* Scenario text at top */}
-          <div className="text-container">
+          <div className="text-container menu-glass">
+          {/* Image in middle */}
             <h2 className="fade-in">{scenarioData.scenario}</h2>
           </div>
           {/* Continue button at bottom */}
@@ -422,6 +422,7 @@ const getFadeClass = (idx) => {
               action={() => {
                 setScreen("loading");
                 setLoadingState("question");
+                setAllVoted(false);
                 setCurrentTurn(null);
                 //setFetchQuestion(true);
                 setScenarioData(null);
@@ -435,7 +436,7 @@ const getFadeClass = (idx) => {
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
         <div className="question-screen">
-          <div className="question-main">
+          <div className="question-main menu-glass">
             <div className="choice-container">
               <Button
                 baseButton={getFadeClass(2) + " choice-btn"}

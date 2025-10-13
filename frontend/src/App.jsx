@@ -53,6 +53,7 @@ function App() {
               <Route path="/feedback" element={<FeedbackScreen/>} />
               <Route path="/multiplayer-room/:roomCode/:playerName" element={<GamePlayMulti />} />
               <Route path="/multiplayer-room/:roomCode/:playerName" element={<HostScreen />} />
+              <Route path="/projector-room/:roomCode/" element={<HostScreen />} />
               <Route path="/gallery/:sessionId" element={<GalleryScreen />} />
               <Route path="/mini-game/intro" element={<MiniGameIntro />} />
               <Route path="/mini-game/play" element={<MiniGame />} />

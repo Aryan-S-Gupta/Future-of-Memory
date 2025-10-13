@@ -375,11 +375,15 @@ const HostScreen = () => {
 
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
+
+          <div className="text-container menu-glass">
+          {/* Image in middle */}
           {scenarioData.image && (
             <div className="scenario-image">
               <img src={scenarioData.image} alt="scenario" className="scenario-img" />
             </div>
           )}
+          </div>
           {/* Continue button at bottom */}
           <div className="scenario-footer">
             <Button
@@ -399,13 +403,15 @@ const HostScreen = () => {
       )}
       {screen === "question" && currentTurn && (
         <div className="question-screen">
-          <div className="question-main">
+          {/* Left side: question and choices */}
+          <div className="question-main menu-glass">
             <div className="question-container">
-              <h2>{currentTurn.question}</h2>
+              <h2 className={getFadeClass(1)}>{currentTurn.question}</h2>
             </div>
             {/* Host doesn’t need to choose, optionally hide buttons */}
-            <div className="voting-sidebar">
-              <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
+            {/* Right side: voting display */}
+          <div className="voting-sidebar">
+            <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
             </div>
           </div>
         </div>
