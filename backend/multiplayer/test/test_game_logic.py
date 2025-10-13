@@ -1,7 +1,7 @@
 import pytest
 import threading
 from unittest.mock import patch, MagicMock
-from multiplayer.voting_session import VotingSession  # adjust import path as needed
+from ..game_logic import VotingSession  # adjust import path as needed
 
 # --- FIXTURES AND HELPERS ---
 
