@@ -1,29 +1,5 @@
 @import url('/src/styles/tokens.css');
 
-.question-container {
-  border-radius: 10px;
-  position: fixed;
-  top: 45px;
-  left: 20px;
-  right: 2px;
-  text-align: center;
-}
-
-.question-container h2 {
-  font-family: var(--font-body);
-  font-size: var(--fs-question);
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: var(--space-md);
-}
-h2 {
-  font-family: var(--font-body);
-  font-size: var(--fs-question);
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: var(--space-md);
-}
-
 .winner-screen,
 .waiting-screen {
   display: flex;
@@ -235,7 +211,7 @@ h2 {
 .voting-sidebar {
   flex: 1;
   max-width: 350px;
-  position: sticky;
+  position: static;
   top: 2rem;
 }
 
