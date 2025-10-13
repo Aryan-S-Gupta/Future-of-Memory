@@ -575,10 +575,14 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
 @require_POST
 def submit_score_single_view(request):
     """
-    Submit a score for the single-player memory mini-game.
-    Expects JSON body:
-      - player_name: str
-      - score: int
+    Handle POST request to submit a score for the single-player memory mini-game.
+
+    Expects JSON request body with:
+      - player_name (str): The name of the player.
+      - score (int): The player's score.
+
+    Returns:
+        JsonResponse: A JSON object with either a success message or error details.
     """
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -607,15 +611,21 @@ def get_scores_view(request):
 @require_POST
 def submit_tiebreak_score_view(request):
     """
-    Multiplayer minigame tie-break score submission endpoint.
-    Expects:
-      {
-        "room_code": "ABC123",
-        "turn_id": 5,
-        "player_name": "Alice",
-        "score": 92
-      }
-    """
+        Handle POST request for multiplayer tie-break score submissions.
+
+        Expects JSON request body with:
+        {
+            "room_code": "ABC123",   # unique game room identifier
+            "turn_id": 5,            # numeric turn or round ID
+            "player_name": "Alice",  # player's display name
+            "score": 92              # player's tie-break score
+        }
+
+        Returns:
+            JsonResponse: Indicates the status of the tie-break session:
+                        - {"status": "pending"} if still unresolved
+                        - {"status": "resolved", "winner": <name>, "winning_option": <option>}
+        """
     try:
         data = json.loads(request.body.decode("utf-8"))
         room_code = data["room_code"]

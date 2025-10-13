@@ -531,15 +531,31 @@ class VotingSession:
         }
 
     def has_finished(self):
-        """Returns True if voting has finished."""
+        """Returns True if voting has finished.
+            
+            Returns:
+                bool: True if the final voting result (final_option) has been determined,
+                    False otherwise.
+        """
         return self.final_option is not None
 
 
     def get_current_votes(self):
         """
-        Return current voting status for each player.
-        Shows the option ID for players who voted,
-        and 'Pending' for those who haven't yet.
+        Retrieve the current voting status for each player in the room.
+
+        For each player in the session:
+        - If the player has already voted, show their selected option ID.
+        - If the player has not voted yet, mark their status as "Pending".
+
+        Returns:
+            dict: A mapping of player names to their current voting status.
+                Example:
+                    {
+                        "Alice": 2,
+                        "Bob": "Pending",
+                        "Charlie": 1
+                    }
         """
         all_players = set(rm.get_players(self.room_code))
         votes_so_far = {}
