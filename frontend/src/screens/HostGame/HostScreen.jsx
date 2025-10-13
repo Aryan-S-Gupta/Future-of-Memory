@@ -397,7 +397,6 @@ const HostScreen = () => {
           </div>
         </div>
       )}
-
       {screen === "question" && currentTurn && (
         <div className="question-screen">
           <div className="question-main">
