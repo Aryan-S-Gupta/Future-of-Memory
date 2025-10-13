@@ -50,9 +50,10 @@ const HostBackgroundScreen = () => {
   return (
     <BasePage>
       {mode === "host" && host === playerName && (
-        <div>
-          <h1 className="title">Background</h1>
-
+      <div>
+      <div className="menu-glass howto">
+        <div className="menu-glass-inner">
+          <h2 className="title">Background</h2>
           <div className="crawl-container">
             <div className="crawl-text">
               <p>
@@ -63,22 +64,22 @@ const HostBackgroundScreen = () => {
                 redefining what it means to be human. <br /> <br />
                 Will you forge alliances, push for progress, or defend your people’s values? <br /> <br />
                 The destiny of millions rests in your collective hands! <br /> <br />
-              </p>
+             </p>
             </div>
           </div>
-
-          <div className="button-container">
-            <ExitExperience code={roomCode} player={playerName} />
-            <Button
-              baseButton="btn-next next-fade-in"
+             <Button
+              baseButton="btn-primary next-fade-in"
               action={handleStartGame}
               title={gameStarted ? "Starting..." : "Start Game"}
             />
           </div>
-        </div>
-      )}
-    </BasePage>
-  );
+      </div>
+      <div className="button-container">
+        <ExitExperience code={roomCode} player={playerName} />
+      </div>
+      </div>
+      )};
+    </BasePage>)
 };
 
 export default HostBackgroundScreen;
