@@ -135,9 +135,3 @@ export const getTiebreakStatus = async (roomCode, turnId) => {
   const res = await api.get(`/mini-game/tiebreak_status/${roomCode}/${turnId}`);
   return res.data;
 };
-
-
-export const getWorldView = async () => {
-  const res = await api.get("/world_view");
-  return res;
-}
