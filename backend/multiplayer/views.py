@@ -631,8 +631,10 @@ def submit_tiebreak_score_view(request):
 
     result = voting_sesh.submit_tiebreak_score(player_name, score)
     if result:
+        logger.info({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})
         return JsonResponse({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})
     else:
+        logger.info({"status": "pending"})
         return JsonResponse({"status": "pending"})
 
 

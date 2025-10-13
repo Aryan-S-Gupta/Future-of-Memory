@@ -56,7 +56,7 @@ const MultiplayerLobby = () => {
     await startPrerender(data.session_id, 2035);
     setRoomCode(data.room_code);
     console.log(roomCode);
-            navigate(`/background-multi/${data.room_code}?playerName=${name}`);
+            navigate(`/background-multi/${data.room_code}/${playerName}`);
     // Navigate to multiplayer room screen
     // navigate(`/multiplayer-room/${data.room_code}/${playerName}`);
     console.log("navigated with session id " + data.session_id);
@@ -85,7 +85,7 @@ const MultiplayerLobby = () => {
       if (data.success == "True") {
         setSessionId(data.session_id);
         console.log("session id is " + data.session_id);
-        navigate(`/background-multi/${code}?playerName=${name}`);
+        navigate(`/background-multi/${code}/${name}`);
         console.log("navigated")
       } else {
         alert("Sorry, unable to join the room. Please try again.");

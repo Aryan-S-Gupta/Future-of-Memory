@@ -23,9 +23,7 @@ import { submitTiebreakScore } from "../../api/multiplayer/GameFlowApi.js";
 
 const GamePlayMulti = () => {
   const navigate = useNavigate()
-  const { roomCode } = useParams(); 
-  const [searchParams] = useSearchParams();
-  const playerName = searchParams.get("playerName");
+  const { roomCode, playerName } = useParams(); 
   const prevQuestionRef = useRef(null);
   const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
@@ -269,9 +267,7 @@ const GamePlayMulti = () => {
           return null;
         }
         if (allVoted) {
-          if (tiebreak) {
-            return null;
-          }
+
           console.log("All players voted!");
           setScreen("loading")
           setLoadingState("scenario")
@@ -328,33 +324,45 @@ const GamePlayMulti = () => {
           if (!out.success) {
             console.log("not success")
             if ( out.tie && allVoted && played) {
-              // console.log("waiting fr others")
-              // setScreen("waiting-for-others");
+              console.log("waiting fr others")
+              setScreen("waiting-for-others");
               // setTimeout(() => {
               //   setScreen("scenario");
               // }, 5000);
-              // console.log("waiting done");
 
-            } else if(out.tie && allVoted) {
+              return null;
+            } else if(out.tie && allVoted ) {
               console.log(allVoted);
               console.log("Tie detected, launching mini-game");
               setMiniGameOccurred(true);
               setScreen("mini-game-tiebreak");
               return null;
             } 
-          } 
-          console.log("dont have scenario yet");
-          return null;
-      } if (allVoted && miniGameOccurred) {
-            // console.log("win announcement")
-            // setScreen("winner-display");
+          }
+          if (allVoted && miniGameOccurred) {
+            console.log("win announcement")
+            setScreen("winner-display");
             // setTimeout(() => {
             //   setScreen("scenario");
             // }, 5000);
             // console.log("announcement done")
-            // setMiniGameOccurred(false);
-            // setPlayed(false);
-            setScreen("scenario");
+            setMiniGameOccurred(false);
+            setPlayed(false);
+            // setScreen("scenario");
+            return null 
+        }  
+          console.log("dont have scenario yet");
+          return null;
+      } if (allVoted && miniGameOccurred) {
+            console.log("win announcement")
+            setScreen("winner-display");
+            // setTimeout(() => {
+            //   setScreen("scenario");
+            // }, 5000);
+            // console.log("announcement done")
+            setMiniGameOccurred(false);
+            setPlayed(false);
+            // setScreen("scenario");
             return null
         } 
 
@@ -450,23 +458,23 @@ const getFadeClass = (idx) => {
 
   return (
     <BasePage>
-      <ExitExperience code={roomCode} player={playerName}/>
+      <ExitExperience code={roomCode} player={playerName} />
       {screen == "destroyed" && (
-        <RoomDestroyedPopup/>
+        <RoomDestroyedPopup />
       )}
-            {screen === "loading" && (
-      <LoadingScreen
-        isReady={isReady}
-        funFacts={loadingFacts}
-        onContinue={() => {
-          setScreen({loadingState});
-        }}  
-      />
-    )}
+      {screen === "loading" && (
+        <LoadingScreen
+          isReady={isReady}
+          funFacts={loadingFacts}
+          onContinue={() => {
+            setScreen({ loadingState });
+          }}
+        />
+      )}
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
-              {/* Image in middle */}
-          {scenarioData.image && ( 
+          {/* Image in middle */}
+          {scenarioData.image && (
             <div className="scenario-image">
               <img src={scenarioData.image} alt="scenario" className="scenario-img" />
             </div>
@@ -521,22 +529,42 @@ const getFadeClass = (idx) => {
           </div>
         </div>
       )}
-      {screen === "mini-game-tiebreak" && (
-        <MiniGame
-          playerName={playerName}
-          roomCode={roomCode}
-          turnId={currentTurn.turn_id}
-          onFinish={async (score) => {
-            console.log(`[MiniGame] ${playerName} finished with score ${score}`);
-            const res = await submitTiebreakScore(playerName, roomCode, currentTurn.turn_id, score);
-            setPlayed(true)
-            if (res.status === "resolved") {
-                setWinnerInfo(res.winner)
 
-            }
-          }}
-        />
-      )}
+{screen === "mini-game-tiebreak" && !played && (
+  <MiniGame
+    playerName={playerName}
+    roomCode={roomCode}
+    turnId={currentTurn.turn_id}
+    onFinish={async (score) => {
+      if (played) return; // guard against duplicate replays
+      console.log(`[MiniGame] ${playerName} finished with score ${score}`);
+
+      const res = await submitTiebreakScore(playerName, roomCode, currentTurn.turn_id, score);
+      console.log(res);
+      setPlayed(true);
+
+      if (res.status === "pending") {
+        console.log("Waiting for other players...");
+        setScreen("waiting-for-others");
+        return;
+      }
+
+      if (res.status === "resolved") {
+        console.log("Winner resolved:", res.winner);
+        setWinnerInfo(res.winner);
+        setScreen("winner-display");
+        setTimeout(() => {
+          setLoadingState("none");
+          setScreen("scenario");
+          setMiniGameOccurred(false);
+          setPlayed(false);
+          setWinnerInfo(null);
+        }, 5000);
+      }
+    }}
+  />
+)}
+
       {screen === "winner-display" && winnerInfo && (
         <div className="fade-in">
           <h2>{winnerInfo} has won the round!</h2>
@@ -549,12 +577,10 @@ const getFadeClass = (idx) => {
           <p>Please wait while other players finish their mini-game...</p>
         </div>
       )}
-
-
-
     </BasePage>
   );
 };
+
 
 
 export default GamePlayMulti;

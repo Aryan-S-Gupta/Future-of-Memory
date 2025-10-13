@@ -42,9 +42,9 @@ function App() {
               <Route path="/how-to-play" element={<HowToScreen />} />
               <Route path="/game-play" element={<GamePlay />} />
               <Route path="/multiplayer-lobby" element={<MultiplayerLobby/>} />
-              <Route path="/background-multi/:roomCode" element={<BackgroundScreenMulti/>} />
+              <Route path="/background-multi/:roomCode/:playerName" element={<BackgroundScreenMulti/>} />
               <Route path="/feedback" element={<FeedbackScreen/>} />
-              <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
+              <Route path="/multiplayer-room/:roomCode/:playerName" element={<GamePlayMulti />} />
               <Route path="/multiplayer-room/:roomCode/:playerName" element={<HostScreen />} />
               <Route path="/gallery/:sessionId" element={<GalleryScreen />} />
               <Route path="/mini-game/intro" element={<MiniGameIntro />} />
