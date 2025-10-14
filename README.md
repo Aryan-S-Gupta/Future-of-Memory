@@ -47,7 +47,7 @@ Steps to follow everytime a new branch is pulled:
   - `images/` for image generation (e.g. via ComfyUI)
   - `core/` for turn logic and timeline control
 
-###  Project Structure
+### Project Structure
 
 ```
 ├── api/                    # API endpoints and static data
@@ -329,11 +329,13 @@ Palette.
 Start the redis server:
 
 **macOS/Linux:**
-``` bash
+
+```bash
 redis-server
 ```
 
 **Windows:**
+
 ```bash
 redis-server.exe --port 6380 --bind 127.0.0.1
 ```
@@ -418,6 +420,17 @@ curl --header "Content-Type: application/json" \
 --request POST \
 --data '{ "query_text": "what is the future of memory", "keywords": ["future", "memory"]}' \
 http://127.0.0.1:9000/api/rag/retrieve \
+| python -m json.tool
+```
+
+### Fun facts API test
+
+On MacOS/Linux:
+
+```bash
+curl --header "Content-Type: application/json" \
+--request POST \
+http://127.0.0.1:9000/api/rag/fun_facts \
 | python -m json.tool
 ```
 
