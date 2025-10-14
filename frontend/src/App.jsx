@@ -17,6 +17,9 @@ import FeedbackScreen from "./components/FeedbackScreen/FeedbackScreen.jsx";impo
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
 import mainTheme from "./assets/Heaven_DavidFesliyan.mp3";
+import MiniGameIntro from "./screens/MiniGameIntro.jsx";
+import MiniGame from "./screens/MiniGame.jsx";
+import MiniGameResult from "./screens/MiniGameResult.jsx";
 import galleryTheme from "./assets/DeepMeditation_DavidFesliyan.mp3";
 import { SessionProvider } from "../SessionContext.jsx";
 import IdleHomeReset from "./components/IdleHomeReset.jsx";
@@ -42,11 +45,14 @@ function App() {
               <Route path="/how-to-play" element={<HowToScreen />} />
               <Route path="/game-play" element={<GamePlay />} />
               <Route path="/multiplayer-lobby" element={<MultiplayerLobby/>} />
-              <Route path="/background-multi/:roomCode" element={<BackgroundScreenMulti/>} />
+              <Route path="/background-multi/:roomCode/:playerName" element={<BackgroundScreenMulti/>} />
               <Route path="/feedback" element={<FeedbackScreen/>} />
-              <Route path="/multiplayer-room/:roomCode" element={<GamePlayMulti />} />
+              <Route path="/multiplayer-room/:roomCode/:playerName" element={<GamePlayMulti />} />
               <Route path="/multiplayer-room/:roomCode/:playerName" element={<HostScreen />} />
               <Route path="/gallery/:sessionId" element={<GalleryScreen />} />
+              <Route path="/mini-game/intro" element={<MiniGameIntro />} />
+              <Route path="/mini-game/play" element={<MiniGame />} />
+              <Route path="/mini-game/result" element={<MiniGameResult />} /> 
             </Routes>
           </SessionProvider>
         </BackgroundWrapper>

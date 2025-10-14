@@ -12,12 +12,9 @@ import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
  */
 const BackgroundScreenMulti = () => {
   const navigate = useNavigate();
-  const { roomCode } = useParams();
-  const [searchParams] = useSearchParams();
-  const playerName = searchParams.get("playerName");
-
+  const { roomCode, playerName } = useParams();
   const goToGame = () => {
-    navigate(`/multiplayer-room/${roomCode}?playerName=${playerName}`);
+    navigate(`/multiplayer-room/${roomCode}/${playerName}`);
   };
 
   return (
@@ -38,7 +35,7 @@ const BackgroundScreenMulti = () => {
               </p>
             </div>
           </div>
-          <Button baseButton="btn-confirm btn-next next-fade-in" action={goToGame} title="Next" />
+          <Button baseButton="btn-primary btn-next next-fade-in" action={goToGame} title="Next" />
         </div>
       </div>
 
