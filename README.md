@@ -373,7 +373,7 @@ python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1
 ### Step 12: Start the Development Server at port 9000
 
 ```bash
-python manage.py runserver 9000
+python manage.py runserver 0.0.0.0:9000
 ```
 
 Then open your browser or use terminal tools like `curl` to test the following round-based endpoints:
