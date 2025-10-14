@@ -11,8 +11,9 @@ import GalleryScreen from "./screens/GalleryScreen.jsx";
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
 import GamePlayMulti from "./screens/GamePlayMulti.jsx";
-import HostScreen from "./screens/HostScreen.jsx";
-import FeedbackScreen from "./components/FeedbackScreen/FeedbackScreen.jsx";import '@fontsource/orbitron/500.css'; // NEW
+import HostScreen from "./screens/HostGame/HostScreen.jsx";
+import FeedbackScreen from "./components/FeedbackScreen/FeedbackScreen.jsx";
+import '@fontsource/orbitron/500.css'; // NEW
 
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
@@ -22,6 +23,8 @@ import MiniGame from "./screens/MiniGame.jsx";
 import MiniGameResult from "./screens/MiniGameResult.jsx";
 import galleryTheme from "./assets/DeepMeditation_DavidFesliyan.mp3";
 import { SessionProvider } from "../SessionContext.jsx";
+import HostBackgroundScreen from "./screens/HostGame/HostBackgroundScreen.jsx";
+import PlayerScreen from "./screens/HostGame/PlayerScreen.jsx";
 import IdleHomeReset from "./components/IdleHomeReset.jsx";
 
 function App() {
@@ -46,13 +49,16 @@ function App() {
               <Route path="/game-play" element={<GamePlay />} />
               <Route path="/multiplayer-lobby" element={<MultiplayerLobby/>} />
               <Route path="/background-multi/:roomCode/:playerName" element={<BackgroundScreenMulti/>} />
+              <Route path="/projection-host/:roomCode" element={<HostBackgroundScreen />} />
               <Route path="/feedback" element={<FeedbackScreen/>} />
               <Route path="/multiplayer-room/:roomCode/:playerName" element={<GamePlayMulti />} />
               <Route path="/multiplayer-room/:roomCode/:playerName" element={<HostScreen />} />
+              <Route path="/projector-room/:roomCode/" element={<HostScreen />} />
               <Route path="/gallery/:sessionId" element={<GalleryScreen />} />
               <Route path="/mini-game/intro" element={<MiniGameIntro />} />
               <Route path="/mini-game/play" element={<MiniGame />} />
               <Route path="/mini-game/result" element={<MiniGameResult />} /> 
+              <Route path="/player-room/:roomCode/" element={<PlayerScreen />} />
             </Routes>
           </SessionProvider>
         </BackgroundWrapper>

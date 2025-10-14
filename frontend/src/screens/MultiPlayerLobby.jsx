@@ -26,6 +26,7 @@ const MultiplayerLobby = () => {
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const { sessionId, setSessionId } = useSession();
+  const [mode, setMode] = useState("peer"); // "peer" or "host"
   const navigate = useNavigate();
 
   // Fetch list of available rooms using React Query
@@ -49,18 +50,21 @@ const MultiplayerLobby = () => {
     if (!playerName) {
         return alert("Please Enter a NickName");
     }
-    const data = await createRoom(playerName);
+    const data = await createRoom(playerName, mode);
     setSessionId(data.session_id);
-   // await new Promise(res => setTimeout(res, 50));
-
     await startPrerender(data.session_id, 2035);
     setRoomCode(data.room_code);
     console.log(roomCode);
-            navigate(`/background-multi/${data.room_code}/${playerName}`);
+      if (mode === "peer") {
+ navigate(`/background-multi/${data.room_code}/${playerName}`);
+  } else {
+    navigate(`/projection-host/${data.room_code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
+  }
     // Navigate to multiplayer room screen
     // navigate(`/multiplayer-room/${data.room_code}/${playerName}`);
     console.log("navigated with session id " + data.session_id);
   };
+
 
   /**
    * Handle joining an existing multiplayer room.
@@ -85,8 +89,21 @@ const MultiplayerLobby = () => {
       if (data.success == "True") {
         setSessionId(data.session_id);
         console.log("session id is " + data.session_id);
-        navigate(`/background-multi/${code}/${name}`);
-        console.log("navigated")
+        console.log("the host of this room is: " + data.host)
+        console.log("the game has started? " + data.game_started)
+
+        if (data.mode == "host") {
+          if (data.game_started == "False") {
+            console.log("went to background screen");
+              navigate(`/projection-host/${code}?playerName=${playerName}&hostName=${data.host}&mode=${mode}`);
+          } else {
+              navigate(`/player-room/${code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
+          }
+        } else { 
+          navigate(`/background-multi/${code}/${name}&mode=${mode}`);
+          console.log("navigated")
+        }
+
       } else {
         alert("Sorry, unable to join the room. Please try again.");
       }
@@ -98,34 +115,61 @@ const MultiplayerLobby = () => {
 
   return (
     <BasePage>
-    <div className="multiplayer-lobby">
-    <h2 className="title">Multiplayer Lobby</h2>
-      <div className="room-input-container">
-        <input
-          className="player-input"
-          type="text"
-          placeholder="Enter your name"
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-        />
-        <button className="btn-create-room" onClick={handleCreateRoom}>
-          Create Room
-        </button>
+      <div className="multiplayer-lobby">
+        <h2 className="title">Multiplayer Lobby</h2>
+        <div className="room-input-container">
+          <div className="input-row">
+            <input
+              className="player-input"
+              type="text"
+              placeholder="Enter your name"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+            />
+            <button className="btn-create-room" onClick={handleCreateRoom}>
+              Create Room
+            </button>
+          </div>
+
+          {/* Toggle moved below input + button */}
+          <div className="inline-mode-toggle">
+            <label className={`mode-switch ${mode}`}>
+              <input
+                type="checkbox"
+                checked={mode === "host"}
+                onChange={(e) => setMode(e.target.checked ? "host" : "peer")}
+              />
+              <span className="slider"></span>
+            </label>
+            <span className="mode-inline-label">
+              {mode === "host" ? (
+                <>
+                  🖥️ Host Mode
+                </>
+              ) : (
+                <>
+                  👥 Peer-to-Peer
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+
+
+        <h3 className="subheading">Available Rooms</h3>
+        <ul className="room-list">
+          {roomList?.rooms?.map((code) => (
+            <li key={code} className="room-item">
+              <span className="room-code">{code}</span>
+              <button className="btn-create-room" onClick={() => handleJoinRoom(code)}>Join</button>
+            </li>
+          ))}
+        </ul>
+        <div className="button-container">
+          <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
+        </div>
       </div>
-    <h3 className="subheading">Available Rooms</h3>
-    <ul className="room-list">
-      {roomList?.rooms?.map((code) => (
-        <li key={code} className="room-item">
-          <span className="room-code">{code}</span>
-          <button className="btn-create-room" onClick={() => handleJoinRoom(code)}>Join</button>
-        </li>
-        ))}
-    </ul>
-    <div className="button-container">
-      <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
-    </div>
-  </div>
-  </BasePage>
+    </BasePage >
   );
 };
 
