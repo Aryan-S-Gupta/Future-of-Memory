@@ -417,7 +417,8 @@ Try this `curl` query to test the RAG chunk retrieval API once the backend is ru
 curl --header "Content-Type: application/json" \
 --request POST \
 --data '{ "query_text": "what is the future of memory", "keywords": ["future", "memory"]}' \
-http://127.0.0.1:9000/api/rag/retrieve
+http://127.0.0.1:9000/api/rag/retrieve \
+| python -m json.tool
 ```
 
 On Windows:
