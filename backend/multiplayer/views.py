@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rag.retrieve import retrieve_chunks
 from .game_logic import VotingSession, VotingSessions
+from api.views import rag_retrieve as rag_retrieve_api
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -261,28 +262,10 @@ def get_story_result(request):
 @csrf_exempt
 @require_POST
 def rag_retrieve(request):
-
-    default_query = "fatigue"
-    query: str
-    if request.method != "POST":
-        logger.warning("Non-POST request received. Using default query instead")
-        query = default_query
-    else:
-        data = json.loads(request.body.decode("utf-8"))
-        query_text = data.get("query_text")
-        keywords = data.get("keywords")
-        logger.debug(
-            f"Incoming RAG retrieval API request, {query_text = }, {keywords = }"
-        )
-        query = query_text or keywords
-        if not query:
-            logger.warning(
-                "No 'query_text' or 'keywords' parameter provided. Using default query instead"
-            )
-            query = default_query
-
-    items = retrieve_chunks(query)
-    return JsonResponse({"items": items})
+    """
+    See rag_retrieve in backend/api/views
+    """
+    return rag_retrieve_api(request)
 
 
 @csrf_exempt

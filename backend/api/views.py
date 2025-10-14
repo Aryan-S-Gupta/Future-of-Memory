@@ -166,6 +166,42 @@ def get_story_result(request):
 @csrf_exempt
 @require_POST
 def rag_retrieve(request):
+    """
+    Retrieve relevant chunks from the vector store based on the query. Must be a POST request.
+    
+    Request structure:
+    {
+        "query_text": "<text for the query, phrase/sentence>",
+        "keywords": [
+            "<keyword for the query>",
+            ...
+        ]
+    }
+
+    Return format (JSONResponse):
+    {"items": [
+        {
+            "text": "<chunk text>",
+            "meta": {
+                "source": "<document filename>",
+                "title": "<original doucment title>",
+                "licence": "<licensing information>",
+                "authors": [
+                    "<author name>",
+                    ...
+                ],
+                "link_text": "<text to display in a link to the original document e.g. Cambridge
+                Core article>",
+                "link": "<link to original document>",
+                "start_index": <int, location of this chunk in original document>
+            },
+            "metadata": <same as "meta">,
+            "id": "<chunk id>",
+        },
+        ...
+    ]}
+
+    """
 
     default_query = "fatigue"
     query: str
