@@ -50,16 +50,16 @@ export const getScenarioAndImage = async (session_id, turn_id, year, option_id) 
  * console.log(question.question);
  * console.log(question.options);
  */
-export const getQuestion = async (session_id) => {
-  console.log("called question api for session:", session_id);
-  const res = await api.get(`/storyline/${session_id}/question`);
-  console.log("got output:", res.data);  // prints the actual object
-  console.log("question:", res.data.data.question);
-  console.log("options:", res.data.data.options);
-
-  return res.data.data; // { message, data: { turn_id, year, question, options } }
-};
-
+export async function getQuestion(sessionId, turn_id, year) {
+  try {
+    const res = await api.get(`/storyline/${sessionId}/question/${turn_id}/${year}`);
+    console.log("got output: " + res)
+    console.log(res.data)
+    return res.data;
+  } catch (err) {
+    return null;
+  }
+}
 
 /**
  * Fetches an image from the backend API.

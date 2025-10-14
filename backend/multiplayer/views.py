@@ -387,7 +387,6 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     logger.debug(f"Found session: {existing_session}")
     logger.debug(f"turn_id received: {turn_id}")
     new_year = -1
-    logger.info(f'fetching for {new_year}')
 
     if not rm.room_exists(room_code):
         return JsonResponse({'success': False, 'room_exists': False})
@@ -450,31 +449,7 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
 from shared.services import display_world_view
 
 
-def display_scenario_and_image(request, session_id, turn_id, year, option_id, room_code):
-    """
-    Display the world view after user makes a choice.
-    """
-    player_name = request.GET.get("playerName")
-    logger.debug(f"playername is {player_name}")
-    if not rm.room_exists(room_code):
-        return JsonResponse({'success': False, 'room_exists': False})
-    
-    
-    final_option = VOTING_SESSION.process_player_response(room_code, player_name, option_id)
-    logger.info(f"[Vote Submitted] {player_name} voted for {option_id} in room {room_code}")
-    logger.info(f"[Current Votes] {VotingSessions[(room_code, int(current))].get_p_votes()}")
-    if final_option is None:
-        logger.debug("Not all players have voted yet.")
-        print("Not all players have voted yet.")
-        return JsonResponse({
-            "success": False,
-            "scenario": "",
-            "votes_info": votes_info,
-            "message": "Waiting for other players to vote."
-        }, status=404)
-    else:
 
-        return world_view_data
 
 def display_scenario_and_image(request, session_id, turn_id, year, option_id, room_code):
     """

@@ -34,9 +34,11 @@ const GamePlay = () => {
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
+  const [turn, setTurn] = useState(-1)
   const [loadingFacts, setLoadingFacts] = useState([]);
   const [option_id, setOptionId] = useState(null);
   const [isReady, setIsReady] = useState(false);
+  const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
     scenario:
       "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -58,30 +60,37 @@ const GamePlay = () => {
   // Fetches the question whenever we are on the "question" screen.
   // Fetches the scenario whenever we are on the "scenario" screen.
   const {
-    data: questionData,
-    isLoading: isQuestionLoading,
-    error: questionError,
-    status,
-  } = useQuery({
-    queryKey: ["question", sessionId],
-    queryFn: async () => {
-      console.log("queryFn running for", sessionId);
-      const result = await getQuestion(sessionId);
-      if (!result) {
-        setScreen("loading");
-        setIsReady(false);
-        await fetchFunFacts();
-        return null;
-      }
-      console.log("queryFn result:", result);
-      setCurrentTurn(result)
-      return result;
-    },
-    enabled: screen != "scenario", // only fetch when not on scenario screen
-    onError: (err) => {
-      console.error("onError:", err);
-    }, refetchIntervalInBackground: true
-  });
+    data: questionData
+  } = useQuery ({
+    queryKey: ["question", sessionId, turn, year], 
+    queryFn: async() => {
+        console.log(year);
+        console.log("queryFn running for", year);
+        const result = await getQuestion(sessionId, turn , year);
+        if (!result ) {
+          setScreen("loading");
+          setLoadingState("question");
+          await fetchFunFacts();
+          console.log("loading at the moment");
+          return null;
+        } else {
+          setCurrentTurn(result);
+          setTurn(result.turn_id);
+          setScreen("question");
+          setLoadingState("none")
+          console.log("recieved question data: " + result);
+          setScenarioData(null);
+          return result;
+        }
+    }, enabled: loadingState == "question", 
+    refetchInterval: (result) => {
+        if (result != null) {
+          return false;
+        } else {
+          3000;
+        }
+    }, refetchIntervalInBackground: true, 
+  })
 
   // --- Minimal TTS: inline (no extra files/deps) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
@@ -266,9 +275,9 @@ const GamePlay = () => {
     if (!currentTurn) return;
     cancelTTS();
     setScreen("loading");
+    setLoadingState("scenario")
     setOptionId(option_id);
     console.log("handleChoice called with option_id:", option_id);
-    setIsReady(false);
     await fetchFunFacts();
 
 
@@ -287,20 +296,21 @@ const GamePlay = () => {
 
       if (!out.scenario || !out.scenario.text || !out.image?.url) {
         console.log("Scenario/image not ready yet...");
-        return;
+  
+        return null;
       } else if (out.scenario.text === scenarioData?.scenario) {
         console.log("Scenario/image unchanged, waiting...");
-        return;
+        return null;
       }
       const mapped = {
         scenario: out.scenario.text,
         image: out.image.url
       };
+      setScreen("scenario");
       console.log("Submit choice response:", mapped);
-      setIsReady(true);
       setScenarioData(mapped);
       setYear(year + 1);
-
+      return out;
     },
     enabled: screen !== "question" && currentTurn != null,
     onError: (err) => {
@@ -345,7 +355,7 @@ const GamePlay = () => {
           isReady={isReady}
           funFacts={loadingFacts}
           onContinue={() => {
-            setScreen("scenario");
+            setScreen({loadingState});
           }}
         />
       )}
@@ -368,7 +378,11 @@ const GamePlay = () => {
             <Button
               baseButton="btn-primary"
               action={() => {
-                setScreen("question");
+                setScreen("loading");
+                setLoadingState("question");
+                setCurrentTurn(null);
+                //setFetchQuestion(true);
+                setScenarioData(null);                
                 console.log("Session ID:", sessionId);
               }}
               title="Continue"
