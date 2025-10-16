@@ -56,10 +56,10 @@ const MultiplayerLobby = () => {
     setRoomCode(data.room_code);
     console.log(roomCode);
       if (mode === "peer") {
- navigate(`/background-multi/${data.room_code}/${playerName}`);
-  } else {
-    navigate(`/projection-host/${data.room_code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
-  }
+        navigate(`/background-multi/${data.room_code}/${playerName}`);
+      } else {
+        navigate(`/projection-host/${data.room_code}/${playerName}/${playerName}/${mode}`);
+      }
     // Navigate to multiplayer room screen
     // navigate(`/multiplayer-room/${data.room_code}/${playerName}`);
     console.log("navigated with session id " + data.session_id);
@@ -95,9 +95,9 @@ const MultiplayerLobby = () => {
         if (data.mode == "host") {
           if (data.game_started == "False") {
             console.log("went to background screen");
-              navigate(`/projection-host/${code}?playerName=${playerName}&hostName=${data.host}&mode=${mode}`);
+              navigate(`/projection-host/${code}/${name}/${data.host}/${mode}`);
           } else {
-              navigate(`/player-room/${code}?playerName=${playerName}&hostName=${playerName}&mode=${mode}`);
+              navigate(`/player-room/${code}/${name}/${data.host}/${mode}`);
           }
         } else { 
           navigate(`/background-multi/${code}/${name}&mode=${mode}`);

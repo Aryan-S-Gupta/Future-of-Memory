@@ -1,40 +1,66 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getQuestion, submitChoice, getVotingInfo } from "../../../api/multiplayer/GameFlowApi.js";
+import { getQuestion, submitChoice } from "../../../api/multiplayer/GameFlowApi.js";
+import { getRoomState } from "../../../api/multiplayer/RoomManagementApi.js";
 import Button from "../../components/Button/Button.jsx";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../../styles/GamePlay.css";
 import { useSession } from "../../../SessionContext.jsx";
 import background from "../../assets/background.jpg";
+import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
+import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
+import { useMemo, useRef } from "react";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
-import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
-import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
+import { getVotingInfo} from "../../../api/multiplayer/GameFlowApi";
+import MiniGame from "../MiniGame.jsx";
+import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
+
+/**
+ * furs duspay the questions and after the the players have submiyyed the responses then go to the loading screen
+ * until the scenario and the image is ready ad once ready display the mimage and set current turn to null so that 
+ * the new data can be stored 
+ * to ftech 
+ * 
+ * MINI GAME LOGIC: 
+ * once submit response results in tie then set the screen to mini game on players.
+ * if it is host (host will be checked by playerName = hostName) then display 
+ * "Tie detected.. starting mini competition.. lets seee whose memort is the mosyt powerful" +
+ * keep checking whetehr mini game has been resolved or who has finished
+ * once resolved, display on host who the winner is for 10 seconds and then set the screen back to scenario 
+ * if the scenario is not ready then loading;
+ */
 
 const HostScreen = () => {
-  const { roomCode } = useParams(); 
-  const [searchParams] = useSearchParams();
-  const playerName = searchParams.get("playerName");
-  const { sessionId } = useSession();  
+  const navigate = useNavigate()
+  const { roomCode, playerName } = useParams(); 
+  const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
-  const [screen, setScreen] = useState("scenario"); 
+  const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
   const [loadingFacts, setLoadingFacts] = useState([]);
   const [isReady, setIsReady] = useState(false);
   const [option_id, setOptionId] = useState(null);
   const [turn, setTurn] = useState(-1);
-  const [loadingState, setLoadingState] = useState("none");
-    const [stage, setStage] = useState(0);
-      const fadeDuration = 2000;
-  const [roomDestroyed, setRoomDestroyed] = useState(false);
   const [votes, setVotes] = useState([]);
-    const [hasAnimated, setHasAnimated] = useState(false); 
-    // --- Tie narration to BGM ---
-    const { isPlaying, volume, setVolume } = useBgm();
   const [totalPlayers, setTotalPlayers] = useState(1);
+  const [miniGameOccurred, setMiniGameOccurred] = useState(false);
+  const [winnerInfo, setWinnerInfo] = useState(null);
+  const [showWinner, setShowWinner] = useState(false);
+  const [played, setPlayed] = useState(false)
+  const [factsFecthed, setFactsFetched] = useState(false);
+
+  // --- Staged reveal for multiplayer ---
+  // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
+  const [stage, setStage] = useState(0);
+  
+  const [hasAnimated, setHasAnimated] = useState(false); 
+  const fadeDuration = 2000;
+  const [allVoted, setAllVoted] = useState(false);
+  const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -46,19 +72,28 @@ const HostScreen = () => {
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
 });
+  const [roomDestroyed, setRoomDestroyed] = useState(false);
 
 
-  const {
-    data: questionData
-  } = useQuery ({
+
+  // --- Tie narration to BGM ---
+  const { isPlaying, volume, setVolume } = useBgm();
+
+
+  // --- Question Query ---
+  // Fetches the question whenever we are on the "question" screen.
+  const {data: questionData} = useQuery ({
     queryKey: ["question", roomCode, sessionId, turn, year], 
     queryFn: async() => {
         console.log("queryFn running for", year);
         const result = await getQuestion(sessionId, roomCode, turn , year);
-        if (!result ) {
+        if (!result) {
           setScreen("loading");
           setLoadingState("question");
-          await fetchFunFacts();
+          if (!factsFecthed) {
+            await fetchFunFacts();
+            setFactsFetched(true);
+          }
           console("loading at the moment");
           return null;
         } else {
@@ -68,17 +103,112 @@ const HostScreen = () => {
           setLoadingState("none")
           console.log("recieved question data: " + result);
           setScenarioData(null);
+          setFactsFetched(false);
           return result;
         }
     }, enabled: loadingState == "question", 
-    refetchInterval: (result) => {
-        if (result != null) {
-          return false;
-        } else {
-          3000;
-        }
-    }
+      refetchInterval: (result) => result ? false : 3000,
+    refetchIntervalInBackground: true, 
   })
+
+
+  const {} = useQuery({
+    queryKey: ["votingStatus", roomCode, currentTurn?.turn_id], 
+    queryFn: async() => {
+        
+      console.log(`[VotingQuery] Fetching voting info for room=${roomCode}, turn=${currentTurn.turn_id}`);
+
+        if (currentTurn === null) return;
+        const res = await getVotingInfo(roomCode, currentTurn.turn_id);
+        const data = res.data
+        
+        console.log("[VotingQuery] Raw API response:", res);
+        console.log("[VotingQuery] Parsed data:", res.data);
+        console.log("[VotingQuery] onSuccess triggered. Data:", data);
+        
+        if (!data) {
+          console.log("[VotingQuery] Data empty, skipping state update.");
+          return;
+        }
+        const mappedVotes = Object.entries(data.votes).map(([player, option]) => ({
+          name: player,
+          votedFor: option,
+          hasVoted: option !== "Pending",
+        }));
+
+        console.log(mappedVotes);
+        console.log("[VotingQuery] Mapped votes:", mappedVotes);
+        
+        const votesCount = data.num_responses;
+        const totalCount = data.total_players;
+        
+        if (votesCount >= totalCount) {
+          setAllVoted(true);
+        }
+        setVotes(mappedVotes);
+        setTotalPlayers(data.total_players);
+
+
+        console.log(`[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`);
+        if (allVoted) {
+          console.log("All players voted!");
+          setOptionId(data.final_option);
+          if (!scenarioData || !scenarioData.scenario) {
+            console.log("Scenario not ready → go to loading screen");
+            setScreen("loading");
+            setLoadingState("scenario");
+            if (!factsFecthed) {
+              await fetchFunFacts();
+            }
+          } else {
+            console.log("Scenario ready → show scenario");
+            setScreen("scenario");
+            setLoadingState("none")
+          }
+        }
+        return result;
+      }, enabled: screen == "question",
+      refetchInterval: 3000,
+      refetchIntervalInBackground: true
+  })
+
+
+  const {} = useQuery({
+      queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
+      queryFn: async () => {
+
+        console.log("submitting option", option_id);
+
+        const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
+        console.log(out)
+        if (!out || !out.scenario || !out.scenario.text) {
+          if (!out.room_exists) {
+            setRoomDestroyed(true); 
+            setScreen("destroyed");
+          }
+        }
+        console.log("the data is", out );
+
+        const mapped = {
+          scenario: out.scenario.text,
+          image: out.image.url
+        };
+        console.log("Submit choice response:", mapped);
+
+        setScreen("scenario");
+        setLoadingState("none")
+        setScenarioData(mapped);
+        setYear(year + 1);
+        setOptionId(null);
+        return out;
+      },
+      enabled: currentTurn != null &&  option_id != null && screen !== "destroyed",
+      onError: (err) => {
+        console.log("onError:", err);
+      }, 
+      refetchInterval: 3000, 
+      refetchIntervalInBackground: true, 
+  });
 
 
   // --- Minimal TTS: inline (no extra files/deps) ---
@@ -133,249 +263,161 @@ const HostScreen = () => {
         prevVolRef.current = null;
       }
     };
-  
-  
-      try { synthRef.current.speak(utter); } catch {
-        // In case of any error, restore
-        if (prevVolRef.current !== null) {
-          setVolume(prevVolRef.current);
-          prevVolRef.current = null;
-        }
+
+
+    try { synthRef.current.speak(utter); } catch {
+      // In case of any error, restore
+      if (prevVolRef.current !== null) {
+        setVolume(prevVolRef.current);
+        prevVolRef.current = null;
       }
-    };
-  
-  
-    // Build readout for question + options
-    const questionReadout = useMemo(() => {
-      if (!questionData) return "";
-      const q = String(questionData.question || "");
-      const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      const parts = Object.entries(questionData.options || {}).map(
-        ([, text], i) => `Option ${alpha[i] || i + 1}: ${String(text)}`
-      );
-      return [q, ...parts].join(". ");
-    }, [questionData]);
-  
-  
-    // Auto-read Scenario when it shows (and BGM is playing)
-    useEffect(() => {
-      if (screen === "scenario" && scenarioData?.scenario) {
-        speak(scenarioData.scenario);
-      }
-      return () => cancelTTS();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [screen, scenarioData?.scenario, isPlaying]); // tie to playing state
-  
-  
-    // Auto-read Question + Options when it shows (and BGM is playing)
-    useEffect(() => {
-      if (screen === "question" && questionReadout) {
-        speak(questionReadout);
-      }
-      return () => cancelTTS();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [screen, questionReadout, isPlaying]);
-  
-  
-    // Replay narration when toolbar Play is clicked (even if already playing)
-    useEffect(() => {
-      const handler = () => {
-        if (screen === "scenario" && scenarioData?.scenario) {
-          speak(scenarioData.scenario);
-        } else if (screen === "question" && questionReadout) {
-          speak(questionReadout);
-        }
-      };
-      window.addEventListener("bgm-play", handler);
-      return () => window.removeEventListener("bgm-play", handler);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
-  
-  
-    const {data: votingData} = useQuery({
-      queryKey: ["votingStatus", roomCode, currentTurn?.turn_id], 
-      queryFn: async() => {
-          console.log("the current turn is: " + currentTurn)
-          console.log(
-          `[VotingQuery] Fetching voting info for room=${roomCode}, turn=${currentTurn.turn_id}...`
-          );
-          if (currentTurn === null) return;
-          const res = await getVotingInfo(roomCode, currentTurn.turn_id);
-          console.log("[VotingQuery] Raw API response:", res);
-          const data = res.data
-          console.log("[VotingQuery] Parsed data:", res.data);
-          console.log("[VotingQuery] onSuccess triggered. Data:", data);
-          if (!data) {
-            console.log("[VotingQuery] Data empty, skipping state update.");
-            return;
-          }
-                // Map backend vote dictionary → frontend structure
-          const mappedVotes = Object.entries(data.votes).map(([player, option]) => ({
-            name: player,
-            votedFor: option,
-            hasVoted: option !== "Pending",
-          }));
-          console.log(mappedVotes);
-          console.log("[VotingQuery] Mapped votes:", mappedVotes);
-          const votesCount = data.num_responses;
-          const totalCount = data.total_players;
-          const allVoted = votesCount >= totalCount;
-          setVotes(mappedVotes);
-          setTotalPlayers(data.total_players);
-  
-  
-          console.log(
-            `[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`
-          );
-          if (allVoted) {
-            console.log("All players voted!");
-            setOptionId(data.final_option);
-            setScreen("loading");
-            setLoadingState("scenario");
-            await fetchFunFacts();
-            if (!scenarioData || !scenarioData.scenario) {
-              console.log("Scenario not ready → go to loading screen");
-              setScreen("loading");
-              setLoadingState("scenario");
-              await fetchFunFacts();
-            } else {
-              console.log("Scenario ready → show scenario");
-              setScreen("scenario");
-            }
-          }
-          return result;
-        }, enabled: loadingState === "none", 
-        refetchInterval: 3000
-      
-    })
-  
-  
-    /**
-     * Handles a player's choice when answering a question.
-     *
-     * @param {string} answer - The key of the chosen option.
-     */
-    const {
-      data: out,
-      isLoading: isTurnLoading,
-      error: turnError,
-      status: turnStatus,
-      } = useQuery({
-        queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
-        queryFn: async () => {
-          console.log("submitting option", sessionId);
-          const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
-          if (!out || !out.scenario || !out.scenario.text) {
-            if (!out.room_exists) {
-              setRoomDestroyed(true); 
-              setScreen("destroyed");
-            }
-            console.log("dont have scenario yet");
-            return null;
-        }
-        console.log("the data is", out );
-        const mapped = {
-          scenario: out.scenario.text,
-          image: out.image.url
-        };
-        console.log("Submit choice response:", mapped);
-        setScreen("scenario");
-        setScenarioData(mapped);
-        setYear(year + 1);
-        setOptionId(null);
-        return out;
-      },
-      enabled: loadingState == "scenario",
-      onError: (err) => {
-        console.log("onError:", err);
-      }, 
-      refetchInterval: 1000
-  });
-  
-  useEffect(() => {
-    if (screen === "question") {
-      console.log("[Animation] Resetting staged animation for new question");
-      setHasAnimated(false);
-      setStage(0);
-    }
-  }, [currentTurn, screen])
-  
-  
-  // --- Staged reveal ---
-    // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
-   
-    useEffect(() => {
-      if (screen === "question" && currentTurn) {
-        setStage(1); // show question
-        speak(currentTurn.question);
-  
-  
-        const timer1 = setTimeout(() => {
-          setStage(2);
-          speak(currentTurn.options[0].option_text);
-        }, 10000 - fadeDuration);
-  
-  
-        const timer2 = setTimeout(() => {
-          setStage(3);
-          speak(currentTurn.options[1].option_text);
-        }, 15000 - fadeDuration);
-  
-  
-        const timer3 = setTimeout(() => {
-          setStage(4); // show all together, no TTS
-        }, 20000 - fadeDuration);
-  
-  
-        return () => {
-          clearTimeout(timer1);
-          clearTimeout(timer2);
-          clearTimeout(timer3);
-          cancelTTS();
-        };
-      }
-    }, [screen, currentTurn]);
-  
-  
-  const getFadeClass = (idx) => {
-    switch(idx) {
-      case 1: return stage === 1 || stage === 4 ? "fade-in-out show" : stage > 1 ? "fade-in-out hide" : "fade-in-out";
-      case 2: return stage === 2 || stage === 4 ? "fade-in-out show" : stage > 2 ? "fade-in-out hide" : "fade-in-out";
-      case 3: return stage === 3 || stage === 4 ? "fade-in-out show" : stage > 3 ? "fade-in-out hide" : "fade-in-out";
-      default: return "fade-in-out";
     }
   };
-  
-  
-      // Fetch fun facts when loading scenario
-      const fetchFunFacts = async () => {
-        try {
-          const facts = await getFunFacts(); // Fetch 3 fun facts
-          setLoadingFacts(facts.data);
-          console.log("Fun facts loaded:", facts);
-        } catch (error) {
-            console.error("Error fetching fun facts:", error);
-        }
+
+  // Build readout for question + options
+  const questionReadout = useMemo(() => {
+    if (!questionData) return "";
+    const q = String(questionData.question || "");
+    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const parts = Object.entries(questionData.options || {}).map(
+      ([, text], i) => `Option ${alpha[i] || i + 1}: ${String(text)}`
+    );
+    return [q, ...parts].join(". ");
+  }, [questionData]);
+
+
+  // Auto-read Scenario when it shows (and BGM is playing)
+  useEffect(() => {
+    if (screen === "scenario" && scenarioData?.scenario) {
+      speak(scenarioData.scenario);
+    }
+    return () => cancelTTS();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, scenarioData?.scenario, isPlaying]); // tie to playing state
+
+
+  // Auto-read Question + Options when it shows (and BGM is playing)
+  useEffect(() => {
+    if (screen === "question" && questionReadout) {
+      speak(questionReadout);
+    }
+    return () => cancelTTS();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, questionReadout, isPlaying]);
+
+
+  // Replay narration when toolbar Play is clicked (even if already playing)
+  useEffect(() => {
+    const handler = () => {
+      if (screen === "scenario" && scenarioData?.scenario) {
+        speak(scenarioData.scenario);
+      } else if (screen === "question" && questionReadout) {
+        speak(questionReadout);
       }
-  
-  
+    };
+    window.addEventListener("bgm-play", handler);
+    return () => window.removeEventListener("bgm-play", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
+
+
+useEffect(() => {
+  if (screen === "question") {
+    console.log("[Animation] Resetting staged animation for new question");
+    setHasAnimated(false);
+    setStage(0);
+  }
+}, [currentTurn, screen])
+
+
+// --- Staged reveal ---
+  // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
+ 
+  useEffect(() => {
+    if (screen === "question" && currentTurn) {
+      setStage(1); // show question
+      speak(currentTurn.question);
+
+
+      const timer1 = setTimeout(() => {
+        setStage(2);
+        speak(currentTurn.options[0].option_text);
+      }, 10000 - fadeDuration);
+
+
+      const timer2 = setTimeout(() => {
+        setStage(3);
+        speak(currentTurn.options[1].option_text);
+      }, 15000 - fadeDuration);
+
+
+      const timer3 = setTimeout(() => {
+        setStage(4); // show all together, no TTS
+      }, 20000 - fadeDuration);
+
+
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        cancelTTS();
+      };
+    }
+  }, [screen, currentTurn]);
+
+
+const getFadeClass = (idx) => {
+  switch(idx) {
+    case 1: return stage === 1 || stage === 4 ? "fade-in-out show" : stage > 1 ? "fade-in-out hide" : "fade-in-out";
+    case 2: return stage === 2 || stage === 4 ? "fade-in-out show" : stage > 2 ? "fade-in-out hide" : "fade-in-out";
+    case 3: return stage === 3 || stage === 4 ? "fade-in-out show" : stage > 3 ? "fade-in-out hide" : "fade-in-out";
+    default: return "fade-in-out";
+  }
+};
+
+  // Fetch fun facts when loading scenario
+  const fetchFunFacts = async () => {
+    try {
+      const facts = await getFunFacts(); // Fetch 3 fun facts
+      setLoadingFacts(facts.data);
+      console.log("Fun facts loaded:", facts);
+    } catch (error) {
+        console.error("Error fetching fun facts:", error);
+    }
+  }
+
+  const handleChoice = async (option_id) => {
+    if (!currentTurn) return;
+    cancelTTS(); 
+    //setShowVotes(false);
+    setOptionId(option_id);
+  }
+
+  const handleContinue = async () => {
+    setLoadingState("question");
+    setCurrentTurn(null);
+    setAllVoted(false);
+    setVotes(null);
+    setScenarioData(null);
+  }
+
   return (
     <BasePage>
       <ExitExperience code={roomCode} player={playerName} />
-
-      {screen === "destroyed" && <RoomDestroyedPopup />}
-
+      {screen == "destroyed" && (
+        <RoomDestroyedPopup />
+      )}
       {screen === "loading" && (
         <LoadingScreen
-          isReady={!!scenarioData?.scenario}
+          isReady={isReady}
           funFacts={loadingFacts}
-          onContinue={() => setScreen("scenario")}
+          onContinue={() => {
+            setScreen({ loadingState });
+          }}
         />
       )}
-
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
-
           <div className="text-container menu-glass">
           {/* Image in middle */}
           {scenarioData.image && (
@@ -388,19 +430,13 @@ const HostScreen = () => {
           <div className="scenario-footer">
             <Button
               baseButton="btn-primary"
-              action={() => {
-                setScreen("loading");
-                setLoadingState("question");
-                setCurrentTurn(null);
-                //setFetchQuestion(true);
-                setScenarioData(null);
-                console.log("Session ID:", sessionId);
-              }}
+              action={() => {handleContinue()}}
               title="Continue"
             />
           </div>
         </div>
       )}
+      {/** Question Screen*/}
       {screen === "question" && currentTurn && (
         <div className="question-screen">
           {/* Left side: question and choices */}
@@ -408,11 +444,10 @@ const HostScreen = () => {
             <div className="question-container">
               <h2 className={getFadeClass(1)}>{currentTurn.question}</h2>
             </div>
-            {/* Host doesn’t need to choose, optionally hide buttons */}
-            {/* Right side: voting display */}
+          </div>
+          {/* Right side: voting display */}
           <div className="voting-sidebar">
             <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
-            </div>
           </div>
         </div>
       )}
