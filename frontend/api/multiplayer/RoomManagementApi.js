@@ -14,8 +14,8 @@ export const listRooms = async () => {
  * @param {string} host - The name of the player creating the room.
  * @returns {Promise<object>} Newly created room data.
  */
-export const createRoom =  async (host) => {
-  const response = await api.post("/create", { host });
+export const createRoom =  async (host, mode) => {
+  const response = await api.post("/create", { host, mode });
   return response.data
 };
 
@@ -52,3 +52,19 @@ export const getRoomState = async (roomCode) => {
   const response = await api.get(`/${roomCode}/state`);
   return response.data;
 };
+
+export const checkGameStarted = async (roomCode) => {
+  const res = await api.get(`/check_game_started/${roomCode}`);
+  return res;
+}
+
+export const getHostName = async (roomCode) => {
+  const res = await api.get(`/host/${roomCode}`);
+  return res;
+}
+
+export const startGame = async (roomCode) => {
+  const res = await api.get(`start_game/${roomCode}`);
+  return res;
+
+}

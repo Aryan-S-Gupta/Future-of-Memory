@@ -16,9 +16,8 @@ venv/
 !.vscode/tasks.json
 
 # Ignore image repo
-backend/media/
-
-# Add static repo back
+backend/media/*
+!backend/media/
 !backend/media/static/
 
 # Ignore Redis files

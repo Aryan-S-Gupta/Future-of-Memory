@@ -6,21 +6,14 @@ Provides endpoints to fetch story background, questions, and results based on us
 import json
 import os
 import logging
-import multiplayer.room_manager as rm
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+
+import multiplayer.room_manager as rm
 from rag.retrieve import retrieve_chunks
 from rag.fun_facts.retrieve_fun_facts import retrieve_fun_facts
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-
-from rag.retrieve import retrieve_chunks
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -117,25 +110,25 @@ def submit_choice(request):
 
 
 def get_multiplayer_result(data):
-        room_code = data.get("room_code")
-        player_name = data.get("player_name")
-        choice = data.get("choice")
+    room_code = data.get("room_code")
+    player_name = data.get("player_name")
+    choice = data.get("choice")
 
-        room = rm.get_rooms[room_code]
-        player = room["players"].get[player_name]
-        player.last_choice = choice
-        player.save()
+    room = rm.get_rooms[room_code]
+    player = room["players"].get[player_name]
+    player.last_choice = choice
+    player.save()
 
-        # check if all players have submitted
-        all_answered = all(p.last_choice for p in room.players.all())
-        outcome = None
-        if all_answered:
-            from collections import Counter
-            votes = [p.last_choice for p in room.players.all()]
-            outcome = Counter(votes).most_common(1)[0][0]
-            room.current_year += 1
-            room.save()
-        return JsonResponse({"all_answered": all_answered, "outcome": outcome})
+    # check if all players have submitted
+    all_answered = all(p.last_choice for p in room.players.all())
+    outcome = None
+    if all_answered:
+        from collections import Counter
+        votes = [p.last_choice for p in room.players.all()]
+        outcome = Counter(votes).most_common(1)[0][0]
+        room.current_year += 1
+        room.save()
+    return JsonResponse({"all_answered": all_answered, "outcome": outcome})
 
 @csrf_exempt
 @require_POST
@@ -266,7 +259,7 @@ def start_prerendering(request):
 
 
 # send the existing work
-def display_question_and_options(request, session_id):
+def display_question_and_options(request, session_id, turn_id, year):
 
     """
     Display the question and options for the latest turn of a given session.
@@ -299,43 +292,55 @@ def display_question_and_options(request, session_id):
     logger.debug(f"display_question_and_options called for session_id={session_id}")
     existing_session = get_object_or_404(Session, id=session_id)
     logger.debug(f"Found session: {existing_session}")
+    logger.debug(f"turn_id received: {turn_id}")
 
+    logger.info(f'fetching for {year}')
     # find the latest turn for this session
-    latest_turn = (
-        Turn.objects.filter(session_id=existing_session.id)
-        .order_by("-year", "-id")
-        .first()
-    )
-    if latest_turn is None:
-        logger.warning("No turn found for this session")
-        return JsonResponse({"error": "No turn found for this session"}, status=404)
+    if int(turn_id) == -1:
+        logger.info("year:" + year)
+        latest_turn = (
+            Turn.objects
+            .filter(session_id=existing_session.id)
+            .order_by('-year', '-id')
+            .first()
+        )
+        # if the turn is not rrady yet 
+        if not latest_turn:
+            logger.warning("No turns found for this session")
+            return JsonResponse({'error': 'No turn found for this session'}, status=404)
+    
+    else:
+        # get specific turn by ID
+        turn_id = int(turn_id) + 1
+        latest_turn = get_object_or_404(Turn, year=int(year),  id=int(turn_id))
+        
+    
+    if latest_turn.year != int(year): 
+        logger.info("got here")
+        return JsonResponse({'error': 'new. year not ready yet'}, status=404)
+    
+    turn_id = latest_turn.id 
+    
+    logger.debug(f"Latest turn determined: {latest_turn}")
     logger.debug(f"Latest turn for session: {latest_turn}")
-    # use the latest turn's id to fetch its question and related options
-    question_text = latest_turn.question or ""  # ensure a string
-    options = Option.objects.filter(turn_id=latest_turn.id).order_by("label")
-    logger.debug(f"Options for turn {latest_turn.id}: {list(options)}")
 
-    # serialize the options as exactly: option_id, label, option_text
+    # fetch options
+    options = Option.objects.filter(turn_id=latest_turn.id).order_by('label')
     options_payload = [
-        {
-            "option_id": option.id,
-            "label": option.label,
-            "option_text": option.option_text or "",
-        }
-        for option in options
+        {'option_id': o.id, 'label': o.label, 'option_text': o.option_text or ''}
+        for o in options
     ]
 
-    # build the final JSON payload that the frontend can render directly
     response_payload = {
-        "turn_id": latest_turn.id,
-        "year": latest_turn.year,
-        "question": question_text,
-        "options": options_payload,
+        'message': 'ok',
+        'turn_id': turn_id,
+        'year': year,
+        'question': latest_turn.question or '',
+        'options': options_payload,
     }
-    logger.debug(f"Payload to return: {response_payload}")
-    return JsonResponse({"message": "ok", "data": response_payload}, status=200)
 
-
+    return JsonResponse(response_payload)
+ 
 # scenario and image display page
 from shared.services import display_world_view
 

@@ -362,7 +362,7 @@ system set up to run the project.
 
 ```bash
 python setup_rag.py
-python manage.py runserver 9000
+python manage.py runserver 0.0.0.0:9000
 ```
 
 Then open your browser or use terminal tools like `curl` to test the following round-based endpoints:
