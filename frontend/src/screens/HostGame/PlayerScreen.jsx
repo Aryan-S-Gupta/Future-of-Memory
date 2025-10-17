@@ -302,10 +302,15 @@ const PlayerScreen = () => {
             setRoomDestroyed(true); 
             setScreen("destroyed");
           }
-          if (data.tie) {
+          if (out.tie) {
             console.log("Tie detected! Starting mini-game...");
             setScreen("miniGame");
         }
+      }
+      if (out.tie) {
+        console.log("Tie detected! Starting mini-game...");
+        setScreen("miniGame");
+        return null;
       }
       console.log("the data is", out );
       const mapped = {
@@ -319,7 +324,7 @@ const PlayerScreen = () => {
       setOptionId(null);
       return out;
     },
-    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen !== "miniGameResult",
+    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen !== "miniGame" && screen !== "miniGameResult",
     onError: (err) => {
       console.log("onError:", err);
     }, 
@@ -486,7 +491,7 @@ const getFadeClass = (idx) => {
         <MiniGame
           playerName={playerName}
           roomCode={roomCode}
-          turnId={currentTurn?.turn_id}
+          turnId={turn}
           onFinish={async (score) => {
             console.log(`Mini-game finished with score ${score}`);
             setScore(score)
