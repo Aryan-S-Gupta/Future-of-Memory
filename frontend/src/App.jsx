@@ -49,16 +49,15 @@ function App() {
               <Route path="/game-play" element={<GamePlay />} />
               <Route path="/multiplayer-lobby" element={<MultiplayerLobby/>} />
               <Route path="/background-multi/:roomCode/:playerName" element={<BackgroundScreenMulti/>} />
-              <Route path="/projection-host/:roomCode" element={<HostBackgroundScreen />} />
+              <Route path="/projection-host/:roomCode/:playerName/:host/:mode" element={<HostBackgroundScreen />} />
               <Route path="/feedback" element={<FeedbackScreen/>} />
               <Route path="/multiplayer-room/:roomCode/:playerName" element={<GamePlayMulti />} />
-              <Route path="/multiplayer-room/:roomCode/:playerName" element={<HostScreen />} />
-              <Route path="/projector-room/:roomCode/" element={<HostScreen />} />
+              <Route path="/projector-room/:roomCode/:playerName/:host/:mode" element={<HostScreen />} />
               <Route path="/gallery/:sessionId" element={<GalleryScreen />} />
               <Route path="/mini-game/intro" element={<MiniGameIntro />} />
               <Route path="/mini-game/play" element={<MiniGame />} />
               <Route path="/mini-game/result" element={<MiniGameResult />} /> 
-              <Route path="/player-room/:roomCode/" element={<PlayerScreen />} />
+              <Route path="/player-room/:roomCode/:playerName/:host/:mode" element={<PlayerScreen />} />
             </Routes>
           </SessionProvider>
         </BackgroundWrapper>
