@@ -70,9 +70,7 @@ const PlayerScreen = () => {
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
 // Fetches the scenario whenever we are on the "scenario" screen.
-  const {
-    data: questionData
-  } = useQuery ({
+  const {data: questionData} = useQuery ({
     queryKey: ["question", roomCode, sessionId, turn, year], 
     queryFn: async() => {
         console.log("queryFn running for", year);
@@ -93,11 +91,12 @@ const PlayerScreen = () => {
           setLoadingState("none")
           console.log("recieved question data: " + result);
           setScenarioData(null);
+          setFactsFetched(false)
           return result;
         }
     }, enabled: loadingState == "question", 
       refetchInterval: (result) => result ? false : 3000,
-      refetchIntervalInBackground: true
+      refetchIntervalInBackground: true,
   })
 
 
@@ -274,7 +273,7 @@ const PlayerScreen = () => {
           }
         }
         return result;
-      }, enabled: screen !== "scenario",
+      }, enabled: screen === "question",
       refetchInterval: 3000,
   })
 
@@ -298,15 +297,15 @@ const PlayerScreen = () => {
         console.log("submitting option", sessionId);
         const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
         console.log(out)
-        if (data.tie) {
-            console.log("Tie detected! Starting mini-game...");
-            setScreen("miniGame");
-        }
         if (!out || !out.scenario || !out.scenario.text) {
           if (!out.room_exists) {
             setRoomDestroyed(true); 
             setScreen("destroyed");
           }
+          if (data.tie) {
+            console.log("Tie detected! Starting mini-game...");
+            setScreen("miniGame");
+        }
       }
       console.log("the data is", out );
       const mapped = {

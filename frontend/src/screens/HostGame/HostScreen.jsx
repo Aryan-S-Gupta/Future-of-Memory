@@ -167,7 +167,7 @@ const HostScreen = () => {
           }
         }
         return result;
-      }, enabled: screen == "question",
+      }, enabled: screen == "question" && currentTurn != null,
       refetchInterval: 3000,
       refetchIntervalInBackground: true
   })
@@ -386,18 +386,11 @@ const getFadeClass = (idx) => {
     }
   }
 
-  const handleChoice = async (option_id) => {
-    if (!currentTurn) return;
-    cancelTTS(); 
-    //setShowVotes(false);
-    setOptionId(option_id);
-  }
-
   const handleContinue = async () => {
     setLoadingState("question");
     setCurrentTurn(null);
     setAllVoted(false);
-    setVotes(null);
+    setVotes([]);
     setScenarioData(null);
   }
 
