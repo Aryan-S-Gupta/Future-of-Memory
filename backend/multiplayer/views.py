@@ -625,7 +625,6 @@ def submit_tiebreak_score_view(request):
     if not voting_sesh:
         return JsonResponse({"error": "No active voting session found"}, status=404)
 
-    # 🧩 Host polling mode
     if player_name.upper() == "HOST" or score == -1:
         winner_info = voting_sesh.get_tiebreak_winner()
         if winner_info:
@@ -636,7 +635,6 @@ def submit_tiebreak_score_view(request):
             })
         return JsonResponse({"status": "pending"})
 
-    # 🧩 Player submits score
     result = voting_sesh.submit_tiebreak_score(player_name, score)
     if result:
         return JsonResponse({
