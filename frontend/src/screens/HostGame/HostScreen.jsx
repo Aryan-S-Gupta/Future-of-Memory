@@ -458,18 +458,18 @@ useEffect(() => {
       {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
           <div className="text-container menu-glass">
-          {/* Image in middle */}
-          {scenarioData.image && (
-            <div className="scenario-image">
-              <img src={scenarioData.image} alt="scenario" className="scenario-img" />
-            </div>
-          )}
+            {/* Image in middle */}
+            {scenarioData.image && (
+              <div className="scenario-image">
+                <img src={scenarioData.image} alt="scenario" className="scenario-img" />
+              </div>
+            )}
           </div>
           {/* Continue button at bottom */}
           <div className="scenario-footer">
             <Button
               baseButton="btn-primary"
-              action={() => {handleContinue()}}
+              action={() => { handleContinue() }}
               title="Continue"
             />
           </div>
@@ -488,28 +488,25 @@ useEffect(() => {
           <div className="voting-sidebar">
             <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
           </div>
-          </div>
+        </div>
       )}
-          {screen === "miniGameWait" && (
-            <div className="menu-glass mini-result">
-              <div className="menu-glass mini-result">
-              <h2>🧠 Tie Detected!</h2>
-              <p>
-                A memory duel begins... Each player faces the neural mini-challenge. 
-                We’ll soon discover whose recall dominates the collective mind.
-              </p>
-              <p>⏳ Waiting for players to finish...</p>
-            </div>
-            </div>
-          )}
 
-          {screen === "miniGameWinner" && winnerInfo && (
-            <div className="menu-glass mini-result">
-              <h2>🏆 Tie-Break Winner</h2>
-              <p>{winnerInfo.winner} has triumphed in the neural challenge!</p>
-              <p>Resuming scenario...</p>
-            </div>
-          )}
+      {screen === "miniGameWait" && (
+        <div className="waiting-screen mini-wait">
+          <h2>⚔️ Neural Showdown Engaged</h2>
+          <p>Players are battling to break the tie...</p>
+        </div>
+      )}
+
+      {screen === "miniGameWinner" && (
+        <div className="winner-screen mini-winner">
+          <h2>🏆 Tie Broken!</h2>
+          <p className="winner-name">
+            {winnerInfo.winner}
+          </p>
+          <p className="text2">emerges victorious.</p>
+        </div>
+      )}
 
     </BasePage>
   );

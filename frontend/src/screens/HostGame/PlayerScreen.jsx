@@ -514,19 +514,22 @@ const getFadeClass = (idx) => {
           }}
         />
       )}
+      {/* === MINI-GAME WAITING (uses mini-wait CSS) === */}
       {screen === "miniGameWaiting" && (
-        <div className="menu-glass mini-waiting">
-          <h2>🎮 Thank you for playing!</h2>
-          <p>Let’s see if other players can beat your score...</p>
-          <p>Waiting for other players to finish...</p>
+        <div className="winner-screen mini-wait">
+          <h2>⌛ Waiting for Results</h2>
+          <p className="text2">Your score has been submitted.</p>
+          <p className="text2">Waiting for other players to finish...</p>
+          <div className="spinner"></div>
         </div>
       )}
 
+      {/* === MINI-GAME WINNER (uses mini-winner CSS) === */}
       {screen === "miniGameResult" && (
-        <div className="menu-glass mini-result">
-          <h2>Mini-Game Result</h2>
-          <p>🏆 {miniWinner} wins the tie-break!</p>
-          <p>Resuming game...</p>
+        <div className="winner-screen mini-winner">
+          <h2>🏆 Tie Broken!</h2>
+          <p className="winner-name">{miniWinner || "Unknown Challenger"}</p>
+          <p className="text2">emerges victorious.</p>
         </div>
       )}
     </BasePage>
