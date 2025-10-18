@@ -11,6 +11,8 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.http import HttpResponse
+import datetime
 from rag.retrieve import retrieve_chunks
 from rag.fun_facts.retrieve_fun_facts import retrieve_fun_facts
 
@@ -449,3 +451,39 @@ def get_gallery_for_session(request, session_id: int):
             })
 
     return JsonResponse({"session_id": session_id, "count": len(items), "items": items}, status=200)
+
+
+@csrf_exempt
+@require_POST
+def submit_feedback(request):
+    """Accept feedback JSON and append to a JSONL file in backend/feedback/feedback.jsonl
+
+    Expected JSON body shape (only 'ratings' and 'comments' will be stored):
+    {
+        "ratings": [{"question": str, "rating": int|null}, ...],
+        "comments": str
+        // any other fields (timestamps, session/player metadata) are ignored
+    }
+    """
+    try:
+        body = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return HttpResponse("Invalid JSON", status=400)
+
+    # Enforce anonymity: only persist ratings and comments.
+    allowed_keys = {"ratings", "comments"}
+    sanitized = {k: body.get(k) for k in allowed_keys if k in body}
+
+    # ensure feedback dir exists
+    fb_dir = os.path.join(os.path.dirname(BASE_DIR), "feedback")
+    os.makedirs(fb_dir, exist_ok=True)
+    fb_file = os.path.join(fb_dir, "feedback.jsonl")
+
+    try:
+        with open(fb_file, "a", encoding="utf-8") as f:
+            f.write(json.dumps(sanitized, ensure_ascii=False) + "\n")
+    except Exception as e:
+        logger.exception("Failed to write feedback to file")
+        return HttpResponse(f"Failed to save feedback: {e}", status=500)
+
+    return JsonResponse({"status": "ok"}, status=201)

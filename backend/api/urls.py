@@ -17,4 +17,5 @@ urlpatterns = [
     path('storyline/result', views.get_story_result, name='storyline_result'),
     path('rag/fun_facts', views.retrieve_fun_facts_api, name='fun_facts'),
     path('gallery/<str:session_id>', views.get_gallery_for_session, name='gallery_for_session'),
+    path('feedback', views.submit_feedback, name='submit_feedback'),
 ]

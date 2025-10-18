@@ -3,6 +3,7 @@ import BasePage from "../../screens/BasePage.jsx";
 import Button from "../../components/Button/Button.jsx";
 import "../../styles/FeedbackScreen.css";
 import { useNavigate } from "react-router-dom";
+import { submitFeedback } from "../../../api/single-player/FeedbackApi";
 
 /**
  * FeedbackScreen component
@@ -28,6 +29,7 @@ const FeedbackScreen = () => {
   const [ratings, setRatings] = useState(Array(questions.length).fill(0));
   const [feedbackText, setFeedbackText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleRating = (qIndex, value) => {
     const newRatings = [...ratings];
@@ -42,22 +44,17 @@ const FeedbackScreen = () => {
         rating: ratings[i] || null
       })),
       comments: feedbackText,
-      timestamp: new Date().toISOString()
     };
 
     try {
       setSubmitting(true);
-      const response = await fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(feedbackData)
-      });
-      if (!response.ok) throw new Error("Failed to submit feedback");
-      alert("Thank you for your feedback!");
+      await submitFeedback(feedbackData);
+      setSuccessMessage("Thank you — your feedback has been saved.");
       setRatings(Array(questions.length).fill(0));
       setFeedbackText("");
     } catch (err) {
       console.error(err);
+      setSuccessMessage("");
       alert("Error submitting feedback. Please try again.");
     } finally {
       setSubmitting(false);
@@ -113,6 +110,7 @@ const FeedbackScreen = () => {
           >
             {submitting ? "Submitting..." : "Submit Feedback"}
           </button>
+          {successMessage && <div className="feedback-success">{successMessage}</div>}
         </form>
       </div>
     </BasePage >
