@@ -597,21 +597,21 @@ def get_scores_view(request):
 @require_POST
 def submit_tiebreak_score_view(request):
     """
-        Handle POST request for multiplayer tie-break score submissions.
+    POST /mini-game/submit_tiebreak_score
+    Used by both players and host.
 
-        Expects JSON request body with:
-        {
-            "room_code": "ABC123",   # unique game room identifier
-            "turn_id": 5,            # numeric turn or round ID
-            "player_name": "Alice",  # player's display name
-            "score": 92              # player's tie-break score
-        }
+    Body:
+      {
+          "room_code": "ABC123",
+          "turn_id": 5,
+          "player_name": "Alice" or "HOST",
+          "score": 92  # or -1 if host
+      }
 
-        Returns:
-            JsonResponse: Indicates the status of the tie-break session:
-                        - {"status": "pending"} if still unresolved
-                        - {"status": "resolved", "winner": <name>, "winning_option": <option>}
-        """
+    Returns:
+      {"status": "pending"}                     -> if unresolved
+      {"status": "resolved", "winner": "..."}   -> once resolved
+    """
     try:
         data = json.loads(request.body.decode("utf-8"))
         room_code = data["room_code"]
@@ -625,11 +625,24 @@ def submit_tiebreak_score_view(request):
     if not voting_sesh:
         return JsonResponse({"error": "No active voting session found"}, status=404)
 
+    # 🧩 Host polling mode
+    if player_name.upper() == "HOST" or score == -1:
+        winner_info = voting_sesh.get_tiebreak_winner()
+        if winner_info:
+            return JsonResponse({
+                "status": "resolved",
+                "winner": winner_info["winner"],
+                "winning_option": winner_info["winning_option"]
+            })
+        return JsonResponse({"status": "pending"})
+
+    # 🧩 Player submits score
     result = voting_sesh.submit_tiebreak_score(player_name, score)
-    logger.info(f'the result is {result}')
     if result:
-        logger.info({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})
-        return JsonResponse({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})
+        return JsonResponse({
+            "status": "resolved",
+            "winner": result["winner"],
+            "winning_option": result["winning_option"]
+        })
     else:
-        logger.info({"status": "pending"})
         return JsonResponse({"status": "pending"})

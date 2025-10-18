@@ -150,15 +150,6 @@ const HostScreen = () => {
         setVotes(mappedVotes);
         setTotalPlayers(data.total_players);
 
-      if (data.tie) {
-        console.log("Tie detected! Starting mini-game round...");
-        setTieMode(true);
-        setScreen("miniGameWait");
-        return;
-      }
-
-
-
         console.log(`[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`);
         if (allVoted) {
           console.log("All players voted!");
@@ -196,6 +187,12 @@ const HostScreen = () => {
             setRoomDestroyed(true); 
             setScreen("destroyed");
           }
+                if (out.tie) {
+        console.log("Tie detected! Starting mini-game round...");
+        setTieMode(true);
+        setScreen("miniGameWait");
+        return;
+      }
         }
         console.log("the data is", out );
 
@@ -212,7 +209,7 @@ const HostScreen = () => {
         setOptionId(null);
         return out;
       },
-      enabled: currentTurn != null &&  option_id != null && screen !== "destroyed",
+      enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen !== "miniGame" && screen !== "miniGameResult",
       onError: (err) => {
         console.log("onError:", err);
       }, 
@@ -427,6 +424,34 @@ const getFadeClass = (idx) => {
     setScenarioData(null);
   }
 
+  useEffect(() => {
+  if (!tieMode || !currentTurn) return;
+
+  const poll = setInterval(async () => {
+    try {
+      const res = await submitTiebreakScore("HOST", roomCode, currentTurn.turn_id, -1);
+      console.log("[HOST MINI POLL]", res);
+
+      if (res.status === "resolved" || res.winner) {
+        setWinnerInfo(res);
+        setScreen("miniGameWinner");
+        clearInterval(poll);
+
+        // after 10s, resume story
+        setTimeout(() => {
+          setTieMode(false);
+          setScreen("loading");
+          setLoadingState("scenario");
+        }, 10000);
+      }
+    } catch (err) {
+      console.error("Error checking tie-break:", err);
+    }
+  }, 2000);
+
+  return () => clearInterval(poll);
+}, [tieMode, currentTurn]);
+
   return (
     <BasePage>
       <ExitExperience code={roomCode} player={playerName} />
@@ -475,24 +500,29 @@ const getFadeClass = (idx) => {
           <div className="voting-sidebar">
             <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
           </div>
-
+          </div>
+      )}
           {screen === "miniGameWait" && (
             <div className="menu-glass mini-result">
-              <h2>🕹️ Tie-Break Mini-Game in Progress...</h2>
-              <p>Waiting for players to finish...</p>
+              <div className="menu-glass mini-result">
+              <h2>🧠 Tie Detected!</h2>
+              <p>
+                A memory duel begins... Each player faces the neural mini-challenge. 
+                We’ll soon discover whose recall dominates the collective mind.
+              </p>
+              <p>⏳ Waiting for players to finish...</p>
+            </div>
             </div>
           )}
 
           {screen === "miniGameWinner" && winnerInfo && (
             <div className="menu-glass mini-result">
               <h2>🏆 Tie-Break Winner</h2>
-              <p>{winnerInfo.winner} wins the tie-break!</p>
-              <p>Resuming story...</p>
+              <p>{winnerInfo.winner} has triumphed in the neural challenge!</p>
+              <p>Resuming scenario...</p>
             </div>
           )}
 
-        </div>
-      )}
     </BasePage>
   );
 };
