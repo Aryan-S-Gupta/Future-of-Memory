@@ -15,7 +15,8 @@ import { useMemo, useRef } from "react";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
-import { getVotingInfo} from "../../../api/multiplayer/GameFlowApi";
+import { getVotingInfo} from "../../../api/multiplayer/GameFlowApi.js";
+import { getTiebreakStatus} from "../../../api/multiplayer/GameFlowApi.js";
 import MiniGame from "../MiniGame.jsx";
 import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
@@ -388,43 +389,43 @@ const getFadeClass = (idx) => {
   }
 };
 
-    useEffect(() => {
-      if (miniGameDone) {
-        const interval = setInterval(async () => {
-          const res =await submitTiebreakScore(playerName, roomCode, currentTurn.turn_id, score);
-          if (res && res.winner) {
-            console.log("Mini-game resolved:", res);
-            setMiniWinner(res.winner);
-            setScreen("miniGameResult");
-            clearInterval(interval);
-          }
-        }, 2000);
-        return () => clearInterval(interval);
-      }
-    }, [miniGameDone]);
-
-    useEffect(() => {
-      if (screen === "miniGameResult" && miniWinner) {
-        const timer = setTimeout(() => {
-          setMiniWinner(null);
-          setScreen("loading");
-          setLoadingState("scenario");
-        }, 10000);
-        return () => clearTimeout(timer);
-      }
-    }, [screen, miniWinner]);
-
-
-    // Fetch fun facts when loading scenario
-    const fetchFunFacts = async () => {
-      try {
-        const facts = await getFunFacts(); // Fetch 3 fun facts
-        setLoadingFacts(facts.data);
-        console.log("Fun facts loaded:", facts);
-      } catch (error) {
-          console.error("Error fetching fun facts:", error);
-      }
+  useEffect(() => {
+    if (miniGameDone) {
+      submitTiebreakScore(playerName, roomCode, currentTurn.turn_id, score);
+      const poll = setInterval(async () => {
+        const res = await submitTiebreakScore(playerName, roomCode, currentTurn.turn_id, score);
+        if (res.status === "resolved" || res.winner) {
+          console.log("Mini-game resolved:", res);
+          setMiniWinner(res.winner);
+          setScreen("miniGameResult");
+          clearInterval(poll);
+        }
+      }, 2000);
+      return () => clearInterval(poll);
     }
+  }, [miniGameDone]);
+  useEffect(() => {
+    if (screen === "miniGameResult" && miniWinner) {
+      const timer = setTimeout(() => {
+        setMiniWinner(null);
+        setScreen("loading");
+        setLoadingState("scenario");
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [screen, miniWinner]);
+
+
+  // Fetch fun facts when loading scenario
+  const fetchFunFacts = async () => {
+    try {
+      const facts = await getFunFacts(); // Fetch 3 fun facts
+      setLoadingFacts(facts.data);
+      console.log("Fun facts loaded:", facts);
+    } catch (error) {
+      console.error("Error fetching fun facts:", error);
+    }
+  }
 
 
 

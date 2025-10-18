@@ -632,5 +632,3 @@ def submit_tiebreak_score_view(request):
     else:
         logger.info({"status": "pending"})
         return JsonResponse({"status": "pending"})
-
-

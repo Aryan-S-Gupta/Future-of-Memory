@@ -19,7 +19,7 @@ urlpatterns = [
     path('storyline/<str:session_id>/question/<str:room_code>/<str:turn_id>/<str:year>', views.display_question_and_options, name='storyline_question'),
     path('storyline/choice/<str:session_id>/<str:turn_id>/<str:year>/<str:option_id>/<str:room_code>', views.display_scenario_and_image, name='storyline_choice'),
     path("state/<str:room_code>", views.get_current_state),
-    path("mini-game/submit_tiebreak_score", views.submit_score_single_view),
+    path("mini-game/submit_tiebreak_score_single", views.submit_score_single_view),
+    path("mini-game/submit_tiebreak_score", views.submit_tiebreak_score_view),
     path("mini-game/scores", views.get_scores_view),
-
 ]

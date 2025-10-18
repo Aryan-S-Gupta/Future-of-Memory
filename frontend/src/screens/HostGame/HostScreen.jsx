@@ -61,6 +61,8 @@ const HostScreen = () => {
   const fadeDuration = 2000;
   const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
+  const [tieMode, setTieMode] = useState(false);
+  const [tieStatus, setTieStatus] = useState(null);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -148,6 +150,14 @@ const HostScreen = () => {
         setVotes(mappedVotes);
         setTotalPlayers(data.total_players);
 
+      if (data.tie) {
+        console.log("Tie detected! Starting mini-game round...");
+        setTieMode(true);
+        setScreen("miniGameWait");
+        return;
+      }
+
+
 
         console.log(`[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`);
         if (allVoted) {
@@ -209,6 +219,29 @@ const HostScreen = () => {
       refetchInterval: 3000, 
       refetchIntervalInBackground: true, 
   });
+
+  const {} = useQuery({
+  queryKey: ["tiebreakStatus", roomCode, currentTurn?.turn_id],
+  queryFn: async () => {
+    if (!tieMode || !currentTurn) return;
+    const res = await getTiebreakStatus(roomCode, currentTurn.turn_id);
+    console.log("[TIEBREAK STATUS]", res);
+
+    if (res.status === "resolved" || res.winner) {
+      setWinnerInfo(res);
+      setScreen("miniGameWinner");
+      setTimeout(() => {
+        setTieMode(false);
+        setScreen("loading");
+        setLoadingState("scenario");
+      }, 10000);
+    }
+    return res;
+  },
+  enabled: tieMode && currentTurn != null,
+  refetchInterval: 2000,
+});
+
 
 
   // --- Minimal TTS: inline (no extra files/deps) ---
@@ -442,6 +475,22 @@ const getFadeClass = (idx) => {
           <div className="voting-sidebar">
             <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
           </div>
+
+          {screen === "miniGameWait" && (
+            <div className="menu-glass mini-result">
+              <h2>🕹️ Tie-Break Mini-Game in Progress...</h2>
+              <p>Waiting for players to finish...</p>
+            </div>
+          )}
+
+          {screen === "miniGameWinner" && winnerInfo && (
+            <div className="menu-glass mini-result">
+              <h2>🏆 Tie-Break Winner</h2>
+              <p>{winnerInfo.winner} wins the tie-break!</p>
+              <p>Resuming story...</p>
+            </div>
+          )}
+
         </div>
       )}
     </BasePage>

@@ -97,7 +97,7 @@ export const getFunFacts = async () => {
  * const result = await submitMemoryScore("Alice", 85);
  */
 export const submitMemoryScore = async (playerName, score) => {
-  const res = await api.post("/mini-game/submit_score", { player_name: playerName, score });
+  const res = await api.post("/mini-game/submit_score_single", { player_name: playerName, score });
   return res.data; // { status: "success", player_name, score }
 };
 

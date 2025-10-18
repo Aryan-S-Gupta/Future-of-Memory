@@ -280,7 +280,8 @@ class VotingSession:
         logging.info(f"[Tie-break Current Scores] {self.tie_scores}")
 
         # Check if all tied players have submitted scores
-        if len(self.tie_scores) == len(self.tie_players):
+        if len(self.tie_scores) >= len(self.tie_players):
+            logging.info("reached") 
             return self.resolve_tiebreak_winner()
         return None
 
