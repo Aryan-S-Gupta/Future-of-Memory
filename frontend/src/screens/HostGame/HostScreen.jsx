@@ -37,6 +37,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 const HostScreen = () => {
   const navigate = useNavigate()
   const { roomCode, playerName } = useParams(); 
+  const displayRoomCode = (roomCode && /^\d+$/.test(roomCode)) ? String(roomCode).padStart(4, "0") : roomCode;
   const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
@@ -443,6 +444,7 @@ useEffect(() => {
   return (
     <BasePage>
       <ExitExperience code={roomCode} player={playerName} />
+  <div className="room-code-topcenter">Room : {displayRoomCode}</div>
       {screen == "destroyed" && (
         <RoomDestroyedPopup />
       )}
