@@ -61,7 +61,6 @@ const HostScreen = () => {
   const fadeDuration = 2000;
   const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
-  const [tieMode, setTieMode] = useState(false);
   const [tieStatus, setTieStatus] = useState(null);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
@@ -153,6 +152,9 @@ const HostScreen = () => {
         console.log(`[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`);
         if (allVoted) {
           console.log("All players voted!");
+          if (screen === "miniGameWait") {
+            return null;
+          }
           setOptionId(data.final_option);
           if (!scenarioData || !scenarioData.scenario) {
             console.log("Scenario not ready → go to loading screen");
@@ -186,16 +188,21 @@ const HostScreen = () => {
           if (!out.room_exists) {
             setRoomDestroyed(true); 
             setScreen("destroyed");
+            return;
           }
-                if (out.tie) {
-        console.log("Tie detected! Starting mini-game round...");
-        setTieMode(true);
-        setScreen("miniGameWait");
-        return;
-      }
+          if (out.tie) {
+            console.log("Tie detected! Starting mini-game round...");
+            setScreen("miniGameWait");
+            return null;
+          }
         }
         console.log("the data is", out );
 
+        if (out.tie) {
+            console.log("Tie detected! Starting mini-game round...");
+            setScreen("miniGameWait");
+            return null;
+          }
         const mapped = {
           scenario: out.scenario.text,
           image: out.image.url
@@ -209,35 +216,13 @@ const HostScreen = () => {
         setOptionId(null);
         return out;
       },
-      enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen !== "miniGame" && screen !== "miniGameResult",
+      enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen !== "miniGameWinner" && screen !== "miniGameWait",
       onError: (err) => {
         console.log("onError:", err);
       }, 
       refetchInterval: 3000, 
       refetchIntervalInBackground: true, 
   });
-
-  const {} = useQuery({
-  queryKey: ["tiebreakStatus", roomCode, currentTurn?.turn_id],
-  queryFn: async () => {
-    if (!tieMode || !currentTurn) return;
-    const res = await getTiebreakStatus(roomCode, currentTurn.turn_id);
-    console.log("[TIEBREAK STATUS]", res);
-
-    if (res.status === "resolved" || res.winner) {
-      setWinnerInfo(res);
-      setScreen("miniGameWinner");
-      setTimeout(() => {
-        setTieMode(false);
-        setScreen("loading");
-        setLoadingState("scenario");
-      }, 10000);
-    }
-    return res;
-  },
-  enabled: tieMode && currentTurn != null,
-  refetchInterval: 2000,
-});
 
 
 
@@ -351,13 +336,13 @@ const HostScreen = () => {
   }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
 
 
-useEffect(() => {
-  if (screen === "question") {
-    console.log("[Animation] Resetting staged animation for new question");
-    setHasAnimated(false);
-    setStage(0);
-  }
-}, [currentTurn, screen])
+  useEffect(() => {
+    if (screen === "question") {
+      console.log("[Animation] Resetting staged animation for new question");
+      setHasAnimated(false);
+      setStage(0);
+    }
+  }, [currentTurn, screen])
 
 
 // --- Staged reveal ---
@@ -424,22 +409,23 @@ const getFadeClass = (idx) => {
     setScenarioData(null);
   }
 
-  useEffect(() => {
-  if (!tieMode || !currentTurn) return;
+useEffect(() => {
+  // Only start polling if tie mode is active AND winner not yet resolved
+  if (!currentTurn || winnerInfo) return;
 
   const poll = setInterval(async () => {
     try {
       const res = await submitTiebreakScore("HOST", roomCode, currentTurn.turn_id, -1);
       console.log("[HOST MINI POLL]", res);
 
+      // Once winner is resolved, stop polling and move to result screen
       if (res.status === "resolved" || res.winner) {
+        clearInterval(poll);
         setWinnerInfo(res);
         setScreen("miniGameWinner");
-        clearInterval(poll);
 
         // after 10s, resume story
         setTimeout(() => {
-          setTieMode(false);
           setScreen("loading");
           setLoadingState("scenario");
         }, 10000);
@@ -450,7 +436,9 @@ const getFadeClass = (idx) => {
   }, 2000);
 
   return () => clearInterval(poll);
-}, [tieMode, currentTurn]);
+}, [currentTurn, winnerInfo]);
+
+
 
   return (
     <BasePage>

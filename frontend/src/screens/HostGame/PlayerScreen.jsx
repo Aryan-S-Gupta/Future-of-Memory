@@ -254,6 +254,9 @@ const PlayerScreen = () => {
         );
         if (allVoted) {
           console.log("All players voted!");
+          if (screen === "miniGame") {
+            return null;
+          }
           if (data.tie) {  // backend should include this flag
             console.log("Tie detected! Starting mini-game...");
             setScreen("miniGame");
@@ -305,6 +308,7 @@ const PlayerScreen = () => {
           if (out.tie) {
             console.log("Tie detected! Starting mini-game...");
             setScreen("miniGame");
+            return;
         }
       }
       if (out.tie) {
@@ -324,7 +328,7 @@ const PlayerScreen = () => {
       setOptionId(null);
       return out;
     },
-    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen !== "miniGame" && screen !== "miniGameResult",
+    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen !== "miniGame" && screen !== "miniGameResult" && screen !== "miniGameWaiting",
     onError: (err) => {
       console.log("onError:", err);
     }, 
@@ -388,12 +392,11 @@ const getFadeClass = (idx) => {
   }
 };
 
-useEffect(() => {
-  if (miniGameDone) {
-    const handleTiebreak = async () => {
-      const ans = await submitTiebreakScore(playerName, roomCode, turn, score);
-      console.log("asking", ans);
-
+  useEffect(() => {
+    if (miniGameDone) {
+      const handleTiebreak = async () => {
+        // Immediately move to waiting screen after finishing mini-game
+        setScreen("miniGameWaiting");
       const poll = setInterval(async () => {
         const res = await submitTiebreakScore(playerName, roomCode, turn, score);
         console.log("asking", res);
@@ -409,9 +412,10 @@ useEffect(() => {
       return () => clearInterval(poll);
     };
 
-    handleTiebreak();
-  }
-}, [miniGameDone]);
+      handleTiebreak();
+    }
+  }, [miniGameDone]);
+
 
   useEffect(() => {
     if (screen === "miniGameResult" && miniWinner) {
@@ -419,6 +423,7 @@ useEffect(() => {
         setMiniWinner(null);
         setScreen("loading");
         setLoadingState("scenario");
+        fetchFunFacts();
       }, 10000);
       return () => clearTimeout(timer);
     }
@@ -509,6 +514,14 @@ useEffect(() => {
           }}
         />
       )}
+      {screen === "miniGameWaiting" && (
+        <div className="menu-glass mini-waiting">
+          <h2>🎮 Thank you for playing!</h2>
+          <p>Let’s see if other players can beat your score...</p>
+          <p>Waiting for other players to finish...</p>
+        </div>
+      )}
+
       {screen === "miniGameResult" && (
         <div className="menu-glass mini-result">
           <h2>Mini-Game Result</h2>
