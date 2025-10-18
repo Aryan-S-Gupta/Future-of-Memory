@@ -626,6 +626,7 @@ def submit_tiebreak_score_view(request):
         return JsonResponse({"error": "No active voting session found"}, status=404)
 
     result = voting_sesh.submit_tiebreak_score(player_name, score)
+    logger.info(f'the result is {result}')
     if result:
         logger.info({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})
         return JsonResponse({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})

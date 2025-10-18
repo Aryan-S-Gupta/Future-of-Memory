@@ -34,7 +34,6 @@ const PlayerScreen = () => {
   const [isReady, setIsReady] = useState(false);
   const [option_id, setOptionId] = useState(null);
   const [turn, setTurn] = useState(-1);
-  const [showVotes, setShowVotes] = useState(false)
   const [votes, setVotes] = useState([]);
   const [totalPlayers, setTotalPlayers] = useState(1);
   const [score, setScore] = useState(null);
@@ -389,11 +388,16 @@ const getFadeClass = (idx) => {
   }
 };
 
-  useEffect(() => {
-    if (miniGameDone) {
-      submitTiebreakScore(playerName, roomCode, currentTurn.turn_id, score);
+useEffect(() => {
+  if (miniGameDone) {
+    const handleTiebreak = async () => {
+      const ans = await submitTiebreakScore(playerName, roomCode, turn, score);
+      console.log("asking", ans);
+
       const poll = setInterval(async () => {
-        const res = await submitTiebreakScore(playerName, roomCode, currentTurn.turn_id, score);
+        const res = await submitTiebreakScore(playerName, roomCode, turn, score);
+        console.log("asking", res);
+
         if (res.status === "resolved" || res.winner) {
           console.log("Mini-game resolved:", res);
           setMiniWinner(res.winner);
@@ -401,9 +405,14 @@ const getFadeClass = (idx) => {
           clearInterval(poll);
         }
       }, 2000);
+
       return () => clearInterval(poll);
-    }
-  }, [miniGameDone]);
+    };
+
+    handleTiebreak();
+  }
+}, [miniGameDone]);
+
   useEffect(() => {
     if (screen === "miniGameResult" && miniWinner) {
       const timer = setTimeout(() => {

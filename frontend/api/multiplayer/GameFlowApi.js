@@ -124,6 +124,8 @@ export const submitTiebreakScore = async (playerName, roomCode, turnId, score) =
     player_name: playerName,
     score,
   });
+  console.log("the data is recieved with: ", res)
+  console.log("the dta payload is: ", res.data)
   return res.data;
 };
 
