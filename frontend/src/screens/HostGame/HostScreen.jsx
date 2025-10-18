@@ -19,22 +19,7 @@ import { getVotingInfo} from "../../../api/multiplayer/GameFlowApi";
 import MiniGame from "../MiniGame.jsx";
 import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
-/**
- * furs duspay the questions and after the the players have submiyyed the responses then go to the loading screen
- * until the scenario and the image is ready ad once ready display the mimage and set current turn to null so that 
- * the new data can be stored 
- * to ftech 
- * 
- * MINI GAME LOGIC: 
- * once submit response results in tie then set the screen to mini game on players.
- * if it is host (host will be checked by playerName = hostName) then display 
- * "Tie detected.. starting mini competition.. lets seee whose memort is the mosyt powerful" +
- * keep checking whetehr mini game has been resolved or who has finished
- * once resolved, display on host who the winner is for 10 seconds and then set the screen back to scenario 
- * if the scenario is not ready then loading;
- */
-
-const HostScreen = () => {
+ const HostScreen = () => {
   const navigate = useNavigate()
   const { roomCode, playerName } = useParams(); 
   const displayRoomCode = (roomCode && /^\d+$/.test(roomCode)) ? String(roomCode).padStart(4, "0") : roomCode;
