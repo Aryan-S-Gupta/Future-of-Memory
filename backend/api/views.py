@@ -469,7 +469,6 @@ def submit_feedback(request):
     except json.JSONDecodeError:
         return HttpResponse("Invalid JSON", status=400)
 
-    # Enforce anonymity: only persist ratings and comments.
     allowed_keys = {"ratings", "comments"}
     sanitized = {k: body.get(k) for k in allowed_keys if k in body}
 
