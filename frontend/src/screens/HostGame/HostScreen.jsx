@@ -479,14 +479,14 @@ useEffect(() => {
       )}
 
       {screen === "miniGameWait" && (
-        <div className="waiting-screen mini-wait">
+        <div className="mini-wait">
           <h2>⚔️ Neural Showdown Engaged</h2>
           <p>Players are battling to break the tie...</p>
         </div>
       )}
 
       {screen === "miniGameWinner" && (
-        <div className="winner-screen mini-winner">
+        <div className="mini-winner">
           <h2>🏆 Tie Broken!</h2>
           <p className="winner-name">
             {winnerInfo.winner}

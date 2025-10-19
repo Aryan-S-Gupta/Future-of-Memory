@@ -574,7 +574,7 @@ const getFadeClass = (idx) => {
         </div>
       )}
       {screen === "waiting-for-others" && (
-        <div className="waiting-screen fade-in">
+        <div className="mini-wait fade-in">
           <h2>Well done {playerName}!</h2>
           <p>Please wait while other players finish their mini-game...</p>
         </div>

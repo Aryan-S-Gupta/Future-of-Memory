@@ -1,89 +1,7 @@
+
 @import url('/src/styles/tokens.css');
 
-.winner-screen,
-.waiting-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  color: #fff;
-  text-align: center;
-  animation: fadeIn 1.5s ease;
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 1px;
-  position: relative;
-  overflow: hidden;
-}
 
-/* Subtle glow animation under text */
-@keyframes textGlow {
-  0%, 100% {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4),
-                 0 0 20px rgba(255, 255, 255, 0.2);
-  }
-  50% {
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.7),
-                 0 0 40px rgba(255, 255, 255, 0.4);
-  }
-}
-
-.winner-screen h2,
-.waiting-screen h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  animation: textGlow 2.5s infinite ease-in-out;
-}
-
-.winner-screen p,
-.waiting-screen p {
-  font-size: 1.2rem;
-  color: #ddd;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-}
-
-/* Add a neon underglow pulse beneath the text */
-.winner-screen::after,
-.waiting-screen::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 60%;
-  height: 4px;
-  background: white;
-  border-radius: 50%;
-  transform: translateX(-50%);
-  filter: blur(15px);
-  animation: underglowPulse 3s ease-in-out infinite;
-}
-
-@keyframes underglowPulse {
-  0%, 100% {
-    opacity: 0.3;
-    transform: translateX(-50%) scaleX(1);
-  }
-  50% {
-    opacity: 1;
-    transform: translateX(-50%) scaleX(1.2);
-  }
-}
-
-/* Subtle ambient flicker effect to add life */
-@keyframes ambientFlicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-    opacity: 1;
-  }
-  20%, 22%, 55% {
-    opacity: 0.7;
-  }
-}
-
-.winner-screen,
-.waiting-screen {
-  animation: fadeIn 1s ease, ambientFlicker 6s infinite;
-}
 
 /* Fade-in animation for scenario/question text */
 .fade-in {
@@ -351,7 +269,6 @@
   align-self: flex-end;
   margin-top: 2rem;
 }
-@import url('/src/styles/tokens.css');
 
 /* === MINI-GAME WAIT (Projector Display) === */
 .mini-wait {
@@ -439,20 +356,20 @@
     0 0 16px rgba(200, 200, 255, 0.3);
 }
 
-/* === Subtle underglow pulse (soft white instead of neon) === */
+/* === Mini-winner / Mini-wait underglow (static, toned down) === */
 .mini-winner::after,
 .mini-wait::after {
   content: "";
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 60%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.4);
+  width: 48%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.32);
   border-radius: 50%;
   transform: translateX(-50%);
-  filter: blur(12px);
-  animation: underglowPulse 3s ease-in-out infinite;
+  filter: blur(8px);
+  opacity: 0.45;
 }
 
 /* === Shared Animations === */
@@ -461,42 +378,15 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes textGlow {
-  0%, 100% {
-    text-shadow: 
-      0 0 8px rgba(255, 255, 255, 0.7),
-      0 0 18px rgba(180, 180, 255, 0.3);
-  }
-  50% {
-    text-shadow: 
-      0 0 14px rgba(255, 255, 255, 1),
-      0 0 35px rgba(180, 180, 255, 0.6);
-  }
-}
+/* textGlow simplified to a subtle static highlight */
+@keyframes textGlow { from { opacity: 1; } to { opacity: 1; } }
 
-@keyframes underglowPulse {
-  0%, 100% { opacity: 0.4; transform: translateX(-50%) scaleX(1); }
-  50% { opacity: 1; transform: translateX(-50%) scaleX(1.2); }
-}
+/* underglowPulse left as no-op to avoid animation behavior elsewhere */
+@keyframes underglowPulse { from { opacity: 0.45; } to { opacity: 0.45; } }
 
-@keyframes ambientFlicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
-  20%, 22%, 55% { opacity: 0.7; }
-}
+/* ambientFlicker removed (no flicker) */
 
-@keyframes winnerPulse {
-  0%, 100% {
-    text-shadow: 
-      0 0 10px rgba(255, 255, 255, 0.8),
-      0 0 25px rgba(180, 180, 255, 0.5);
-  }
-  50% {
-    text-shadow: 
-      0 0 18px rgba(255, 255, 255, 1),
-      0 0 40px rgba(180, 180, 255, 0.8);
-  }
-}
+/* winnerPulse toned down: subtle static shadow */
+@keyframes winnerPulse { from { opacity: 1; } to { opacity: 1; } }
