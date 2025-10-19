@@ -480,8 +480,14 @@ useEffect(() => {
 
       {screen === "miniGameWait" && (
         <div className="mini-wait">
-          <h2>⚔️ Neural Showdown Engaged</h2>
-          <p>Players are battling to break the tie...</p>
+          <h2 className="mini-wait-main">Neural Showdown</h2>
+          <p className="mini-wait-lead">The votes are tied and the world stands still as a single memory duel will decide which player's choice shapes the next scene.</p>
+
+          <div className="mini-wait-instructions container">
+            <p className="mini-wait-paragraph">In the Neural Showdown players reveal cards to expose hidden faces and must rely on attention and recall to find matching pairs the challenger who best remembers the board claims victory and their vote will decide what happens next.</p>
+          </div>
+
+          <p className="text2">Waiting for all players to complete the mini-game. Results will appear here automatically.</p>
         </div>
       )}
 

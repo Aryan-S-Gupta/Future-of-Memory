@@ -520,9 +520,8 @@ const getFadeClass = (idx) => {
           <h2>⌛ Waiting for Results</h2>
           <p className="text2">Your score has been submitted.</p>
           <p className="text2">Waiting for other players to finish...</p>
-          <div className="spinner"></div>
-        </div>
-      )}
+      </div>
+    )}
 
       {/* === MINI-GAME WINNER (uses mini-winner CSS) === */}
       {screen === "miniGameResult" && (

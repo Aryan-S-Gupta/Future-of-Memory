@@ -372,6 +372,76 @@
   opacity: 0.45;
 }
 
+/* --- MINI-WAIT INSTRUCTIONS / TYPOGRAPHY --- */
+.mini-wait-instructions.container {
+  max-width: 720px;
+  margin: 1rem auto;
+  text-align: center; /* center instructions */
+  padding: 0.5rem 0.75rem;
+}
+
+.mini-wait-title {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.mini-wait-lead {
+  font-size: 0.5rem; /* much smaller per request */
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 0 6px rgba(255,255,255,0.75);
+  margin-bottom: 0.4rem;
+}
+
+.mini-wait-main {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 0 18px rgba(255,255,255,0.92), 0 0 32px rgba(160,170,255,0.6);
+  margin-bottom: 0.5rem;
+}
+
+.mini-wait-lead { /* slightly larger for tie explanation readability */
+  font-size: 0.95rem;
+}
+
+.mini-wait-subtitle-small {
+  margin: 0.25rem 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #dfe8ff;
+  opacity: 0.95;
+}
+
+.mini-wait-subtitle {
+  margin: 0.5rem 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e8eefc;
+}
+
+.mini-wait-paragraph {
+  margin: 0 0 0.5rem 0;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.45;
+}
+
+.mini-wait-tips {
+  margin: 0 auto;
+  padding-left: 0; /* center bullets */
+  display: inline-block;
+  text-align: left;
+  color: rgba(255,255,255,0.9);
+}
+
+.mini-wait {
+  text-align: center; /* center all text inside */
+}
+
+
+
 /* === Shared Animations === */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
