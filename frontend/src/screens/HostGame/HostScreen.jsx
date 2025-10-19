@@ -487,7 +487,6 @@ useEffect(() => {
             <p className="mini-wait-paragraph">In the Neural Showdown players reveal cards to expose hidden faces and must rely on attention and recall to find matching pairs the challenger who best remembers the board claims victory and their vote will decide what happens next.</p>
           </div>
 
-          <p className="text2">Waiting for all players to complete the mini-game. Results will appear here automatically.</p>
         </div>
       )}
 
