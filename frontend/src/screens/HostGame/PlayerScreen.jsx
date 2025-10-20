@@ -59,7 +59,6 @@ const PlayerScreen = () => {
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
 });
-  const [roomDestroyed, setRoomDestroyed] = useState(false);
 
 
 
@@ -85,6 +84,10 @@ const PlayerScreen = () => {
           console("loading at the moment");
           return null;
         } else {
+          if (!result.room_exists) {
+            setScreen("destroyed");
+            return null;
+          }
           setCurrentTurn(result);
           setTurn(result.turn_id);
           setScreen("question");
@@ -302,13 +305,13 @@ const PlayerScreen = () => {
         console.log(out)
         if (!out || !out.scenario || !out.scenario.text) {
           if (!out.room_exists) {
-            setRoomDestroyed(true); 
             setScreen("destroyed");
+            return null;
           }
           if (out.tie) {
             console.log("Tie detected! Starting mini-game...");
             setScreen("miniGame");
-            return;
+            return null;
         }
       }
       if (out.tie) {

@@ -181,7 +181,7 @@ def get_current_state(request, room_code):
     """
     return JsonResponse({"state": rm.get_state(room_code)})
 
-
+ 
 @csrf_exempt
 def leave_multiplayer_room(request):
     room_code = request.GET.get("roomCode")
@@ -222,6 +222,7 @@ def leave_multiplayer_room(request):
             'success': success,
             'room_code': room_code,
             'player_name': player_name,
+            'destroy': rm.room_exists(room_code),
             'message': f'Failed to leave room {room_code}'
         }
         logger.warning(f'Failed to leave room {room_code}')
@@ -517,6 +518,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
         return JsonResponse({
             "success": False,
             "scenario": "",
+            "room_exists": rm.room_exists(room_code),
             "tie": False,
             "votes_info": votes_info,
             "message": "Waiting for other players to vote."
@@ -550,6 +552,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id, ro
         return JsonResponse({
             'success': False,
             'status': 'error',
+            'room_exists': rm.room_exists(room_code),
             'votes_info': votes_info,
             'error': f'Failed to display world view: {str(e)}'
         }, status=500)
