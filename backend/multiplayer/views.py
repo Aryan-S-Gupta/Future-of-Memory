@@ -447,6 +447,7 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     response_payload = {
         'message': 'ok',
         'room_code': room_code,
+        'room_exists': rm.room_exists(room_code),
         'turn_id': turn_id,
         'year': new_year,
         'question': latest_turn.question or '',
