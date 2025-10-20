@@ -18,7 +18,7 @@
   max-width: 900px;
   width: 100%;
   box-shadow: 0 0 30px rgba(237, 237, 237, 0.3);
-  border: 1px solid rgba(0, 200, 255, 0.25);
+  border: 1px solid rgba(207, 231, 238, 0.25);
 }
 
 .loading-title {
@@ -43,7 +43,7 @@
 .loading-bar {
   width: 0%;
   height: 100%;
-  background: linear-gradient(90deg, #00f0ff, #00ffa0);
+  background: linear-gradient(90deg, #e5e7eb, #ffffff);
   border-radius: 8px;
   animation: loadAnim 2s linear infinite;
 }
@@ -136,4 +136,24 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+}
+
+/* Make Continue match primary button look */
+.btn-continue {
+  border: var(--btn-rim);
+  border-radius: 14px;
+  color: var(--btn-primary-text);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 14%),
+    linear-gradient(to bottom, var(--btn-primary-grad-start), var(--btn-primary-grad-end));
+  box-shadow: var(--btn-primary-shadow);
+}
+
+.btn-continue:hover,
+.btn-continue:focus-visible {
+  border: var(--btn-rim-hover);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 16%),
+    linear-gradient(to bottom, var(--btn-primary-hover-start), var(--btn-primary-hover-end));
+  box-shadow: var(--btn-primary-shadow-hover);
 }
