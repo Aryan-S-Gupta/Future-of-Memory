@@ -864,3 +864,82 @@ button:focus-visible,
 .btn-primary:hover, .btn-secondary:hover, .btn-back:hover {
   transform: translateY(-1.5px);
 }
+
+:root[data-theme="light"] {
+  /* Titles & fade-in text -> solid black, no glows/gradients */
+  /* Covers generic titles, titles on glass, and fade-in wrappers */
+}
+:root[data-theme="light"] .title,
+:root[data-theme="light"] .menu-glass .title,
+:root[data-theme="light"] .fade-in,
+:root[data-theme="light"] .fade-in * ,
+:root[data-theme="light"] .fade-in h2 {
+  color: #0b1220 !important;
+  text-shadow: none !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+}
+
+/* Mini-game result text */
+:root[data-theme="light"] .mini-game-result,
+:root[data-theme="light"] .mini-game-result * {
+  color: #0b1220 !important;
+  text-shadow: none !important;
+}
+
+/* Buttons: primary + secondary + feedback unified */
+:root[data-theme="light"] .btn-primary,
+:root[data-theme="light"] .btn-secondary,
+:root[data-theme="light"] .btn-feedback,
+:root[data-theme="light"] .button-group .btn-primary,
+:root[data-theme="light"] .button-group .btn-secondary,
+:root[data-theme="light"] .button-group .btn-feedback {
+  color: #0b1220 !important;
+  border: 1px solid rgba(12,16,24,0.22) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 16%),
+    linear-gradient(to bottom, #eaf2ff, #cfe2ff) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    0 8px 18px rgba(0,0,0,0.12) !important;
+  text-shadow: none !important;
+  transition: all 0.2s ease-in-out;
+}
+
+:root[data-theme="light"] .btn-primary:is(:hover, :focus-visible),
+:root[data-theme="light"] .btn-secondary:is(:hover, :focus-visible),
+:root[data-theme="light"] .btn-feedback:is(:hover, :focus-visible),
+:root[data-theme="light"] .button-group .btn-primary:is(:hover, :focus-visible),
+:root[data-theme="light"] .button-group .btn-secondary:is(:hover, :focus-visible),
+:root[data-theme="light"] .button-group .btn-feedback:is(:hover, :focus-visible) {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 16%),
+    linear-gradient(to bottom, #f4f8ff, #dcebff) !important;
+  border-color: rgba(12,16,24,0.32) !important;
+  box-shadow:
+    0 0 0 3px rgba(12,16,24,0.06),
+    0 10px 22px rgba(0,0,0,0.14) !important;
+}
+
+/* Screensaver invert for light mode */
+:root[data-theme="light"] .screensaver {
+  background-color: #f9fafc;
+  background-image: var(--vignette-bg, radial-gradient(circle,
+                  rgba(255, 255, 255, 0.9) 40%, rgba(255, 255, 255, 1) 65%));
+  color: #0b1220 !important;
+}
+:root[data-theme="light"] .screensaver .logo,
+:root[data-theme="light"] .screensaver .subtitle,
+:root[data-theme="light"] .screensaver .hint,
+:root[data-theme="light"] .screensaver .txt,
+:root[data-theme="light"] .screensaver .center {
+  color: #0b1220 !important;
+  fill: #0b1220 !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+:root[data-theme="light"] .screensaver .halo {
+  filter: drop-shadow(0 0 10px rgba(0,0,0,0.15));
+  opacity: 0.85;
+}
