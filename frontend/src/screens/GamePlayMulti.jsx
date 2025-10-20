@@ -46,7 +46,7 @@ const GamePlayMulti = () => {
   const [stage, setStage] = useState(0);
   
   const [hasAnimated, setHasAnimated] = useState(false); 
-  const fadeDuration = 2000;
+  const fadeDuration = 1000;
   const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
@@ -65,7 +65,7 @@ const GamePlayMulti = () => {
 
 
   // --- Tie narration to BGM ---
-  const { isPlaying, volume, setVolume } = useBgm();
+  const { isPlaying, isMuted, volume, setVolume } = useBgm();
 
 
   // --- Question Query ---
@@ -121,55 +121,54 @@ const GamePlayMulti = () => {
   };
 
 
-  const speak = (text) => {
-    if (!synthRef.current || !text) return;
+  const speak = (text, onDone) => {
+    if (!synthRef.current || !text) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
     // Cancel any previous narration
     cancelTTS();
 
-
     // Only narrate if BGM is playing (toolbar controls this)
-    if (!isPlaying) return;
-
+    if (!isPlaying) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
 
     // Lower BGM volume temporarily (minimal approach)
     prevVolRef.current = volume;
     setVolume(Math.max(0, Math.min(1, volume * duckFactor)));
 
-
     const utter = new SpeechSynthesisUtterance(String(text));
-    // --- choose voice here ---
     const voices = synthRef.current.getVoices();
     const prefs = [
-      /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i, // Edge (neural)
-      /Microsoft Jenny Online \(Natural\).*English \(United States\)/i,  // Edge (neural)
-      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i,                    // macOS built-ins
-      /Google UK English Female/i                                        // Chrome fallback
+      /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i,
+      /Microsoft Jenny Online \(Natural\).*English \(United States\)/i,
+      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i,
+      /Google UK English Female/i
     ];
-    const picked = prefs
-      .map(rx => voices.find(v => rx.test(v.name)))
-      .find(Boolean) || voices[0];
+    const picked = prefs.map(rx => voices.find(v => rx.test(v.name))).find(Boolean) || voices[0];
     utter.voice = picked;
-    // tweak for more “majestic” feel
-    utter.rate = 0.90;  // slower = more weighty
-    utter.pitch = 1.12;  // deeper
-    utter.volume = 1;   // full, since we ducked bgm
 
+    utter.rate = 0.7;
+    utter.pitch = 1.0;
+    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
 
-    utter.onend = utter.onerror = () => {
-      // Restore BGM volume
+    const restore = () => {
       if (prevVolRef.current !== null) {
         setVolume(prevVolRef.current);
         prevVolRef.current = null;
       }
+      if (typeof onDone === "function") onDone();
     };
 
+    utter.onend = restore;
+    utter.onerror = restore;
 
-    try { synthRef.current.speak(utter); } catch {
-      // In case of any error, restore
-      if (prevVolRef.current !== null) {
-        setVolume(prevVolRef.current);
-        prevVolRef.current = null;
-      }
+    try {
+      synthRef.current.speak(utter);
+    } catch {
+      restore();
     }
   };
 
@@ -197,32 +196,81 @@ const GamePlayMulti = () => {
 
 
   // Auto-read Question + Options when it shows (and BGM is playing)
-  useEffect(() => {
-    if (screen === "question" && questionReadout) {
-      speak(questionReadout);
-    }
-    return () => cancelTTS();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, questionReadout, isPlaying]);
+  // useEffect(() => {
+  //   if (screen === "question" && questionReadout) {
+  //     speak(questionReadout);
+  //   }
+  //   return () => cancelTTS();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [screen, questionReadout, isPlaying]);
 
-
-  // Replay narration when toolbar Play is clicked (even if already playing)
   useEffect(() => {
-    const handler = () => {
-      if (screen === "scenario" && scenarioData?.scenario) {
-        speak(scenarioData.scenario);
-      } else if (screen === "question" && questionReadout) {
-        speak(questionReadout);
-      }
+    if (screen !== "question" || !currentTurn) return;
+
+    let cleared = false;
+    let t1, t2, t3;
+
+    const fallback = () => {
+      setStage(1); // show question
+      t1 = setTimeout(() => setStage(2), 12000 - fadeDuration);
+      t2 = setTimeout(() => setStage(3), 18000 - fadeDuration);
+      t3 = setTimeout(() => setStage(4), 24000 - fadeDuration);
     };
-    window.addEventListener("bgm-play", handler);
-    return () => window.removeEventListener("bgm-play", handler);
+
+    const optA = currentTurn?.options?.[0]?.option_text;
+    const optB = currentTurn?.options?.[1]?.option_text;
+
+    // If no TTS or not playing, just run fallback timers
+    if (!synthRef.current || !isPlaying) {
+      fallback();
+      return () => {
+        cleared = true;
+        clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+        cancelTTS();
+      };
+    }
+
+    // TTS-driven chain
+    setStage(1);
+    speak(currentTurn.question, () => {
+      if (cleared) return;
+      setStage(2);
+      if (optA) {
+        speak(optA, () => {
+          if (cleared) return;
+          setStage(3);
+          if (optB) {
+            speak(optB, () => {
+              if (cleared) return;
+              setStage(4);
+            });
+          } else {
+            setStage(4);
+          }
+        });
+      } else {
+        // No A? Jump forward.
+        setStage(3);
+        if (optB) {
+          speak(optB, () => {
+            if (cleared) return;
+            setStage(4);
+          });
+        } else {
+          setStage(4);
+        }
+      }
+    });
+
+    return () => {
+      cleared = true;
+      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+      cancelTTS();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
+  }, [screen, currentTurn, isPlaying]);
 
-
- 
-
+  useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
 
 
   const {data: votingData} = useQuery({
