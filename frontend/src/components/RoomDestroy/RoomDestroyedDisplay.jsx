@@ -1,4 +1,3 @@
-import React from "react";
 import "../../styles/RoomDestroyedPopup.css"; 
 import { useNavigate } from "react-router-dom";
 
@@ -23,8 +22,8 @@ const RoomDestroyedPopup = () => {
     // Overlay background to dim rest of the screen
     <div className="popup-overlay">
       <div className="popup-box">
-        <h2>Room Destroyed</h2>
-        <p>The host has left, and this room no longer exists.</p>
+        <h2>This room is no longer available.</h2>
+        <p>The host or all players have left, so the room has been closed.</p>
 
         <div className="popup-actions">
 
