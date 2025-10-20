@@ -73,16 +73,78 @@ def step3a_generate_images(session_id: int, turn_id: int):
     
     return generate_two_images_blocking(session_id, turn_id)
 
-@dramatiq.actor(queue_name="llm_queue")
+@dramatiq.actor(queue_name="llm_scenario")
 def step3b_generate_scenarios(session_id: int, turn_id: int, year: int):
     """Step 3b: Generate scenarios (runs in parallel with images)"""
     session_id = int(session_id)
     turn_id = int(turn_id)
     year = int(year)
     
+    logger.info(f"step3b_generate_scenarios STARTED for session {session_id}, turn {turn_id}, year {year}")
+    
+    # Import required functions and models
+    from .models import Turn, Option
+    from .services import generate_and_save_scenario
+    
     if not validate_session(session_id):
+        logger.warning(f"step3b_generate_scenarios SKIPPED for session {session_id} - failed validation")
         return {"status": "skipped", "reason": "invalid_session"}
     
+    # check if scenarios already exist for this turn
+    try:
+        current_turn = Turn.objects.get(id=turn_id, session_id=session_id)
+        current_options = Option.objects.filter(turn=current_turn)
+        
+        if current_options.exists() and all(opt.scenario for opt in current_options):
+            logger.warning(f"step3b_generate_scenarios DUPLICATE DETECTED: Turn {turn_id} already has complete scenarios - skipping")
+            return {"status": "skipped", "reason": "already_complete"}
+            
+    except Turn.DoesNotExist:
+        logger.error(f"step3b_generate_scenarios Turn {turn_id} not found")
+        return {"status": "error", "reason": "turn_not_found"}
+    
+    # order enforcement: ensure previous year's scenarios are complete
+    if year > 2035:
+        previous_year = year - 1
+        
+        previous_turns = Turn.objects.filter(session_id=session_id, year=previous_year)
+        incomplete_previous = []
+        
+        for prev_turn in previous_turns:
+            prev_options = Option.objects.filter(turn=prev_turn)
+            for option in prev_options:
+                if not option.scenario:
+                    incomplete_previous.append(f"Turn {prev_turn.id} Option {option.id}")
+        
+        if incomplete_previous:
+            logger.warning(f"step3b_generate_scenarios FOUND incomplete previous year {previous_year}: {incomplete_previous}")
+            
+            for prev_turn in previous_turns:
+                prev_options = Option.objects.filter(turn=prev_turn, scenario__isnull=True)
+                if prev_options.exists():
+                    logger.info(f"step3b_generate_scenarios FIXING previous year: generating scenarios for turn {prev_turn.id}")
+                    try:
+                        generate_and_save_scenario(session_id, prev_turn.id, previous_year)
+                        logger.info(f"step3b_generate_scenarios FIXED previous turn {prev_turn.id}")
+                    except Exception as e:
+                        logger.error(f"step3b_generate_scenarios FAILED to fix previous turn {prev_turn.id}: {e}")
+            
+            remaining_incomplete = []
+            for prev_turn in previous_turns:
+                prev_options = Option.objects.filter(turn=prev_turn, scenario__isnull=True)
+                if prev_options.exists():
+                    remaining_incomplete.extend([f"Turn {prev_turn.id}" for _ in prev_options])
+            
+            if remaining_incomplete:
+                logger.warning(f"step3b_generate_scenarios STILL waiting: {remaining_incomplete} not complete")
+                import time
+                time.sleep(1)
+                step3b_generate_scenarios.send(session_id, turn_id, year)
+                return {"status": "rescheduled", "reason": "waiting_for_previous_year"}
+            else:
+                logger.info(f"step3b_generate_scenarios Previous year {previous_year} is now complete, proceeding")
+    
+    logger.info(f"step3b_generate_scenarios PROCEEDING for session {session_id}, turn {turn_id}, year {year}")
     return generate_and_save_scenario(session_id, turn_id, year)
 
 @dramatiq.actor(queue_name="default")

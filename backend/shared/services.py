@@ -305,6 +305,31 @@ def generate_and_save_scenario(session_id: int, turn_id: int, year: int) -> Dict
     """
     logger.info(f"Starting scenario generation for session {session_id}, turn {turn_id}, year {year}")
     
+    # added duplication check
+    try:
+        existing_turn = Turn.objects.get(id=turn_id)
+        existing_options = Option.objects.filter(turn=existing_turn)
+        
+        # check if scenarios already exist
+        if existing_options.exists() and all(opt.scenario for opt in existing_options):
+            logger.warning(f"Scenarios already exist for turn {turn_id}, session {session_id}, year {year} - skipping generation")
+            return {
+                "status": "already_exists",
+                "session_id": session_id,
+                "turn_id": turn_id,
+                "year": year,
+                "message": "Scenarios already generated for this turn"
+            }
+            
+        # check if some options are incomplete
+        incomplete_options = [opt for opt in existing_options if not opt.scenario]
+        if incomplete_options:
+            logger.info(f"Found {len(incomplete_options)} incomplete scenarios for turn {turn_id}, continuing generation")
+            
+    except Turn.DoesNotExist:
+        logger.error(f"Turn {turn_id} not found in duplication check")
+        # continue with normal flow
+    
     # Step 1: Get session and world background
     try:
         session = Session.objects.get(id=session_id)

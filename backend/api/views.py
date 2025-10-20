@@ -337,22 +337,39 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
     """
     try:
         world_view_data = display_world_view(session_id, turn_id, year, option_id)
-        if world_view_data.get("success") and world_view_data.get("scenario").get("text") != "":
+        
+        # 检查是否是等待状态（数据正在生成中）
+        if world_view_data.get("status") == "waiting":
+            # 返回等待状态，不是错误
+            return JsonResponse({
+                "success": False,
+                "status": "waiting", 
+                "message": "Scenario and image are being generated, please wait...",
+                "scenario_ready": world_view_data.get("scenario_ready", False),
+                "image_ready": world_view_data.get("image_ready", False)
+            }, status=202)  # 202 Accepted - 请求已接收但还在处理中
+        
+        if world_view_data.get("success"):
             next_year = int(year) + 1
             next_turn = Turn.objects.filter(session_id=session_id, year=next_year).first()
             if next_turn:
                 world_view_data["next_turn_id"] = next_turn.id
-            # start generating next turn in background
-            try:
-                start_turn_pipeline.send(session_id, next_year)
-                logger.info(f"Started generating next turn (year {next_year}) in background")
-            except Exception as e:
-                logger.warning(f"Failed to start next turn generation: {e}")
-
+            
+            if not next_turn:
+                # start generating next turn in background only if it doesn't exist yet
+                try:
+                    start_turn_pipeline.send(session_id, next_year)
+                    logger.info(f"Started generating next turn (year {next_year}) in background")
+                except Exception as e:
+                    logger.warning(f"Failed to start next turn generation: {e}")
+            else:
+                logger.debug(f"Next turn (year {next_year}) already exists, skipping generation")
 
             return JsonResponse(world_view_data)
         else:
-            return JsonResponse({'error': 'No turn found for this session'}, status=404)
+            # 真正的错误情况
+            error_msg = world_view_data.get("error", "No turn found for this session")
+            return JsonResponse({'error': error_msg}, status=404)
     except Exception as e:
         logger.exception("Error in display_scenario_and_image")
         return JsonResponse({
