@@ -492,7 +492,7 @@ useEffect(() => {
 
       {screen === "miniGameWinner" && (
         <div className="mini-winner">
-          <h2>🏆 Tie Broken!</h2>
+          <h2> Tie Broken!</h2>
           <p className="winner-name">
             {winnerInfo.winner}
           </p>
