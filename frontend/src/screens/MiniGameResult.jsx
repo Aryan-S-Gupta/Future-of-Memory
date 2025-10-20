@@ -31,18 +31,22 @@ const MiniGameResult = () => {
   }, [playerName, score]);
 
   return (
-    <div className="mini-game-result">
-      <h2>Well Done, {playerName}!</h2>
-      <p>Your Score: {score}</p>
+    <div className="menu-glass">
+      <div className="menu-glass-inner">
+        <div className="mini-game-result">
+          <h2>Well Done, {playerName}!</h2>
+          <p>Your Score: {score}</p>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!submitted && !error && <p>Submitting your score...</p>}
+          {error && <p style={{ color: "red" }}>{error}</p>}
+          {!submitted && !error && <p>Submitting your score...</p>}
 
-      <Button
-        baseButton="btn-primary"
-        action={() => navigate("/")}
-        title="Back to Menu"
-      />
+          <Button
+            baseButton="btn-primary"
+            action={() => navigate("/")}
+            title="Back to Menu"
+          />
+        </div>
+      </div>
     </div>
   );
 };
