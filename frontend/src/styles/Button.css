@@ -210,7 +210,7 @@
   background-color: var(--color-text-container-bg);
   padding: var(--space-md);
   border-radius: var(--radius-sm);
-  max-width: 400px;
+  max-width: 500px;
   text-align: center;
 }
 
@@ -222,14 +222,14 @@
   text-align: center;
   color: var(--color-accent);
   text-shadow: var(--shadow-subheading);
-  max-width: 900px;
+  max-width: 950px;
   margin: 0 auto;
   line-height: 1.5;
 }
 
 
 .crawl-container {
-  perspective: 800px;
+  perspective: 650px;
   /* creates the 3D effect */
   height: 500px;
   /* height of the visible area */
@@ -240,7 +240,7 @@
 
 .crawl-text {
   position: absolute;
-  bottom: -35rem;
+  bottom: -36rem;
   /* start slightly below the panel */
   width: 100%;
   transform-origin: 50% 100%;
