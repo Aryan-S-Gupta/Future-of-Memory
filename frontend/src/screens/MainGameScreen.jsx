@@ -4,7 +4,6 @@ import BasePage from "./BasePage.jsx";
 import Button from "../components/Button/Button.jsx";
 import { createSession } from "../../api/single-player/GameApi.js";
 import { useSession } from "../../SessionContext.jsx";
-import { startPrerender } from "../../api/single-player/GameApi.js";
 import { Typewriter } from "react-simple-typewriter";
 import Screensaver from "../components/Screensaver.jsx";
 
@@ -42,10 +41,9 @@ const MainGameScreen = () => {
   const start_single_session = async () => {
     try {
       const response = await createSession();
-
       setSessionId(response.session_id);
       // await startPrerender(sessionId);
-      console.log("session is" + sessionId);
+      console.log("session is " + sessionId);
       navigate("/story");
     } catch (error) {
       console.error("Error creating single session:", error);

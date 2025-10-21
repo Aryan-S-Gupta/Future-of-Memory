@@ -2,15 +2,14 @@
 
 import logging
 import os
-import re
 import json
 
 import xml.etree.ElementTree as ET
 
 from rag.utils.utils import sanitise_string
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 RAG_DIR = os.path.abspath("rag")
 
