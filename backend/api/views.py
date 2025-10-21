@@ -6,19 +6,18 @@ Provides endpoints to fetch story background, questions, and results based on us
 import json
 import os
 import logging
-import multiplayer.room_manager as rm
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse
+
+import multiplayer.room_manager as rm
 from rag.retrieve import retrieve_chunks
 from rag.fun_facts.retrieve_fun_facts import retrieve_fun_facts
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+logger.setLevel(logging.DEBUG)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data", "static_stories.json")
@@ -73,6 +72,7 @@ def get_story_question(request):
         }
     )
 
+
 def get_story_result_by_choice(request):
     """
     Retrieve the result of a user's choice for a given year from the story data.
@@ -111,25 +111,25 @@ def submit_choice(request):
 
 
 def get_multiplayer_result(data):
-        room_code = data.get("room_code")
-        player_name = data.get("player_name")
-        choice = data.get("choice")
+    room_code = data.get("room_code")
+    player_name = data.get("player_name")
+    choice = data.get("choice")
 
-        room = rm.get_rooms[room_code]
-        player = room["players"].get[player_name]
-        player.last_choice = choice
-        player.save()
+    room = rm.get_rooms[room_code]
+    player = room["players"].get[player_name]
+    player.last_choice = choice
+    player.save()
 
-        # check if all players have submitted
-        all_answered = all(p.last_choice for p in room.players.all())
-        outcome = None
-        if all_answered:
-            from collections import Counter
-            votes = [p.last_choice for p in room.players.all()]
-            outcome = Counter(votes).most_common(1)[0][0]
-            room.current_year += 1
-            room.save()
-        return JsonResponse({"all_answered": all_answered, "outcome": outcome})
+    # check if all players have submitted
+    all_answered = all(p.last_choice for p in room.players.all())
+    outcome = None
+    if all_answered:
+        from collections import Counter
+        votes = [p.last_choice for p in room.players.all()]
+        outcome = Counter(votes).most_common(1)[0][0]
+        room.current_year += 1
+        room.save()
+    return JsonResponse({"all_answered": all_answered, "outcome": outcome})
 
 @csrf_exempt
 @require_POST
@@ -160,6 +160,42 @@ def get_story_result(request):
 @csrf_exempt
 @require_POST
 def rag_retrieve(request):
+    """
+    Retrieve relevant chunks from the vector store based on the query. Must be a POST request.
+    
+    Request structure:
+    {
+        "query_text": "<text for the query, phrase/sentence>",
+        "keywords": [
+            "<keyword for the query>",
+            ...
+        ]
+    }
+
+    Return format (JSONResponse):
+    {"items": [
+        {
+            "text": "<chunk text>",
+            "meta": {
+                "source": "<document filename>",
+                "title": "<original doucment title>",
+                "licence": "<licensing information>",
+                "authors": [
+                    "<author name>",
+                    ...
+                ],
+                "link_text": "<text to display in a link to the original document e.g. Cambridge
+                Core article>",
+                "link": "<link to original document>",
+                "start_index": <int, location of this chunk in original document>
+            },
+            "metadata": <same as "meta">,
+            "id": "<chunk id>",
+        },
+        ...
+    ]}
+
+    """
 
     default_query = "fatigue"
     query: str
@@ -202,22 +238,26 @@ def create_session(request):
 
     """
     session = Session.objects.create()
-    logger.debug(f'session id created: {session.id}')
-    return JsonResponse({'session_id': session.id}, status=201)
+    logger.debug(f"session id created: {session.id}")
+    return JsonResponse({"session_id": session.id}, status=201)
+
 
 # intro page
 
-# need a call in background page - it starts gebnerating question and options and images and scenario
+# need a call in background page - it starts generating question and options and images and scenario
 from shared.tasks import start_turn_pipeline
+
+
 def start_prerendering(request):
     year = request.GET.get("year")
     session_id = request.GET.get("session_id")
     logger.info("start_turn_pipeline.send() called")
     start_turn_pipeline.send(session_id, year)
-    logger.info("start_turn_pipeline.send() called: ")
-    return JsonResponse({'status': 'generation_started'})
+    logger.info("start_turn_pipeline.send() called")
+    return JsonResponse({"status": "generation_started"})
 
 # question and options display page
+
 
 # send the existing work
 def display_question_and_options(request, session_id, turn_id, year):
@@ -346,7 +386,9 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
             # start generating next turn in background
             try:
                 start_turn_pipeline.send(session_id, next_year)
-                logger.info(f"Started generating next turn (year {next_year}) in background")
+                logger.info(
+                    f"Started generating next turn (year {next_year}) in background"
+                )
             except Exception as e:
                 logger.warning(f"Failed to start next turn generation: {e}")
 
