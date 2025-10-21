@@ -17,8 +17,8 @@ from rag.config import UPDATE_RAG, LATEST_VERSION
 from rag.utils.utils import vector_db_exists
 
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 DOCUMENT_PATH = os.path.abspath(os.path.join("rag", "cleaned_data"))
 

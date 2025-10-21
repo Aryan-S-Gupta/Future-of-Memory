@@ -1,5 +1,4 @@
-"""Shared utility functions for the backend.
-"""
+"""Shared utility functions for the backend."""
 
 import logging
 
@@ -8,8 +7,8 @@ from langchain_ollama import OllamaEmbeddings
 from shared.constants import OLLAMA_EMBED_MODEL
 
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def get_ollama_embeddings() -> OllamaEmbeddings:
