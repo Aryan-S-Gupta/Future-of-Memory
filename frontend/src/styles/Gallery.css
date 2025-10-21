@@ -143,3 +143,21 @@ html, body { width: 100%; max-width: 100%; overflow-x: clip; }
   object-fit: cover;
   max-height: 320px;
 }
+
+.gal,
+.gal-modal-body {
+  font-family: 'Kanit','Orbitron', sans-serif !important;
+  font-size: 1.05rem;
+  color: #111;
+}
+
+.gal-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.gal-modal-sub,
+.gal-scenario {
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
