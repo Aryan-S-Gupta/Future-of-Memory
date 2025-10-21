@@ -190,6 +190,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
         if (out.tie) {
             console.log("Tie detected! Starting mini-game round...");
+            setWinnerInfo(null);
             setScreen("miniGameWait");
             return null;
           }
@@ -418,7 +419,6 @@ useEffect(() => {
         setTimeout(() => {
           setScreen("loading");
           setLoadingState("scenario");
-          setWinnerInfo(null);
         }, 10000);
       }
     } catch (err) {
