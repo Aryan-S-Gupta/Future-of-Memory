@@ -5,8 +5,6 @@ import "../styles/tokens.css";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import { startPrerender } from "../../api/single-player/GameApi.js";
 import { useSession } from "../../SessionContext.jsx";
-import "../styles/tokens.css"
-
 
 /**
  * BackgroundScreen component

@@ -114,13 +114,13 @@
   top: 0.6rem;
   left: 50%;
   transform: translateX(-50%);
-  font-family: --font-body;
+  font-family: var(--font-display, 'Orbitron', sans-serif) !important;
   font-size: 1.05rem;
   padding: 0.12rem 0.45rem;
   border-radius: 6px;
   z-index: 1000;
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 400;
   /* strong underglow to make text visible over any background */
   text-shadow:
     0 0 10px rgba(255,255,255,0.95),
