@@ -491,14 +491,14 @@ const getFadeClass = (idx) => {
         <div className="question-screen">
           {/* Left side: question and choices */}
           <div className="question-main menu-glass">
-            <div className="choice-container">
+            <div className="choice-container custom-choices">
               <Button
-                baseButton={getFadeClass(2) + " choice-btn"}
+                baseButton={getFadeClass(2) + " choice-btn custom-choice"}
                 action={() => handleChoice(currentTurn.options[0].option_id)}
                 title={`${currentTurn.options[0].label}. ${currentTurn.options[0].option_text}`}
               />
               <Button
-                baseButton={getFadeClass(3) + " choice-btn"}
+                baseButton={getFadeClass(3) + " choice-btn custom-choice"}
                 action={() => handleChoice(currentTurn.options[1].option_id)}
                 title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
               />
