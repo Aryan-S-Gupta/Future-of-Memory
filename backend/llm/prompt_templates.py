@@ -77,11 +77,9 @@ LANGUAGE: {STORY_LANGUAGE_RULES}
 MISSION: Create JSON with question that ends with question mark, options "[WHICH GROUP] should [ACTION] so that [RESULT]", option_queries (3-6 keywords each).
 
 QUESTION FORMAT:
-1. Story sentence about this year (end with .)
-2. Question about what groups should do next (end with ?)
-3. Combine both under 35 words total
+ONE QUESTION WHICH IS COMPOSED OF 2 PARTS, STORY STATEMENT + QUESTION:
+- Total length: 15-30 words
 - MUST end with "?" 
-- Ask about big groups (cities/hospitals/schools), not individuals
 - Show how world changed and what problem groups face
 
 OPTIONS FORMAT:
@@ -89,6 +87,7 @@ OPTIONS FORMAT:
 - Structure: "[WHICH GROUP] should [ACTION] so that [RESULT]"
 - MUST use group names like: cities, hospitals, schools, governments, companies, communities, families
 - No symbols like [ or " in final output
+- Total length: 10-20 words
 - No keywords in options
 - Both must directly answer the question
 
@@ -100,11 +99,10 @@ OUTPUT: Valid JSON only with: question, options, option_queries
 Use normal English, no random numbers/broken text.
 <|end|>
 <|user|>
-WORLD STATE: {world_ctx}
-Phase: {phase} ({phase_themes})
-Year: {year}
-
-Create a story question about what happened and what groups should do next, with two opposite options and two keyword queries.
+Based on the history in {world_ctx} and one of the {phase_themes} of current {year}
+create a short question starting with the {year} and following the QUESTION FORMAT,content is about what happened and what should do next, diffrent from previous questions,
+with two short opposite options following the OPTION FORMAT and option content must be related to the question, 
+and two keyword queries extracted from options.
 <|end|>
 <|assistant|>""".strip()
 
