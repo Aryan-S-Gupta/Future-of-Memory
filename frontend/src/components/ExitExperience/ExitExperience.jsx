@@ -35,7 +35,8 @@ const ExitExperience = ({ code, player }) => {
       } else {
         navigate("/");
       }
-      return;
+      console.log("exited successfully");
+      return null;
     }
     // Case 2: Multiplayer mode → call API to leave room
     else {

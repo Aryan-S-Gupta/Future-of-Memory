@@ -84,6 +84,10 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
           console("loading at the moment");
           return null;
         } else {
+            if (!result.room_exists) {
+              setScreen("destroyed");
+              return null;
+            }
           setCurrentTurn(result);
           setTurn(result.turn_id);
           setScreen("question");
@@ -172,9 +176,8 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
         console.log(out)
         if (!out || !out.scenario || !out.scenario.text) {
           if (!out.room_exists) {
-            setRoomDestroyed(true); 
             setScreen("destroyed");
-            return;
+            return null;
           }
           if (out.tie) {
             console.log("Tie detected! Starting mini-game round...");
@@ -429,76 +432,72 @@ useEffect(() => {
   return (
     <BasePage>
       <ExitExperience code={roomCode} player={playerName} />
-  <div className="room-code-topcenter">Room : {displayRoomCode}</div>
-      {screen == "destroyed" && (
-        <RoomDestroyedPopup />
-      )}
-      {screen === "loading" && (
-        <LoadingScreen
-          isReady={isReady}
-          funFacts={loadingFacts}
-          onContinue={() => {
-            setScreen({ loadingState });
-          }}
-        />
-      )}
-      {screen === "scenario" && scenarioData && (
-        <div className="scenario-screen">
-          <div className="text-container menu-glass">
-            {/* Image in middle */}
-            {scenarioData.image && (
-              <div className="scenario-image">
-                <img src={scenarioData.image} alt="scenario" className="scenario-img" />
-              </div>
-            )}
-          </div>
-          {/* Continue button at bottom */}
-          <div className="scenario-footer">
-            <Button
-              baseButton="btn-primary"
-              action={() => { handleContinue() }}
-              title="Continue"
-            />
-          </div>
-        </div>
-      )}
-      {/** Question Screen*/}
-      {screen === "question" && currentTurn && (
-        <div className="question-screen">
-          {/* Left side: question and choices */}
-          <div className="question-main menu-glass">
-            <div className="question-container">
-              <h2 className={getFadeClass(1)}>{currentTurn.question}</h2>
+        <div className="room-code-topcenter">Room : {displayRoomCode}</div>
+        {screen == "destroyed" && (
+          <RoomDestroyedPopup />
+        )}
+        {screen === "loading" && (
+          <LoadingScreen
+            isReady={isReady}
+            funFacts={loadingFacts}
+            onContinue={() => {
+              setScreen({ loadingState });
+            }}
+          />
+        )}
+        {screen === "scenario" && scenarioData && (
+          <div className="scenario-screen">
+            <div className="text-container menu-glass">
+              {/* Image in middle */}
+              {scenarioData.image && (
+                <div className="scenario-image">
+                  <img src={scenarioData.image} alt="scenario" className="scenario-img" />
+                </div>
+              )}
+            </div>
+            {/* Continue button at bottom */}
+            <div className="scenario-footer">
+              <Button
+                baseButton="btn-primary"
+                action={() => { handleContinue() }}
+                title="Continue"
+              />
             </div>
           </div>
-          {/* Right side: voting display */}
-          <div className="voting-sidebar">
-            <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
+        )}
+        {/** Question Screen*/}
+        {screen === "question" && currentTurn && (
+          <div className="question-screen">
+            {/* Left side: question and choices */}
+            <div className="question-main menu-glass">
+              <div className="question-container">
+                <h2 className={getFadeClass(1)}>{currentTurn.question}</h2>
+              </div>
+            </div>
+            {/* Right side: voting display */}
+            <div className="voting-sidebar">
+              <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
+            </div>
           </div>
-        </div>
-      )}
-
-      {screen === "miniGameWait" && (
-        <div className="mini-wait">
-          <h2 className="mini-wait-main">Neural Showdown</h2>
-          <p className="mini-wait-lead">The votes are tied and the world stands still as a single memory duel will decide which player's choice shapes the next scene.</p>
-
-          <div className="mini-wait-instructions container">
-            <p className="mini-wait-paragraph">In the Neural Showdown players reveal cards to expose hidden faces and must rely on attention and recall to find matching pairs the challenger who best remembers the board claims victory and their vote will decide what happens next.</p>
+        )}
+        {screen === "miniGameWait" && (
+          <div className="mini-wait">
+            <h2 className="mini-wait-main">Neural Showdown</h2>
+            <p className="mini-wait-lead">The votes are tied and the world stands still as a single memory duel will decide which player's choice shapes the next scene.</p>
+            <div className="mini-wait-instructions container">
+              <p className="mini-wait-paragraph">In the Neural Showdown players reveal cards to expose hidden faces and must rely on attention and recall to find matching pairs the challenger who best remembers the board claims victory and their vote will decide what happens next.</p>
+            </div>
           </div>
-
-        </div>
-      )}
-
-      {screen === "miniGameWinner" && (
-        <div className="mini-winner">
-          <h2>🏆 Tie Broken!</h2>
-          <p className="winner-name">
-            {winnerInfo.winner}
-          </p>
-          <p className="text2">emerges victorious.</p>
-        </div>
-      )}
+        )}
+        {screen === "miniGameWinner" && (
+          <div className="mini-winner">
+            <h2>Tie Broken!</h2>
+            <p className="winner-name">
+              {winnerInfo.winner}
+            </p>
+            <p className="text2">emerges victorious.</p>
+          </div>
+        )}
 
     </BasePage>
   );

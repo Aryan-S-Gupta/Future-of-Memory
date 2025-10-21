@@ -26,17 +26,21 @@ const MultiplayerLobby = () => {
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const { sessionId, setSessionId } = useSession();
-  const [mode, setMode] = useState("peer"); // "peer" or "host"
+  const [mode, setMode] = useState("host"); // "peer" or "host"
+  const [alertMsg, setAlertMsg] = useState(null);
+  const [promptOpen, setPromptOpen] = useState(false);
+  const [pendingRoom, setPendingRoom] = useState(null);
+
   const navigate = useNavigate();
 
   // Fetch list of available rooms using React Query
   const {
-      data: roomList,
-      isLoading: isRoomsLoading,
-      error: roomError,
+    data: roomList,
+    isLoading: isRoomsLoading,
+    error: roomError,
   } = useQuery({
-      queryKey: ["rooms"],
-      queryFn: () => listRooms(),
+    queryKey: ["rooms"],
+    queryFn: () => listRooms(),
   });
 
   /**
@@ -48,70 +52,65 @@ const MultiplayerLobby = () => {
    */
   const handleCreateRoom = async () => {
     if (!playerName) {
-        return alert("Please Enter a NickName");
+      return setAlertMsg("Please enter a nickname before creating a room.");
+
     }
     const data = await createRoom(playerName, mode);
     setSessionId(data.session_id);
     await startPrerender(data.session_id, 2035);
     setRoomCode(data.room_code);
     console.log(roomCode);
-      if (mode === "peer") {
-        navigate(`/background-multi/${data.room_code}/${playerName}`);
-      } else {
-        navigate(`/projection-host/${data.room_code}/${playerName}/${playerName}/${mode}`);
-      }
+    if (mode === "peer") {
+      navigate(`/background-multi/${data.room_code}/${playerName}`);
+    } else {
+      navigate(`/projection-host/${data.room_code}/${playerName}/${playerName}/${mode}`);
+    }
     // Navigate to multiplayer room screen
     // navigate(`/multiplayer-room/${data.room_code}/${playerName}`);
     console.log("navigated with session id " + data.session_id);
   };
 
 
-  /**
-   * Handle joining an existing multiplayer room.
-   * - Prompts the user for a name.
-   * - Calls API to join the specified room.
-   * - Updates local state with player name and room code.
-   * - Navigates to the joined room on success.
-   *
-   * @async
-   * @param {string} code - The room code to join.
-   * @returns {Promise<void>}
-   */
-  const handleJoinRoom = async (code) => {
-    const name = window.prompt("Enter your name to join the room:");
+  const handleJoinRoom = (code) => {
+    setPendingRoom(code);
+    setPromptOpen(true);
+  };
+
+  const joinWithName = async (name) => {
     if (!name) {
-      alert("Sorry");
+      setAlertMsg("Please enter your name to join the room.");
+      return;
     }
-    setRoomCode(code);
-    setPlayerName(name); 
+    setPromptOpen(false);
+    setRoomCode(pendingRoom);
+    setPlayerName(name);
+
     try {
-      const data = await joinRoom(code, name);
-      if (data.success == "True") {
+      const data = await joinRoom(pendingRoom, name);
+      if (data.success === "True") {
         setSessionId(data.session_id);
         console.log("session id is " + data.session_id);
-        console.log("the host of this room is: " + data.host)
-        console.log("the game has started? " + data.game_started)
+        console.log("the host of this room is: " + data.host);
+        console.log("the game has started? " + data.game_started);
 
-        if (data.mode == "host") {
-          if (data.game_started == "False") {
-            console.log("went to background screen");
-              navigate(`/projection-host/${code}/${name}/${data.host}/${mode}`);
+        if (data.mode === "host") {
+          if (data.game_started === "False") {
+            navigate(`/projection-host/${pendingRoom}/${name}/${data.host}/${mode}`);
           } else {
-              navigate(`/player-room/${code}/${name}/${data.host}/${mode}`);
+            setAlertMsg("Session already in progress. Please join another room.");
           }
-        } else { 
-          navigate(`/background-multi/${code}/${name}&mode=${mode}`);
-          console.log("navigated")
+        } else {
+          navigate(`/background-multi/${pendingRoom}/${name}&mode=${mode}`);
         }
-
       } else {
-        alert("Sorry, unable to join the room. Please try again.");
+        setAlertMsg("Unable to join the room. Please try again.");
       }
     } catch (err) {
       console.error(err);
-      alert("Error joining room. Please try again.");
+      setAlertMsg("Error joining room. Please try again.");
     }
   };
+
 
   return (
     <BasePage>
@@ -131,28 +130,6 @@ const MultiplayerLobby = () => {
             </button>
           </div>
 
-          {/* Toggle moved below input + button */}
-          <div className="inline-mode-toggle">
-            <label className={`mode-switch ${mode}`}>
-              <input
-                type="checkbox"
-                checked={mode === "host"}
-                onChange={(e) => setMode(e.target.checked ? "host" : "peer")}
-              />
-              <span className="slider"></span>
-            </label>
-            <span className="mode-inline-label">
-              {mode === "host" ? (
-                <>
-                  🖥️ Host Mode
-                </>
-              ) : (
-                <>
-                  👥 Peer-to-Peer
-                </>
-              )}
-            </span>
-          </div>
         </div>
 
 
@@ -169,6 +146,37 @@ const MultiplayerLobby = () => {
           <Button baseButton="btn-exit" action={() => navigate("/")} title="Back" />
         </div>
       </div>
+      {/* === Custom Alert Modal === */}
+      {alertMsg && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <h3>⚠️ Notice</h3>
+            <p>{alertMsg}</p>
+            <button className="btn-modal" onClick={() => setAlertMsg(null)}>OK</button>
+          </div>
+        </div>
+      )}
+
+      {/* === Custom Prompt Modal === */}
+      {promptOpen && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <h3>Enter your name to join</h3>
+            <input
+              className="modal-input"
+              type="text"
+              placeholder="Your nickname"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+            />
+            <div className="modal-actions">
+              <button className="btn-modal" onClick={() => joinWithName(playerName)}>Join</button>
+              <button className="btn-modal cancel" onClick={() => setPromptOpen(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </BasePage >
   );
 };

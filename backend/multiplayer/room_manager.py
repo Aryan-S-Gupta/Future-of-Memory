@@ -342,13 +342,18 @@ def remove_player(room_code, player_name):
         bool: True if successful, False if room or player doesn't exist.
     """
     if not room_exists(room_code):
-        logging.warning(f'Remove failed: room {room_code} not found.')
+        logging.info(f'Remove failed: room {room_code} not found.')
         return False
 
+    if player_name == get_host(room_code):
+        destroy_room(room_code)
+        logging.info(f'Removing host {player_name} from room {room_code}')
+        return True
     if player_in_room_exists(room_code, player_name):
         rooms[room_code]["players"].remove(player_name)
         logging.info(f'Player {player_name} removed from room {room_code}')
         return True
+    logging.info("The room existed but the player did not exist in the room ")
     return False
 
 def transfer_host(room_code, new_host):
