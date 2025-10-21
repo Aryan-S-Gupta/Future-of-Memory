@@ -424,6 +424,7 @@ const getFadeClass = (idx) => {
     if (screen === "miniGameResult" && miniWinner) {
       const timer = setTimeout(() => {
         setMiniWinner(null);
+        setMiniGameDone(false);
         setScreen("loading");
         setLoadingState("scenario");
         fetchFunFacts();
