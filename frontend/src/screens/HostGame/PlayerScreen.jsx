@@ -466,7 +466,7 @@ const getFadeClass = (idx) => {
         <div className="scenario-screen">
           <div className="text-container menu-glass">
           {/* Image in middle */}
-            <h2 className="fade-in">{scenarioData.scenario}</h2>
+            <h2 className="fade-in bigger-text">{scenarioData.scenario}</h2>
           </div>
           {/* Continue button at bottom */}
           <div className="scenario-footer">
