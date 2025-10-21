@@ -469,3 +469,28 @@
   text-align: center;
   color: var(--color-text, #ffffff);
 }
+
+.question-screen .question-main .question-container > h2 {
+  font-family: var(--font-body) !important;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+/* Centered glass question layout (multiplayer only) */
+.centered-glass {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 60vh;
+  text-align: center;
+}
+
+/* Auto-shrink question font for long text or small screens */
+.centered-glass .question-container h2 {
+  font-size: clamp(1rem, 2.5vw + 0.4rem, 2.2rem);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.question-screen { align-items: center; }

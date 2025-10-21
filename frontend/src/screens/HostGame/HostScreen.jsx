@@ -470,7 +470,7 @@ useEffect(() => {
         {screen === "question" && currentTurn && (
           <div className="question-screen">
             {/* Left side: question and choices */}
-            <div className="question-main menu-glass">
+            <div className="question-main menu-glass centered-glass">
               <div className="question-container">
                 <h2 className={getFadeClass(1)}>{currentTurn.question}</h2>
               </div>
