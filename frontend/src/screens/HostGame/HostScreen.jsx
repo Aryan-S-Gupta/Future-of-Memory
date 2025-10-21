@@ -181,6 +181,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
           }
           if (out.tie) {
             console.log("Tie detected! Starting mini-game round...");
+            setWinnerInfo(null);
             setScreen("miniGameWait");
             return null;
           }
@@ -402,8 +403,9 @@ const getFadeClass = (idx) => {
 
 useEffect(() => {
   // Only start polling if tie mode is active AND winner not yet resolved
+  console.log("trying");
   if (!currentTurn || winnerInfo) return;
-
+  console.log("winner info exists")
   const poll = setInterval(async () => {
     try {
       const res = await submitTiebreakScore("HOST", roomCode, currentTurn.turn_id, -1);
@@ -418,6 +420,7 @@ useEffect(() => {
         // after 10s, resume story
         setTimeout(() => {
           setScreen("loading");
+          fetchFunFacts();
           setLoadingState("scenario");
         }, 10000);
       }

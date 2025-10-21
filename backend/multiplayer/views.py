@@ -498,7 +498,7 @@ def display_scenario_and_image(
         "final_option": final_option
     }
     if final_option == "TIE":
-        logger.info("senfing tie")
+        logger.info("sending tie")
         return JsonResponse({
             'success': False,
             'room_exists': True,
