@@ -1,89 +1,7 @@
+
 @import url('/src/styles/tokens.css');
 
-.winner-screen,
-.waiting-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  color: #fff;
-  text-align: center;
-  animation: fadeIn 1.5s ease;
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 1px;
-  position: relative;
-  overflow: hidden;
-}
 
-/* Subtle glow animation under text */
-@keyframes textGlow {
-  0%, 100% {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4),
-                 0 0 20px rgba(255, 255, 255, 0.2);
-  }
-  50% {
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.7),
-                 0 0 40px rgba(255, 255, 255, 0.4);
-  }
-}
-
-.winner-screen h2,
-.waiting-screen h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  animation: textGlow 2.5s infinite ease-in-out;
-}
-
-.winner-screen p,
-.waiting-screen p {
-  font-size: 1.2rem;
-  color: #ddd;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-}
-
-/* Add a neon underglow pulse beneath the text */
-.winner-screen::after,
-.waiting-screen::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 60%;
-  height: 4px;
-  background: white;
-  border-radius: 50%;
-  transform: translateX(-50%);
-  filter: blur(15px);
-  animation: underglowPulse 3s ease-in-out infinite;
-}
-
-@keyframes underglowPulse {
-  0%, 100% {
-    opacity: 0.3;
-    transform: translateX(-50%) scaleX(1);
-  }
-  50% {
-    opacity: 1;
-    transform: translateX(-50%) scaleX(1.2);
-  }
-}
-
-/* Subtle ambient flicker effect to add life */
-@keyframes ambientFlicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-    opacity: 1;
-  }
-  20%, 22%, 55% {
-    opacity: 0.7;
-  }
-}
-
-.winner-screen,
-.waiting-screen {
-  animation: fadeIn 1s ease, ambientFlicker 6s infinite;
-}
 
 /* Fade-in animation for scenario/question text */
 .fade-in {
@@ -188,6 +106,27 @@
   display: flex;
   justify-content: center;
   margin-top: 0rem;
+}
+
+/* Host header showing room code */
+.room-code-topcenter {
+  position: fixed;
+  top: 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: --font-body;
+  font-size: 1.05rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 6px;
+  z-index: 1000;
+  color: #ffffff;
+  font-weight: 700;
+  /* strong underglow to make text visible over any background */
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.95),
+    0 0 20px rgba(255,255,255,0.75),
+    0 6px 18px rgba(0,0,0,0.65);
+  pointer-events: none; /* don't block clicks */
 }
 
 .question-screen {
@@ -330,3 +269,194 @@
   align-self: flex-end;
   margin-top: 2rem;
 }
+
+/* === MINI-GAME WAIT (Projector Display) === */
+.mini-wait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: transparent; /* No dark overlay */
+  color: #ffffff;
+  font-family: 'Orbitron', sans-serif;
+  text-align: center;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 1.5s ease, ambientFlicker 6s infinite;
+}
+
+.mini-wait h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 
+    0 0 8px rgba(255, 255, 255, 0.8),
+    0 0 18px rgba(180, 180, 255, 0.3),
+    0 0 35px rgba(255, 255, 255, 0.15);
+  animation: textGlow 3s ease-in-out infinite;
+  margin-bottom: 0.5rem;
+}
+
+.mini-wait p {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 
+    0 0 6px rgba(255, 255, 255, 0.5),
+    0 0 14px rgba(160, 160, 255, 0.3);
+}
+
+/* === MINI-GAME WINNER (Projector Display) === */
+.mini-winner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: transparent; /* No overlay */
+  color: #ffffff;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 1.5s ease, ambientFlicker 6s infinite;
+}
+
+.mini-winner h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  text-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.9),
+    0 0 25px rgba(180, 180, 255, 0.6),
+    0 0 45px rgba(255, 255, 255, 0.3);
+  animation: winnerPulse 3s ease-in-out infinite;
+  margin-bottom: 0.5rem;
+}
+
+.mini-winner .winner-name {
+  font-size: 2.4rem;
+  color: #fff;
+  text-shadow: 
+    0 0 15px rgba(255, 255, 255, 0.9),
+    0 0 30px rgba(180, 180, 255, 0.5);
+  margin-bottom: 0.4rem;
+  animation: fadeIn 1s ease;
+}
+
+.mini-winner .text2 {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 
+    0 0 8px rgba(255, 255, 255, 0.4),
+    0 0 16px rgba(200, 200, 255, 0.3);
+}
+
+/* === Mini-winner / Mini-wait underglow (static, toned down) === */
+.mini-winner::after,
+.mini-wait::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 48%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.32);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  filter: blur(8px);
+  opacity: 0.45;
+}
+
+/* --- MINI-WAIT INSTRUCTIONS / TYPOGRAPHY --- */
+.mini-wait-instructions.container {
+  max-width: 720px;
+  margin: 1rem auto;
+  text-align: center; /* center instructions */
+  padding: 0.5rem 0.75rem;
+}
+
+.mini-wait-title {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.mini-wait-lead {
+  font-size: 0.5rem; /* much smaller per request */
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 0 6px rgba(255,255,255,0.75);
+  margin-bottom: 0.4rem;
+}
+
+.mini-wait-main {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 0 18px rgba(255,255,255,0.92), 0 0 32px rgba(160,170,255,0.6);
+  margin-bottom: 0.5rem;
+}
+
+.mini-wait-lead { /* slightly larger for tie explanation readability */
+  font-size: 0.95rem;
+}
+
+.mini-wait-subtitle-small {
+  margin: 0.25rem 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #dfe8ff;
+  opacity: 0.95;
+}
+
+.mini-wait-subtitle {
+  margin: 0.5rem 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e8eefc;
+}
+
+.mini-wait-paragraph {
+  margin: 0 0 0.5rem 0;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.45;
+}
+
+.mini-wait-tips {
+  margin: 0 auto;
+  padding-left: 0; /* center bullets */
+  display: inline-block;
+  text-align: left;
+  color: rgba(255,255,255,0.9);
+}
+
+.mini-wait {
+  text-align: center; /* center all text inside */
+}
+
+
+
+/* === Shared Animations === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* textGlow simplified to a subtle static highlight */
+@keyframes textGlow { from { opacity: 1; } to { opacity: 1; } }
+
+/* underglowPulse left as no-op to avoid animation behavior elsewhere */
+@keyframes underglowPulse { from { opacity: 0.45; } to { opacity: 0.45; } }
+
+/* ambientFlicker removed (no flicker) */
+
+/* winnerPulse toned down: subtle static shadow */
+@keyframes winnerPulse { from { opacity: 1; } to { opacity: 1; } }

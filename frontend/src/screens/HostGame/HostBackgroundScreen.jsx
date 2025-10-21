@@ -10,21 +10,18 @@ import { startGame } from "../../../api/multiplayer/RoomManagementApi.js";
 
 const HostBackgroundScreen = () => {
   const navigate = useNavigate();
-  const { roomCode } = useParams();
-  const [searchParams] = useSearchParams();
-  const playerName = searchParams.get("playerName");
-  const host = searchParams.get("hostName");
-  const mode = searchParams.get("mode");
+  const { roomCode, playerName, host, mode } = useParams();
   const [gameStarted, setGameStarted] = useState(false);
 
   const {} = useQuery({
     queryKey: ["started", roomCode],
     queryFn: async () => {
       console.log("Checking whether the game has started...");
+      console.log("host is: " + host);
       const res = await checkGameStarted(roomCode);
       if (res.data.game_started) {
         console.log("game started");
-        navigate(`/player-room/${roomCode}?playerName=${playerName}&mode=${mode}`);
+        navigate(`/player-room/${roomCode}/${playerName}/${host}/${mode}`);
       }
       return res.data;
     },
@@ -41,7 +38,7 @@ const HostBackgroundScreen = () => {
     try {
       await startGame(roomCode)
       setGameStarted(true);
-      navigate(`/projector-room/${roomCode}?playerName=${playerName}&mode=${mode}`);
+      navigate(`/projector-room/${roomCode}/${playerName}/${host}/${mode}`);
     } catch (err) {
       console.error("Error starting game:", err);
     }
@@ -78,7 +75,7 @@ const HostBackgroundScreen = () => {
         <ExitExperience code={roomCode} player={playerName} />
       </div>
       </div>
-      )};
+      )}
     </BasePage>)
 };
 

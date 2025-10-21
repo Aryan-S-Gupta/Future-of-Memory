@@ -1,25 +1,30 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getQuestion, submitChoice, getVotingInfo } from "../../../api/multiplayer/GameFlowApi.js";
+import { getQuestion, submitChoice } from "../../../api/multiplayer/GameFlowApi.js";
+import { getRoomState } from "../../../api/multiplayer/RoomManagementApi.js";
 import Button from "../../components/Button/Button.jsx";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../../styles/GamePlay.css";
 import { useSession } from "../../../SessionContext.jsx";
-import background from "../../assets/background.jpg";
+import background from "../../assets/fallback_first_turn.png";
+import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
+import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
+import { useMemo, useRef } from "react";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
-import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
-import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
+import { getVotingInfo} from "../../../api/multiplayer/GameFlowApi.js";
+import { getTiebreakStatus} from "../../../api/multiplayer/GameFlowApi.js";
+import MiniGame from "../MiniGame.jsx";
+import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
+
 
 
 const PlayerScreen = () => {
   const navigate = useNavigate()
-  const { roomCode } = useParams(); 
-  const [searchParams] = useSearchParams();
-  const playerName = searchParams.get("playerName");
+  const { roomCode, playerName } = useParams(); 
   const prevQuestionRef = useRef(null);
   const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
@@ -29,17 +34,19 @@ const PlayerScreen = () => {
   const [isReady, setIsReady] = useState(false);
   const [option_id, setOptionId] = useState(null);
   const [turn, setTurn] = useState(-1);
-  const [showVotes, setShowVotes] = useState(false)
   const [votes, setVotes] = useState([]);
   const [totalPlayers, setTotalPlayers] = useState(1);
-  const [fetchVoteData, setFetchVoteData] = useState(true);
+  const [score, setScore] = useState(null);
+  const [factsFecthed, setFactsFetched] = useState(false);
+  const [miniWinner, setMiniWinner] = useState(null);
+  const [miniGameDone, setMiniGameDone] = useState(false);
+
   // --- Staged reveal for multiplayer ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false); 
   const fadeDuration = 2000;
-
-
+  const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
   scenario: 
@@ -52,7 +59,6 @@ const PlayerScreen = () => {
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
 });
-  const [roomDestroyed, setRoomDestroyed] = useState(false);
 
 
 
@@ -63,9 +69,7 @@ const PlayerScreen = () => {
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
 // Fetches the scenario whenever we are on the "scenario" screen.
-  const {
-    data: questionData
-  } = useQuery ({
+  const {data: questionData} = useQuery ({
     queryKey: ["question", roomCode, sessionId, turn, year], 
     queryFn: async() => {
         console.log("queryFn running for", year);
@@ -73,20 +77,29 @@ const PlayerScreen = () => {
         if (!result ) {
           setScreen("loading");
           setLoadingState("question");
-          await fetchFunFacts();
-          console.log("loading at the moment");
+          if (!factsFecthed) {
+            await fetchFunFacts();
+            setFactsFetched(true);
+          }
+          console("loading at the moment");
           return null;
         } else {
+          if (!result.room_exists) {
+            setScreen("destroyed");
+            return null;
+          }
           setCurrentTurn(result);
           setTurn(result.turn_id);
           setScreen("question");
           setLoadingState("none")
           console.log("recieved question data: " + result);
           setScenarioData(null);
+          setFactsFetched(false)
           return result;
         }
     }, enabled: loadingState == "question", 
-      refetchInterval: (result) => result ? false : 3000
+      refetchInterval: (result) => result ? false : 3000,
+      refetchIntervalInBackground: true,
   })
 
 
@@ -206,15 +219,9 @@ const PlayerScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
 
-
- 
-
-
-
   const {data: votingData} = useQuery({
     queryKey: ["votingStatus", roomCode, currentTurn?.turn_id], 
     queryFn: async() => {
-        console.log("the current turn is: " + currentTurn)
         console.log(
         `[VotingQuery] Fetching voting info for room=${roomCode}, turn=${currentTurn.turn_id}...`
         );
@@ -236,43 +243,45 @@ const PlayerScreen = () => {
         }));
         console.log(mappedVotes);
         console.log("[VotingQuery] Mapped votes:", mappedVotes);
+        
         const votesCount = data.num_responses;
         const totalCount = data.total_players;
-        const allVoted = votesCount >= totalCount;
+        
+        if (votesCount >= totalCount) {
+          setAllVoted(true);
+        }
         setVotes(mappedVotes);
         setTotalPlayers(data.total_players);
-
-
         console.log(
           `[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`
         );
         if (allVoted) {
           console.log("All players voted!");
-          setScreen("loading")
-          setLoadingState("scenario")
-          await fetchFunFacts();
+          if (screen === "miniGame") {
+            return null;
+          }
+          if (data.tie) {  // backend should include this flag
+            console.log("Tie detected! Starting mini-game...");
+            setScreen("miniGame");
+          } 
           if (!scenarioData || !scenarioData.scenario) {
             console.log("Scenario not ready → go to loading screen");
             setScreen("loading");
             setLoadingState("scenario");
+          if (!factsFecthed) {
             await fetchFunFacts();
+            setFactsFetched(true);
+          }
           } else {
             console.log("Scenario ready → show scenario");
+            setOptionId(data.final_option);
             setScreen("scenario");
           }
         }
         return result;
-      }, enabled: loadingState === "none", 
-      refetchInterval: 3000
-    
+      }, enabled: screen === "question",
+      refetchInterval: 3000,
   })
-
-
-  /**
-   * Handles a player's choice when answering a question.
-   *
-   * @param {string} answer - The key of the chosen option.
-   */
 
 
   // handle choice click
@@ -282,7 +291,6 @@ const PlayerScreen = () => {
     //setShowVotes(false);
     setOptionId(option_id);
   }
-
 
   const {
     data: out,
@@ -294,13 +302,22 @@ const PlayerScreen = () => {
       queryFn: async () => {
         console.log("submitting option", sessionId);
         const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
+        console.log(out)
         if (!out || !out.scenario || !out.scenario.text) {
           if (!out.room_exists) {
-            setRoomDestroyed(true); 
             setScreen("destroyed");
+            return null;
           }
-          console.log("dont have scenario yet");
-          return null;
+          if (out.tie) {
+            console.log("Tie detected! Starting mini-game...");
+            setScreen("miniGame");
+            return null;
+        }
+      }
+      if (out.tie) {
+        console.log("Tie detected! Starting mini-game...");
+        setScreen("miniGame");
+        return null;
       }
       console.log("the data is", out );
       const mapped = {
@@ -314,11 +331,12 @@ const PlayerScreen = () => {
       setOptionId(null);
       return out;
     },
-    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed",
+    enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen !== "miniGame" && screen !== "miniGameResult" && screen !== "miniGameWaiting",
     onError: (err) => {
       console.log("onError:", err);
     }, 
-    refetchInterval: 1000
+    refetchInterval: 3000, 
+    refetchIntervalInBackground: true, 
 });
 
 
@@ -377,39 +395,74 @@ const getFadeClass = (idx) => {
   }
 };
 
+  useEffect(() => {
+    if (miniGameDone) {
+      const handleTiebreak = async () => {
+        // Immediately move to waiting screen after finishing mini-game
+        setScreen("miniGameWaiting");
+      const poll = setInterval(async () => {
+        const res = await submitTiebreakScore(playerName, roomCode, turn, score);
+        console.log("asking", res);
 
+        if (res.status === "resolved" || res.winner) {
+          console.log("Mini-game resolved:", res);
+          setMiniWinner(res.winner);
+          setScreen("miniGameResult");
+          clearInterval(poll);
+        }
+      }, 2000);
 
+      return () => clearInterval(poll);
+    };
 
-
-    // Fetch fun facts when loading scenario
-    const fetchFunFacts = async () => {
-      try {
-        const facts = await getFunFacts(); // Fetch 3 fun facts
-        setLoadingFacts(facts.data);
-        console.log("Fun facts loaded:", facts);
-      } catch (error) {
-          console.error("Error fetching fun facts:", error);
-      }
+      handleTiebreak();
     }
+  }, [miniGameDone]);
+
+
+  useEffect(() => {
+    if (screen === "miniGameResult" && miniWinner) {
+      const timer = setTimeout(() => {
+        setMiniWinner(null);
+        setMiniGameDone(false);
+        setScreen("loading");
+        setLoadingState("scenario");
+        fetchFunFacts();
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [screen, miniWinner]);
+
+
+  // Fetch fun facts when loading scenario
+  const fetchFunFacts = async () => {
+    try {
+      const facts = await getFunFacts(); // Fetch 3 fun facts
+      setLoadingFacts(facts.data);
+      console.log("Fun facts loaded:", facts);
+    } catch (error) {
+      console.error("Error fetching fun facts:", error);
+    }
+  }
 
 
 
   return (
     <BasePage>
-      <ExitExperience code={roomCode} player={playerName}/>
+      <ExitExperience code={roomCode} player={playerName} />
       {screen == "destroyed" && (
-        <RoomDestroyedPopup/>
+        <RoomDestroyedPopup />
       )}
-            {screen === "loading" && (
-      <LoadingScreen
-        isReady={isReady}
-        funFacts={loadingFacts}
-        onContinue={() => {
-          setScreen({loadingState});
-        }}  
-      />
-    )}
-     {screen === "scenario" && scenarioData && (
+      {screen === "loading" && (
+        <LoadingScreen
+          isReady={isReady}
+          funFacts={loadingFacts}
+          onContinue={() => {
+            setScreen({ loadingState });
+          }}
+        />
+      )}
+      {screen === "scenario" && scenarioData && (
         <div className="scenario-screen">
           <div className="text-container menu-glass">
           {/* Image in middle */}
@@ -436,6 +489,7 @@ const getFadeClass = (idx) => {
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
         <div className="question-screen">
+          {/* Left side: question and choices */}
           <div className="question-main menu-glass">
             <div className="choice-container">
               <Button
@@ -450,17 +504,41 @@ const getFadeClass = (idx) => {
               />
             </div>
           </div>
-          
-          <div className="voting-sidebar">
-            <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
-          </div>
         </div>
       )}
+      {screen === "miniGame" && (
+        <MiniGame
+          playerName={playerName}
+          roomCode={roomCode}
+          turnId={turn}
+          onFinish={async (score) => {
+            console.log(`Mini-game finished with score ${score}`);
+            setScore(score)
+            setMiniGameDone(true);
+          }}
+        />
+      )}
+      {/* === MINI-GAME WAITING (uses mini-wait CSS) === */}
+      {screen === "miniGameWaiting" && (
+          <div className="mini-wait">
+          <h2>⌛ Waiting for Results</h2>
+          <p className="text2">Your score has been submitted.</p>
+          <p className="text2">Waiting for other players to finish...</p>
+      </div>
+    )}
 
-
+      {/* === MINI-GAME WINNER (uses mini-winner CSS) === */}
+      {screen === "miniGameResult" && (
+          <div className="mini-winner">
+          <h2>🏆 Tie Broken!</h2>
+          <p className="winner-name">{miniWinner || "Unknown Challenger"}</p>
+          <p className="text2">emerges victorious.</p>
+        </div>
+      )}
     </BasePage>
   );
 };
+
 
 
 export default PlayerScreen;

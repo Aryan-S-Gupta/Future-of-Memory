@@ -6,7 +6,7 @@ import Button from "../components/Button/Button.jsx";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../styles/GamePlay.css";
 import { useSession } from "../../SessionContext.jsx";
-import background from "../assets/background.jpg";
+import background from "../assets/fallback_first_turn.png";
 import { getFunFacts } from "../../api/single-player/GameApi.js";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "./BasePage.jsx";
@@ -574,7 +574,7 @@ const getFadeClass = (idx) => {
         </div>
       )}
       {screen === "waiting-for-others" && (
-        <div className="waiting-screen fade-in">
+        <div className="mini-wait fade-in">
           <h2>Well done {playerName}!</h2>
           <p>Please wait while other players finish their mini-game...</p>
         </div>

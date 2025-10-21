@@ -21,9 +21,9 @@ const ExitExperience = ({ code, player }) => {
 
     // Case 1: Single-player mode → no API call needed
     if (code == "-1" && player == "single-player") {
-      // Redirect to home
       navigate("/");
-      return;
+      console.log("exited successfully");
+      return null;
     } 
     // Case 2: Multiplayer mode → call API to leave room
     else {

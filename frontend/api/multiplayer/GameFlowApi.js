@@ -74,6 +74,7 @@ export const submitChoice = async (playerName, roomCode, session_id, turn_id, ye
   const res = await api.get(
     `/storyline/choice/${session_id}/${turn_id}/${year}/${option_id}/${roomCode}`, { params: { playerName }}
   );
+  console.log(res.data);
   return res.data; // { scenario, image, ...
 } catch (err) {
   return null;
@@ -97,7 +98,7 @@ export const getFunFacts = async () => {
  * const result = await submitMemoryScore("Alice", 85);
  */
 export const submitMemoryScore = async (playerName, score) => {
-  const res = await api.post("/mini-game/submit_score", { player_name: playerName, score });
+  const res = await api.post("/mini-game/submit_score_single", { player_name: playerName, score });
   return res.data; // { status: "success", player_name, score }
 };
 
@@ -124,6 +125,8 @@ export const submitTiebreakScore = async (playerName, roomCode, turnId, score) =
     player_name: playerName,
     score,
   });
+  console.log("the data is recieved with: ", res)
+  console.log("the dta payload is: ", res.data)
   return res.data;
 };
 

@@ -182,7 +182,7 @@ def get_current_state(request, room_code):
     """
     return JsonResponse({"state": rm.get_state(room_code)})
 
-
+ 
 @csrf_exempt
 def leave_multiplayer_room(request):
     room_code = request.GET.get("roomCode")
@@ -208,7 +208,7 @@ def leave_multiplayer_room(request):
                 "success": success,
                 "room_code": room_code,
                 "player_name": player_name,
-                "destroy": False,
+                'destroy': rm.room_exists(room_code),
                 "message": f"player removed but {room_code} still exists",
             }
         else:
@@ -225,6 +225,7 @@ def leave_multiplayer_room(request):
             "success": success,
             "room_code": room_code,
             "player_name": player_name,
+            'destroy': rm.room_exists(room_code),
             "message": f"Failed to leave room {room_code}",
         }
         logger.warning(f"Failed to leave room {room_code}")
@@ -376,33 +377,42 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
         - question: The question text for the current turn.
         - options: A list of options, each with:
     """
-    logger.debug(f"display_question_and_options called for session_id={session_id}")
+    logger.info(f"display_question_and_options called for session_id={session_id}")
+    session_id = int(session_id)
     existing_session = get_object_or_404(Session, id=session_id)
-    logger.debug(f"Found session: {existing_session}")
-    logger.debug(f"turn_id received: {turn_id}")
-    new_year = -1
+    logger.info(f"Found session: {existing_session}")
+    logger.info(f"turn_id received: {turn_id}")
+    # latest_stored = latest_turn = (
+    #         Turn.objects
+    #         .filter(session_id=existing_session.id)
+    #         .order_by('-year', '-id')
+    #         .first()
+    #     )
+    # logger.info(f'latest stored turn id ={latest_stored}')
 
-    if not rm.room_exists(room_code):
-        return JsonResponse({'success': False, 'room_exists': False})
+    # if not rm.room_exists(room_code):
+    #     return JsonResponse({'success': False, 'room_exists': False})
     
-    if int(turn_id) == -1:
-        logger.info("year:" + year)
-        latest_turn = (
-            Turn.objects.filter(session_id=existing_session.id)
-            .order_by("-year", "-id")
-            .first()
-        )
-        # if the turn is not rrady yet
-        if not latest_turn:
-            logger.warning("No turns found for this session")
-            return JsonResponse({"error": "No turn found for this session"}, status=404)
+    # if int(turn_id) == -1:
+    #     logger.info("year:" + year)
+    #     latest_turn = (
+    #         Turn.objects.filter(session_id=existing_session.id)
+    #         .order_by("-year", "-id")
+    #         .first()
+    #     )
+    #     # if the turn is not rrady yet
+    #     if not latest_turn:
+    #         logger.warning("No turns found for this session")
+    #         return JsonResponse({"error": "No turn found for this session"}, status=404)
 
-    else:
-        # get specific turn by ID
-        turn_id = int(turn_id) + 1
-        latest_turn = get_object_or_404(Turn, year=int(year), id=int(turn_id))
-
-    if latest_turn.year != int(year):
+    # else:
+    #     # get specific turn by ID
+    #     new_turn = int(turn_id) + 1
+    latest_turn = get_object_or_404(Turn, year=int(year),  session_id=session_id)
+    logger.info(f'latest turn is; {latest_turn}')
+        
+    
+    if latest_turn.year != int(year): 
         logger.info("got here")
         return JsonResponse({"error": "new. year not ready yet"}, status=404)
 
@@ -428,12 +438,13 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     ]
 
     response_payload = {
-        "message": "ok",
-        "room_code": room_code,
-        "turn_id": turn_id,
-        "year": new_year,
-        "question": latest_turn.question or "",
-        "options": options_payload,
+        'message': 'ok',
+        'room_code': room_code,
+        'room_exists': rm.room_exists(room_code),
+        'turn_id': turn_id,
+        'year': year,
+        'question': latest_turn.question or '',
+        'options': options_payload,
     }
 
     return JsonResponse(response_payload)
@@ -487,7 +498,7 @@ def display_scenario_and_image(
         "final_option": final_option
     }
     if final_option == "TIE":
-        logger.info("senfing tie")
+        logger.info("sending tie")
         return JsonResponse({
             'success': False,
             'room_exists': True,
@@ -502,6 +513,7 @@ def display_scenario_and_image(
         return JsonResponse({
             "success": False,
             "scenario": "",
+            "room_exists": rm.room_exists(room_code),
             "tie": False,
             "votes_info": votes_info,
             "message": "Waiting for other players to vote."
@@ -541,6 +553,7 @@ def display_scenario_and_image(
         return JsonResponse({
             'success': False,
             'status': 'error',
+            'room_exists': rm.room_exists(room_code),
             'votes_info': votes_info,
             'error': f'Failed to display world view: {str(e)}'
         }, status=500)
@@ -586,21 +599,21 @@ def get_scores_view(request):
 @require_POST
 def submit_tiebreak_score_view(request):
     """
-        Handle POST request for multiplayer tie-break score submissions.
+    POST /mini-game/submit_tiebreak_score
+    Used by both players and host.
 
-        Expects JSON request body with:
-        {
-            "room_code": "ABC123",   # unique game room identifier
-            "turn_id": 5,            # numeric turn or round ID
-            "player_name": "Alice",  # player's display name
-            "score": 92              # player's tie-break score
-        }
+    Body:
+      {
+          "room_code": "ABC123",
+          "turn_id": 5,
+          "player_name": "Alice" or "HOST",
+          "score": 92  # or -1 if host
+      }
 
-        Returns:
-            JsonResponse: Indicates the status of the tie-break session:
-                        - {"status": "pending"} if still unresolved
-                        - {"status": "resolved", "winner": <name>, "winning_option": <option>}
-        """
+    Returns:
+      {"status": "pending"}                     -> if unresolved
+      {"status": "resolved", "winner": "..."}   -> once resolved
+    """
     try:
         data = json.loads(request.body.decode("utf-8"))
         room_code = data["room_code"]
@@ -614,12 +627,22 @@ def submit_tiebreak_score_view(request):
     if not voting_sesh:
         return JsonResponse({"error": "No active voting session found"}, status=404)
 
-    result = voting_sesh.submit_tiebreak_score(player_name, score)
-    if result:
-        logger.info({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})
-        return JsonResponse({"status": "resolved", "winner": result["winner"], "winning_option": result["winning_option"]})
-    else:
-        logger.info({"status": "pending"})
+    if player_name.upper() == "HOST" or score == -1:
+        winner_info = voting_sesh.get_tiebreak_winner()
+        if winner_info:
+            return JsonResponse({
+                "status": "resolved",
+                "winner": winner_info["winner"],
+                "winning_option": winner_info["winning_option"]
+            })
         return JsonResponse({"status": "pending"})
 
-
+    result = voting_sesh.submit_tiebreak_score(player_name, score)
+    if result:
+        return JsonResponse({
+            "status": "resolved",
+            "winner": result["winner"],
+            "winning_option": result["winning_option"]
+        })
+    else:
+        return JsonResponse({"status": "pending"})

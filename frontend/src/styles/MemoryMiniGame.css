@@ -1,39 +1,79 @@
-/* === Grid for MiniGame === */
+@import url('/src/styles/tokens.css');
 
+/* === MINI-GAME CONTAINER === */
+.mini-game-intro,
+.mini-game-result {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', sans-serif;
+  color: #ffffff;
+  text-align: center;
+  min-height: 100vh;
+  padding: 1rem;
+  background: transparent;
+  animation: fadeIn 1.2s ease;
+}
+
+.mini-game-intro h2,
+.mini-game-result h2 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  text-shadow:
+    0 0 12px rgba(255, 255, 255, 0.7),
+    0 0 28px rgba(180, 180, 255, 0.3);
+}
+
+.mini-game-intro p,
+.mini-game-result p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+}
+
+/* === GRID LAYOUT === */
 .emoji-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 columns */
+  grid-template-columns: repeat(4, 1fr);
   gap: 15px;
   justify-items: center;
   align-items: center;
   padding: 2rem 0;
-  max-width: 500px; /* smaller width for 4x4 layout */
+  max-width: 500px;
   margin: 0 auto;
 }
 
+/* === CARD STYLING === */
 .card {
   width: 80px;
   height: 100px;
+  perspective: 800px;
+  cursor: pointer;
+  transition: transform 0.25s ease;
 }
 
+.card:hover {
+  transform: scale(1.05);
+}
 
-
-/* Card inner wrapper for flip animation */
 .card-inner {
   position: relative;
   width: 100%;
   height: 100%;
-  transition: transform 0.6s;
+  transition: transform 0.6s ease;
   transform-style: preserve-3d;
 }
 
-/* Flip the card when flipped class is applied */
 .card.flipped .card-inner {
   transform: rotateY(180deg);
 }
 
-/* Card front and back */
-.card-front, .card-back {
+/* CARD FACES */
+.card-front,
+.card-back {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -42,100 +82,86 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
   font-family: 'Orbitron', sans-serif;
-  text-shadow: 0 0 10px rgba(0,255,255,0.5);
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
   transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    inset 0 0 10px rgba(255, 255, 255, 0.08),
+    0 0 15px rgba(255, 255, 255, 0.1);
 }
 
-/* Card front (hidden) */
+/* FRONT (question mark) */
 .card-front {
-  background: rgba(20, 30, 40, 0.6); /* semi-transparent front */
-  border: 2px solid #00f0ff;
-  color: #00f0ff;
-  font-size: 1.5rem;
+  background: #101010; /* solid black surface */
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.4rem;
+  text-shadow:
+    0 0 8px rgba(255, 255, 255, 0.5),
+    0 0 20px rgba(200, 200, 255, 0.25);
+  animation: holoPulse 3s ease-in-out infinite;
 }
 
-/* Card back (emoji) */
+/* BACK (emoji reveal) */
 .card-back {
-  background: rgba(0,0,0,0.5); /* semi-transparent back */
-  border: 2px solid #00ffa0;
-  color: #00ffa0;
-  transform: rotateY(180deg);
+  background: #1b1b1b; /* solid deep grey */
+  color: #ffffff;
   font-size: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-shadow: 0 0 15px rgba(0, 255, 160, 0.8);
+  transform: rotateY(180deg);
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.6),
+    0 0 24px rgba(180, 180, 255, 0.3);
+  box-shadow:
+    0 0 25px rgba(255, 255, 255, 0.15);
 }
 
-/* Card hover effects */
+/* Glow pulse for matched cards */
+.card.flipped .card-back {
+  box-shadow:
+    0 0 25px rgba(255, 255, 255, 0.4),
+    0 0 45px rgba(200, 200, 255, 0.3);
+  transition: box-shadow 0.4s ease;
+}
+
+/* Hover subtle glow */
 .card:hover .card-front {
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-  transform: none; /* prevent revealing content */
+  box-shadow:
+    0 0 20px rgba(255, 255, 255, 0.15),
+    inset 0 0 10px rgba(255, 255, 255, 0.05);
 }
 
 .card:hover .card-back {
-  box-shadow: 0 0 10px rgba(0, 255, 160, 0.5);
-  transform: rotateY(180deg); /* keep hidden unless flipped */
+  box-shadow:
+    0 0 25px rgba(255, 255, 255, 0.25),
+    inset 0 0 8px rgba(255, 255, 255, 0.05);
 }
 
-/* === MiniGame Intro & Result Screens === */
-.mini-game-intro,
-.mini-game-result {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Kanit', sans-serif;
-  color: #f5fcff;
-  text-align: center;
-  min-height: 100vh;
-  padding: 1rem;
-  background: transparent; /* blend with main background */
-}
-
-/* Optional subtle overlay for readability */
-.mini-game-intro::before,
-.mini-game-result::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(10,10,10,0.2); /* subtle dark overlay */
-  z-index: -1; /* behind content */
-  border-radius: inherit;
-}
-
-/* Headings */
-.mini-game-intro h2,
-.mini-game-result h2 {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  text-shadow: 0 0 10px #00f0ff, 0 0 20px #00ffa0;
-}
-
-/* Input styling for intro screen */
-.mini-game-intro input {
-  padding: 0.6rem 1rem;
+/* === MOVES DISPLAY === */
+.mini-game-intro p:last-of-type {
+  margin-top: 1.5rem;
   font-size: 1rem;
-  border-radius: 8px;
-  border: 2px solid #00f0ff;
-  background: rgba(20, 30, 40, 0.6); /* semi-transparent input */
-  color: #f5fcff;
-  margin-bottom: 1rem;
-  text-align: center;
+  color: rgba(255, 255, 255, 0.75);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
 }
 
-.mini-game-intro input:focus {
-  outline: none;
-  border-color: #00ffa0;
-  box-shadow: 0 0 15px rgba(0, 255, 160, 0.6);
+/* === ANIMATIONS === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Buttons for Intro & Result screens */
+/* Holographic breathing glow */
+@keyframes holoPulse {
+  0%, 100% {
+    opacity: 0.9;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+  }
+}
+
+/* === BUTTONS === */
 .mini-game-intro button,
 .mini-game-result button {
   padding: 0.75rem 1.5rem;
@@ -143,10 +169,10 @@
   font-family: 'Orbitron', sans-serif;
   font-weight: 700;
   letter-spacing: 1px;
-  border: 2px solid #60dbfa;
-  border-radius: 6px;
-  background: rgba(20, 30, 40, 0.6); /* semi-transparent button */
-  color: #60dbfa;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  background: #111; /* solid black button */
+  color: #fff;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 1rem;
@@ -154,26 +180,20 @@
 
 .mini-game-intro button:hover,
 .mini-game-result button:hover {
-  background: rgba(30, 50, 60, 0.6);
-  box-shadow: 0 0 25px rgba(96, 219, 250, 0.7);
+  background: #222;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
   transform: scale(1.05);
 }
 
-/* Result Score */
-.mini-game-result p {
-  font-size: 1.2rem;
-  margin: 0.5rem 0;
-}
-
-/* Responsive adjustments */
+/* === RESPONSIVE === */
 @media (max-width: 500px) {
   .emoji-grid {
-    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
   }
 
   .card {
-    width: 60px;
+    width: 65px;
     height: 80px;
   }
 
@@ -183,18 +203,6 @@
 
   .mini-game-intro h2,
   .mini-game-result h2 {
-    font-size: 1.5rem;
-  }
-}
-/* Optional: smaller size for mobile */
-@media (max-width: 500px) {
-  .emoji-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-  }
-
-  .card {
-    width: 60px;
-    height: 80px;
+    font-size: 1.7rem;
   }
 }

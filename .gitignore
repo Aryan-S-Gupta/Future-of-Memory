@@ -19,6 +19,7 @@ venv/
 backend/media/*
 !backend/media/
 !backend/media/static/
+backend/feedback
 
 # Ignore Redis files
 dump.rdb

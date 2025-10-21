@@ -52,6 +52,9 @@ class VotingSession:
         self.vote_timer = self.vote_timer = threading.Timer(self.vote_timeout, self.end_voting)
         self.time_started = False
         self.inactive_players = set()
+        self.tiebreak_winner = None
+        self.tiebreak_winning_option = None
+
         self.final_option = None
         self.lock = threading.Lock()
         self.tie_mode = False           # True when in tie-breaker mode
@@ -160,6 +163,8 @@ class VotingSession:
             if player_name in self.voted_players:
                 return None
         
+            if player_name == rm.get_host(self.room_code):
+                return self.final_option
             logging.info(f"Player {player_name} voted for option {option_id} in room {room}")  
             logging.info(f"Total players in room: {rm.get_players(room)}")
             # record the player's vote
@@ -266,9 +271,6 @@ class VotingSession:
 
     def submit_tiebreak_score(self, player_name, score):
         """Store a tie-breaker minigame score for a tied player."""
-        if not self.tie_mode:
-            logging.info("Tie-break score received when tie_mode=False")
-            return None
 
         if player_name not in self.tie_players:
             logging.warning(f"{player_name} is not part of tie-breaker players.")
@@ -280,7 +282,8 @@ class VotingSession:
         logging.info(f"[Tie-break Current Scores] {self.tie_scores}")
 
         # Check if all tied players have submitted scores
-        if len(self.tie_scores) == len(self.tie_players):
+        if len(self.tie_scores) >= len(rm.get_players(self.room_code)):
+            logging.info("reached") 
             return self.resolve_tiebreak_winner()
         return None
 
@@ -297,6 +300,8 @@ class VotingSession:
         winning_option = self.p_votes[winner]
         self.final_option = winning_option
         self.tie_mode = False
+
+        self.tiebreak_winner = winner
 
         logging.info(f"Tie-break resolved: {winner} won with {highest_score}. Option chosen: {winning_option}")
         return {
@@ -568,6 +573,15 @@ class VotingSession:
 
         logging.info(f"Vote status for room {self.room_code}: {votes_so_far}")
         return votes_so_far
+
+    def get_tiebreak_winner(self):
+        """Return winner info if the tie-break has been resolved."""
+        if self.tiebreak_winner:
+            return {
+                "winner": self.tiebreak_winner,
+                "winning_option": self.p_votes[self.tiebreak_winner]
+        }
+        return None
 
 
 # Global dictionary to manage voting sessions per room
