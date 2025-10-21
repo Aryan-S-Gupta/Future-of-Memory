@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQuestion, submitChoice, } from "../../api/single-player/GameApi";
 import { useSession } from "../../SessionContext.jsx";
-import background from "../assets/background.jpg";
+import background from "../../assets/fallback_first_turn.png";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import Button from "../components/Button/Button.jsx";
 import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
