@@ -208,7 +208,7 @@ def leave_multiplayer_room(request):
                 "success": success,
                 "room_code": room_code,
                 "player_name": player_name,
-                "destroy": False,
+                'destroy': rm.room_exists(room_code),
                 "message": f"player removed but {room_code} still exists",
             }
         else:
@@ -225,7 +225,7 @@ def leave_multiplayer_room(request):
             "success": success,
             "room_code": room_code,
             "player_name": player_name,
-            "destroy": rm.room_exists(room_code),
+            'destroy': rm.room_exists(room_code),
             "message": f"Failed to leave room {room_code}",
         }
         logger.warning(f"Failed to leave room {room_code}")
@@ -382,36 +382,34 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     existing_session = get_object_or_404(Session, id=session_id)
     logger.info(f"Found session: {existing_session}")
     logger.info(f"turn_id received: {turn_id}")
-    new_year = -1
+    # latest_stored = latest_turn = (
+    #         Turn.objects
+    #         .filter(session_id=existing_session.id)
+    #         .order_by('-year', '-id')
+    #         .first()
+    #     )
+    # logger.info(f'latest stored turn id ={latest_stored}')
 
-    latest_stored = latest_turn = (
-            Turn.objects
-            .filter(session_id=existing_session.id)
-            .order_by('-year', '-id')
-            .first()
-        )
-    logger.info(f'latest stored turn id ={latest_stored}')
-
-    if not rm.room_exists(room_code):
-        return JsonResponse({'success': False, 'room_exists': False})
+    # if not rm.room_exists(room_code):
+    #     return JsonResponse({'success': False, 'room_exists': False})
     
-    if int(turn_id) == -1:
-        logger.info("year:" + year)
-        latest_turn = (
-            Turn.objects.filter(session_id=existing_session.id)
-            .order_by("-year", "-id")
-            .first()
-        )
-        # if the turn is not rrady yet
-        if not latest_turn:
-            logger.warning("No turns found for this session")
-            return JsonResponse({"error": "No turn found for this session"}, status=404)
+    # if int(turn_id) == -1:
+    #     logger.info("year:" + year)
+    #     latest_turn = (
+    #         Turn.objects.filter(session_id=existing_session.id)
+    #         .order_by("-year", "-id")
+    #         .first()
+    #     )
+    #     # if the turn is not rrady yet
+    #     if not latest_turn:
+    #         logger.warning("No turns found for this session")
+    #         return JsonResponse({"error": "No turn found for this session"}, status=404)
 
-    else:
-        # get specific turn by ID
-        new_turn = int(turn_id) + 1
-        latest_turn = get_object_or_404(Turn, year=int(year),  session_id=session_id)
-        logger.info(f'latest turn is; {latest_turn}')
+    # else:
+    #     # get specific turn by ID
+    #     new_turn = int(turn_id) + 1
+    latest_turn = get_object_or_404(Turn, year=int(year),  session_id=session_id)
+    logger.info(f'latest turn is; {latest_turn}')
         
     
     if latest_turn.year != int(year): 
@@ -440,13 +438,13 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     ]
 
     response_payload = {
-        "message": "ok",
-        "room_code": room_code,
-        "room_exists": rm.room_exists(room_code),
-        "turn_id": turn_id,
-        "year": new_year,
-        "question": latest_turn.question or "",
-        "options": options_payload,
+        'message': 'ok',
+        'room_code': room_code,
+        'room_exists': rm.room_exists(room_code),
+        'turn_id': turn_id,
+        'year': year,
+        'question': latest_turn.question or '',
+        'options': options_payload,
     }
 
     return JsonResponse(response_payload)
@@ -500,7 +498,7 @@ def display_scenario_and_image(
         "final_option": final_option
     }
     if final_option == "TIE":
-        logger.info("senfing tie")
+        logger.info("sending tie")
         return JsonResponse({
             'success': False,
             'room_exists': True,
@@ -525,24 +523,23 @@ def display_scenario_and_image(
     try:
         world_view_data = display_world_view(session_id, turn_id, year, final_option)
 
-        if (
-            world_view_data.get("success")
-            and world_view_data.get("scenario").get("text") != ""
-        ):
+        if world_view_data.get("success"):
             next_year = int(year) + 1
             next_turn = Turn.objects.filter(
                 session_id=session_id, year=next_year
             ).first()
             if next_turn:
                 world_view_data["next_turn_id"] = next_turn.id
-            # start generating next turn in background
-            try:
-                start_turn_pipeline.send(session_id, next_year)
-                logger.info(
-                    f"Started generating next turn (year {next_year}) in background"
-                )
-            except Exception as e:
-                logger.warning(f"Failed to start next turn generation: {e}")
+            
+            if not next_turn:
+                # start generating next turn in background only if it doesn't exist yet
+                try:
+                    start_turn_pipeline.send(session_id, next_year)
+                    logger.info(f"Started generating next turn (year {next_year}) in background")
+                except Exception as e:
+                    logger.warning(f"Failed to start next turn generation: {e}")
+            else:
+                logger.debug(f"Next turn (year {next_year}) already exists, skipping generation")
 
             # Include votes info always
             world_view_data["votes_info"] = votes_info

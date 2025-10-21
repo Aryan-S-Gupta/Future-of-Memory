@@ -8,19 +8,33 @@ for the MemorySim narrative game. It handles JSON validation, retries, and error
 import requests
 import json
 import re
+import logging
 from typing import Dict, Any, Union
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 # Handle imports for both relative (Django) and absolute (standalone) usage
 try:
     from .prompt_templates import build_question_prompt, build_description_prompt, build_image_text_prompt
-    from ..shared.constants import OLLAMA_LLM_MODEL
+    from ..shared.constants import (
+        OLLAMA_LLM_MODEL_QUESTION, 
+        OLLAMA_LLM_MODEL_SCENARIO, 
+        OLLAMA_LLM_MODEL_IMAGE,
+        OLLAMA_LLM_MODEL  # for backward compatibility
+    )
 except ImportError:
     from llm.prompt_templates import build_question_prompt, build_description_prompt, build_image_text_prompt
-    from shared.constants import OLLAMA_LLM_MODEL
+    from shared.constants import (
+        OLLAMA_LLM_MODEL_QUESTION, 
+        OLLAMA_LLM_MODEL_SCENARIO, 
+        OLLAMA_LLM_MODEL_IMAGE,
+        OLLAMA_LLM_MODEL  # for backward compatibility
+    )
 
 # Configuration constants
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = OLLAMA_LLM_MODEL
+MODEL = OLLAMA_LLM_MODEL  # Default model for backward compatibility
 
 # JSON Schemas for structured output
 QUESTION_SCHEMA = {
@@ -28,13 +42,13 @@ QUESTION_SCHEMA = {
     "properties": {
         "question": {
             "type": "string", 
-            "description": "18-30 words, specific, time-aware, builds on history"
+            "description": "18-35 words written as 2-3 short sentences, with one question mark at the end"
         },
         "options": {
             "type": "array",
             "items": {
                 "type": "string",
-                "description": "10-18 words, concrete policy/action, mutually exclusive"
+                "description": "15-30 words, concrete policy/action, mutually exclusive"
             },
             "minItems": 2,
             "maxItems": 2,
@@ -44,7 +58,7 @@ QUESTION_SCHEMA = {
             "type": "array",
             "items": {
                 "type": "string",
-                "description": "<=80 chars keyword phrase for RAG retrieval"
+                "description": "3–6 lowercase keywords for retrieval (no verbs, no questions)"
             },
             "minItems": 2,
             "maxItems": 2,
@@ -59,7 +73,7 @@ DESCRIPTION_SCHEMA = {
     "properties": {
         "scenario": {
             "type": "string",
-            "description": "Single paragraph with 80-150 words"
+            "description": "Single paragraph with 6-9 short sentences, 80-150 words total"
         },
         "scenario_summary": {
             "type": "string",
@@ -90,13 +104,14 @@ OPTIONS_REFINE_SCHEMA = {
 
 # ---------- Shared helpers ----------
 
-def call_ollama(prompt: str, json_schema: dict = None) -> dict:
+def call_ollama(prompt: str, json_schema: dict = None, model: str = None) -> dict:
     """
     Call the Ollama API with the given prompt and return parsed JSON response.
     
     Args:
         prompt: The prompt to send to the model
         json_schema: Optional JSON schema to enforce response format
+        model: Optional model name to use (defaults to MODEL constant)
         
     Returns:
         dict: Parsed JSON response from the model
@@ -105,8 +120,9 @@ def call_ollama(prompt: str, json_schema: dict = None) -> dict:
         requests.RequestException: If the API call fails
         json.JSONDecodeError: If the response is not valid JSON
     """
+    selected_model = model if model else MODEL
     payload = {
-        "model": MODEL, 
+        "model": selected_model, 
         "prompt": prompt, 
         "stream": False, 
         "format": json_schema if json_schema else "json",
@@ -122,7 +138,14 @@ def call_ollama(prompt: str, json_schema: dict = None) -> dict:
     response.raise_for_status()
     
     data = response.json()  # Ollama's response wrapper
-    text = data.get("response", "").strip()  # Extract model output
+    
+    # Try to get response from different fields (Ollama versions may vary)
+    text = data.get("response", "").strip()
+    if not text and "thinking" in data:
+        text = data.get("thinking", "").strip()
+    
+    if not text:
+        raise ValueError(f"Empty response from Ollama. Full response: {data}")
     
     return json.loads(text)  # Convert to Python dict
 
@@ -150,11 +173,21 @@ def validate_question_options(result: dict) -> bool:
     if len(options) != 2:
         return False
     
-    # Each option must be a string with 6-20 words
+    # Each option must be a string with 6-35 words
     for opt in options:
-        if not isinstance(opt, str) or not (6 <= len(opt.split()) <= 20):
+        if not isinstance(opt, str) or not (6 <= len(opt.split()) <= 35):
             return False
-    
+        
+        # Check for invalid "keywords" content (case insensitive)
+        if "keywords" in opt.lower() or "queries" in opt.lower():
+            print(f"Validation failed: Option contains 'keywords' or 'queries': {opt}")
+            return False
+
+        # Check if the sentence starts with a capital letter or digit
+        if not (opt[0].isupper() or opt[0].isdigit()):
+            print(f"Validation failed: Option does not start with a capital letter or digit: {opt}")
+            return False
+
     return True
 
 
@@ -178,10 +211,10 @@ def validate_description_scenario(result: dict) -> bool:
         print(f"Validation failed: scenario is empty")
         return False
     
-    # Check word count - fixed 50-150 words requirement
+    # Check word count
     word_count = len(scenario.split())
-    if not (50 <= word_count <= 150):
-        print(f"Validation failed: word count is {word_count}, expected 50-150")
+    if not (50 <= word_count <= 180):
+        print(f"Validation failed: word count is {word_count}, expected 50-180")
         return False
     
     return True
@@ -199,13 +232,14 @@ def refine_question_options(original_result: dict) -> dict:
     """
     question = original_result.get("question", "")
     fix_prompt = f"""
-    Return ONLY valid JSON.
+   <|system|>
 
+    ROLE
+    You are a storyteller for a turn-based museum game about the future of memory technology.
     You previously produced a question but did not provide exactly two valid options.
-    Rewrite ONLY the "options" array with EXACTLY TWO concise, mutually exclusive choices (6–14 words each).
+    Rewrite two opposite mini-story option sentences with the REQUIRED STRUCTURE: "[WHICH GROUP] should [ACTION] so that [RESULT]" with natural language only.
+    NO symbols and don't start with option A or B.
     and do NOT repeat the question text.
-
-    Question: {question}
 
     Output schema:
     {{
@@ -214,10 +248,15 @@ def refine_question_options(original_result: dict) -> dict:
             "Option B"
         ]
     }}
+    <|end|>
+    <|user|>
+    Question: {question}
+    <|end|>
+    <|assistant|>
     """.strip()
 
     try:
-        refined_result = call_ollama(fix_prompt, OPTIONS_REFINE_SCHEMA)
+        refined_result = call_ollama(fix_prompt, OPTIONS_REFINE_SCHEMA, model=OLLAMA_LLM_MODEL_QUESTION)
         if validate_question_options(refined_result):
             original_result["options"] = refined_result["options"]
     except Exception as e:
@@ -339,35 +378,50 @@ def generate_question(
     Raises:
         Exception: If generation fails after all retries
     """
+    print(f"[DEBUG] generate_question CALLED with year={year}, story_state={'present' if story_state else 'None'}")
+    logger.info(f"generate_question CALLED with year={year}, story_state={'present' if story_state else 'None'}")
+    
     # Year-based validation and context selection
     if year == 2035:
         # First year: use background directly without story state
+        logger.info(f"Year {year}: Using first year logic (no story_state)")
         prompt = build_question_prompt(
             year, background, context_block
         )
     elif story_state:
         # Subsequent years with story state: use all historical context
         history = story_state.get("history", [])
+        logger.info(f"Year {year}: Using story_state with {len(history)} history entries")
         
         # Build compressed context with all history and RAG content
         if history:
             history_context = "\n".join([f"Turn {i+1}: {summary}" for i, summary in enumerate(history)])
             compressed_context = f"Story History:\n{history_context}\n\nRAG Context: {context_block}"
+            logger.info(f"Year {year}: Built compressed context with history ({len(history_context)} chars)")
         else:
             compressed_context = f"RAG Context: {context_block}"
+            logger.info(f"Year {year}: story_state exists but history is empty, using RAG only")
             
         prompt = build_question_prompt(
             year, background, compressed_context
         )
     else:
         # Fallback for subsequent years without story state
+        logger.info(f"Year {year}: No story_state provided, using fallback context")
         prompt = build_question_prompt(
             year, background, context_block
         )
     
     # Step A: Main generation attempt
     try:
-        result = call_ollama(prompt, QUESTION_SCHEMA)
+        result = call_ollama(prompt, QUESTION_SCHEMA, model=OLLAMA_LLM_MODEL_QUESTION)
+
+        # Fix question if it doesn't end with question mark
+        if 'result' in locals() and 'question' in result:
+            question = result.get("question", "").strip()
+            if not question.endswith("?"):
+                result["question"] = question + " What should we do?"
+
         if validate_question_options(result):
             return json.dumps(result)
     except Exception as e:
@@ -382,36 +436,29 @@ def generate_question(
     # Step C: Retry main generation
     for attempt in range(max_retries):
         try:
-            result = call_ollama(prompt, QUESTION_SCHEMA)
+            result = call_ollama(prompt, QUESTION_SCHEMA, model=OLLAMA_LLM_MODEL_QUESTION)
+
+            # Fix question if it doesn't end with question mark
+            if 'result' in locals() and 'question' in result:
+                question = result.get("question", "").strip()
+                if not question.endswith("?"):
+                    result["question"] = question + " What should we do?"
+
             if validate_question_options(result):
                 return json.dumps(result)
         except Exception as e:
             print(f"Retry attempt {attempt + 1} failed: {e}")
     
-    # Step D: Fallback with default options
-    if 'result' in locals():
-        result["options"] = [
-            "Take an action that advances the situation forward",
-            "Hold back and reconsider before making a move"
-        ]
-        # Ensure option_queries exist
-        if "option_queries" not in result:
-            result["option_queries"] = [
-                "memory editing implementation policies and procedures",
-                "memory editing ethical concerns and safety considerations"
-            ]
-        return json.dumps(result)
-    
     # Ultimate fallback
     fallback_result = {
-        "question": "How should society proceed with memory editing technology?",
+        "question": "What should people do about this new technology?",
         "options": [
-            "Take an action that advances the situation forward",
-            "Hold back and reconsider before making a move"
+            "Move forward and try something new",
+            "Wait and think more about it first"
         ],
         "option_queries": [
-            "memory editing implementation policies and procedures",
-            "memory editing ethical concerns and safety considerations"
+            "new technology and helpful changes",
+            "being careful and thinking about problems"
         ]
     }
     return json.dumps(fallback_result)
@@ -454,8 +501,8 @@ def generate_option_image_texts(
     
     # Default fallback descriptions for each option type
     fallback_descriptions = [
-        "Officials in a modern conference room discussing policy implementation",
-        "Researchers in a laboratory setting reviewing technical documentation"
+        "People in suits sitting around a big table talking about new rules",
+        "Scientists in white coats looking at computers and books in a lab"
     ]
     
     for i, (label, option_text) in enumerate(zip(option_labels, options)):
@@ -484,7 +531,7 @@ def generate_option_image_texts(
                 }
                 
                 # Use JSON-based call for individual image descriptions
-                result = call_ollama(prompt, single_image_schema)
+                result = call_ollama(prompt, single_image_schema, model=OLLAMA_LLM_MODEL_IMAGE)
                 
                 # Extract the description from JSON result
                 if result and "description" in result and len(result["description"]) > 5:
@@ -542,7 +589,7 @@ def generate_option_descriptions(
     Returns:
         str: JSON string ready for database storage, mapping option labels ('A', 'B') 
         to description results, each containing:
-            - scenario: String paragraph (80-150 words)
+            - scenario: String paragraph (70-120 words)
             - scenario_summary: Brief summary for story state tracking
             - query_text: RAG query string for next turn
             
@@ -561,14 +608,14 @@ def generate_option_descriptions(
     # Default fallback descriptions for each option type
     fallback_scenarios = [
         # Option A fallback
-        "The policy-focused approach creates structured institutional changes as government agencies begin implementing new regulatory frameworks. Official committees meet to establish standardized procedures while public institutions adapt their operations to comply with new guidelines. The systematic approach ensures consistent implementation across all sectors, creating a foundation for regulated progress. Citizens observe these developments with cautious optimism, wondering how these changes will affect their daily lives. What balance between safety and innovation will ultimately emerge from this structured approach?",
+        "The government decides to make new rules about the technology. Important people meet in big buildings to talk about what should be allowed and what should not be allowed. They write down the rules on paper and tell everyone what they have to do. Some people are happy because the rules help keep everyone safe. Other people are worried because the rules might slow down new discoveries. Everyone is watching to see what happens next. Will the new rules help people, or will they make things too hard?",
         # Option B fallback
-        "The research-driven approach prioritizes scientific investigation as scientists launch comprehensive studies to gather empirical data. Research facilities expand their capabilities to support the investigation while academic institutions collaborate to publish findings and recommendations. Evidence-based conclusions guide future decision-making processes, ensuring that policy follows scientific understanding. The methodical pace frustrates some stakeholders who seek immediate solutions, yet others appreciate the thoroughness. How long will society wait for definitive answers before demanding action?"
+        "Scientists want to learn more before making big decisions. They do lots of experiments and tests to understand how things work. Smart people in labs work together to find out what is safe and what might be dangerous. They write reports about what they discover and share their ideas with everyone. Some people think this is smart because they want to know all the facts first. Other people are getting impatient because they want answers right now. How long will everyone wait before something big happens?"
     ]
     
     fallback_queries = [
-        "policy implementation and regulatory frameworks",
-        "scientific research and empirical evidence"
+        "new rules and government decisions",
+        "science experiments and learning more"
     ]
     
     # Process context_block with story_state for each option
@@ -578,16 +625,20 @@ def generate_option_descriptions(
         # Process context_block with story state
         if year == 2035:
             processed_context = context_block
+            print(f"[DEBUG] Option {label} Year {year}: Using basic context (first year)")
         elif story_state:
             history = story_state.get("history", [])
             if history:
                 history_context = "\n".join([f"Turn {i+1}: {summary}" for i, summary in enumerate(history)])
                 processed_context = f"Story History:\n{history_context}\n\nRAG Context: {context_block}"
+                print(f"[DEBUG] Option {label} Year {year}: Using story_state with {len(history)} history entries")
             else:
                 processed_context = f"RAG Context: {context_block}"
+                print(f"[DEBUG] Option {label} Year {year}: story_state exists but history is empty")
         else:
             # Fallback
             processed_context = context_block
+            print(f"[DEBUG] Option {label} Year {year}: No story_state provided, using fallback")
         
         for attempt in range(max_retries):
             try:
@@ -599,7 +650,7 @@ def generate_option_descriptions(
                     selected_option=option_text
                 )
                 
-                result = call_ollama(prompt, DESCRIPTION_SCHEMA)
+                result = call_ollama(prompt, DESCRIPTION_SCHEMA, model=OLLAMA_LLM_MODEL_SCENARIO)
                 
                 if validate_description_scenario(result):
                     option_descriptions[label] = result
@@ -615,7 +666,7 @@ def generate_option_descriptions(
         if not success:
             option_descriptions[label] = {
                 "scenario": fallback_scenarios[i],
-                "scenario_summary": f"{'Policy-focused institutional changes' if i == 0 else 'Research-driven scientific investigation'} continue to develop",
+                "scenario_summary": f"{'Government makes new rules and people follow them' if i == 0 else 'Scientists do more tests to learn what is safe'} as things keep changing",
                 "query_text": fallback_queries[i]
             }
             print(f"Option {label}: Using fallback description")

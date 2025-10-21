@@ -5,7 +5,20 @@ This module provides high-level business logic functions that coordinate between
 different components (LLM, RAG, Database) to deliver complete game functionality.
 
 Key Functions:
-- generate_and_save_question(): Generate and save questions for new turns
+- generate_and_save_que    except Exception as e:
+        logger.error(f"Failed to create options: {e}")
+        # If we hit a unique constraint error, it might be a race condition
+        # Try to retrieve existing options
+        if "unique constraint" in str(e).lower():
+            logger.warning("Attempting to retrieve existing options due to constraint error")
+            created_options = list(Option.objects.filter(turn=new_turn).order_by('label'))
+            if len(created_options) == 2:
+                logger.info(f"Retrieved {len(created_options)} existing options for turn {new_turn.id}")
+            else:
+                logger.error(f"Expected 2 options, found {len(created_options)}")
+                raise
+        else:
+            raiseon(): Generate and save questions for new turns
 - generate_and_save_scenario(): Generate and save scenario descriptions 
 - generate_and_save_image_text(): Generate and save image descriptions
 - record_user_choice(): Record player's choice for a turn
@@ -177,16 +190,28 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
         logger.error(f"LLM question generation failed: {e}")
         raise
     
-    # Step 6: Create new Turn record with story state
+    # Step 6: Create new Turn record with story state (handle duplicates)
     try:
-        new_turn = Turn.objects.create(
-            session=session,
-            year=year,
-            question=question_result.get('question', ''),
-            question_generated_at=timezone.now(),
-            story_state=current_story_state or {}
-        )
-        logger.info(f"Created new turn {new_turn.id} for year {year}")
+        # Check if turn already exists
+        existing_turn = Turn.objects.filter(session=session, year=year).first()
+        if existing_turn:
+            logger.warning(f"Turn for session {session_id}, year {year} already exists (turn_id={existing_turn.id})")
+            # Update existing turn instead of creating new one
+            existing_turn.question = question_result.get('question', '')
+            existing_turn.question_generated_at = timezone.now()
+            existing_turn.story_state = current_story_state or {}
+            existing_turn.save()
+            new_turn = existing_turn
+            logger.info(f"Updated existing turn {new_turn.id} for year {year}")
+        else:
+            new_turn = Turn.objects.create(
+                session=session,
+                year=year,
+                question=question_result.get('question', ''),
+                question_generated_at=timezone.now(),
+                story_state=current_story_state or {}
+            )
+            logger.info(f"Created new turn {new_turn.id} for year {year}")
         
     except Exception as e:
         logger.error(f"Failed to create Turn record: {e}")
@@ -205,17 +230,30 @@ def generate_and_save_question(session_id: int, year: int) -> Dict[str, Any]:
     
     try:
         for i, (label, option_text, query_text) in enumerate(zip(labels, options_data, option_queries)):
-            option = Option.objects.create(
-                turn=new_turn,
-                label=label,
-                option_text=option_text,
-                scenario_query_text=query_text,
-                created_at=timezone.now()
-            )
-            created_options.append(option)
-            logger.debug(f"Created option {label}: {option_text[:30]}...")
+            # Check if option already exists
+            existing_option = Option.objects.filter(turn=new_turn, label=label).first()
+            if existing_option:
+                logger.warning(f"Option {label} for turn {new_turn.id} already exists, updating")
+                # Update existing option
+                existing_option.option_text = option_text
+                existing_option.scenario_query_text = query_text
+                existing_option.created_at = timezone.now()
+                existing_option.save()
+                created_options.append(existing_option)
+                logger.debug(f"Updated option {label}: {option_text[:30]}...")
+            else:
+                # Create new option
+                option = Option.objects.create(
+                    turn=new_turn,
+                    label=label,
+                    option_text=option_text,
+                    scenario_query_text=query_text,
+                    created_at=timezone.now()
+                )
+                created_options.append(option)
+                logger.debug(f"Created option {label}: {option_text[:30]}...")
         
-        logger.info(f"Successfully created {len(created_options)} options for turn {new_turn.id}")
+        logger.info(f"Successfully processed {len(created_options)} options for turn {new_turn.id}")
         
     except Exception as e:
         logger.error(f"Failed to create Option records: {e}")
@@ -266,6 +304,31 @@ def generate_and_save_scenario(session_id: int, turn_id: int, year: int) -> Dict
         Exception: If generation or database operations fail
     """
     logger.info(f"Starting scenario generation for session {session_id}, turn {turn_id}, year {year}")
+    
+    # added duplication check
+    try:
+        existing_turn = Turn.objects.get(id=turn_id)
+        existing_options = Option.objects.filter(turn=existing_turn)
+        
+        # check if scenarios already exist
+        if existing_options.exists() and all(opt.scenario for opt in existing_options):
+            logger.warning(f"Scenarios already exist for turn {turn_id}, session {session_id}, year {year} - skipping generation")
+            return {
+                "status": "already_exists",
+                "session_id": session_id,
+                "turn_id": turn_id,
+                "year": year,
+                "message": "Scenarios already generated for this turn"
+            }
+            
+        # check if some options are incomplete
+        incomplete_options = [opt for opt in existing_options if not opt.scenario]
+        if incomplete_options:
+            logger.info(f"Found {len(incomplete_options)} incomplete scenarios for turn {turn_id}, continuing generation")
+            
+    except Turn.DoesNotExist:
+        logger.error(f"Turn {turn_id} not found in duplication check")
+        # continue with normal flow
     
     # Step 1: Get session and world background
     try:

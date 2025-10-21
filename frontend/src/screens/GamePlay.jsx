@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQuestion, submitChoice, } from "../../api/single-player/GameApi";
 import { useSession } from "../../SessionContext.jsx";
-import background from "../assets/background.jpg";
+import background from "../assets/fallback_first_turn.png";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import Button from "../components/Button/Button.jsx";
 import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
@@ -83,13 +83,8 @@ const GamePlay = () => {
           return result;
         }
     }, enabled: loadingState == "question", 
-    refetchInterval: (result) => {
-        if (result != null) {
-          return false;
-        } else {
-          3000;
-        }
-    }, refetchIntervalInBackground: true, 
+    refetchInterval: 3000,
+    refetchIntervalInBackground: true, 
   })
 
   // --- Minimal TTS: inline (no extra files/deps) ---
@@ -312,10 +307,12 @@ const GamePlay = () => {
       setYear(year + 1);
       return out;
     },
-    enabled: screen !== "question" && currentTurn != null,
+    enabled: screen !== "question" && currentTurn != null && !scenarioData,
+    refetchInterval: 3000,
+    refetchIntervalInBackground: true,
     onError: (err) => {
       console.error("onError:", err);
-    }, refetchIntervalInBackground: true
+    }
   });
   const questionClass =
     stage === 1 || stage === 4 ? "fade-in-out show" :

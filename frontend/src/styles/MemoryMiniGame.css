@@ -183,9 +183,6 @@
   }
 }
 
-
-@import url('/src/styles/tokens.css');
-
 /* Make the intro content behave nicely *inside* the glass card */
 .mini-game-intro { /* keep for other screens if reused */ }
 

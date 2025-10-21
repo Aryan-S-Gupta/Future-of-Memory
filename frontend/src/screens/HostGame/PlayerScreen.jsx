@@ -6,7 +6,7 @@ import Button from "../../components/Button/Button.jsx";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../../styles/GamePlay.css";
 import { useSession } from "../../../SessionContext.jsx";
-import background from "../../assets/background.jpg";
+import background from "../../assets/fallback_first_turn.png";
 import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
@@ -424,6 +424,7 @@ const getFadeClass = (idx) => {
     if (screen === "miniGameResult" && miniWinner) {
       const timer = setTimeout(() => {
         setMiniWinner(null);
+        setMiniGameDone(false);
         setScreen("loading");
         setLoadingState("scenario");
         fetchFunFacts();

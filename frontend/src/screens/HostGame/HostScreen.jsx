@@ -6,7 +6,7 @@ import Button from "../../components/Button/Button.jsx";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../../styles/GamePlay.css";
 import { useSession } from "../../../SessionContext.jsx";
-import background from "../../assets/background.jpg";
+import background from "../../assets/fallback_first_turn.png";
 import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
@@ -52,11 +52,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
     "Once experimental, memory editing, enhancement, and storage are mainstream, forcing governments " +
-    "to confront choices that could redefine humanity. manipulation not just possible, but precise and reliable." +
-    "Memory editing, enhancement," +
-    "These technologies can erase trauma, boost learning, and even share memories, offering both promise " +
-    "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
-    " ownership, and the commercialization of consciousness.",
+    "to confront choices that could redefine humanity.",
     image: background // no image for the first one
 });
   const [roomDestroyed, setRoomDestroyed] = useState(false);
@@ -181,14 +177,17 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
           }
           if (out.tie) {
             console.log("Tie detected! Starting mini-game round...");
+            setWinnerInfo(null);
             setScreen("miniGameWait");
             return null;
           }
+          return null;
         }
         console.log("the data is", out );
 
         if (out.tie) {
             console.log("Tie detected! Starting mini-game round...");
+            setWinnerInfo(null);
             setScreen("miniGameWait");
             return null;
           }
@@ -400,8 +399,9 @@ const getFadeClass = (idx) => {
 
 useEffect(() => {
   // Only start polling if tie mode is active AND winner not yet resolved
+  console.log("trying");
   if (!currentTurn || winnerInfo) return;
-
+  console.log("winner info exists")
   const poll = setInterval(async () => {
     try {
       const res = await submitTiebreakScore("HOST", roomCode, currentTurn.turn_id, -1);
@@ -416,6 +416,7 @@ useEffect(() => {
         // after 10s, resume story
         setTimeout(() => {
           setScreen("loading");
+          fetchFunFacts();
           setLoadingState("scenario");
         }, 10000);
       }
