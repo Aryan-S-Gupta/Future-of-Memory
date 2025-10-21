@@ -257,3 +257,18 @@
   align-items: stretch; 
   padding-top: 3rem; 
 }
+.intro-form {
+  width: min(100%, 560px);            /* shrink on narrow viewports */
+  padding-inline: clamp(0.5rem, 4vw, 1rem);
+}
+
+.intro-input {
+  max-width: 100%;                    /* ensure no overflow */
+}
+
+/* Stack buttons on very small screens */
+@media (max-width: 420px) {
+  .intro-actions > * {
+    width: 100%;
+  }
+}
