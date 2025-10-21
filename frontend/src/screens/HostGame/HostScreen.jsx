@@ -34,6 +34,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
   const [votes, setVotes] = useState([]);
   const [totalPlayers, setTotalPlayers] = useState(1);
   const [miniGameOccurred, setMiniGameOccurred] = useState(false);
+  const [scenarioFetched, setScenarioFetched] = useState(false);
   const [winnerInfo, setWinnerInfo] = useState(null);
   const [showWinner, setShowWinner] = useState(false);
   const [played, setPlayed] = useState(false)
@@ -184,6 +185,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
             setScreen("miniGameWait");
             return null;
           }
+          return null;
         }
         console.log("the data is", out );
 
@@ -192,17 +194,19 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
             setScreen("miniGameWait");
             return null;
           }
-        const mapped = {
-          scenario: out.scenario.text,
-          image: out.image.url
-        };
-        console.log("Submit choice response:", mapped);
-
-        setScreen("scenario");
-        setLoadingState("none")
-        setScenarioData(mapped);
-        setYear(year + 1);
-        setOptionId(null);
+        if (!scenarioFetched) {
+          const mapped = {
+            scenario: out.scenario.text,
+            image: out.image.url
+          };
+          console.log("Submit choice response:", mapped);
+          setScreen("scenario");
+          setLoadingState("none")
+          setScenarioData(mapped);
+          setYear(year + 1);
+          setOptionId(null);
+          setScenarioFetched(true);
+        }
         return out;
       },
       enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen !== "miniGameWinner" && screen !== "miniGameWait",
@@ -393,6 +397,7 @@ const getFadeClass = (idx) => {
   const handleContinue = async () => {
     setLoadingState("question");
     setCurrentTurn(null);
+    setScenarioFetched(true);
     setAllVoted(false);
     setVotes([]);
     setScenarioData(null);
