@@ -382,36 +382,34 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     existing_session = get_object_or_404(Session, id=session_id)
     logger.info(f"Found session: {existing_session}")
     logger.info(f"turn_id received: {turn_id}")
-    new_year = -1
+    # latest_stored = latest_turn = (
+    #         Turn.objects
+    #         .filter(session_id=existing_session.id)
+    #         .order_by('-year', '-id')
+    #         .first()
+    #     )
+    # logger.info(f'latest stored turn id ={latest_stored}')
 
-    latest_stored = latest_turn = (
-            Turn.objects
-            .filter(session_id=existing_session.id)
-            .order_by('-year', '-id')
-            .first()
-        )
-    logger.info(f'latest stored turn id ={latest_stored}')
-
-    if not rm.room_exists(room_code):
-        return JsonResponse({'success': False, 'room_exists': False})
+    # if not rm.room_exists(room_code):
+    #     return JsonResponse({'success': False, 'room_exists': False})
     
-    if int(turn_id) == -1:
-        logger.info("year:" + year)
-        latest_turn = (
-            Turn.objects.filter(session_id=existing_session.id)
-            .order_by("-year", "-id")
-            .first()
-        )
-        # if the turn is not rrady yet
-        if not latest_turn:
-            logger.warning("No turns found for this session")
-            return JsonResponse({"error": "No turn found for this session"}, status=404)
+    # if int(turn_id) == -1:
+    #     logger.info("year:" + year)
+    #     latest_turn = (
+    #         Turn.objects.filter(session_id=existing_session.id)
+    #         .order_by("-year", "-id")
+    #         .first()
+    #     )
+    #     # if the turn is not rrady yet
+    #     if not latest_turn:
+    #         logger.warning("No turns found for this session")
+    #         return JsonResponse({"error": "No turn found for this session"}, status=404)
 
-    else:
-        # get specific turn by ID
-        new_turn = int(turn_id) + 1
-        latest_turn = get_object_or_404(Turn, year=int(year),  session_id=session_id)
-        logger.info(f'latest turn is; {latest_turn}')
+    # else:
+    #     # get specific turn by ID
+    #     new_turn = int(turn_id) + 1
+    latest_turn = get_object_or_404(Turn, year=int(year),  session_id=session_id)
+    logger.info(f'latest turn is; {latest_turn}')
         
     
     if latest_turn.year != int(year): 
@@ -444,7 +442,7 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
         'room_code': room_code,
         'room_exists': rm.room_exists(room_code),
         'turn_id': turn_id,
-        'year': new_year,
+        'year': year,
         'question': latest_turn.question or '',
         'options': options_payload,
     }

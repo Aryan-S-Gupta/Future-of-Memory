@@ -184,6 +184,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
             setScreen("miniGameWait");
             return null;
           }
+          return null;
         }
         console.log("the data is", out );
 
