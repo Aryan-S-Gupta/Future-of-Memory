@@ -98,7 +98,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
           return result;
         }
     }, enabled: loadingState == "question", 
-      refetchInterval: (result) => result ? false : 3000,
+      refetchInterval: 3000,
     refetchIntervalInBackground: true, 
   })
 
