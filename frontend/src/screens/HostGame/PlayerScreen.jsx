@@ -98,7 +98,7 @@ const PlayerScreen = () => {
           return result;
         }
     }, enabled: loadingState == "question", 
-      refetchInterval: (result) => result ? false : 3000,
+      refetchInterval: 3000,
       refetchIntervalInBackground: true,
   })
 
