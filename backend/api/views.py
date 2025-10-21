@@ -273,7 +273,7 @@ def display_question_and_options(request, session_id, turn_id, year):
     else:
         # get specific turn by ID
         turn_id = int(turn_id) + 1
-        latest_turn = get_object_or_404(Turn, year=int(year),  id=int(turn_id))
+        latest_turn = get_object_or_404(Turn, year=int(year),  session_id=session_id)
         
     
     if latest_turn.year != int(year): 
