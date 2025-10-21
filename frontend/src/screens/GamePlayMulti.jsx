@@ -6,7 +6,7 @@ import Button from "../components/Button/Button.jsx";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../styles/GamePlay.css";
 import { useSession } from "../../SessionContext.jsx";
-import background from "../../assets/fallback_first_turn.png";
+import background from "../assets/fallback_first_turn.png";
 import { getFunFacts } from "../../api/single-player/GameApi.js";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "./BasePage.jsx";
