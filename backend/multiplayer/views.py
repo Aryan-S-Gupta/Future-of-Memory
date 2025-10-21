@@ -511,24 +511,23 @@ def display_scenario_and_image(
     try:
         world_view_data = display_world_view(session_id, turn_id, year, final_option)
 
-        if (
-            world_view_data.get("success")
-            and world_view_data.get("scenario").get("text") != ""
-        ):
+        if world_view_data.get("success"):
             next_year = int(year) + 1
             next_turn = Turn.objects.filter(
                 session_id=session_id, year=next_year
             ).first()
             if next_turn:
                 world_view_data["next_turn_id"] = next_turn.id
-            # start generating next turn in background
-            try:
-                start_turn_pipeline.send(session_id, next_year)
-                logger.info(
-                    f"Started generating next turn (year {next_year}) in background"
-                )
-            except Exception as e:
-                logger.warning(f"Failed to start next turn generation: {e}")
+            
+            if not next_turn:
+                # start generating next turn in background only if it doesn't exist yet
+                try:
+                    start_turn_pipeline.send(session_id, next_year)
+                    logger.info(f"Started generating next turn (year {next_year}) in background")
+                except Exception as e:
+                    logger.warning(f"Failed to start next turn generation: {e}")
+            else:
+                logger.debug(f"Next turn (year {next_year}) already exists, skipping generation")
 
             # Include votes info always
             world_view_data["votes_info"] = votes_info

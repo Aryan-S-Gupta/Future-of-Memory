@@ -152,11 +152,20 @@ Should display a version number.
 
 #### Download Required Models
 
+**Essential Models:**
 ```bash
-ollama pull phi3:3.8b
-ollama pull nomic-embed-text
-ollama pull gemma3:1b-it-qat
+ollama pull phi3:3.8b          # Default fallback model for all tasks
+ollama pull nomic-embed-text   # Text embedding for RAG
+ollama pull gemma3:1b-it-qat   # Lightweight model for rag_preprocess and image text generation
 ```
+
+> **Note for Low-Performance Computers**: If your computer doesn't have enough resources, you can skip the optional models. The system will automatically use `phi3:3.8b` as a fallback for all tasks.
+
+**Performance-Optimized Models:**
+```bash
+ollama pull qwen3:4b           # Specialized model for scenario generation
+```
+> 
 
 #### Start Ollama Server
 
@@ -348,6 +357,7 @@ Ensure your working directory is the `backend` folder, and then:
 python manage.py rundramatiq --queues default --processes 1 --threads 1
 python manage.py rundramatiq --queues image_queue --processes 1 --threads 1
 python manage.py rundramatiq --queues llm_queue --processes 1 --threads 1
+python manage.py rundramatiq --queues llm_scenario --processes 1 --threads 1
 ```
 
 ### Step 10: Set up ComfyUI for image generation
