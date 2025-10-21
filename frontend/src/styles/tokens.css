@@ -943,3 +943,19 @@ button:focus-visible,
   filter: drop-shadow(0 0 10px rgba(0,0,0,0.15));
   opacity: 0.85;
 }
+
+/* Hard-stop the Next button from filling the glass */
+.menu-glass .btn-next {
+  display: inline-flex;
+  width: auto !important;
+  max-width: max-content;
+  align-self: center;
+  align-content: center;
+  white-space: nowrap;
+}
+
+/* If any min-/full-width leaked in from other button rules */
+.menu-glass .btn-primary.btn-next {
+  min-width: 50% !important;
+  justify-content: center;
+}

@@ -49,7 +49,7 @@ const BackgroundScreen = () => {
               </p>
             </div>
           </div>
-          <Button baseButton="btn-confirm btn-next next-fade-in" action={start} title="Next" />
+          <Button baseButton="btn-primary btn-next next-fade-in" action={start} title="Next" />
         </div>
       </div>
 
