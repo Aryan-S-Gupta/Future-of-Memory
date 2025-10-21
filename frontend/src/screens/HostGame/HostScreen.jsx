@@ -418,6 +418,7 @@ useEffect(() => {
         setTimeout(() => {
           setScreen("loading");
           setLoadingState("scenario");
+          setWinnerInfo(null);
         }, 10000);
       }
     } catch (err) {
