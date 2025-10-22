@@ -73,12 +73,16 @@ def check_game_started(request, room_code):
     if rm.get_mode(room_code) != "host":
         return JsonResponse({"unable to perform this action"})
     return JsonResponse({"game_started": rm.is_game_started(room_code)})
-    
-def start_game(request, room_code):
 
+
+def start_game(request, room_code):
     if not rm.room_exists(room_code):
         logger.info("rooom does not exist")
         return JsonResponse({'error': 'Room not found'}, status=404)
+    
+    elif rm.get_players(room_code) == []:
+        logger.info("room is empty")
+        return JsonResponse({'empty': True})
     else: 
         if rm.get_mode(room_code) != "host":
             return JsonResponse({"unable to perform this action"})

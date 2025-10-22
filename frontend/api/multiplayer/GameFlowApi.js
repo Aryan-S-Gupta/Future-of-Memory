@@ -138,3 +138,4 @@ export const getTiebreakStatus = async (roomCode, turnId) => {
   const res = await api.get(`/mini-game/tiebreak_status/${roomCode}/${turnId}`);
   return res.data;
 };
+

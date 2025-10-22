@@ -39,6 +39,7 @@ const PlayerScreen = () => {
   const [score, setScore] = useState(null);
   const [factsFecthed, setFactsFetched] = useState(false);
   const [miniWinner, setMiniWinner] = useState(null);
+
   const [miniGameDone, setMiniGameDone] = useState(false);
 
   // --- Staged reveal for multiplayer ---

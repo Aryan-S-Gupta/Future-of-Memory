@@ -16,6 +16,7 @@ const HostBackgroundScreen = () => {
   const navigate = useNavigate();
   const { roomCode, playerName, host, mode } = useParams();
   const [gameStarted, setGameStarted] = useState(false);
+  const [alertMsg, setAlertMsg] = useState(null);
 
   // Polling to check if game has started (for non-host players)
   const {} = useQuery({
@@ -41,10 +42,15 @@ const HostBackgroundScreen = () => {
   // Function to handle starting the game (for host)
   const handleStartGame = async () => {
     try {
-      await startGame(roomCode)
+      const res = await startGame(roomCode);
+      if (res.data.empty) {
+        console.log("room is empty");
+        setAlertMsg("Cannot start game: Room is empty.");
+        return;
+      }
       setGameStarted(true);
       navigate(`/projector-room/${roomCode}/${playerName}/${host}/${mode}`);
-    } catch (err) {
+    } catch (err) { 
       console.error("Error starting game:", err);
     }
   };
@@ -81,7 +87,18 @@ const HostBackgroundScreen = () => {
       </div>
       </div>
       )}
-    </BasePage>)
+
+      {/* === Custom Alert Modal === */}
+      {alertMsg && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <h3>⚠️ Notice</h3>
+            <p>{alertMsg}</p>
+            <button className="btn-modal" onClick={() => setAlertMsg(null)}>OK</button>
+          </div>
+        </div>
+      )}
+  </BasePage>)
 };
 
 export default HostBackgroundScreen;
