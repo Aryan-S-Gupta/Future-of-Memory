@@ -15,13 +15,13 @@ import { useMemo, useRef } from "react";
 import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 import VotingDisplay from "../components/Voting Display/VotingDisplay.jsx";
-import { getVotingInfo} from "../../api/multiplayer/GameFlowApi";
+import { getVotingInfo} from "../../api/multiplayer/GameFlowApi.js";
 import MiniGame from "./MiniGame.jsx";
 import { submitTiebreakScore } from "../../api/multiplayer/GameFlowApi.js";
 
 
 
-const GamePlayMulti = () => {
+const PeerGame = () => {
   const navigate = useNavigate()
   const { roomCode, playerName } = useParams(); 
   const prevQuestionRef = useRef(null);
@@ -639,4 +639,4 @@ const getFadeClass = (idx) => {
 
 
 
-export default GamePlayMulti;
+export default PeerGame;
