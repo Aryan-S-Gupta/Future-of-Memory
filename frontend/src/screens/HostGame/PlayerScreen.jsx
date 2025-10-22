@@ -82,38 +82,38 @@ const PlayerScreen = () => {
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
-  // Fetches the scenario whenever we are on the "scenario" screen.
-  const { data: questionData } = useQuery({
-    queryKey: ["question", roomCode, sessionId, turn, year],
-    queryFn: async () => {
-      console.log("queryFn running for", year);
-      const result = await getQuestion(sessionId, roomCode, turn, year);
-      if (!result) {
-        setScreen("loading");
-        setLoadingState("question");
-        if (!factsFecthed) {
-          await fetchFunFacts();
-          setFactsFetched(true);
-        }
-        console("loading at the moment");
-        return null;
-      } else {
-        if (!result.room_exists) {
-          setScreen("destroyed");
+// Fetches the scenario whenever we are on the "scenario" screen.
+  const {data: questionData} = useQuery ({
+    queryKey: ["question", roomCode, sessionId, turn, year], 
+    queryFn: async() => {
+        console.log("queryFn running for", year);
+        const result = await getQuestion(sessionId, roomCode, turn , year);
+        if (!result ) {
+          setScreen("loading");
+          setLoadingState("question");
+          if (!factsFecthed) {
+            await fetchFunFacts();
+            setFactsFetched(true);
+          }
+          console("loading at the moment");
           return null;
+        } else {
+          if (!result.room_exists) {
+            setScreen("destroyed");
+            return null;
+          }
+          setCurrentTurn(result);
+          setTurn(result.turn_id);
+          setScreen("question");
+          setLoadingState("none")
+          console.log("recieved question data: " + result);
+          setScenarioData(null);
+          setFactsFetched(false)
+          return result;
         }
-        setCurrentTurn(result);
-        setTurn(result.turn_id);
-        setScreen("question");
-        setLoadingState("none")
-        console.log("recieved question data: " + result);
-        setScenarioData(null);
-        setFactsFetched(false)
-        return result;
-      }
-    }, enabled: loadingState == "question",
-    refetchInterval: (result) => result ? false : 3000,
-    refetchIntervalInBackground: true,
+    }, enabled: loadingState == "question", 
+      refetchInterval: 3000,
+      refetchIntervalInBackground: true,
   })
 
 
@@ -302,17 +302,26 @@ const PlayerScreen = () => {
       console.log("Submit choice response:", mapped);
       setScreen("scenario");
       setScenarioData(mapped);
-      setYear(year + 1);
       setOptionId(null);
       return out;
     },
     enabled: currentTurn != null && option_id != null && screen !== "destroyed" && screen !== "miniGame" && screen !== "miniGameResult" && screen !== "miniGameWaiting",
     onError: (err) => {
       console.log("onError:", err);
-    },
-    refetchInterval: 3000,
-    refetchIntervalInBackground: true,
-  });
+    }, 
+    refetchInterval: 3000, 
+    refetchIntervalInBackground: true, 
+});
+
+  // Improved scenario data and year handling to prevent redundant increments
+  const scenarioDataRef = useRef(null);
+  useEffect(() => {
+    if (!scenarioData) return;
+    if (scenarioDataRef.current !== null && JSON.stringify(scenarioData) !== JSON.stringify(scenarioDataRef.current)) {
+      setYear((prev) => prev + 1);
+    }
+    scenarioDataRef.current = scenarioData;
+  }, [scenarioData]);
 
 
 
