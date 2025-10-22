@@ -108,7 +108,7 @@ const MultiplayerLobby = () => {
           return null;
         }
         setAlertMsg("Unable to join the room. Please try again.");
-        return null
+        return null;
       }
     } catch (err) {
       console.error(err);
