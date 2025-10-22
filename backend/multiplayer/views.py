@@ -114,9 +114,21 @@ def join_multiplayer_room(request):
 
     room_code = data.get("roomCode")
     player_name = data.get("playerName")
+    session = None
 
     if not rm.room_exists:
         JsonResponse({"Success": False, "room_exists": False})
+    
+    if rm.is_game_started(room_code):
+        logger.info(f"Game already started in room {room_code}")
+        return JsonResponse({
+            "success": False,
+            "room_exists": True,
+            "mode": rm.get_state(room_code),
+            "game_started": str(rm.is_game_started(room_code))
+        })
+    
+     # Check if player name is already taken in the room
 
     if rm.player_in_room_exists(room_code, player_name):
         logger.info(f"Player {player_name} already in room {room_code}")
@@ -127,7 +139,6 @@ def join_multiplayer_room(request):
         })
     # Attempt to join the room
     success = rm.join_room(room_code, player_name)
-    session = None
     if success:
         room_host = rm.get_host(room_code)
         mode = rm.get_mode(room_code)
