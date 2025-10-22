@@ -112,7 +112,14 @@ export default function GlobalToolbar() {
     // Track theme (dark/light/auto)
     const [effectiveTheme, setEffectiveTheme] = useState(getEffectiveTheme());
     /** Toggle between muted/unmuted state */
-    const onToggleMute = () => (isMuted ? unmute() : mute());
+    const onToggleMute = () => {
+        if (isMuted) {         // going to UNMUTE
+            unmute();
+            window.dispatchEvent(new Event("tts-enable"));
+        } else {
+            mute();
+        }
+    };
 
     // text zoom
     const initialZoom = useMemo(() => {

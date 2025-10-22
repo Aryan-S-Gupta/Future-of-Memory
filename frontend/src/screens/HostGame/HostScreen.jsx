@@ -51,7 +51,11 @@ const HostScreen = () => {
     scenario:
       "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
       "Once experimental, memory editing, enhancement, and storage are mainstream, forcing governments " +
-      "to confront choices that could redefine humanity.",
+      "to confront choices that could redefine humanity. manipulation not just possible, but precise and reliable." +
+      "Memory editing, enhancement," +
+      "These technologies can erase trauma, boost learning, and even share memories, offering both promise " +
+      "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
+      " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
   });
   const [roomDestroyed, setRoomDestroyed] = useState(false);
@@ -214,13 +218,13 @@ const HostScreen = () => {
 
 
   // --- Minimal TTS: inline (no extra files/deps) ---
-  // --- Minimal TTS: inline (match single-player) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
   const prevVolRef = useRef(null); // remember user volume while narrating
-  const duckFactor = 0.3; // lower bgm while speaking
+  const duckFactor = 0.3; // simple lower (no separate ducking state)
 
   const cancelTTS = () => {
     try { synthRef.current?.cancel(); } catch { }
+    // Restore volume if we changed it
     if (prevVolRef.current !== null) {
       setVolume(prevVolRef.current);
       prevVolRef.current = null;
@@ -232,21 +236,20 @@ const HostScreen = () => {
       if (typeof onDone === "function") onDone();
       return;
     }
-    // stop previous
+    // Cancel any previous narration
     cancelTTS();
 
-    // Only narrate if BGM is playing
+    // Only narrate if BGM is playing (toolbar controls this)
     if (!isPlaying) {
       if (typeof onDone === "function") onDone();
       return;
     }
 
-    // duck BGM
+    // Lower BGM volume temporarily (minimal approach)
     prevVolRef.current = volume;
     setVolume(Math.max(0, Math.min(1, volume * duckFactor)));
 
     const utter = new SpeechSynthesisUtterance(String(text));
-
     const voices = synthRef.current.getVoices();
     const prefs = [
       /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i,
@@ -257,7 +260,6 @@ const HostScreen = () => {
     const picked = prefs.map(rx => voices.find(v => rx.test(v.name))).find(Boolean) || voices[0];
     utter.voice = picked;
 
-    // mirror single-player params
     utter.rate = 0.7;
     utter.pitch = 1.0;
     utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
@@ -318,36 +320,93 @@ const HostScreen = () => {
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
 
   // --- Staged reveal (match single-player: question -> A -> B with TTS chain; fallback timers) ---
-  const fadeDuration = 1000; // match single-player
+  const fadeDuration = 1000;
   useEffect(() => {
     if (screen !== "question" || !currentTurn) return;
 
+    let cleared = false;
     let t1, t2, t3;
 
-    setStage(1);                 // show question
-    speak(currentTurn.question); // Host: read ONLY the question
+    const fallback = () => {
+      setStage(1); // question
+      t1 = setTimeout(() => setStage(2), 12000 - fadeDuration); // A
+      t2 = setTimeout(() => setStage(3), 18000 - fadeDuration); // B
+      t3 = setTimeout(() => setStage(4), 24000 - fadeDuration); // all
+    };
 
-    // Timed reveals for options (no TTS)
-    t1 = setTimeout(() => setStage(2), 12000 - fadeDuration); // show Option A
-    t2 = setTimeout(() => setStage(3), 18000 - fadeDuration); // show Option B
-    t3 = setTimeout(() => setStage(4), 24000 - fadeDuration); // show all
+    // Robust option extraction (works with either shape)
+    const optA =
+      currentTurn?.options?.[0]?.option_text ??
+      currentTurn?.options?.A ??
+      currentTurn?.options?.[0]?.text ??
+      null;
+
+    const optB =
+      currentTurn?.options?.[1]?.option_text ??
+      currentTurn?.options?.B ??
+      currentTurn?.options?.[1]?.text ??
+      null;
+
+    // If no TTS or not playing, run timers
+    if (!synthRef.current || !isPlaying) {
+      fallback();
+      return () => {
+        cleared = true;
+        clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+        cancelTTS();
+      };
+    }
+
+    // TTS-driven chain: question → A → B; reveal each as it’s read
+    setStage(1);
+    speak(currentTurn.question, () => {
+      if (cleared) return;
+      setStage(2);
+      if (optA) {
+        speak(optA, () => {
+          if (cleared) return;
+          setStage(3);
+          if (optB) {
+            speak(optB, () => {
+              if (cleared) return;
+              setStage(4);
+            });
+          } else {
+            setStage(4);
+          }
+        });
+      } else {
+        // No A → try B
+        setStage(3);
+        if (optB) {
+          speak(optB, () => {
+            if (cleared) return;
+            setStage(4);
+          });
+        } else {
+          setStage(4);
+        }
+      }
+    });
 
     return () => {
+      cleared = true;
       clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
       cancelTTS();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, currentTurn, isPlaying]);
 
+  useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
 
 
   const getFadeClass = (idx) => {
-    switch (idx) {
-      case 1: return stage === 1 || stage === 4 ? "fade-in-out show" : stage > 1 ? "fade-in-out hide" : "fade-in-out";
-      case 2: return stage === 2 || stage === 4 ? "fade-in-out show" : stage > 2 ? "fade-in-out hide" : "fade-in-out";
-      case 3: return stage === 3 || stage === 4 ? "fade-in-out show" : stage > 3 ? "fade-in-out hide" : "fade-in-out";
-      default: return "fade-in-out";
-    }
+    // Question: once shown, never hide again
+    if (idx === 1) return stage >= 1 ? "fade-in-out show" : "fade-in-out";
+    // Option A/B: appear at their stage and stay visible afterwards
+    if (idx === 2) return stage >= 2 ? "fade-in-out show" : "fade-in-out";
+    if (idx === 3) return stage >= 3 ? "fade-in-out show" : "fade-in-out";
+    return "fade-in-out";
   };
 
   // Fetch fun facts when loading scenario

@@ -375,11 +375,11 @@
 @media (max-width: 700px) {
   .choice-container.custom-choices {
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   .choice-btn.custom-choice {
     width: 80%;
-    padding: 1.6rem 2rem;
+    padding: 1.6rem 1.8rem;
   }
 }

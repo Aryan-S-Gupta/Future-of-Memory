@@ -65,6 +65,20 @@ const PlayerScreen = () => {
   // --- Tie narration to BGM ---
   const { isPlaying, isMuted, volume, setVolume } = useBgm();
 
+  const [ttsEnabled, setTtsEnabled] = useState(false);
+  const enabledOnceRef = useRef(false);
+
+  // when toolbar sends enable, start following isMuted
+  useEffect(() => {
+    const onTtsSet = (e) => setTtsEnabled(!!e.detail);
+    window.addEventListener("tts-set", onTtsSet);
+    return () => window.removeEventListener("tts-set", onTtsSet);
+  }, []);
+
+  // after first enable, keep TTS in sync with toolbar mute
+  useEffect(() => {
+    if (enabledOnceRef.current) setTtsEnabled(!isMuted);
+  }, [isMuted]);
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
@@ -118,52 +132,42 @@ const PlayerScreen = () => {
   };
 
   const speak = (text, onDone) => {
-    if (!synthRef.current || !text) {
-      if (typeof onDone === "function") onDone();
-      return;
-    }
-    // stop previous
-    cancelTTS();
+    if (!synthRef.current || !text) { onDone?.(); return; }
+    try { synthRef.current.cancel(); } catch { }
 
-    // Only narrate if BGM is playing
-    if (!isPlaying) {
-      if (typeof onDone === "function") onDone();
-      return;
-    }
+    // voice audible only if TTS enabled and toolbar not muted
+    const voiceAudible = ttsEnabled && !isMuted;
 
-    // duck BGM
-    prevVolRef.current = volume;
-    setVolume(Math.max(0, Math.min(1, volume * duckFactor)));
+    if (!isPlaying && voiceAudible === false) { onDone?.(); return; }
+    if (voiceAudible) {
+      prevVolRef.current = volume;
+      setVolume(Math.max(0, Math.min(1, volume * duckFactor)));
+    }
 
     const utter = new SpeechSynthesisUtterance(String(text));
     const voices = synthRef.current.getVoices();
     const prefs = [
       /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i,
       /Microsoft Jenny Online \(Natural\).*English \(United States\)/i,
-      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i,
-      /Google UK English Female/i
+      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i, /Google UK English Female/i
     ];
     const picked = prefs.map(rx => voices.find(v => rx.test(v.name))).find(Boolean) || voices[0];
     if (picked) utter.voice = picked;
 
-    // match SP params
-    utter.rate = 0.7;
-    utter.pitch = 1.0;
-    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
+    utter.rate = 0.7; utter.pitch = 1.0;
+    utter.volume = voiceAudible ? Math.max(0, Math.min(1, volume)) : 0;
 
     const restore = () => {
-      if (prevVolRef.current !== null) {
-        setVolume(prevVolRef.current);
-        prevVolRef.current = null;
+      if (voiceAudible && prevVolRef.current !== null) {
+        setVolume(prevVolRef.current); prevVolRef.current = null;
       }
-      if (typeof onDone === "function") onDone();
+      onDone?.();
     };
-
-    utter.onend = restore;
-    utter.onerror = restore;
-
+    utter.onend = restore; utter.onerror = restore;
     try { synthRef.current.speak(utter); } catch { restore(); }
   };
+
+
 
 
   // Auto-read Scenario when it shows (and BGM is playing)
@@ -325,33 +329,45 @@ const PlayerScreen = () => {
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
 
   const fadeBase = 1000; // align with SP fade
+  // question -> A -> B, using silent TTS so timings match Host exactly
   useEffect(() => {
     if (screen !== "question" || !currentTurn) return;
 
-    // Start with question stage visible (for timing parity), but don't speak it
-    setStage(1);
+    let cleared = false;
+    setStage(1); // question phase (Player UI still empty until A)
 
-    const optA = currentTurn?.options?.[0]?.option_text;
-    const optB = currentTurn?.options?.[1]?.option_text;
+    const optA = currentTurn?.options?.[0]?.option_text || "";
+    const optB = currentTurn?.options?.[1]?.option_text || "";
 
-    const t1 = setTimeout(() => {
-      setStage(2);                    // show A
-      if (optA) speak(optA);
-    }, 12000 - fadeBase);
+    // Read question -> then A -> then B, revealing each on onend
+    speak(currentTurn.question, () => {
+      if (cleared) return;
+      setStage(2);                 // show A
+      if (optA) speak(optA, () => {
+        if (cleared) return;
+        setStage(3);               // show B
+        if (optB) speak(optB, () => {
+          if (cleared) return;
+          setStage(4);             // show both
+        }); else {
+          setStage(4);
+        }
+      }); else {
+        setStage(3);
+        if (optB) speak(optB, () => {
+          if (cleared) return;
+          setStage(4);
+        }); else {
+          setStage(4);
+        }
+      }
+    });
 
-    const t2 = setTimeout(() => {
-      setStage(3);                    // show B
-      if (optB) speak(optB);
-    }, 18000 - fadeBase);
-
-    const t3 = setTimeout(() => {
-      setStage(4);                    // show all
-    }, 24000 - fadeBase);
-
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); cancelTTS(); };
+    return () => { cleared = true; try { synthRef.current?.cancel(); } catch { } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, currentTurn, isPlaying]);
+  }, [screen, currentTurn]);
 
+  useEffect(() => { if (isMuted) try { synthRef.current?.cancel(); } catch { } }, [isMuted]);
 
   const getFadeClass = (idx) => {
     switch (idx) {
