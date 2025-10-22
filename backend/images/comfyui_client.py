@@ -59,8 +59,8 @@ EXPORTED_WORKFLOW = {
   },
   "5": {
     "inputs": {
-      "width": 200,#512
-      "height": 200, #512
+      "width": 512,#512
+      "height": 512, #512
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
@@ -83,7 +83,7 @@ EXPORTED_WORKFLOW = {
   },
   "7": {
     "inputs": {
-      "text": "text, watermark",
+      "text": "text, watermark, logo, extra fingers, bad anatomy",
       "clip": [
         "4",
         1
