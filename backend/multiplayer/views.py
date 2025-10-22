@@ -117,6 +117,14 @@ def join_multiplayer_room(request):
 
     if not rm.room_exists:
         JsonResponse({"Success": False, "room_exists": False})
+
+    if rm.player_in_room_exists(room_code, player_name):
+        logger.info(f"Player {player_name} already in room {room_code}")
+        return JsonResponse({
+            "success": False,
+            "room_exists": True,
+            "message": f"Player {player_name} already in room {room_code}"
+        })
     # Attempt to join the room
     success = rm.join_room(room_code, player_name)
     session = None
