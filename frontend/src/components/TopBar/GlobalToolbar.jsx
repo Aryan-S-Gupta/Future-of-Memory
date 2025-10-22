@@ -77,6 +77,23 @@ const IconSun = () => (
         <path d="m19.07 4.93-1.41 1.41" />
     </svg>
 );
+const IconHamburger = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2"
+        strokeLinecap="round" strokeLinejoin="round">
+        <line x1="4" y1="6.5" x2="20" y2="6.5" />
+        <line x1="4" y1="12" x2="20" y2="12" />
+        <line x1="4" y1="17.5" x2="20" y2="17.5" />
+    </svg>
+);
+const IconClose = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2"
+        strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+);
 
 /* Constants: Text zoom persistence + limits */
 const TEXT_ZOOM_KEY = "textZoom";
@@ -95,7 +112,14 @@ export default function GlobalToolbar() {
     // Track theme (dark/light/auto)
     const [effectiveTheme, setEffectiveTheme] = useState(getEffectiveTheme());
     /** Toggle between muted/unmuted state */
-    const onToggleMute = () => (isMuted ? unmute() : mute());
+    const onToggleMute = () => {
+        if (isMuted) {         // going to UNMUTE
+            unmute();
+            window.dispatchEvent(new Event("tts-enable"));
+        } else {
+            mute();
+        }
+    };
 
     // text zoom
     const initialZoom = useMemo(() => {
@@ -103,6 +127,9 @@ export default function GlobalToolbar() {
         return Number.isFinite(saved) ? Math.min(ZMAX, Math.max(ZMIN, saved)) : ZDEFAULT;
     }, []);
     const [textZoom, setTextZoom] = useState(initialZoom);
+
+    const [open, setOpen] = useState(false);
+    const toggleOpen = () => setOpen(o => !o);
 
     //Apply and persist zoom level.
     const applyZoom = (z) => {
@@ -121,56 +148,78 @@ export default function GlobalToolbar() {
         return off;
     }, []);
 
+    useEffect(() => {
+        if (!open) return;
+        const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [open]);
+
     // Render
     return (
-        <div className="gtb" role="toolbar" aria-label="Global toolbar">
-            {/* AUDIO CONTROLS */}
-            <div className="gtb-group" aria-label="Audio">
-                {/* Mute/unmute toggle */}
-                <button type="button" className="gtb-btn" onClick={onToggleMute}
-                    aria-pressed={isMuted} aria-label={isMuted ? "Unmute" : "Mute"} title={isMuted ? "Unmute" : "Mute"}>
-                    {isMuted ? <IconVolumeMute /> : <IconVolume />}
-                </button>
+        <div className={`gtb-shell ${open ? "is-open" : "is-collapsed"}`} data-open={open ? "true" : "false"}>
+            {/* Square hamburger trigger (no duplicate content) */}
+            <button
+                type="button"
+                className="gtb-ham"
+                aria-label={open ? "Close menu" : "Open menu"}
+                aria-expanded={open}
+                aria-controls="gtb-panel"
+                onClick={toggleOpen}
+            >
+                <span className="gtb-ham-ico">{open ? <IconClose /> : <IconHamburger />}</span>
+            </button>
 
-                {/* Play / Pause buttons */}
-                <div className="gtb-seg">
-                    <button type="button" className="gtb-btn" onClick={play} aria-label="Play" title="Play"><IconPlay /></button>
-                    <button type="button" className="gtb-btn" onClick={pause} aria-label="Pause" title="Pause"><IconPause /></button>
+            {/* Sliding panel with your existing toolbar content */}
+            <div id="gtb-panel" className="gtb" role="toolbar" aria-label="Global toolbar">
+                {/* AUDIO CONTROLS */}
+                <div className="gtb-group" aria-label="Audio">
+                    {/* Mute/unmute toggle */}
+                    <button type="button" className="gtb-btn" onClick={onToggleMute}
+                        aria-pressed={isMuted} aria-label={isMuted ? "Unmute" : "Mute"} title={isMuted ? "Unmute" : "Mute"}>
+                        {isMuted ? <IconVolumeMute /> : <IconVolume />}
+                    </button>
+
+                    {/* Play / Pause buttons */}
+                    <div className="gtb-seg">
+                        <button type="button" className="gtb-btn" onClick={play} aria-label="Play" title="Play"><IconPlay /></button>
+                        <button type="button" className="gtb-btn" onClick={pause} aria-label="Pause" title="Pause"><IconPause /></button>
+                    </div>
+
+                    {/* Volume slider */}
+                    <label className="gtb-slider-label" aria-label="Volume">
+                        <input
+                            className="gtb-slider"
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.01"
+                            value={isMuted ? 0 : volume}
+                            onChange={(e) => setVolume(parseFloat(e.target.value))}
+                        />
+                    </label>
                 </div>
 
-                {/* Volume slider */}
-                <label className="gtb-slider-label" aria-label="Volume">
-                    <input
-                        className="gtb-slider"
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={isMuted ? 0 : volume}
-                        onChange={(e) => setVolume(parseFloat(e.target.value))}
-                    />
-                </label>
-            </div>
+                {/* APPEARANCE CONTROLS */}
+                <div className="gtb-group" aria-label="Appearance">
+                    {/* Text size controls */}
+                    <div className="gtb-textsize" aria-label="Text size">
+                        <button type="button" className="gtb-btn" title="Smaller text" aria-label="Smaller text"
+                            onClick={() => applyZoom(textZoom - ZSTEP)}>A−</button>
 
-            {/* APPEARANCE CONTROLS */}
-            <div className="gtb-group" aria-label="Appearance">
-                {/* Text size controls */}
-                <div className="gtb-textsize" aria-label="Text size">
-                    <button type="button" className="gtb-btn" title="Smaller text" aria-label="Smaller text"
-                        onClick={() => applyZoom(textZoom - ZSTEP)}>A−</button>
+                        <button type="button" className="gtb-btn" title="Reset text size" aria-label="Reset text size"
+                            onClick={() => applyZoom(ZDEFAULT)}><IconTextSize /></button>
 
-                    <button type="button" className="gtb-btn" title="Reset text size" aria-label="Reset text size"
-                        onClick={() => applyZoom(ZDEFAULT)}><IconTextSize /></button>
+                        <button type="button" className="gtb-btn" title="Larger text" aria-label="Larger text"
+                            onClick={() => applyZoom(textZoom + ZSTEP)}>A+</button>
+                    </div>
 
-                    <button type="button" className="gtb-btn" title="Larger text" aria-label="Larger text"
-                        onClick={() => applyZoom(textZoom + ZSTEP)}>A+</button>
+                    {/* Theme toggle (light/dark) */}
+                    <button type="button" className="gtb-btn" aria-label="Toggle theme" title="Toggle theme"
+                        onClick={() => setEffectiveTheme(toggleTheme())}>
+                        {effectiveTheme === "dark" ? <IconMoon /> : <IconSun />}
+                    </button>
                 </div>
-
-                {/* Theme toggle (light/dark) */}
-                <button type="button" className="gtb-btn" aria-label="Toggle theme" title="Toggle theme"
-                    onClick={() => setEffectiveTheme(toggleTheme())}>
-                    {effectiveTheme === "dark" ? <IconMoon /> : <IconSun />}
-                </button>
             </div>
         </div>
     );

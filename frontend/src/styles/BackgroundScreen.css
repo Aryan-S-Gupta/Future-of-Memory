@@ -23,8 +23,10 @@
 
 
 .crawl-container {
-  perspective: 500px; /* creates the 3D effect */
-  height: 500px; /* height of the visible area */
+  perspective: 500px;
+  /* creates the 3D effect */
+  height: 500px;
+  /* height of the visible area */
   width: 800px;
   overflow: hidden;
   position: relative;
@@ -47,6 +49,7 @@
   0% {
     bottom: -200%;
   }
+
   100% {
     bottom: 100%;
   }
@@ -67,6 +70,7 @@
   letter-spacing: 2px;
   transition: all 0.3s var(--ease-standard);
 }
+
 .btn-next:hover {
   background: linear-gradient(145deg, var(--color-btn-hover-start), var(--color-btn-hover-end));
   box-shadow: var(--shadow-strong-hover);
@@ -83,8 +87,10 @@
 @keyframes nextfadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px); /* subtle upward motion */
+    transform: translateY(20px);
+    /* subtle upward motion */
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

@@ -2,10 +2,11 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-import "../../styles/ExitExperience.css"; 
+import "../../styles/ExitExperience.css";
 import Button from "../Button/Button.jsx";
 import { leaveRoom } from "../../../api/multiplayer/RoomManagementApi.js";
 import RoomDestroyedPopup from "../RoomDestroy/RoomDestroyedDisplay.jsx";
+import { useSession } from "../../../SessionContext.jsx";
 
 // Component handles the "Exit Experience" button and confirmation popup
 const ExitExperience = ({ code, player }) => {
@@ -13,35 +14,55 @@ const ExitExperience = ({ code, player }) => {
   const navigate = useNavigate();
   // Controls visibility of confirmation popup
   const [showPopup, setShowPopup] = useState(false);
+  const { sessionId } = useSession();
 
   // Function called when user confirms they want to exit
   const exitRoom = async () => {
     console.log(code);
     console.log(player);
 
+    if (window.location.pathname.startsWith("/gallery")) {
+      navigate("/");
+      return;
+    }
+
+
     // Case 1: Single-player mode → no API call needed
     if (code == "-1" && player == "single-player") {
-      navigate("/");
+      // Send straight to Gallery for this session (fallback to home if missing)
+      if (sessionId) {
+        navigate(`/gallery/${sessionId}`);
+      } else {
+        navigate("/");
+      }
       console.log("exited successfully");
       return null;
-    } 
+    }
     // Case 2: Multiplayer mode → call API to leave room
     else {
       // Attempt to leave room via backend
-      const res = await leaveRoom(code, player); 
+      const res = await leaveRoom(code, player);
 
       // If leaving the room failed
       if (!res.success) {
         // If the room no longer exists, just return to home
         if (!res.room_exists) {
-          navigate("/");
+          if (sessionId) {
+            navigate(`/gallery/${sessionId}`);
+          } else {
+            navigate("/");
+          }
         }
         console.log("Leaving room was not successful: " + res);
-      } 
+      }
       // If leaving was successful
       else {
         console.log(`${player} has left the room with room code ${code}`);
-        navigate("/"); // Redirect to home screen
+        if (sessionId) {
+          navigate(`/gallery/${sessionId}`);
+        } else {
+          navigate("/");
+        }
       }
     }
   };
@@ -49,10 +70,10 @@ const ExitExperience = ({ code, player }) => {
   return (
     <div>
       {/* Exit button pinned to top-right corner */}
-      <Button 
-        baseButton="btn-exit" 
+      <Button
+        baseButton="btn-exit"
         action={() => setShowPopup(true)} // Show popup when user clicks exit
-        title="Exit Experience"  
+        title="Exit Experience"
       />
 
       {/* Confirmation popup (renders only when showPopup is true) */}

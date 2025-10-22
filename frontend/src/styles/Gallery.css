@@ -131,3 +131,33 @@ html, body { width: 100%; max-width: 100%; overflow-x: clip; }
   text-shadow: 0 1px 2px rgba(0,0,0,.45);
 }
 .gal-decision { display: none !important; }
+
+/* --- If only one card, make it smaller and centered --- */
+.gal-grid:has(.gal-card:only-child) {
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.gal-grid:has(.gal-card:only-child) .gal-thumb {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  max-height: 320px;
+}
+
+.gal,
+.gal-modal-body {
+  font-family: 'Kanit','Orbitron', sans-serif !important;
+  font-size: 1.05rem;
+  color: #111;
+}
+
+.gal-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.gal-modal-sub,
+.gal-scenario {
+  font-size: 1.05rem;
+  line-height: 1.6;
+}

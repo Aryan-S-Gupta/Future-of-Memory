@@ -5,8 +5,6 @@ import "../styles/tokens.css";
 import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 import { startPrerender } from "../../api/single-player/GameApi.js";
 import { useSession } from "../../SessionContext.jsx";
-import "../styles/tokens.css"
-
 
 /**
  * BackgroundScreen component
@@ -49,7 +47,7 @@ const BackgroundScreen = () => {
               </p>
             </div>
           </div>
-          <Button baseButton="btn-confirm btn-next next-fade-in" action={start} title="Next" />
+          <Button baseButton="btn-primary btn-next next-fade-in" action={start} title="Next" />
         </div>
       </div>
 

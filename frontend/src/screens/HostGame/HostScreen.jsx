@@ -15,13 +15,13 @@ import { useMemo, useRef } from "react";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
-import { getVotingInfo} from "../../../api/multiplayer/GameFlowApi";
+import { getVotingInfo } from "../../../api/multiplayer/GameFlowApi";
 import MiniGame from "../MiniGame.jsx";
 import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
- const HostScreen = () => {
+const HostScreen = () => {
   const navigate = useNavigate()
-  const { roomCode, playerName } = useParams(); 
+  const { roomCode, playerName } = useParams();
   const displayRoomCode = (roomCode && /^\d+$/.test(roomCode)) ? String(roomCode).padStart(4, "0") : roomCode;
   const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
@@ -42,25 +42,28 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
   // --- Staged reveal for multiplayer ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
-  
-  const [hasAnimated, setHasAnimated] = useState(false); 
-  const fadeDuration = 2000;
+
+  const [hasAnimated, setHasAnimated] = useState(false);
   const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
   const [tieStatus, setTieStatus] = useState(null);
   const [scenarioData, setScenarioData] = useState({
-  scenario: 
-    "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
-    "Once experimental, memory editing, enhancement, and storage are mainstream, forcing governments " +
-    "to confront choices that could redefine humanity.",
+    scenario:
+      "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
+      "Once experimental, memory editing, enhancement, and storage are mainstream, forcing governments " +
+      "to confront choices that could redefine humanity. manipulation not just possible, but precise and reliable." +
+      "Memory editing, enhancement," +
+      "These technologies can erase trauma, boost learning, and even share memories, offering both promise " +
+      "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
+      " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
-});
+  });
   const [roomDestroyed, setRoomDestroyed] = useState(false);
 
 
 
   // --- Tie narration to BGM ---
-  const { isPlaying, volume, setVolume } = useBgm();
+  const { isPlaying, isMuted, volume, setVolume } = useBgm();
 
 
   // --- Question Query ---
@@ -99,103 +102,103 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
   })
 
 
-  const {} = useQuery({
-    queryKey: ["votingStatus", roomCode, currentTurn?.turn_id], 
-    queryFn: async() => {
-        
+  const { } = useQuery({
+    queryKey: ["votingStatus", roomCode, currentTurn?.turn_id],
+    queryFn: async () => {
+
       console.log(`[VotingQuery] Fetching voting info for room=${roomCode}, turn=${currentTurn.turn_id}`);
 
-        if (currentTurn === null) return;
-        const res = await getVotingInfo(roomCode, currentTurn.turn_id);
-        const data = res.data
-        
-        console.log("[VotingQuery] Raw API response:", res);
-        console.log("[VotingQuery] Parsed data:", res.data);
-        console.log("[VotingQuery] onSuccess triggered. Data:", data);
-        
-        if (!data) {
-          console.log("[VotingQuery] Data empty, skipping state update.");
-          return;
-        }
-        const mappedVotes = Object.entries(data.votes).map(([player, option]) => ({
-          name: player,
-          votedFor: option,
-          hasVoted: option !== "Pending",
-        }));
+      if (currentTurn === null) return;
+      const res = await getVotingInfo(roomCode, currentTurn.turn_id);
+      const data = res.data
 
-        console.log(mappedVotes);
-        console.log("[VotingQuery] Mapped votes:", mappedVotes);
-        
-        const votesCount = data.num_responses;
-        const totalCount = data.total_players;
-        
-        if (votesCount >= totalCount) {
-          setAllVoted(true);
-        }
-        setVotes(mappedVotes);
-        setTotalPlayers(data.total_players);
+      console.log("[VotingQuery] Raw API response:", res);
+      console.log("[VotingQuery] Parsed data:", res.data);
+      console.log("[VotingQuery] onSuccess triggered. Data:", data);
 
-        console.log(`[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`);
-        if (allVoted) {
-          console.log("All players voted!");
-          if (screen === "miniGameWait") {
-            return null;
-          }
-          setOptionId(data.final_option);
-          if (!scenarioData || !scenarioData.scenario) {
-            console.log("Scenario not ready → go to loading screen");
-            setScreen("loading");
-            setLoadingState("scenario");
-            if (!factsFecthed) {
-              await fetchFunFacts();
-            }
-          } else {
-            console.log("Scenario ready → show scenario");
-            setScreen("scenario");
-            setLoadingState("none")
-          }
+      if (!data) {
+        console.log("[VotingQuery] Data empty, skipping state update.");
+        return;
+      }
+      const mappedVotes = Object.entries(data.votes).map(([player, option]) => ({
+        name: player,
+        votedFor: option,
+        hasVoted: option !== "Pending",
+      }));
+
+      console.log(mappedVotes);
+      console.log("[VotingQuery] Mapped votes:", mappedVotes);
+
+      const votesCount = data.num_responses;
+      const totalCount = data.total_players;
+
+      if (votesCount >= totalCount) {
+        setAllVoted(true);
+      }
+      setVotes(mappedVotes);
+      setTotalPlayers(data.total_players);
+
+      console.log(`[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`);
+      if (allVoted) {
+        console.log("All players voted!");
+        if (screen === "miniGameWait") {
+          return null;
         }
-        return result;
-      }, enabled: screen == "question" && currentTurn != null,
-      refetchInterval: 3000,
-      refetchIntervalInBackground: true
+        setOptionId(data.final_option);
+        if (!scenarioData || !scenarioData.scenario) {
+          console.log("Scenario not ready → go to loading screen");
+          setScreen("loading");
+          setLoadingState("scenario");
+          if (!factsFecthed) {
+            await fetchFunFacts();
+          }
+        } else {
+          console.log("Scenario ready → show scenario");
+          setScreen("scenario");
+          setLoadingState("none")
+        }
+      }
+      return result;
+    }, enabled: screen == "question" && currentTurn != null,
+    refetchInterval: 3000,
+    refetchIntervalInBackground: true
   })
 
 
-  const {} = useQuery({
-      queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
-      queryFn: async () => {
+  const { } = useQuery({
+    queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
+    queryFn: async () => {
 
-        console.log("submitting option", option_id);
+      console.log("submitting option", option_id);
 
-        const out = await submitChoice(playerName, roomCode, sessionId,currentTurn.turn_id, year, option_id);
-        console.log(out)
-        if (!out || !out.scenario || !out.scenario.text) {
-          if (!out.room_exists) {
-            setScreen("destroyed");
-            return null;
-          }
-          if (out.tie) {
-            console.log("Tie detected! Starting mini-game round...");
-            setWinnerInfo(null);
-            setScreen("miniGameWait");
-            return null;
-          }
+      const out = await submitChoice(playerName, roomCode, sessionId, currentTurn.turn_id, year, option_id);
+      console.log(out)
+      if (!out || !out.scenario || !out.scenario.text) {
+        if (!out.room_exists) {
+          setScreen("destroyed");
           return null;
         }
-        console.log("the data is", out );
-
         if (out.tie) {
-            console.log("Tie detected! Starting mini-game round...");
-            setWinnerInfo(null);
-            setScreen("miniGameWait");
-            return null;
-          }
-        const mapped = {
-          scenario: out.scenario.text,
-          image: out.image.url
-        };
-        console.log("Submit choice response:", mapped);
+          console.log("Tie detected! Starting mini-game round...");
+          setWinnerInfo(null);
+          setScreen("miniGameWait");
+          return null;
+        }
+        return null;
+      }
+      console.log("the data is", out);
+
+      if (out.tie) {
+        console.log("Tie detected! Starting mini-game round...");
+        setWinnerInfo(null);
+        setScreen("miniGameWait");
+        return null;
+      }
+      const mapped = {
+        scenario: out.scenario.text,
+        image: out.image.url
+      };
+      console.log("Submit choice response:", mapped);
 
         setScreen("scenario");
         setLoadingState("none")
@@ -237,66 +240,56 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
     }
   };
 
-  const speak = (text) => {
-    if (!synthRef.current || !text) return;
+  const speak = (text, onDone) => {
+    if (!synthRef.current || !text) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
     // Cancel any previous narration
     cancelTTS();
 
     // Only narrate if BGM is playing (toolbar controls this)
-    if (!isPlaying) return;
+    if (!isPlaying) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
 
     // Lower BGM volume temporarily (minimal approach)
     prevVolRef.current = volume;
     setVolume(Math.max(0, Math.min(1, volume * duckFactor)));
 
     const utter = new SpeechSynthesisUtterance(String(text));
-    // --- choose voice here ---
     const voices = synthRef.current.getVoices();
     const prefs = [
-      /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i, // Edge (neural)
-      /Microsoft Jenny Online \(Natural\).*English \(United States\)/i,  // Edge (neural)
-      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i,                    // macOS built-ins
-      /Google UK English Female/i                                        // Chrome fallback
+      /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i,
+      /Microsoft Jenny Online \(Natural\).*English \(United States\)/i,
+      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i,
+      /Google UK English Female/i
     ];
-    const picked = prefs
-      .map(rx => voices.find(v => rx.test(v.name)))
-      .find(Boolean) || voices[0];
+    const picked = prefs.map(rx => voices.find(v => rx.test(v.name))).find(Boolean) || voices[0];
     utter.voice = picked;
-    // tweak for more “majestic” feel
-    utter.rate = 0.90;  // slower = more weighty
-    utter.pitch = 1.12;  // deeper
-    utter.volume = 1;   // full, since we ducked bgm
 
+    utter.rate = 0.7;
+    utter.pitch = 1.0;
+    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
 
-    utter.onend = utter.onerror = () => {
-      // Restore BGM volume
+    const restore = () => {
       if (prevVolRef.current !== null) {
         setVolume(prevVolRef.current);
         prevVolRef.current = null;
       }
+      if (typeof onDone === "function") onDone();
     };
 
+    utter.onend = restore;
+    utter.onerror = restore;
 
-    try { synthRef.current.speak(utter); } catch {
-      // In case of any error, restore
-      if (prevVolRef.current !== null) {
-        setVolume(prevVolRef.current);
-        prevVolRef.current = null;
-      }
+    try {
+      synthRef.current.speak(utter);
+    } catch {
+      restore();
     }
   };
-
-  // Build readout for question + options
-  const questionReadout = useMemo(() => {
-    if (!questionData) return "";
-    const q = String(questionData.question || "");
-    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const parts = Object.entries(questionData.options || {}).map(
-      ([, text], i) => `Option ${alpha[i] || i + 1}: ${String(text)}`
-    );
-    return [q, ...parts].join(". ");
-  }, [questionData]);
-
 
   // Auto-read Scenario when it shows (and BGM is playing)
   useEffect(() => {
@@ -307,30 +300,20 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, scenarioData?.scenario, isPlaying]); // tie to playing state
 
-
-  // Auto-read Question + Options when it shows (and BGM is playing)
-  useEffect(() => {
-    if (screen === "question" && questionReadout) {
-      speak(questionReadout);
-    }
-    return () => cancelTTS();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, questionReadout, isPlaying]);
-
-
   // Replay narration when toolbar Play is clicked (even if already playing)
   useEffect(() => {
     const handler = () => {
       if (screen === "scenario" && scenarioData?.scenario) {
         speak(scenarioData.scenario);
-      } else if (screen === "question" && questionReadout) {
-        speak(questionReadout);
+      } else if (screen === "question" && currentTurn) {
+        // Host: only read the question (not options)
+        speak(currentTurn.question);
       }
     };
     window.addEventListener("bgm-play", handler);
     return () => window.removeEventListener("bgm-play", handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, scenarioData?.scenario, questionReadout, isPlaying]);
+  }, [screen, scenarioData?.scenario, currentTurn, stage, isPlaying]);
 
 
   useEffect(() => {
@@ -342,50 +325,98 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
   }, [currentTurn, screen])
 
 
-// --- Staged reveal ---
+  // --- Staged reveal ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
- 
+
+  // --- Staged reveal (match single-player: question -> A -> B with TTS chain; fallback timers) ---
+  const fadeDuration = 1000;
   useEffect(() => {
-    if (screen === "question" && currentTurn) {
-      setStage(1); // show question
-      speak(currentTurn.question);
+    if (screen !== "question" || !currentTurn) return;
 
+    let cleared = false;
+    let t1, t2, t3;
 
-      const timer1 = setTimeout(() => {
-        setStage(2);
-        speak(currentTurn.options[0].option_text);
-      }, 10000 - fadeDuration);
+    const fallback = () => {
+      setStage(1); // question
+      t1 = setTimeout(() => setStage(2), 12000 - fadeDuration); // A
+      t2 = setTimeout(() => setStage(3), 18000 - fadeDuration); // B
+      t3 = setTimeout(() => setStage(4), 24000 - fadeDuration); // all
+    };
 
+    // Robust option extraction (works with either shape)
+    const optA =
+      currentTurn?.options?.[0]?.option_text ??
+      currentTurn?.options?.A ??
+      currentTurn?.options?.[0]?.text ??
+      null;
 
-      const timer2 = setTimeout(() => {
-        setStage(3);
-        speak(currentTurn.options[1].option_text);
-      }, 15000 - fadeDuration);
+    const optB =
+      currentTurn?.options?.[1]?.option_text ??
+      currentTurn?.options?.B ??
+      currentTurn?.options?.[1]?.text ??
+      null;
 
-
-      const timer3 = setTimeout(() => {
-        setStage(4); // show all together, no TTS
-      }, 20000 - fadeDuration);
-
-
+    // If no TTS or not playing, run timers
+    if (!synthRef.current || !isPlaying) {
+      fallback();
       return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-        clearTimeout(timer3);
+        cleared = true;
+        clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
         cancelTTS();
       };
     }
-  }, [screen, currentTurn]);
+
+    // TTS-driven chain: question → A → B; reveal each as it’s read
+    setStage(1);
+    speak(currentTurn.question, () => {
+      if (cleared) return;
+      setStage(2);
+      if (optA) {
+        speak(optA, () => {
+          if (cleared) return;
+          setStage(3);
+          if (optB) {
+            speak(optB, () => {
+              if (cleared) return;
+              setStage(4);
+            });
+          } else {
+            setStage(4);
+          }
+        });
+      } else {
+        // No A → try B
+        setStage(3);
+        if (optB) {
+          speak(optB, () => {
+            if (cleared) return;
+            setStage(4);
+          });
+        } else {
+          setStage(4);
+        }
+      }
+    });
+
+    return () => {
+      cleared = true;
+      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+      cancelTTS();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, currentTurn, isPlaying]);
+
+  useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
 
 
-const getFadeClass = (idx) => {
-  switch(idx) {
-    case 1: return stage === 1 || stage === 4 ? "fade-in-out show" : stage > 1 ? "fade-in-out hide" : "fade-in-out";
-    case 2: return stage === 2 || stage === 4 ? "fade-in-out show" : stage > 2 ? "fade-in-out hide" : "fade-in-out";
-    case 3: return stage === 3 || stage === 4 ? "fade-in-out show" : stage > 3 ? "fade-in-out hide" : "fade-in-out";
-    default: return "fade-in-out";
-  }
-};
+  const getFadeClass = (idx) => {
+    // Question: once shown, never hide again
+    if (idx === 1) return stage >= 1 ? "fade-in-out show" : "fade-in-out";
+    // Option A/B: appear at their stage and stay visible afterwards
+    if (idx === 2) return stage >= 2 ? "fade-in-out show" : "fade-in-out";
+    if (idx === 3) return stage >= 3 ? "fade-in-out show" : "fade-in-out";
+    return "fade-in-out";
+  };
 
   // Fetch fun facts when loading scenario
   const fetchFunFacts = async () => {
@@ -394,7 +425,7 @@ const getFadeClass = (idx) => {
       setLoadingFacts(facts.data);
       console.log("Fun facts loaded:", facts);
     } catch (error) {
-        console.error("Error fetching fun facts:", error);
+      console.error("Error fetching fun facts:", error);
     }
   }
 
@@ -406,108 +437,108 @@ const getFadeClass = (idx) => {
     setScenarioData(null);
   }
 
-useEffect(() => {
-  // Only start polling if tie mode is active AND winner not yet resolved
-  console.log("trying");
-  if (!currentTurn || winnerInfo) return;
-  console.log("winner info exists")
-  const poll = setInterval(async () => {
-    try {
-      const res = await submitTiebreakScore("HOST", roomCode, currentTurn.turn_id, -1);
-      console.log("[HOST MINI POLL]", res);
+  useEffect(() => {
+    // Only start polling if tie mode is active AND winner not yet resolved
+    console.log("trying");
+    if (!currentTurn || winnerInfo) return;
+    console.log("winner info exists")
+    const poll = setInterval(async () => {
+      try {
+        const res = await submitTiebreakScore("HOST", roomCode, currentTurn.turn_id, -1);
+        console.log("[HOST MINI POLL]", res);
 
-      // Once winner is resolved, stop polling and move to result screen
-      if (res.status === "resolved" || res.winner) {
-        clearInterval(poll);
-        setWinnerInfo(res);
-        setScreen("miniGameWinner");
+        // Once winner is resolved, stop polling and move to result screen
+        if (res.status === "resolved" || res.winner) {
+          clearInterval(poll);
+          setWinnerInfo(res);
+          setScreen("miniGameWinner");
 
-        // after 10s, resume story
-        setTimeout(() => {
-          setScreen("loading");
-          fetchFunFacts();
-          setLoadingState("scenario");
-        }, 10000);
+          // after 10s, resume story
+          setTimeout(() => {
+            setScreen("loading");
+            fetchFunFacts();
+            setLoadingState("scenario");
+          }, 10000);
+        }
+      } catch (err) {
+        console.error("Error checking tie-break:", err);
       }
-    } catch (err) {
-      console.error("Error checking tie-break:", err);
-    }
-  }, 2000);
+    }, 2000);
 
-  return () => clearInterval(poll);
-}, [currentTurn, winnerInfo]);
+    return () => clearInterval(poll);
+  }, [currentTurn, winnerInfo]);
 
 
 
   return (
     <BasePage>
       <ExitExperience code={roomCode} player={playerName} />
-        <div className="room-code-topcenter">Room : {displayRoomCode}</div>
-        {screen == "destroyed" && (
-          <RoomDestroyedPopup />
-        )}
-        {screen === "loading" && (
-          <LoadingScreen
-            isReady={isReady}
-            funFacts={loadingFacts}
-            onContinue={() => {
-              setScreen({ loadingState });
-            }}
-          />
-        )}
-        {screen === "scenario" && scenarioData && (
-          <div className="scenario-screen">
-            <div className="text-container menu-glass">
-              {/* Image in middle */}
-              {scenarioData.image && (
-                <div className="scenario-image">
-                  <img src={scenarioData.image} alt="scenario" className="scenario-img" />
-                </div>
-              )}
-            </div>
-            {/* Continue button at bottom */}
-            <div className="scenario-footer">
-              <Button
-                baseButton="btn-primary"
-                action={() => { handleContinue() }}
-                title="Continue"
-              />
-            </div>
-          </div>
-        )}
-        {/** Question Screen*/}
-        {screen === "question" && currentTurn && (
-          <div className="question-screen">
-            {/* Left side: question and choices */}
-            <div className="question-main menu-glass">
-              <div className="question-container">
-                <h2 className={getFadeClass(1)}>{currentTurn.question}</h2>
+      <div className="room-code-topcenter">Room : {displayRoomCode}</div>
+      {screen == "destroyed" && (
+        <RoomDestroyedPopup />
+      )}
+      {screen === "loading" && (
+        <LoadingScreen
+          isReady={isReady}
+          funFacts={loadingFacts}
+          onContinue={() => {
+            setScreen({ loadingState });
+          }}
+        />
+      )}
+      {screen === "scenario" && scenarioData && (
+        <div className="scenario-screen">
+          <div className="text-container menu-glass">
+            {/* Image in middle */}
+            {scenarioData.image && (
+              <div className="scenario-image">
+                <img src={scenarioData.image} alt="scenario" className="scenario-img" />
               </div>
-            </div>
-            {/* Right side: voting display */}
-            <div className="voting-sidebar">
-              <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
+            )}
+          </div>
+          {/* Continue button at bottom */}
+          <div className="scenario-footer">
+            <Button
+              baseButton="btn-primary"
+              action={() => { handleContinue() }}
+              title="Continue"
+            />
+          </div>
+        </div>
+      )}
+      {/** Question Screen*/}
+      {screen === "question" && currentTurn && (
+        <div className="question-screen">
+          {/* Left side: question and choices */}
+          <div className="question-main menu-glass centered-glass">
+            <div className="question-container">
+              <h2 className={getFadeClass(1)}>{currentTurn.question}</h2>
             </div>
           </div>
-        )}
-        {screen === "miniGameWait" && (
-          <div className="mini-wait">
-            <h2 className="mini-wait-main">Neural Showdown</h2>
-            <p className="mini-wait-lead">The votes are tied and the world stands still as a single memory duel will decide which player's choice shapes the next scene.</p>
-            <div className="mini-wait-instructions container">
-              <p className="mini-wait-paragraph">In the Neural Showdown players reveal cards to expose hidden faces and must rely on attention and recall to find matching pairs the challenger who best remembers the board claims victory and their vote will decide what happens next.</p>
-            </div>
+          {/* Right side: voting display */}
+          <div className="voting-sidebar">
+            <VotingDisplay voters={votes} totalPlayers={totalPlayers} />
           </div>
-        )}
-        {screen === "miniGameWinner" && (
-          <div className="mini-winner">
-            <h2>Tie Broken!</h2>
-            <p className="winner-name">
-              {winnerInfo.winner}
-            </p>
-            <p className="text2">emerges victorious.</p>
+        </div>
+      )}
+      {screen === "miniGameWait" && (
+        <div className="mini-wait">
+          <h2 className="mini-wait-main">Neural Showdown</h2>
+          <p className="mini-wait-lead">The votes are tied and the world stands still as a single memory duel will decide which player's choice shapes the next scene.</p>
+          <div className="mini-wait-instructions container">
+            <p className="mini-wait-paragraph">In the Neural Showdown players reveal cards to expose hidden faces and must rely on attention and recall to find matching pairs the challenger who best remembers the board claims victory and their vote will decide what happens next.</p>
           </div>
-        )}
+        </div>
+      )}
+      {screen === "miniGameWinner" && (
+        <div className="mini-winner">
+          <h2>Tie Broken!</h2>
+          <p className="winner-name">
+            {winnerInfo.winner}
+          </p>
+          <p className="text2">emerges victorious.</p>
+        </div>
+      )}
 
     </BasePage>
   );
