@@ -11,16 +11,20 @@ const MiniGameResult = () => {
   const score = state?.score;
 
   return (
-    <div className="mini-game-result">
-      <h2>Well Done, {playerName}!</h2>
-      <p>Your Score: {score}</p>
+    <div className="menu-glass">
+      <div className="menu-glass-inner">
+        <div className="mini-game-result">
+          <h2>Well Done, {playerName}!</h2>
+          <p>Your Score: {score}</p>
 
 
-      <Button
-        baseButton="btn-primary"
-        action={() => navigate("/")}
-        title="Back to Menu"
-      />
+          <Button
+            baseButton="btn-primary"
+            action={() => navigate("/")}
+            title="Back to Menu"
+          />
+        </div>
+      </div>
     </div>
   );
 };

@@ -16,8 +16,8 @@
 /* Popup container */
 .popup-box {
   background: rgba(20, 30, 40, 0.95);
-  border: 2px solid rgba(96, 219, 250, 0.6);
-  box-shadow: 0 0 25px rgba(96, 219, 250, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(204, 215, 218, 0.6);
+  box-shadow: 0 0 25px rgba(176, 185, 187, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.7);
   padding: 30px 40px;
   border-radius: 14px;
   max-width: 450px;

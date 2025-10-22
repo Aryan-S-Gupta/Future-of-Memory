@@ -210,7 +210,7 @@
   background-color: var(--color-text-container-bg);
   padding: var(--space-md);
   border-radius: var(--radius-sm);
-  max-width: 400px;
+  max-width: 500px;
   text-align: center;
 }
 
@@ -222,14 +222,14 @@
   text-align: center;
   color: var(--color-accent);
   text-shadow: var(--shadow-subheading);
-  max-width: 900px;
+  max-width: 950px;
   margin: 0 auto;
   line-height: 1.5;
 }
 
 
 .crawl-container {
-  perspective: 800px;
+  perspective: 650px;
   /* creates the 3D effect */
   height: 500px;
   /* height of the visible area */
@@ -240,7 +240,7 @@
 
 .crawl-text {
   position: absolute;
-  bottom: -35rem;
+  bottom: -36rem;
   /* start slightly below the panel */
   width: 100%;
   transform-origin: 50% 100%;
@@ -334,5 +334,52 @@
 @media (max-width: 480px) {
   .choice-btn:hover {
     transform: translateY(-3px);
+  }
+}
+
+/* === Multiplayer Choices: Centered & Bigger === */
+.choice-container.custom-choices {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 3.5rem;
+  height: 70vh;                /* keeps layout centered vertically */
+  width: 100%;
+  text-align: center;
+}
+
+/* Buttons inside the custom container */
+.choice-btn.custom-choice {
+  width: min(52%, 520px);
+  /* Match Height for good UI + Responsive - enough space around text vertically as well*/
+  height: 55%;
+  padding: 1.5rem 2rem;
+  font-size: clamp(1.1rem, 1.8vw + 0.6rem, 2rem);
+  border-radius: 14px;
+  text-align: center;
+  backdrop-filter: blur(6px);
+  box-shadow:
+    0 0 10px rgba(0, 0, 0, 0.4),
+    0 0 25px rgba(0, 160, 255, 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.choice-btn.custom-choice:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 0 20px rgba(0, 160, 255, 0.55),
+    0 0 40px rgba(0, 160, 255, 0.25);
+}
+
+@media (max-width: 700px) {
+  .choice-container.custom-choices {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .choice-btn.custom-choice {
+    width: 80%;
+    padding: 1.6rem 1.8rem;
   }
 }

@@ -100,3 +100,100 @@
   font-family: var(--btn-font-display, var(--font-display, sans-serif));
   line-height: 1;
 }
+
+/* === GlobalToolbar: hamburger shell === */
+.gtb-shell {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+  z-index: 9999;
+  display: grid;
+  grid-template-areas:
+    "ham"
+    "panel";
+  justify-items: end;
+  gap: 8px;
+}
+
+/* Square hamburger trigger (consistent, glassy) */
+.gtb-ham {
+  grid-area: ham;
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  background: var(--gtb-bg);
+  color: var(--gtb-fg);
+  box-shadow: var(--gtb-shadow);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  outline: none;
+  transition: transform 160ms var(--ease-standard), background 160ms var(--ease-standard);
+}
+.gtb-ham:hover,
+.gtb-ham:focus-visible {
+  background: var(--gtb-hover);
+}
+.gtb-ham:active { transform: scale(0.98); }
+.gtb-ham-ico { line-height: 0; display: inline-block; filter: drop-shadow(var(--gtb-icon-glow)); }
+
+/* Panel inherits your original .gtb styles + adds motion */
+.gtb {
+  grid-area: panel;
+  transform-origin: top right;
+  transition: all 700ms cubic-bezier(0.1, 1, 0.5, 1);
+}
+
+/* Collapsed state: hide panel, keep only square ham visible */
+.gtb-shell.is-collapsed .gtb {
+  opacity: 0;
+  transform: translateX(80px) scale(0.96);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Open state: reveal panel */
+.gtb-shell.is-open .gtb {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Auto-collapse on narrow viewports */
+@media (max-width: 880px) {
+  .gtb-shell:not([data-open="true"]) .gtb {
+    opacity: 0;
+    transform: translateX(80px) scale(0.96);
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* Keep panel width tidy and avoid overflow on tiny screens */
+.gtb {
+  max-width: min(92vw, 680px);
+  flex-wrap: wrap;
+}
+
+/* Optional: focus ring parity with your buttons */
+.gtb-ham:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, #fff 30%);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .gtb,
+  .gtb-ham { transition: none !important; }
+}
+
+/* Keep hamburger above the expanded toolbar */
+.gtb { z-index: 1 !important; }          /* panel under */
+.gtb-ham { position: relative; z-index: 2; }  /* trigger over */
+
+.gtb { padding-right: 60px; }

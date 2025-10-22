@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/single-player/api.js";
 import "../styles/Gallery.css";
+import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 
 const BACKEND_ORIGIN = api.defaults.baseURL.replace(/\/api\/?$/, "");
 const toAbs = (u) => (u && u.startsWith("/media/")) ? BACKEND_ORIGIN + u : u;
@@ -27,6 +28,9 @@ export default function Gallery({ sessionId: propSessionId }) {
 
     return (
         <div className="gal">
+            <div className="button-container">
+                <ExitExperience />
+            </div>
             {loading && <div className="gal-loading">Loading…</div>}
 
             {!loading && items.length === 0 && (
