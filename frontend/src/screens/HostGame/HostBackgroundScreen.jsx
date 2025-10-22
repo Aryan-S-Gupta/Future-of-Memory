@@ -1,4 +1,4 @@
-import { useNavigate, useParams, useSearchParams} from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import BasePage from "../BasePage.jsx";
@@ -19,7 +19,7 @@ const HostBackgroundScreen = () => {
   const [alertMsg, setAlertMsg] = useState(null);
 
   // Polling to check if game has started (for non-host players)
-  const {} = useQuery({
+  const { } = useQuery({
     queryKey: ["started", roomCode],
     queryFn: async () => {
       console.log("Checking whether the game has started...");
@@ -58,32 +58,32 @@ const HostBackgroundScreen = () => {
   return (
     <BasePage>
       {mode === "host" && host === playerName && (
-      <div>
-      <div className="menu-glass howto">
-        <div className="menu-glass-inner">
-          <h2 className="title">Background</h2>
-          <div className="crawl-container">
-            <div className="crawl-text">
-              <p>
-                Welcome to 2035 <br /> <br />
-                Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /> <br />
-                Together with other leaders, you stand between promise and peril. <br /> <br />
-                Every decision you debate and every law you pass will ripple across nations,
-                redefining what it means to be human. <br /> <br />
-                Will you forge alliances, push for progress, or defend your people’s values? <br /> <br />
-                The destiny of millions rests in your collective hands! <br /> <br />
-             </p>
+        <div>
+          <div className="menu-glass howto">
+            <div className="menu-glass-inner">
+              <h2 className="title">Background</h2>
+              <div className="crawl-container">
+                <div className="crawl-text">
+                  <p>
+                    Welcome to 2035 <br /> <br />
+                    Where neurotechnology connects minds, rewrites memories, and reshapes reality. <br /> <br />
+                    Together with other leaders, you stand between promise and peril. <br /> <br />
+                    Every decision you debate and every law you pass will ripple across nations,
+                    redefining what it means to be human. <br /> <br />
+                    Will you forge alliances, push for progress, or defend your people’s values? <br /> <br />
+                    The destiny of millions rests in your collective hands! <br /> <br />
+                  </p>
+                </div>
+              </div>
+              <Button
+                baseButton="btn-primary btn-next next-fade-in"
+                action={handleStartGame}
+                title={gameStarted ? "Starting..." : "Start Game"}
+              />
             </div>
           </div>
-             <Button
-              baseButton="btn-primary next-fade-in"
-              action={handleStartGame}
-              title={gameStarted ? "Starting..." : "Start Game"}
-            />
-          </div>
-      </div>
-      <div className="button-container">
-        <ExitExperience code={roomCode} player={playerName} />
+          <div className="button-container">
+            <ExitExperience code={roomCode} player={playerName} />
       </div>
       </div>
       )}
@@ -95,8 +95,8 @@ const HostBackgroundScreen = () => {
             <h3>⚠️ Notice</h3>
             <p>{alertMsg}</p>
             <button className="btn-modal" onClick={() => setAlertMsg(null)}>OK</button>
+              </div>
           </div>
-        </div>
       )}
   </BasePage>)
 };

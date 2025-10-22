@@ -501,6 +501,15 @@ def display_scenario_and_image(
     # Process player response and determine the winning option if all voted
     current = rm.get_state(room_code).get("turn_id", -1)
     logger.info(f"turn_id received: {turn_id}")
+    
+    # Get the current turn to ensure we have the correct year
+    try:
+        current_turn = Turn.objects.get(id=current)
+        current_year = current_turn.year
+    except Turn.DoesNotExist:
+        logger.error(f"Current turn {current} does not exist")
+        return JsonResponse({"error": "Current turn not found"}, status=404)
+    
     final_option = VotingSessions[(room_code, int(current))].process_player_response(room_code, player_name, option_id)
 
     logger.info(f"[Vote Submitted] {player_name} voted for {option_id} in room {room_code}")
@@ -544,10 +553,10 @@ def display_scenario_and_image(
 
     # All players have voted → generate world view
     try:
-        world_view_data = display_world_view(session_id, turn_id, year, final_option)
+        world_view_data = display_world_view(session_id, current, current_year, final_option)
 
         if world_view_data.get("success"):
-            next_year = int(year) + 1
+            next_year = current_year + 1
             next_turn = Turn.objects.filter(
                 session_id=session_id, year=next_year
             ).first()

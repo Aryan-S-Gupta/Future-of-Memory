@@ -161,30 +161,6 @@
   }
 }
 
-/* === BUTTONS === */
-.mini-game-intro button,
-.mini-game-result button {
-  padding: 0.75rem 1.5rem;
-  font-size: 1.1rem;
-  font-family: 'Orbitron', sans-serif;
-  font-weight: 700;
-  letter-spacing: 1px;
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
-  border-radius: 8px;
-  background: #111; /* solid black button */
-  color: #fff;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 1rem;
-}
-
-.mini-game-intro button:hover,
-.mini-game-result button:hover {
-  background: #222;
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
-  transform: scale(1.05);
-}
-
 /* === RESPONSIVE === */
 @media (max-width: 500px) {
   .emoji-grid {
@@ -204,5 +180,92 @@
   .mini-game-intro h2,
   .mini-game-result h2 {
     font-size: 1.7rem;
+  }
+}
+
+/* Make the intro content behave nicely *inside* the glass card */
+.mini-game-intro { /* keep for other screens if reused */ }
+
+/* Screen-reader only label */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* Form block inside the glass */
+.intro-form {
+  display: grid;
+  gap: 10rem;
+  width: 560px;
+  max-width: 720px;
+  margin: 100px auto;
+  text-align: left; /* aligns like BackgroundScreen text */
+}
+
+/* Input styled to match your glass theme */
+.intro-input{
+  width: 100%;
+  padding: 0.95rem 1.1rem;
+  font-family: var(--font-body);
+  font-size: var(--fs-body-strong);
+  color: var(--on-glass);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 24%),
+    color-mix(in srgb, var(--glass-bg) 88%, #0a0e14 12%);
+  border: 1px solid color-mix(in srgb, #9bd7ff 22%, #ffffff 8%);
+  border-radius: 12px;
+  outline: none;
+  box-shadow:
+    inset 0 0 10px rgba(255,255,255,0.05),
+    0 0 0 0 rgba(96,219,250,0);          /* focus ring anim target */
+  caret-color: var(--color-text);
+  transition: box-shadow 200ms var(--ease-standard), border-color 200ms var(--ease-standard), background 200ms var(--ease-standard);
+}
+
+.intro-input::placeholder {
+  color: rgba(255,255,255,0.65);
+}
+
+.intro-input:focus {
+  border-color: rgba(207, 231, 238, 0.45);
+  box-shadow: 0 0 18px rgba(207,231,238,0.25);
+}
+
+/* Action row keeps buttons consistent; Start uses .btn-next gradient */
+.intro-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end; /* Start on the right inside glass */
+  width: 100%;
+  justify-content: center;
+}
+
+/* --- OPTIONAL: if your old .mini-game-intro set full-screen centering, neutralize it here when inside glass --- */
+.menu-glass .mini-game-intro,
+.menu-glass .mini-game-result {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.menu-glass.howto .menu-glass-inner { 
+  justify-content: flex-start; 
+  align-items: stretch; 
+  padding-top: 3rem; 
+}
+.intro-form {
+  width: min(100%, 560px);            /* shrink on narrow viewports */
+  padding-inline: clamp(0.5rem, 4vw, 1rem);
+}
+
+.intro-input {
+  max-width: 100%;                    /* ensure no overflow */
+}
+
+/* Stack buttons on very small screens */
+@media (max-width: 420px) {
+  .intro-actions > * {
+    width: 100%;
   }
 }

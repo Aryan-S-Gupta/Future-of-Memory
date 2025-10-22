@@ -6,9 +6,7 @@
     /* Colors */
     --color-text: #ffffff;
     /* base text */
-    --color-accent: #61dca3;
     /* green accent currently used */
-    --color-accent-2: #7b00ff;
     /* purple glow used in shadow */
     --color-btn-grad-start: #1e40af;
     /* btn-next gradient start */
@@ -22,8 +20,6 @@
     /* translucent panel */
 
     /* Shadows / glow (kept as rgba to match current look) */
-    --shadow-strong: 0 0 12px rgba(73, 159, 239, 0.9), 0 0 25px rgba(6, 41, 98, 0.7), inset 0 0 8px rgba(255, 255, 255, 0.2);
-    --shadow-strong-hover: 0 0 20px rgba(59, 130, 246, 1), 0 0 40px rgba(59, 130, 246, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
     --shadow-title: 2px 2px 8px rgba(0, 0, 0, 0.7);
     --shadow-subheading: 1px 1px 6px rgba(123, 0, 255, 0.7);
     --shadow-text: 1px 1px 4px rgb(0, 0, 0);
@@ -713,29 +709,35 @@ html {
 }
 
 :root {
-  --on-glass: #eef6ff;                 /* text on dark glass */
-  --on-glass-muted: rgba(238,246,255,0.82);
-  --glass-bg: rgba(20, 22, 30, 0.24);  /* dark frosted */
-  --glass-border: 1px solid rgba(255,255,255,0.35);
-  --shadow-readable: 0 1px 2px rgba(0,0,0,0.7); /* crisp on dark */
+    --on-glass: #eef6ff;
+    /* text on dark glass */
+    --on-glass-muted: rgba(238, 246, 255, 0.82);
+    --glass-bg: rgba(20, 22, 30, 0.24);
+    /* dark frosted */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.35);
+    --shadow-readable: 0 1px 2px rgba(0, 0, 0, 0.7);
+    /* crisp on dark */
 }
 
 /* Light theme flips contrast safely */
 :root[data-theme="light"] {
-  --on-glass: #0b1220;                 /* ink on light glass */
-  --on-glass-muted: rgba(11,18,32,0.82);
-  --glass-bg: rgba(255,255,255,0.72);  /* brighter frosted */
-  --glass-border: 1px solid rgba(12,16,24,0.14);
-  --shadow-readable: 0 1px 2px rgba(255,255,255,0.7); /* halo on light */
+    --on-glass: #0b1220;
+    /* ink on light glass */
+    --on-glass-muted: rgba(11, 18, 32, 0.82);
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    /* brighter frosted */
+    --glass-border: 1px solid rgba(12, 16, 24, 0.14);
+    --shadow-readable: 0 1px 2px rgba(255, 255, 255, 0.7);
+    /* halo on light */
 }
 
 /* 2) Apply to your glass panels */
 .menu-glass,
 .menu-glass.howto {
-  background: var(--glass-bg) !important;
-  border: var(--glass-border) !important;
-  color: var(--on-glass);
-  text-shadow: var(--shadow-readable);
+    background: var(--glass-bg) !important;
+    border: var(--glass-border) !important;
+    color: var(--on-glass);
+    text-shadow: var(--shadow-readable);
 }
 
 /* 3) Ensure headings/body on glass inherit readable contrast */
@@ -743,128 +745,241 @@ html {
 .menu-glass .subheading,
 .menu-glass .text,
 .menu-glass .text2 {
-  color: var(--on-glass) !important;
-  text-shadow: var(--shadow-readable);
+    color: var(--on-glass) !important;
+    text-shadow: var(--shadow-readable);
 }
 
 /* 4) Make crawl text single-hue (no rainbow) but still “sci-fi” */
 .crawl-text p {
-  /* keep a tiny tint of accent for futurism */
-  color: color-mix(in srgb, var(--on-glass) 92%, var(--color-accent) 8%);
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
-  text-shadow: var(--shadow-readable);
+    /* keep a tiny tint of accent for futurism */
+    color: color-mix(in srgb, var(--on-glass) 92%, var(--color-accent) 8%);
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    text-shadow: var(--shadow-readable);
 }
 
 /* 5) Optional: slightly stronger legibility on super-busy bgs */
 .menu-glass .button-group .btn-primary,
 .menu-glass .button-group .btn-secondary {
-  filter: saturate(1.02) contrast(1.05);
+    filter: saturate(1.02) contrast(1.05);
 }
 
 /* 6) Keyboard focus that works in both themes */
 button:focus-visible,
 .menu-glass .button-group :is(button, a):focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, #fff 30%);
-  outline-offset: 3px;
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent) 18%, transparent);
+    outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, #fff 30%);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent) 18%, transparent);
 }
 
 :root {
-  /* Nudge the gradient toward your accents without losing "black" */
-  --btn-primary-grad-start: color-mix(in srgb, #0c0f14 88%, var(--color-accent) 12%);
-  --btn-primary-grad-end:   color-mix(in srgb, #151924 90%, var(--color-accent-2) 10%);
+    /* Nudge the gradient toward your accents without losing "black" */
+    --btn-primary-grad-start: color-mix(in srgb, #0c0f14 88%, var(--color-accent) 12%);
+    --btn-primary-grad-end: color-mix(in srgb, #151924 90%, var(--color-accent-2) 10%);
 
-  --btn-primary-hover-start: color-mix(in srgb, #121621 84%, var(--color-accent) 16%);
-  --btn-primary-hover-end:   color-mix(in srgb, #1b2130 86%, var(--color-accent-2) 14%);
+    --btn-primary-hover-start: color-mix(in srgb, #121621 84%, var(--color-accent) 16%);
+    --btn-primary-hover-end: color-mix(in srgb, #1b2130 86%, var(--color-accent-2) 14%);
 
-  /* Bigger, clearer undertone (thicker bottom inset glow + faint rim) */
-  --btn-primary-shadow:
-      0 0 10px rgba(0, 225, 255, 0.16),
-      0 10px 22px rgba(0, 0, 0, 0.55),
-      inset 0 1px 0 rgba(255, 255, 255, 0.16),      /* top edge */
-      inset 0 -12px 28px rgba(0, 0, 0, 0.65),       /* deeper base */
-      inset 0 -2px 10px rgba(97, 220, 163, 0.18);   /* accent undertone */
+    /* Bigger, clearer undertone (thicker bottom inset glow + faint rim) */
+    --btn-primary-shadow:
+        0 0 10px rgba(0, 225, 255, 0.16),
+        0 10px 22px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        /* top edge */
+        inset 0 -12px 28px rgba(0, 0, 0, 0.65),
+        /* deeper base */
+        inset 0 -2px 10px rgba(97, 220, 163, 0.18);
+    /* accent undertone */
 
-  --btn-primary-shadow-hover:
-      0 0 18px rgba(0, 225, 255, 0.28),
-      0 14px 28px rgba(0, 0, 0, 0.65),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      inset 0 -16px 34px rgba(0, 0, 0, 0.7),
-      inset 0 -4px 16px rgba(123, 0, 255, 0.22);    /* undertone grows on hover */
+    --btn-primary-shadow-hover:
+        0 0 18px rgba(0, 225, 255, 0.28),
+        0 14px 28px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        inset 0 -16px 34px rgba(0, 0, 0, 0.7),
+        inset 0 -4px 16px rgba(123, 0, 255, 0.22);
+    /* undertone grows on hover */
 
-  /* Subtle 1px rim to read on busy glass */
-  --btn-rim: 1px solid color-mix(in srgb, #ffffff 10%, #000 90%);
-  --btn-rim-hover: 1px solid color-mix(in srgb, var(--color-accent) 22%, #0b0e14 78%);
+    /* Subtle 1px rim to read on busy glass */
+    --btn-rim: 1px solid color-mix(in srgb, #ffffff 10%, #000 90%);
+    --btn-rim-hover: 1px solid color-mix(in srgb, var(--color-accent) 22%, #0b0e14 78%);
 }
 
 /* 2) Apply to primary (your existing .btn-primary selector will inherit) */
 .btn-primary {
-  position: relative;
-  border: var(--btn-rim);
-  background:
-    /* ultra-subtle carbon noise / grain for futurism (no image needed) */
-    linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 14%),
-    linear-gradient( to bottom, var(--btn-primary-grad-start), var(--btn-primary-grad-end) );
-  box-shadow: var(--btn-primary-shadow);
+    position: relative;
+    border: var(--btn-rim);
+    background:
+        /* ultra-subtle carbon noise / grain for futurism (no image needed) */
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 14%),
+        linear-gradient(to bottom, var(--btn-primary-grad-start), var(--btn-primary-grad-end));
+    box-shadow: var(--btn-primary-shadow);
 }
 
 /* 3) Futuristic diagonal sheen on hover/focus (non-intrusive) */
 .btn-primary::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient( 60deg,
-      transparent 22%,
-      rgba(255,255,255,0.12) 38%,
-      rgba(255,255,255,0.28) 45%,
-      rgba(255,255,255,0.10) 52%,
-      transparent 62%
-  );
-  opacity: 0;
-  transform: translateX(-20%);
-  transition: opacity 280ms ease, transform 480ms ease;
-  pointer-events: none;
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(60deg,
+            transparent 22%,
+            rgba(255, 255, 255, 0.12) 38%,
+            rgba(255, 255, 255, 0.28) 45%,
+            rgba(255, 255, 255, 0.10) 52%,
+            transparent 62%);
+    opacity: 0;
+    transform: translateX(-20%);
+    transition: opacity 280ms ease, transform 480ms ease;
+    pointer-events: none;
 }
+
 .btn-primary:is(:hover, :focus-visible) {
-  border: var(--btn-rim-hover);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 16%),
-    linear-gradient( to bottom, var(--btn-primary-hover-start), var(--btn-primary-hover-end) );
-  box-shadow: var(--btn-primary-shadow-hover);
+    border: var(--btn-rim-hover);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 16%),
+        linear-gradient(to bottom, var(--btn-primary-hover-start), var(--btn-primary-hover-end));
+    box-shadow: var(--btn-primary-shadow-hover);
 }
+
 .btn-primary:is(:hover, :focus-visible)::after {
-  opacity: 1;
-  transform: translateX(8%);
+    opacity: 1;
+    transform: translateX(8%);
 }
 
 /* 4) Keep secondary/back in the same family but lighter too (optional) */
 .btn-secondary {
-  border: var(--btn-rim);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 14%),
-    linear-gradient(to bottom,
-      color-mix(in srgb, #0b0c0f 90%, var(--color-accent) 10%),
-      color-mix(in srgb, #171921 92%, var(--color-accent-2) 8%)
-    );
-  box-shadow:
-      0 0 10px rgba(160, 200, 255, 0.14),
-      0 10px 20px rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      inset 0 -10px 24px rgba(0, 0, 0, 0.6),
-      inset 0 -3px 12px rgba(97, 220, 163, 0.14);
+    border: var(--btn-rim);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 14%),
+        linear-gradient(to bottom,
+            color-mix(in srgb, #0b0c0f 90%, var(--color-accent) 10%),
+            color-mix(in srgb, #171921 92%, var(--color-accent-2) 8%));
+    box-shadow:
+        0 0 10px rgba(160, 200, 255, 0.14),
+        0 10px 20px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -10px 24px rgba(0, 0, 0, 0.6),
+        inset 0 -3px 12px rgba(97, 220, 163, 0.14);
 }
+
 .btn-secondary:hover {
-  border: var(--btn-rim-hover);
+    border: var(--btn-rim-hover);
 }
 
 /* 5) Micro-lift animation still subtle and sleek */
-.btn-primary, .btn-secondary, .btn-back {
-  transform: translateY(0);
-  transition: transform 180ms ease;
+.btn-primary,
+.btn-secondary,
+.btn-back {
+    transform: translateY(0);
+    transition: transform 180ms ease;
 }
-.btn-primary:hover, .btn-secondary:hover, .btn-back:hover {
-  transform: translateY(-1.5px);
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-back:hover {
+    transform: translateY(-1.5px);
+}
+
+:root[data-theme="light"] {
+    /* Titles & fade-in text -> solid black, no glows/gradients */
+    /* Covers generic titles, titles on glass, and fade-in wrappers */
+}
+
+:root[data-theme="light"] .title,
+:root[data-theme="light"] .menu-glass .title,
+:root[data-theme="light"] .fade-in,
+:root[data-theme="light"] .fade-in *,
+:root[data-theme="light"] .fade-in h2 {
+    color: #0b1220 !important;
+    text-shadow: none !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+}
+
+/* Mini-game result text */
+:root[data-theme="light"] .mini-game-result,
+:root[data-theme="light"] .mini-game-result * {
+    color: #0b1220 !important;
+    text-shadow: none !important;
+}
+
+/* Buttons: primary + secondary + feedback unified */
+:root[data-theme="light"] .btn-primary,
+:root[data-theme="light"] .btn-secondary,
+:root[data-theme="light"] .btn-feedback,
+:root[data-theme="light"] .button-group .btn-primary,
+:root[data-theme="light"] .button-group .btn-secondary,
+:root[data-theme="light"] .button-group .btn-feedback {
+    color: #0b1220 !important;
+    border: 1px solid rgba(12, 16, 24, 0.22) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.55) 16%),
+        linear-gradient(to bottom, #eaf2ff, #cfe2ff) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 8px 18px rgba(0, 0, 0, 0.12) !important;
+    text-shadow: none !important;
+    transition: all 0.2s ease-in-out;
+}
+
+:root[data-theme="light"] .btn-primary:is(:hover, :focus-visible),
+:root[data-theme="light"] .btn-secondary:is(:hover, :focus-visible),
+:root[data-theme="light"] .btn-feedback:is(:hover, :focus-visible),
+:root[data-theme="light"] .button-group .btn-primary:is(:hover, :focus-visible),
+:root[data-theme="light"] .button-group .btn-secondary:is(:hover, :focus-visible),
+:root[data-theme="light"] .button-group .btn-feedback:is(:hover, :focus-visible) {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.7) 16%),
+        linear-gradient(to bottom, #f4f8ff, #dcebff) !important;
+    border-color: rgba(12, 16, 24, 0.32) !important;
+    box-shadow:
+        0 0 0 3px rgba(12, 16, 24, 0.06),
+        0 10px 22px rgba(0, 0, 0, 0.14) !important;
+}
+
+/* Screensaver invert for light mode */
+:root[data-theme="light"] .screensaver {
+    background-color: #f9fafc;
+    background-image: var(--vignette-bg, radial-gradient(circle,
+                rgba(255, 255, 255, 0.9) 40%, rgba(255, 255, 255, 1) 65%));
+    color: #0b1220 !important;
+}
+
+:root[data-theme="light"] .screensaver .logo,
+:root[data-theme="light"] .screensaver .subtitle,
+:root[data-theme="light"] .screensaver .hint,
+:root[data-theme="light"] .screensaver .txt,
+:root[data-theme="light"] .screensaver .center {
+    color: #0b1220 !important;
+    fill: #0b1220 !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+:root[data-theme="light"] .screensaver .halo {
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.15));
+    opacity: 0.85;
+}
+
+/* Hard-stop the Next button from filling the glass */
+.menu-glass .btn-next {
+    display: inline-flex;
+    width: auto !important;
+    max-width: max-content;
+    align-self: center;
+    align-content: center;
+    white-space: nowrap;
+}
+
+/* If any min-/full-width leaked in from other button rules */
+.menu-glass .btn-primary.btn-next {
+    min-width: 50% !important;
+    justify-content: center;
+}
+
+:root[data-theme="light"] .room-code-topcenter {
+  color: #0b1220 !important;
+  text-shadow: none !important;
 }

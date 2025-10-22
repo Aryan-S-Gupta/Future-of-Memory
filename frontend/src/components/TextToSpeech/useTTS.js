@@ -50,10 +50,7 @@ export default function useTTS(defaultEnabled = true, duckLevel = 0.25) {
                     u.pitch = 1;
 
                     // try to pick a nice clear english voice
-                    const warmup =
-                        voicesRef.current.find(v =>
-                            /Microsoft (Sonia|Jenny|Aria).*Online|Google UK English Female|Samantha|Victoria|Serena|Daniel/i.test(v.name)
-                        ) || voicesRef.current[0];
+                    const warmup = voicesRef.current.find(v => /en/i.test(v.lang) && (v.localService || !/Online|Natural/i.test(v.name))) || voicesRef.current[0];
 
                     if (warmup) u.voice = warmup;
 
@@ -96,7 +93,7 @@ export default function useTTS(defaultEnabled = true, duckLevel = 0.25) {
 
         // sync with app volume/mute
         utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
-        utter.rate = 1;
+        utter.rate = 2;
         utter.pitch = 1;
 
         // update state on start/stop
