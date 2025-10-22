@@ -98,7 +98,7 @@ const PlayerScreen = () => {
           return result;
         }
     }, enabled: loadingState == "question", 
-      refetchInterval: (result) => result ? false : 3000,
+      refetchInterval: 3000,
       refetchIntervalInBackground: true,
   })
 
@@ -327,7 +327,6 @@ const PlayerScreen = () => {
       console.log("Submit choice response:", mapped);
       setScreen("scenario");
       setScenarioData(mapped);
-      setYear(year + 1);
       setOptionId(null);
       return out;
     },
@@ -338,6 +337,16 @@ const PlayerScreen = () => {
     refetchInterval: 3000, 
     refetchIntervalInBackground: true, 
 });
+
+  // Improved scenario data and year handling to prevent redundant increments
+  const scenarioDataRef = useRef(null);
+  useEffect(() => {
+    if (!scenarioData) return;
+    if (scenarioDataRef.current !== null && JSON.stringify(scenarioData) !== JSON.stringify(scenarioDataRef.current)) {
+      setYear((prev) => prev + 1);
+    }
+    scenarioDataRef.current = scenarioData;
+  }, [scenarioData]);
 
 
 
