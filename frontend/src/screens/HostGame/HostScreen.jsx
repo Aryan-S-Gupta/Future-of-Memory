@@ -1,26 +1,23 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQuestion, submitChoice } from "../../../api/multiplayer/GameFlowApi.js";
-import { getRoomState } from "../../../api/multiplayer/RoomManagementApi.js";
 import Button from "../../components/Button/Button.jsx";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {useParams } from "react-router-dom";
 import "../../styles/GamePlay.css";
 import { useSession } from "../../../SessionContext.jsx";
 import background from "../../assets/fallback_first_turn.png";
 import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
-import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
+import { useBgm } from "../../audio/AudioProvider.jsx"; 
 import { useMemo, useRef } from "react";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
 import { getVotingInfo} from "../../../api/multiplayer/GameFlowApi";
-import MiniGame from "../MiniGame.jsx";
 import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
  const HostScreen = () => {
-  const navigate = useNavigate()
   const { roomCode, playerName } = useParams(); 
   const displayRoomCode = (roomCode && /^\d+$/.test(roomCode)) ? String(roomCode).padStart(4, "0") : roomCode;
   const { sessionId } = useSession(); // <-- get session from context
@@ -33,10 +30,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
   const [turn, setTurn] = useState(-1);
   const [votes, setVotes] = useState([]);
   const [totalPlayers, setTotalPlayers] = useState(1);
-  const [miniGameOccurred, setMiniGameOccurred] = useState(false);
   const [winnerInfo, setWinnerInfo] = useState(null);
-  const [showWinner, setShowWinner] = useState(false);
-  const [played, setPlayed] = useState(false)
   const [factsFecthed, setFactsFetched] = useState(false);
 
   // --- Staged reveal for multiplayer ---
@@ -47,7 +41,6 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
   const fadeDuration = 2000;
   const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
-  const [tieStatus, setTieStatus] = useState(null);
   const [scenarioData, setScenarioData] = useState({
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
@@ -55,10 +48,6 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
     "to confront choices that could redefine humanity.",
     image: background // no image for the first one
 });
-  const [roomDestroyed, setRoomDestroyed] = useState(false);
-
-
-
   // --- Tie narration to BGM ---
   const { isPlaying, volume, setVolume } = useBgm();
 
@@ -98,7 +87,8 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
     refetchIntervalInBackground: true, 
   })
 
-
+  // --- Voting Query ---
+  // Fetches voting info periodically while on the "question" screen.
   const {} = useQuery({
     queryKey: ["votingStatus", roomCode, currentTurn?.turn_id], 
     queryFn: async() => {
@@ -161,7 +151,8 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
       refetchIntervalInBackground: true
   })
 
-
+  // --- Submit Choice Query ---
+  // Submits the final choice obtained from the voting of all players when option_id is set.
   const {} = useQuery({
       queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
       queryFn: async () => {
@@ -172,10 +163,12 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
         console.log(out)
         if (!out || !out.scenario || !out.scenario.text) {
           if (!out.room_exists) {
+            // check whether the room was destroyed
             setScreen("destroyed");
             return null;
           }
           if (out.tie) {
+            // starts the minigame
             console.log("Tie detected! Starting mini-game round...");
             setWinnerInfo(null);
             setScreen("miniGameWait");
@@ -186,6 +179,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
         console.log("the data is", out );
 
         if (out.tie) {
+            // handles if the tie is detected even after the data is generated
             console.log("Tie detected! Starting mini-game round...");
             setWinnerInfo(null);
             setScreen("miniGameWait");
@@ -204,15 +198,17 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
         setOptionId(null);
         return out;
       },
-      enabled: currentTurn != null &&  option_id != null && screen !== "destroyed" && screen !== "miniGameWinner" && screen !== "miniGameWait",
+      enabled: currentTurn != null &&  
+              option_id != null && 
+              screen !== "destroyed" && 
+              screen !== "miniGameWinner" && 
+              screen !== "miniGameWait",
       onError: (err) => {
         console.log("onError:", err);
       }, 
       refetchInterval: 3000, 
       refetchIntervalInBackground: true, 
   });
-
-
 
   // --- Minimal TTS: inline (no extra files/deps) ---
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);

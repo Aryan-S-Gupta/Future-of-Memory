@@ -8,11 +8,16 @@ import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import { checkGameStarted } from "../../../api/multiplayer/RoomManagementApi.js";
 import { startGame } from "../../../api/multiplayer/RoomManagementApi.js";
 
+/***
+ * HostBackgroundScreen component displays the game background and allows the host to start the game.
+ * @returns JSX.Element
+ */
 const HostBackgroundScreen = () => {
   const navigate = useNavigate();
   const { roomCode, playerName, host, mode } = useParams();
   const [gameStarted, setGameStarted] = useState(false);
 
+  // Polling to check if game has started (for non-host players)
   const {} = useQuery({
     queryKey: ["started", roomCode],
     queryFn: async () => {
@@ -25,15 +30,15 @@ const HostBackgroundScreen = () => {
       }
       return res.data;
     },
-    enabled: host !== playerName,  // only run for non-hosts
-    refetchInterval: 1000,         // poll every second
+    enabled: host !== playerName,  
+    refetchInterval: 1000,      
     onError: (err) => {
       console.error("Polling error:", err);
     },
   });
 
 
-  // Host starts game
+  // Function to handle starting the game (for host)
   const handleStartGame = async () => {
     try {
       await startGame(roomCode)
