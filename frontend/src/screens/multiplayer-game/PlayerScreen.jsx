@@ -102,6 +102,10 @@ const PlayerScreen = () => {
       const data = res.data
       console.log("[VotingQuery] Parsed data:", res.data);
       console.log("[VotingQuery] onSuccess triggered. Data:", data);
+      if (!res && !res.data.room_exists) {
+        setScreen("destroyed");
+        return null;
+      }
       if (!data) {
         console.log("[VotingQuery] Data empty, skipping state update.");
         return;
@@ -162,12 +166,7 @@ const PlayerScreen = () => {
     setOptionId(option_id);
   }
 
-  const {
-    data: out,
-    isLoading: isTurnLoading,
-    error: turnError,
-    status: turnStatus,
-  } = useQuery({
+  const { } = useQuery({
     queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
     queryFn: async () => {
       console.log("submitting option", sessionId);
@@ -237,6 +236,12 @@ const PlayerScreen = () => {
         const poll = setInterval(async () => {
           const res = await submitTiebreakScore(playerName, roomCode, turn, score);
           console.log("asking", res);
+
+          if (!res || !res.room_exists) {
+            setScreen("destroyed");
+            clearInterval(poll);
+            return;
+          }
 
           if (res.status === "resolved" || res.winner) {
             console.log("Mini-game resolved:", res);

@@ -269,6 +269,8 @@ def get_voting_status_with_options(request, room_code, turn_id):
     """
     Returns the current voting status for a room including player choices.
     """
+    if not rm.room_exists(room_code):
+        return JsonResponse({"success": False, "room_exists": False})
     session_key = (room_code, int(turn_id))
     voting_session = VotingSessions.get(session_key)
 
@@ -561,6 +563,8 @@ def submit_tiebreak_score_view(request):
     except (KeyError, ValueError, json.JSONDecodeError):
         return HttpResponseBadRequest("Invalid or missing parameters")
 
+    if not rm.room_exists(room_code):
+        return JsonResponse({"success": False, "room_exists": False})
     voting_sesh = VotingSessions.get((room_code, turn_id))
     if not voting_sesh:
         return JsonResponse({"error": "No active voting session found"}, status=404)
