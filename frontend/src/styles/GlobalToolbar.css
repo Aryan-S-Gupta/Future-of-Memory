@@ -144,7 +144,7 @@
 .gtb {
   grid-area: panel;
   transform-origin: top right;
-  transition: all 700ms cubic-bezier(0.1, 1, 0.5, 1);
+  transition: transform 700ms cubic-bezier(0.1, 1, 0.5, 1);
 }
 
 /* Collapsed state: hide panel, keep only square ham visible */
@@ -197,3 +197,14 @@
 .gtb-ham { position: relative; z-index: 2; }  /* trigger over */
 
 .gtb { padding-right: 60px; }
+
+.gtb-audio-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.gtb-audio-inline svg {
+  width: 22px;
+  height: 22px;
+  opacity: 0.8;
+}
