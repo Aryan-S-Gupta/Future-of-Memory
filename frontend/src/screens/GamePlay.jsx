@@ -382,7 +382,7 @@ const GamePlay = () => {
       )}
       {/** Question Screen*/}
       {screen === "question" && currentTurn && (
-        <div className="menu-glass  question-screen-container">
+        <div className="menu-glass  question-screen">
           <div className="question-container">
             <h2 className={questionClass}>
               {currentTurn.question}
