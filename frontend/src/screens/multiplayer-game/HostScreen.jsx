@@ -86,7 +86,7 @@ import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
     image: background // no image for the first one
 });
   // --- Tie narration to BGM ---
-  const { isPlaying, isMuted, volume, setVolume } = useBgm();
+  const { isPlaying, volume, setVolume } = useBgm();
 
 
   // --- Question Query ---
@@ -304,7 +304,7 @@ import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
 
     utter.rate = 0.7;
     utter.pitch = 1.0;
-    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
+    utter.volume = 1;
 
     const restore = () => {
       if (prevVolRef.current !== null) {
@@ -332,22 +332,6 @@ import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
     return () => cancelTTS();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, scenarioData?.scenario, isPlaying]); // tie to playing state
-
-  // Replay narration when toolbar Play is clicked (even if already playing)
-  useEffect(() => {
-    const handler = () => {
-      if (screen === "scenario" && scenarioData?.scenario) {
-        speak(scenarioData.scenario);
-      } else if (screen === "question" && currentTurn) {
-        // Host: only read the question (not options)
-        speak(currentTurn.question);
-      }
-    };
-    window.addEventListener("bgm-play", handler);
-    return () => window.removeEventListener("bgm-play", handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, scenarioData?.scenario, currentTurn, stage, isPlaying]);
-
 
   useEffect(() => {
     if (screen === "question") {
@@ -437,9 +421,6 @@ import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, currentTurn, isPlaying]);
-
-  useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
-
 
   const getFadeClass = (idx) => {
     // Question: once shown, never hide again
