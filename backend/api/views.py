@@ -15,6 +15,10 @@ from django.http import HttpResponse
 import multiplayer.room_manager as rm
 from rag.retrieve import retrieve_chunks
 from rag.fun_facts.retrieve_fun_facts import retrieve_fun_facts
+from shared.services import display_world_view
+from shared.models import Session, Option, Turn, ImageRender
+from shared.tasks import start_turn_pipeline
+from shared.tasks import start_turn_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -220,11 +224,6 @@ def rag_retrieve(request):
     return JsonResponse({"items": items})
 
 
-# new views
-from shared.models import Session, Option, Turn, ImageRender
-
-# home page
-# need to call this somewhere - as soon as the game is created
 def create_session(request):
     """
     Create a new Session and return its ID as JSON.
@@ -242,12 +241,6 @@ def create_session(request):
     return JsonResponse({"session_id": session.id}, status=201)
 
 
-# intro page
-
-# need a call in background page - it starts generating question and options and images and scenario
-from shared.tasks import start_turn_pipeline
-
-
 def start_prerendering(request):
     year = request.GET.get("year")
     session_id = request.GET.get("session_id")
@@ -256,10 +249,7 @@ def start_prerendering(request):
     logger.info("start_turn_pipeline.send() called")
     return JsonResponse({"status": "generation_started"})
 
-# question and options display page
 
-
-# send the existing work
 def display_question_and_options(request, session_id, turn_id, year):
 
     """
@@ -291,36 +281,22 @@ def display_question_and_options(request, session_id, turn_id, year):
     """
     # get session
     logger.debug(f"display_question_and_options called for session_id={session_id}")
+    session_id = int(session_id)
     existing_session = get_object_or_404(Session, id=session_id)
     logger.debug(f"Found session: {existing_session}")
     logger.debug(f"turn_id received: {turn_id}")
 
     logger.info(f'fetching for {year}')
-    # find the latest turn for this session
-    if int(turn_id) == -1:
-        logger.info("year:" + year)
-        latest_turn = (
-            Turn.objects
-            .filter(session_id=existing_session.id)
-            .order_by('-year', '-id')
-            .first()
-        )
-        # if the turn is not rrady yet 
-        if not latest_turn:
-            logger.warning("No turns found for this session")
-            return JsonResponse({'error': 'No turn found for this session'}, status=404)
-    
-    else:
-        # get specific turn by ID
-        turn_id = int(turn_id) + 1
-        latest_turn = get_object_or_404(Turn, year=int(year),  session_id=session_id)
+
+    latest_turn = get_object_or_404(Turn, year=int(year),  session_id=session_id)
+    logger.info(f'latest turn is; {latest_turn}')
         
     
     if latest_turn.year != int(year): 
         logger.info("got here")
-        return JsonResponse({'error': 'new. year not ready yet'}, status=404)
-    
-    turn_id = latest_turn.id 
+        return JsonResponse({"error": "new. year not ready yet"}, status=404)
+
+    turn_id = latest_turn.id
     
     logger.debug(f"Latest turn determined: {latest_turn}")
     logger.debug(f"Latest turn for session: {latest_turn}")
@@ -341,9 +317,6 @@ def display_question_and_options(request, session_id, turn_id, year):
     }
 
     return JsonResponse(response_payload)
- 
-# scenario and image display page
-from shared.services import display_world_view
 
 
 def display_scenario_and_image(request, session_id, turn_id, year, option_id):
