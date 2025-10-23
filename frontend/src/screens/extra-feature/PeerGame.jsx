@@ -1,28 +1,26 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getQuestion, submitChoice } from "../../api/multiplayer/GameFlowApi.js";
-import { getRoomState } from "../../api/multiplayer/RoomManagementApi.js";
-import Button from "../components/Button/Button.jsx";
+import { getQuestion, submitChoice } from "../../../api/multiplayer/GameFlowApi.js";
+import Button from "../../components/Button/Button.jsx";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../styles/GamePlay.css";
-import { useSession } from "../../SessionContext.jsx";
+import { useSession } from "../../../SessionContext.jsx";
 import background from "../assets/fallback_first_turn.png";
-import { getFunFacts } from "../../api/single-player/GameApi.js";
-import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
-import BasePage from "./BasePage.jsx";
-import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
+import { getFunFacts } from "../../../api/single-player/GameApi.js";
+import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
+import BasePage from "../BasePage.jsx";
+import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
-import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
-import RoomDestroyedPopup from "../components/RoomDestroy/RoomDestroyedDisplay.jsx";
-import VotingDisplay from "../components/Voting Display/VotingDisplay.jsx";
-import { getVotingInfo} from "../../api/multiplayer/GameFlowApi.js";
-import MiniGame from "./MiniGame.jsx";
-import { submitTiebreakScore } from "../../api/multiplayer/GameFlowApi.js";
+import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
+import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
+import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
+import { getVotingInfo} from "../../../api/multiplayer/GameFlowApi.js";
+import MiniGame from "../MiniGame.jsx";
+import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
 
 
 const PeerGame = () => {
-  const navigate = useNavigate()
   const { roomCode, playerName } = useParams(); 
   const prevQuestionRef = useRef(null);
   const { sessionId } = useSession(); // <-- get session from context
