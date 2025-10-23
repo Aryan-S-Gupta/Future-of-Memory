@@ -304,6 +304,7 @@ CREATE DATABASE memorysim_db;
 CREATE USER memorysim_user WITH PASSWORD 'password123';
 GRANT ALL PRIVILEGES ON DATABASE memorysim_db TO memorysim_user;
 \c memorysim_db;
+# then enter
 GRANT ALL ON SCHEMA public TO memorysim_user;
 \q
 ```
