@@ -42,7 +42,6 @@ const PlayerScreen = () => {
   // --- Staged reveal for multiplayer ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
   const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
@@ -162,7 +161,6 @@ const PlayerScreen = () => {
   // handle choice click
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
-    //setShowVotes(false);
     setOptionId(option_id);
   }
 
@@ -237,7 +235,7 @@ const PlayerScreen = () => {
           const res = await submitTiebreakScore(playerName, roomCode, turn, score);
           console.log("asking", res);
 
-          if (!res || !res.room_exists) {
+          if (!res && !res.data.room_exists) {
             setScreen("destroyed");
             clearInterval(poll);
             return;
