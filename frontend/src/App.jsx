@@ -13,7 +13,7 @@ import '@fontsource/kanit/500.css';
 import PeerGame from "./screens/PeerGame.jsx";
 import HostScreen from "./screens/HostGame/HostScreen.jsx";
 import FeedbackScreen from "./components/FeedbackScreen/FeedbackScreen.jsx";
-import '@fontsource/orbitron/500.css'; // NEW
+import '@fontsource/orbitron/500.css';
 
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
