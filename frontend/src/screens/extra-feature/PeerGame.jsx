@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getQuestion, submitChoice } from "../../../api/multiplayer/GameFlowApi.js";
 import Button from "../../components/Button/Button.jsx";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import "../styles/GamePlay.css";
 import { useSession } from "../../../SessionContext.jsx";
 import background from "../assets/fallback_first_turn.png";
@@ -18,32 +18,54 @@ import { getVotingInfo} from "../../../api/multiplayer/GameFlowApi.js";
 import MiniGame from "../MiniGame.jsx";
 import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
-
-
+/**
+ * PeerGame Component
+ * ---------------------
+ * NOTE PLEASE READ README.md IN THE SAME FOLDER BEFORE USING THIS COMPONENT.
+ * 
+ * This component implements the original peer-to-peer multiplayer game mode.
+ * It allows all players to interact directly without a designated host,
+ * handling question flow, scenario transitions, voting, and mini-game tie-breakers.
+ *
+ * While later replaced by the host-vs-player system, this version remains
+ * a functional backup in case of errors or connectivity issues in the host mode.
+ *
+ * Core Features:
+ *  - Peer-based session handling (each player equal)
+ *  - Scenario/question progression
+ *  - Vote tracking and synchronization
+ *  - Mini-game tie-breakers
+ *  - Fun fact loading screens
+ *  - Integrated text-to-speech (TTS) narration synced with BGM
+ *
+ * State Overview:
+ *  - `screen`: determines the active view (scenario, question, loading, mini-game, etc.)
+ *  - `currentTurn`: stores the question and options of the current round
+ *  - `votes`, `totalPlayers`, `allVoted`: track live vote progress
+ *  - `scenarioData`: holds the narrative text/image for the current outcome
+ *  - `miniGameOccurred`, `winnerInfo`, `played`: manage tie-breaker results
+ *
+ * @component
+ * @returns {JSX.Element} The peer-to-peer multiplayer game interface.
+ */
 const PeerGame = () => {
   const { roomCode, playerName } = useParams(); 
-  const prevQuestionRef = useRef(null);
   const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
   const [loadingFacts, setLoadingFacts] = useState([]);
-  const [isReady, setIsReady] = useState(false);
   const [option_id, setOptionId] = useState(null);
   const [turn, setTurn] = useState(-1);
-  const [showVotes, setShowVotes] = useState(false)
   const [votes, setVotes] = useState([]);
   const [totalPlayers, setTotalPlayers] = useState(1);
   const [miniGameOccurred, setMiniGameOccurred] = useState(false);
   const [winnerInfo, setWinnerInfo] = useState(null);
-  const [showWinner, setShowWinner] = useState(false);
   const [played, setPlayed] = useState(false)
 
   // --- Staged reveal for multiplayer ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
-  
-  const [hasAnimated, setHasAnimated] = useState(false); 
   const fadeDuration = 1000;
   const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
@@ -55,10 +77,6 @@ const PeerGame = () => {
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
 });
-  const [roomDestroyed, setRoomDestroyed] = useState(false);
-
-
-
   // --- Tie narration to BGM ---
   const { isPlaying, isMuted, volume, setVolume } = useBgm();
 
@@ -268,7 +286,7 @@ const PeerGame = () => {
   useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
 
 
-  const {data: votingData} = useQuery({
+  const { } = useQuery({
     queryKey: ["votingStatus", roomCode, currentTurn?.turn_id], 
     queryFn: async() => {
         console.log("the current turn is: " + currentTurn)
@@ -348,12 +366,7 @@ const PeerGame = () => {
     setOptionId(option_id);
   }
 
-  const {
-    data: out,
-    isLoading: isTurnLoading,
-    error: turnError,
-    status: turnStatus,
-    } = useQuery({
+  const { } = useQuery({
       queryKey: ["scenario", playerName, roomCode, currentTurn, sessionId, roomCode, option_id, year],
       queryFn: async () => {
         console.log("submitting option", sessionId);
@@ -361,7 +374,6 @@ const PeerGame = () => {
         console.log(out)
         if (!out || !out.scenario || !out.scenario.text) {
           if (!out.room_exists) {
-            setRoomDestroyed(true); 
             setScreen("destroyed");
           }
           if (!out.success) {
@@ -444,7 +456,6 @@ const PeerGame = () => {
 useEffect(() => {
   if (screen === "question") {
     console.log("[Animation] Resetting staged animation for new question");
-    setHasAnimated(false);
     setStage(0);
   }
 }, [currentTurn, screen])
@@ -516,7 +527,6 @@ const getFadeClass = (idx) => {
       )}
       {screen === "loading" && (
         <LoadingScreen
-          isReady={isReady}
           funFacts={loadingFacts}
           onContinue={() => {
             setScreen({ loadingState });
