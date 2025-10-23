@@ -372,28 +372,13 @@ python manage.py rundramatiq --queues llm_scenario --processes 1 --threads 1
 
 ### Step 11: Start the Development Server at port 9000
 
-Set `UPDATE_RAG` to `False` in `backend/rag/config.py` if you don't want the RAG system to be
-updated (updating it takes some time). Note however that you must have some version of the RAG
-system set up to run the project.
-
 ```bash
-python setup_rag.py
 python manage.py runserver 0.0.0.0:9000
 ```
 
-Then open your browser or use terminal tools like `curl` to test the following round-based endpoints:
+### Step 12: Testing the RAG system
 
-## Pseudo API Endpoints (Round-by-Round)
-
-Each round includes:
-
-1. Year-based background story
-2. Ethical yes/no question
-3. Branching result based on player choice
-
-## Testing the RAG system
-
-### Verify existence of RAG files
+#### Verify existence of RAG files
 
 ```bash
 # macOS/Linux
