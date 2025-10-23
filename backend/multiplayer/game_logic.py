@@ -54,7 +54,6 @@ class VotingSession:
         self.inactive_players = set()
         self.tiebreak_winner = None
         self.tiebreak_winning_option = None
-
         self.final_option = None
         self.lock = threading.Lock()
         self.tie_mode = False           # True when in tie-breaker mode
