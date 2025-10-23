@@ -494,3 +494,11 @@
 }
 
 .question-screen { align-items: center; }
+
+.question-screen .custom-choice,
+.question-screen .custom-choice * {
+  animation: none !important;
+  animation-name: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}

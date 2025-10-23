@@ -10,7 +10,6 @@ import background from "../../assets/fallback_first_turn.png";
 import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
-import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
@@ -60,139 +59,41 @@ const PlayerScreen = () => {
     image: background // no image for the first one
   });
 
-
-
-  // --- Tie narration to BGM ---
-  const { isPlaying, isMuted, volume, setVolume } = useBgm();
-
-  const [ttsEnabled, setTtsEnabled] = useState(false);
-  const enabledOnceRef = useRef(false);
-
-  // when toolbar sends enable, start following isMuted
-  useEffect(() => {
-    const onTtsSet = (e) => setTtsEnabled(!!e.detail);
-    window.addEventListener("tts-set", onTtsSet);
-    return () => window.removeEventListener("tts-set", onTtsSet);
-  }, []);
-
-  // after first enable, keep TTS in sync with toolbar mute
-  useEffect(() => {
-    if (enabledOnceRef.current) setTtsEnabled(!isMuted);
-  }, [isMuted]);
-
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
-// Fetches the scenario whenever we are on the "scenario" screen.
-  const {data: questionData} = useQuery ({
-    queryKey: ["question", roomCode, sessionId, turn, year], 
-    queryFn: async() => {
-        console.log("queryFn running for", year);
-        const result = await getQuestion(sessionId, roomCode, turn , year);
-        if (!result ) {
-          setScreen("loading");
-          setLoadingState("question");
-          if (!factsFecthed) {
-            await fetchFunFacts();
-            setFactsFetched(true);
-          }
-          console("loading at the moment");
-          return null;
-        } else {
-          if (!result.room_exists) {
-            setScreen("destroyed");
-            return null;
-          }
-          setCurrentTurn(result);
-          setTurn(result.turn_id);
-          setScreen("question");
-          setLoadingState("none")
-          console.log("recieved question data: " + result);
-          setScenarioData(null);
-          setFactsFetched(false)
-          return result;
+  // Fetches the scenario whenever we are on the "scenario" screen.
+  const { data: questionData } = useQuery({
+    queryKey: ["question", roomCode, sessionId, turn, year],
+    queryFn: async () => {
+      console.log("queryFn running for", year);
+      const result = await getQuestion(sessionId, roomCode, turn, year);
+      if (!result) {
+        setScreen("loading");
+        setLoadingState("question");
+        if (!factsFecthed) {
+          await fetchFunFacts();
+          setFactsFetched(true);
         }
-    }, enabled: loadingState == "question", 
-      refetchInterval: 3000,
-      refetchIntervalInBackground: true,
+        console("loading at the moment");
+        return null;
+      } else {
+        if (!result.room_exists) {
+          setScreen("destroyed");
+          return null;
+        }
+        setCurrentTurn(result);
+        setTurn(result.turn_id);
+        setScreen("question");
+        setLoadingState("none")
+        console.log("recieved question data: " + result);
+        setScenarioData(null);
+        setFactsFetched(false)
+        return result;
+      }
+    }, enabled: loadingState == "question",
+    refetchInterval: 3000,
+    refetchIntervalInBackground: true,
   })
-
-
-
-  // --- Minimal TTS: inline (match single-player volume/mute) ---
-  const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
-  const prevVolRef = useRef(null);
-  const duckFactor = 0.3;
-
-  const cancelTTS = () => {
-    try { synthRef.current?.cancel(); } catch { }
-    if (prevVolRef.current !== null) {
-      setVolume(prevVolRef.current);
-      prevVolRef.current = null;
-    }
-  };
-
-  const speak = (text, onDone) => {
-    if (!synthRef.current || !text) { onDone?.(); return; }
-    try { synthRef.current.cancel(); } catch { }
-
-    // voice audible only if TTS enabled and toolbar not muted
-    const voiceAudible = ttsEnabled && !isMuted;
-
-    if (!isPlaying && voiceAudible === false) { onDone?.(); return; }
-    if (voiceAudible) {
-      prevVolRef.current = volume;
-      setVolume(Math.max(0, Math.min(1, volume * duckFactor)));
-    }
-
-    const utter = new SpeechSynthesisUtterance(String(text));
-    const voices = synthRef.current.getVoices();
-    const prefs = [
-      /Microsoft Sonia Online \(Natural\).*English \(United Kingdom\)/i,
-      /Microsoft Jenny Online \(Natural\).*English \(United States\)/i,
-      /Samantha/i, /Victoria/i, /Serena/i, /Daniel/i, /Google UK English Female/i
-    ];
-    const picked = prefs.map(rx => voices.find(v => rx.test(v.name))).find(Boolean) || voices[0];
-    if (picked) utter.voice = picked;
-
-    utter.rate = 0.7; utter.pitch = 1.0;
-    utter.volume = voiceAudible ? Math.max(0, Math.min(1, volume)) : 0;
-
-    const restore = () => {
-      if (voiceAudible && prevVolRef.current !== null) {
-        setVolume(prevVolRef.current); prevVolRef.current = null;
-      }
-      onDone?.();
-    };
-    utter.onend = restore; utter.onerror = restore;
-    try { synthRef.current.speak(utter); } catch { restore(); }
-  };
-
-
-
-
-  // Auto-read Scenario when it shows (and BGM is playing)
-  useEffect(() => {
-    if (screen === "scenario" && scenarioData?.scenario) {
-      speak(scenarioData.scenario);
-    }
-    return () => cancelTTS();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, scenarioData?.scenario, isPlaying]); // tie to playing state
-
-  useEffect(() => {
-    const handler = () => {
-      if (screen === "scenario" && scenarioData?.scenario) {
-        speak(scenarioData.scenario);
-      } else if (screen === "question" && currentTurn) {
-        if (stage === 2) speak(currentTurn?.options?.[0]?.option_text);
-        else if (stage === 3) speak(currentTurn?.options?.[1]?.option_text);
-      }
-    };
-    window.addEventListener("bgm-play", handler);
-    return () => window.removeEventListener("bgm-play", handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, scenarioData?.scenario, currentTurn, stage, isPlaying]);
-
 
   const { data: votingData } = useQuery({
     queryKey: ["votingStatus", roomCode, currentTurn?.turn_id],
@@ -262,7 +163,6 @@ const PlayerScreen = () => {
   // handle choice click
   const handleChoice = async (option_id) => {
     if (!currentTurn) return;
-    cancelTTS();
     //setShowVotes(false);
     setOptionId(option_id);
   }
@@ -308,10 +208,10 @@ const PlayerScreen = () => {
     enabled: currentTurn != null && option_id != null && screen !== "destroyed" && screen !== "miniGame" && screen !== "miniGameResult" && screen !== "miniGameWaiting",
     onError: (err) => {
       console.log("onError:", err);
-    }, 
-    refetchInterval: 3000, 
-    refetchIntervalInBackground: true, 
-});
+    },
+    refetchInterval: 3000,
+    refetchIntervalInBackground: true,
+  });
 
   // Improved scenario data and year handling to prevent redundant increments
   const scenarioDataRef = useRef(null);
@@ -333,59 +233,6 @@ const PlayerScreen = () => {
     }
   }, [currentTurn, screen])
 
-
-  // --- Staged reveal ---
-  // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
-
-  const fadeBase = 1000; // align with SP fade
-  // question -> A -> B, using silent TTS so timings match Host exactly
-  useEffect(() => {
-    if (screen !== "question" || !currentTurn) return;
-
-    let cleared = false;
-    setStage(1); // question phase (Player UI still empty until A)
-
-    const optA = currentTurn?.options?.[0]?.option_text || "";
-    const optB = currentTurn?.options?.[1]?.option_text || "";
-
-    // Read question -> then A -> then B, revealing each on onend
-    speak(currentTurn.question, () => {
-      if (cleared) return;
-      setStage(2);                 // show A
-      if (optA) speak(optA, () => {
-        if (cleared) return;
-        setStage(3);               // show B
-        if (optB) speak(optB, () => {
-          if (cleared) return;
-          setStage(4);             // show both
-        }); else {
-          setStage(4);
-        }
-      }); else {
-        setStage(3);
-        if (optB) speak(optB, () => {
-          if (cleared) return;
-          setStage(4);
-        }); else {
-          setStage(4);
-        }
-      }
-    });
-
-    return () => { cleared = true; try { synthRef.current?.cancel(); } catch { } };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, currentTurn]);
-
-  useEffect(() => { if (isMuted) try { synthRef.current?.cancel(); } catch { } }, [isMuted]);
-
-  const getFadeClass = (idx) => {
-    switch (idx) {
-      case 1: return stage === 1 || stage === 4 ? "fade-in-out show" : stage > 1 ? "fade-in-out hide" : "fade-in-out";
-      case 2: return stage === 2 || stage === 4 ? "fade-in-out show" : stage > 2 ? "fade-in-out hide" : "fade-in-out";
-      case 3: return stage === 3 || stage === 4 ? "fade-in-out show" : stage > 3 ? "fade-in-out hide" : "fade-in-out";
-      default: return "fade-in-out";
-    }
-  };
 
   useEffect(() => {
     if (miniGameDone) {
@@ -437,6 +284,10 @@ const PlayerScreen = () => {
     }
   }
 
+  useEffect(() => {
+    if (screen === "question" && currentTurn) setStage(4);
+  }, [screen, currentTurn]);
+
 
 
   return (
@@ -485,12 +336,12 @@ const PlayerScreen = () => {
           <div className="question-main menu-glass">
             <div className="choice-container custom-choices">
               <Button
-                baseButton={getFadeClass(2) + " choice-btn custom-choice"}
+                baseButton={"choice-btn custom-choice"}
                 action={() => handleChoice(currentTurn.options[0].option_id)}
                 title={`${currentTurn.options[0].label}. ${currentTurn.options[0].option_text}`}
               />
               <Button
-                baseButton={getFadeClass(3) + " choice-btn custom-choice"}
+                baseButton={"choice-btn custom-choice"}
                 action={() => handleChoice(currentTurn.options[1].option_id)}
                 title={`${currentTurn.options[1].label}. ${currentTurn.options[1].option_text}`}
               />

@@ -886,6 +886,34 @@ button:focus-visible,
     /* Covers generic titles, titles on glass, and fade-in wrappers */
 }
 
+:root,
+:root[data-theme="dark"] {
+  --on-glass: #eef6ff;
+  --on-glass-muted: rgba(238, 246, 255, 0.82);
+  --glass-bg: rgba(12, 14, 20, 0.6);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.18);
+  --shadow-readable: 0 1px 2px rgba(0, 0, 0, 0.7);
+
+  --accent: #bde5ff;      /* soft blue */
+  --accent-strong: #ffffff;
+  --accent-glow: rgba(189, 229, 255, 0.7);
+}
+
+/* =========================
+   Light Mode
+========================= */
+:root[data-theme="light"] {
+  --on-glass: #0b1220;
+  --on-glass-muted: rgba(11, 18, 32, 0.82);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: 1px solid rgba(12, 16, 24, 0.14);
+  --shadow-readable: 0 1px 2px rgba(255, 255, 255, 0.7);
+
+  --accent: #0e3a5a;      /* deeper accent */
+  --accent-strong: #08324c;
+  --accent-glow: rgba(14, 58, 90, 0.35);
+}
+
 :root[data-theme="light"] .title,
 :root[data-theme="light"] .menu-glass .title,
 :root[data-theme="light"] .fade-in,
