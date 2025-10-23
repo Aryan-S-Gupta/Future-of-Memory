@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getQuestion, submitChoice } from "../../../api/multiplayer/GameFlowApi.js";
+import { getQuestion, submitChoice, getVotingInfo, submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 import Button from "../../components/Button/Button.jsx";
 import { useParams } from "react-router-dom";
-import "../styles/GamePlay.css";
+import "../../styles/GamePlay.css";
 import { useSession } from "../../../SessionContext.jsx";
-import background from "../assets/fallback_first_turn.png";
+import background from "../../assets/fallback_first_turn.png";
 import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
@@ -14,9 +14,7 @@ import { useMemo, useRef } from "react";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
-import { getVotingInfo} from "../../../api/multiplayer/GameFlowApi.js";
 import MiniGame from "../MiniGame.jsx";
-import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
 /**
  * PeerGame Component

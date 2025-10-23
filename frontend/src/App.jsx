@@ -2,12 +2,11 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainGameScreen from "./screens/MainGameScreen.jsx";
 import BackgroundScreen from "./screens/single-player/BackgroundScreen.jsx";
-import BackgroundScreenMulti from "./screens/BackgroundScreenMulti.jsx";
+import BackgroundScreenMulti from "./screens/extra-feature/BackgroundScreenMulti.jsx";
 import HowToScreen from "./screens/HowToScreen.jsx";
 import GamePlay from "./screens/single-player/GamePlay.jsx";
-import MultiplayerLobby from "./screens/MultiPlayerLobby.jsx";
+import MultiplayerLobby from "./screens/multiplayer-game/MultiPlayerLobby.jsx";
 import GalleryScreen from "./screens/GalleryScreen.jsx";
-
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
 import PeerGame from "./screens/extra-feature/PeerGame.jsx";

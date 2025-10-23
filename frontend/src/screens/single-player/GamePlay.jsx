@@ -9,7 +9,7 @@ import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import BasePage from "../BasePage.jsx";
 import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
-import "../styles/GamePlay.css";
+import "../../styles/GamePlay.css";
 import { getFunFacts } from "../../../api/single-player/GameApi.js";
 
 /**

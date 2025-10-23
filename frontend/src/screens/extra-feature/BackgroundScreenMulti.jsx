@@ -1,8 +1,8 @@
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import BasePage from "./BasePage.jsx";
-import Button from "../components/Button/Button.jsx";
-import "../styles/tokens.css";
-import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
+import BasePage from "../BasePage.jsx";
+import Button from "../../components/Button/Button.jsx";
+import "../../styles/tokens.css";
+import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 
 /**
  * This screen serves as the introductory background for multiplayer sessions in "Future of Memory."
