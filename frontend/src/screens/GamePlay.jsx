@@ -51,7 +51,7 @@ const GamePlay = () => {
   const navigate = useNavigate();
 
   // --- Tie narration to BGM ---
-  const { isPlaying, isMuted, volume, setVolume } = useBgm();
+  const { isPlaying, volume, setVolume } = useBgm();
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
@@ -129,7 +129,7 @@ const GamePlay = () => {
 
     utter.rate = 0.7;
     utter.pitch = 1.0;
-    utter.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
+    utter.volume = 1;
 
     const restore = () => {
       if (prevVolRef.current !== null) {
@@ -257,10 +257,6 @@ const GamePlay = () => {
     if (stage > idx + 2) return "hide";
     return "";
   };
-
-  // If user hits Mute in the toolbar, kill any ongoing speech immediately
-  useEffect(() => { if (isMuted) cancelTTS(); }, [isMuted]);
-
 
   // handle choice click
   const handleChoice = async (option_id) => {
