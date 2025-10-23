@@ -20,7 +20,7 @@ def prev_turn_displayed_image_rel(turn: Turn) -> str:
     return INITIAL_WORLD_IMAGE_REL
 
 # ideally if frontend gives enough time for generation, no wait needed
-def display_by_option(session_id: int, turn_id: int, option_id: int, max_wait_s: float = 25.0, poll_every_s: float = 0.5) -> dict:
+def display_by_option(request, session_id: int, turn_id: int, option_id: int, max_wait_s: float = 25.0, poll_every_s: float = 0.5) -> dict:
 
     turn = get_object_or_404(Turn, id=turn_id, session_id=session_id)
     opt = get_object_or_404(Option, id=option_id, turn=turn)
@@ -36,7 +36,7 @@ def display_by_option(session_id: int, turn_id: int, option_id: int, max_wait_s:
             "turn_id": turn_id,
             "option_id": opt.id,
             "status": "ready",
-            "image_url": build_image_url(rel),
+            "image_url": build_image_url(request, rel),
         }
 
     # if failed or timeout, show fallback
@@ -48,10 +48,11 @@ def display_by_option(session_id: int, turn_id: int, option_id: int, max_wait_s:
         "turn_id": turn_id,
         "option_id": opt.id,
         "status": "failed_fallback",
-        "image_url": build_image_url(fallback_rel),
+        "image_url": build_image_url(request, fallback_rel),
     }
 
-def build_image_url(rel_path):
-    base = getattr(settings, 'ABSOLUTE_BASE_URL', 'http://127.0.0.1:9000').rstrip('/')
-    print(f'{base}{settings.MEDIA_URL}{rel_path} is image url')
-    return f"{base}{settings.MEDIA_URL}{rel_path}" # http://127.0.0.1:9000/media/comfyui/output/xxx.png
+
+def build_image_url(request, rel_path):
+    base = f"{request.scheme}://{request.get_host()}"  # e.g. "http://192.168.0.151:8000"
+    full_url = f"{base}{settings.MEDIA_URL}{rel_path}" # e.g. "http://192.168.0.151:8000/media/session_x_turn_y_option_A.png
+    return full_url

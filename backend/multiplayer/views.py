@@ -528,7 +528,7 @@ def display_scenario_and_image(
 
     # All players have voted → generate world view
     try:
-        world_view_data = display_world_view(session_id, current, current_year, final_option)
+        world_view_data = display_world_view(request, session_id, current, current_year, final_option)
 
         if world_view_data.get("success"):
             next_year = current_year + 1

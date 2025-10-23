@@ -350,7 +350,7 @@ def display_scenario_and_image(request, session_id, turn_id, year, option_id):
 
     """
     try:
-        world_view_data = display_world_view(session_id, turn_id, year, option_id)
+        world_view_data = display_world_view(request, session_id, turn_id, year, option_id)
         if world_view_data.get("success") and world_view_data.get("scenario").get("text") != "":
             next_year = int(year) + 1
             next_turn = Turn.objects.filter(session_id=session_id, year=next_year).first()

@@ -683,7 +683,7 @@ def record_user_choice(turn_id: int, option_id: int) -> Dict[str, Any]:
         return {'error': str(e), 'success': False}
 
 from images.display import display_by_option
-def display_world_view(session_id: int, turn_id: int, year: int, option_id: int) -> Dict[str, Any]:
+def display_world_view(request,session_id: int, turn_id: int, year: int, option_id: int) -> Dict[str, Any]:
     """
     Display the world view after user makes a choice.
     
@@ -719,7 +719,7 @@ def display_world_view(session_id: int, turn_id: int, year: int, option_id: int)
     
     # Step 2: Get the image info
     try:
-        image_info = display_by_option(session_id, turn_id, option_id)
+        image_info = display_by_option(request,session_id, turn_id, option_id)
         logger.info(f"Retrieved image info: {image_info.get('status', 'unknown')}")
         
     except Exception as e:
@@ -758,155 +758,3 @@ def display_world_view(session_id: int, turn_id: int, year: int, option_id: int)
 
     logger.info(f"World view display completed for session {session_id}, turn {turn_id}, option {option.label}")
     return world_view_response
-
-
-# # this is refactored by start_turn_pipeline in tasks.py
-# @transaction.atomic
-# def generate_complete_turn(session_id: Optional[int] = None, year: Optional[int] = None) -> Dict[str, Any]:
-#     """
-#     Generate a complete turn including question, image texts, and scenarios.
-    
-#     This function orchestrates the complete turn generation workflow:
-#     1. Check or create session
-#     2. Determine the appropriate year
-#     3. Generate question and options
-#     4. Generate image texts for options
-#     5. Generate scenarios for options
-    
-#     Args:
-#         session_id: Optional existing session ID. If None, creates new session
-#         year: Optional target year. If None, determines next available year
-        
-#     Returns:
-#         Dict containing all generated data and metadata
-        
-#     Raises:
-#         ValueError: If year exceeds 2085 limit
-#         Exception: If any generation step fails
-#     """
-#     logger.info(f"Starting complete turn generation for session {session_id}, year {year}")
-    
-#     start_time = timezone.now()
-    
-#     # Step 1: Handle session creation/validation
-#     # Brynn: I do not think session should be created here, it should be at the home page view
-#     # is there any year limit?
-#     try:
-#         if session_id is None:
-#             # Create new session
-#             session = Session.objects.create(created_at=timezone.now())
-#             session_id = session.id
-#             target_year = 2035  # Start from first year
-#             logger.info(f"Created new session {session_id}")
-#         else:
-#             # Validate existing session
-#             try:
-#                 session = Session.objects.get(id=session_id)
-#                 logger.debug(f"Retrieved existing session {session_id}")
-                
-#                 # Determine next year if not provided
-#                 if year is None:
-#                     latest_turn = Turn.objects.filter(session=session).order_by('-year').first()
-#                     target_year = latest_turn.year + 1 if latest_turn else 2035
-#                 else:
-#                     target_year = year
-                    
-#             except Session.DoesNotExist:
-#                 logger.warning(f"Session {session_id} not found, creating new session")
-#                 session = Session.objects.create(created_at=timezone.now())
-#                 session_id = session.id
-#                 target_year = year if year is not None else 2035
-        
-#         # Step 2: Validate year limit
-#         if target_year > 2085:
-#             logger.error(f"Year {target_year} exceeds maximum limit of 2085")
-#             # Create new session for a fresh start
-#             session = Session.objects.create(created_at=timezone.now())
-#             session_id = session.id
-#             target_year = 2035
-#             logger.info(f"Created new session {session_id} due to year limit, starting from 2035")
-        
-#         logger.info(f"Target generation: Session {session_id}, Year {target_year}")
-        
-#     except Exception as e:
-#         logger.error(f"Failed to handle session setup: {e}")
-#         raise
-    
-#     # Step 3: Generate question and options
-#     step_start = timezone.now()
-#     try:
-#         logger.info("Step 1/3: Generating question and options...")
-#         question_result = generate_and_save_question(session_id, target_year)
-#         turn_id = question_result['turn_id']
-#         step_duration = (timezone.now() - step_start).total_seconds()
-#         logger.info(f"Question generation completed in {step_duration:.2f}s, Turn ID: {turn_id}")
-        
-#     except Exception as e:
-#         logger.error(f"Question generation failed: {e}")
-#         raise
-    
-#     # Step 4: Generate image texts
-#     step_start = timezone.now()
-#     try:
-#         logger.info("Step 2/3: Generating image texts...")
-#         image_result = generate_and_save_image_text(session_id, turn_id, target_year)
-#         step_duration = (timezone.now() - step_start).total_seconds()
-#         logger.info(f"Image text generation completed in {step_duration:.2f}s")
-#         # TODO: Reserved space for image generation function
-#         generate_two_images_blocking(session_id, turn_id)
-        
-#     except Exception as e:
-#         logger.error(f"Image text generation failed: {e}")
-#         raise
-    
-#     # Step 5: Generate scenarios
-#     step_start = timezone.now()
-#     try:
-#         logger.info("Step 3/3: Generating scenarios...")
-#         scenario_result = generate_and_save_scenario(session_id, turn_id, target_year)
-#         step_duration = (timezone.now() - step_start).total_seconds()
-#         logger.info(f"Scenario generation completed in {step_duration:.2f}s")
-        
-#     except Exception as e:
-#         logger.error(f"Scenario generation failed: {e}")
-#         raise
-    
-#     # Step 6: Compile complete result
-#     total_duration = (timezone.now() - start_time).total_seconds()
-    
-#     result = {
-#         'session_id': session_id,
-#         'turn_id': turn_id,
-#         'year': target_year,
-#         'created_new_session': session_id != session_id if session_id else True,  # Simplified logic
-#         'total_duration': total_duration,
-#         'generation_steps': {
-#             'question': {
-#                 'success': True,
-#                 'turn_id': question_result['turn_id'],
-#                 'question': question_result['question'],
-#                 'options': question_result['options'],
-#                 'generated_at': question_result['generated_at']
-#             },
-#             'image_texts': {
-#                 'success': True,
-#                 'image_texts': image_result['image_texts'],
-#                 'generated_at': image_result['generated_at']
-#             },
-#             'images': {
-#                 'success': True,
-#             },
-#             'scenarios': {
-#                 'success': True,
-#                 'scenarios': scenario_result['scenarios'],
-#                 'generated_at': scenario_result['generated_at']
-#             }
-#         },
-#         'completed_at': timezone.now().isoformat()
-#     }
-    
-#     logger.info(f"Complete turn generation finished successfully")
-#     logger.info(f"Session: {session_id}, Turn: {turn_id}, Year: {target_year}")
-#     logger.info(f"Total duration: {total_duration:.2f}s")
-    
-#     return result
