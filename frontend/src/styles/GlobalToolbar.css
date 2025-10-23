@@ -197,3 +197,14 @@
 .gtb-ham { position: relative; z-index: 2; }  /* trigger over */
 
 .gtb { padding-right: 60px; }
+
+.gtb-audio-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.gtb-audio-inline svg {
+  width: 22px;
+  height: 22px;
+  opacity: 0.8;
+}

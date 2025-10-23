@@ -108,7 +108,7 @@ const ZMIN = 0.85, ZMAX = 1.35, ZSTEP = 0.05, ZDEFAULT = 1;
  * Appearance: text size (A− / reset / A+), theme toggle
  */
 export default function GlobalToolbar() {
-    const { isMuted, volume, play, pause, mute, unmute, setVolume } = useBgm();
+    const { volume, setVolume } = useBgm();
     // Track theme (dark/light/auto)
     const [effectiveTheme, setEffectiveTheme] = useState(getEffectiveTheme());
     /** Toggle between muted/unmuted state */
@@ -174,30 +174,20 @@ export default function GlobalToolbar() {
             <div id="gtb-panel" className="gtb" role="toolbar" aria-label="Global toolbar">
                 {/* AUDIO CONTROLS */}
                 <div className="gtb-group" aria-label="Audio">
-                    {/* Mute/unmute toggle */}
-                    <button type="button" className="gtb-btn" onClick={onToggleMute}
-                        aria-pressed={isMuted} aria-label={isMuted ? "Unmute" : "Mute"} title={isMuted ? "Unmute" : "Mute"}>
-                        {isMuted ? <IconVolumeMute /> : <IconVolume />}
-                    </button>
-
-                    {/* Play / Pause buttons */}
-                    <div className="gtb-seg">
-                        <button type="button" className="gtb-btn" onClick={play} aria-label="Play" title="Play"><IconPlay /></button>
-                        <button type="button" className="gtb-btn" onClick={pause} aria-label="Pause" title="Pause"><IconPause /></button>
+                    <div className="gtb-audio-inline">
+                        <IconVolume />  {/* decorative icon */}
+                        <label className="gtb-slider-label" aria-label="Volume">
+                            <input
+                                className="gtb-slider"
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.01"
+                                value={volume}
+                                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                            />
+                        </label>
                     </div>
-
-                    {/* Volume slider */}
-                    <label className="gtb-slider-label" aria-label="Volume">
-                        <input
-                            className="gtb-slider"
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.01"
-                            value={isMuted ? 0 : volume}
-                            onChange={(e) => setVolume(parseFloat(e.target.value))}
-                        />
-                    </label>
                 </div>
 
                 {/* APPEARANCE CONTROLS */}
