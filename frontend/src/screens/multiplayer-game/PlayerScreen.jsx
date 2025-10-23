@@ -9,7 +9,6 @@ import background from "../../assets/fallback_first_turn.png";
 import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
-import { useRef } from "react";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 import MiniGame from "../MiniGame.jsx";
