@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/MemoryMiniGame.css";
 import Button from "../components/Button/Button.jsx";
@@ -9,6 +9,13 @@ const cardSymbols = ["🍎","🍌","🍇","🍉","🍓","🍒","🥝","🍍"];
 // Shuffle function
 const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
 
+/**
+ * Memory Mini-Game component
+ * @param {string} playerName - Player name (optional, from props or location)
+ * @param {string} roomCode - Room code for multiplayer tie-breaks
+ * @param {number} turnId - Current turn ID for multiplayer tie-breaks
+ * @param {function} onFinish - Callback for multiplayer tie-break completion
+ */
 const MiniGame = ({ playerName: PlayerName, roomCode, turnId, onFinish }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -21,12 +28,23 @@ const MiniGame = ({ playerName: PlayerName, roomCode, turnId, onFinish }) => {
   const [moves, setMoves] = useState(0);
   const [busy, setBusy] = useState(false);
 
-  // Initialize a 4x4 deck
+    /**
+   * Initialize the 4x4 deck on component mount.
+   * - Duplicates the 8 emojis to create pairs
+   * - Shuffles the resulting 16-card deck
+   */
   useEffect(() => {
     const doubleCards = shuffle([...cardSymbols, ...cardSymbols]); // duplicate and shuffle
     setCards(doubleCards);
   }, []);
 
+    /**
+   * Handles flipping a card.
+   * - Updates flipped state
+   * - Checks for match when 2 cards are flipped
+   * - Handles matched or mismatched pairs
+   * @param {number} index - Index of the clicked card
+   */
   const handleFlip = (index) => {
     if (flipped.includes(index) || matched.includes(index) || busy) return;
 
@@ -49,7 +67,13 @@ const MiniGame = ({ playerName: PlayerName, roomCode, turnId, onFinish }) => {
       }
     }
   };
-
+  
+  /**
+   * Check for game completion whenever matched cards or moves change.
+   * - Calculates score based on moves
+   * - Calls multiplayer callback if provided
+   * - Navigates to standalone result page if not multiplayer
+   */
   useEffect(() => {
   if (matched.length === cards.length && cards.length > 0) {
     const score = Math.max(0, 100 - moves * 2);

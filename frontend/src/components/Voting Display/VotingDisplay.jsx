@@ -2,8 +2,11 @@ import React from "react";
 import "../../styles/VotingDisplay.css";
 
 /**
- * Component to display voting progress and player statuses.
- * @param {*} param0 
+ * VotingDisplay component
+ * Displays voting progress and each player's voting status in a multiplayer game.
+ *
+ * @param {Object[]} voters - Array of player objects with `name` and `hasVoted` properties
+ * @param {number} totalPlayers - Total number of players in the room
  */
 const VotingDisplay = ({ voters = [], totalPlayers }) => {
   const votedCount = voters.filter((v) => v.hasVoted).length;
