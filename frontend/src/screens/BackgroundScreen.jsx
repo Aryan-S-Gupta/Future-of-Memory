@@ -29,6 +29,20 @@ const BackgroundScreen = () => {
     await startPrerender(sessionId);
     navigate("/game-play");
   }
+  const handleStart = () => {
+  // Unlock TTS/audio context
+  const synth = window.speechSynthesis;
+  if (synth) {
+    // Dummy utterance to unlock
+    const utter = new SpeechSynthesisUtterance("");
+    synth.speak(utter);
+    synth.cancel(); // immediately stop
+  }
+
+  // Now proceed to start game / navigate to gameplay
+  start(); 
+};
+
   return (
     <BasePage>
       <div className="menu-glass howto">
@@ -47,7 +61,7 @@ const BackgroundScreen = () => {
               </p>
             </div>
           </div>
-          <Button baseButton="btn-primary btn-next next-fade-in" action={start} title="Next" />
+          <Button baseButton="btn-primary btn-next next-fade-in" action={handleStart} title="Next" />
         </div>
       </div>
 
