@@ -360,7 +360,7 @@ redis-server
 redis-server.exe --port 6380 --bind 127.0.0.1
 ```
 
-### Step 10: create 3 workers (each from a different terminal)
+### Step 10: create 4 workers (each from a different terminal)
 
 Ensure your working directory is the `backend` folder, and then:
 
