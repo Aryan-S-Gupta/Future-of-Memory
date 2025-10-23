@@ -8,11 +8,17 @@ import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import { checkGameStarted } from "../../../api/multiplayer/RoomManagementApi.js";
 import { startGame } from "../../../api/multiplayer/RoomManagementApi.js";
 
+/***
+ * HostBackgroundScreen component displays the game background and allows the host to start the game.
+ * @returns JSX.Element
+ */
 const HostBackgroundScreen = () => {
   const navigate = useNavigate();
   const { roomCode, playerName, host, mode } = useParams();
   const [gameStarted, setGameStarted] = useState(false);
+  const [alertMsg, setAlertMsg] = useState(null);
 
+  // Polling to check if game has started (for non-host players)
   const { } = useQuery({
     queryKey: ["started", roomCode],
     queryFn: async () => {
@@ -25,21 +31,26 @@ const HostBackgroundScreen = () => {
       }
       return res.data;
     },
-    enabled: host !== playerName,  // only run for non-hosts
-    refetchInterval: 1000,         // poll every second
+    enabled: host !== playerName,  
+    refetchInterval: 1000,      
     onError: (err) => {
       console.error("Polling error:", err);
     },
   });
 
 
-  // Host starts game
+  // Function to handle starting the game (for host)
   const handleStartGame = async () => {
     try {
-      await startGame(roomCode)
+      const res = await startGame(roomCode);
+      if (res.data.empty) {
+        console.log("room is empty");
+        setAlertMsg("Cannot start game: Room is empty.");
+        return;
+      }
       setGameStarted(true);
       navigate(`/projector-room/${roomCode}/${playerName}/${host}/${mode}`);
-    } catch (err) {
+    } catch (err) { 
       console.error("Error starting game:", err);
     }
   };
@@ -73,10 +84,21 @@ const HostBackgroundScreen = () => {
           </div>
           <div className="button-container">
             <ExitExperience code={roomCode} player={playerName} />
-          </div>
-        </div>
+      </div>
+      </div>
       )}
-    </BasePage>)
+
+      {/* === Custom Alert Modal === */}
+      {alertMsg && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <h3>⚠️ Notice</h3>
+            <p>{alertMsg}</p>
+            <button className="btn-modal" onClick={() => setAlertMsg(null)}>OK</button>
+              </div>
+          </div>
+      )}
+  </BasePage>)
 };
 
 export default HostBackgroundScreen;

@@ -41,13 +41,10 @@ const GamePlay = () => {
   const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
     scenario:
-      "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
-      "Once experimental, memory editing, enhancement, and storage are mainstream, forcing governments " +
-      "to confront choices that could redefine humanity. manipulation not just possible, but precise and reliable." +
-      "Memory editing, enhancement," +
-      "These technologies can erase trauma, boost learning, and even share memories, offering both promise " +
-      "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
-      " ownership, and the commercialization of consciousness.",
+    "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
+    "Once experimental, memory editing, enhancement, and storage are mainstream, forcing governments " +
+    "to confront choices that could redefine humanity. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
+    " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
   });
 

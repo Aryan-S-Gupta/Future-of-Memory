@@ -66,5 +66,9 @@ export const getHostName = async (roomCode) => {
 export const startGame = async (roomCode) => {
   const res = await api.get(`start_game/${roomCode}`);
   return res;
+}
 
+export const isRoomEmpty = async (roomCode) => {
+  const res = await api.get(`/room_empty/${roomCode}`);
+  return res;
 }

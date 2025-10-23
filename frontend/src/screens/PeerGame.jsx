@@ -15,13 +15,13 @@ import { useMemo, useRef } from "react";
 import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 import VotingDisplay from "../components/Voting Display/VotingDisplay.jsx";
-import { getVotingInfo} from "../../api/multiplayer/GameFlowApi";
+import { getVotingInfo} from "../../api/multiplayer/GameFlowApi.js";
 import MiniGame from "./MiniGame.jsx";
 import { submitTiebreakScore } from "../../api/multiplayer/GameFlowApi.js";
 
 
 
-const GamePlayMulti = () => {
+const PeerGame = () => {
   const navigate = useNavigate()
   const { roomCode, playerName } = useParams(); 
   const prevQuestionRef = useRef(null);
@@ -53,10 +53,7 @@ const GamePlayMulti = () => {
   scenario: 
     "The year is 2035, and neurotechnology now makes memory manipulation precise and reliable. " +
     "Once experimental, memory editing, enhancement, and storage are mainstream, forcing governments " +
-    "to confront choices that could redefine humanity. manipulation not just possible, but precise and reliable." +
-    "Memory editing, enhancement," +
-    "These technologies can erase trauma, boost learning, and even share memories, offering both promise " +
-    "and peril. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
+    "to confront choices that could redefine humanity. Nations clash over freedom versus regulation, while corporations drive new concerns around privacy," +
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
 });
@@ -642,4 +639,4 @@ const getFadeClass = (idx) => {
 
 
 
-export default GamePlayMulti;
+export default PeerGame;

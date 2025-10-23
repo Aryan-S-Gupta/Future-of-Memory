@@ -10,7 +10,7 @@ import GalleryScreen from "./screens/GalleryScreen.jsx";
 
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
-import GamePlayMulti from "./screens/GamePlayMulti.jsx";
+import PeerGame from "./screens/PeerGame.jsx";
 import HostScreen from "./screens/HostGame/HostScreen.jsx";
 import FeedbackScreen from "./components/FeedbackScreen/FeedbackScreen.jsx";
 import '@fontsource/orbitron/500.css'; // NEW
@@ -51,7 +51,7 @@ function App() {
               <Route path="/background-multi/:roomCode/:playerName" element={<BackgroundScreenMulti/>} />
               <Route path="/projection-host/:roomCode/:playerName/:host/:mode" element={<HostBackgroundScreen />} />
               <Route path="/feedback" element={<FeedbackScreen/>} />
-              <Route path="/multiplayer-room/:roomCode/:playerName" element={<GamePlayMulti />} />
+              <Route path="/multiplayer-room/:roomCode/:playerName" element={<PeerGame />} />
               <Route path="/projector-room/:roomCode/:playerName/:host/:mode" element={<HostScreen />} />
               <Route path="/gallery/:sessionId" element={<GalleryScreen />} />
               <Route path="/mini-game/intro" element={<MiniGameIntro />} />
