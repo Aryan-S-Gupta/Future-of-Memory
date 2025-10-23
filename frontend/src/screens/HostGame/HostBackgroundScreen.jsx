@@ -8,9 +8,31 @@ import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import { checkGameStarted } from "../../../api/multiplayer/RoomManagementApi.js";
 import { startGame } from "../../../api/multiplayer/RoomManagementApi.js";
 
-/***
- * HostBackgroundScreen component displays the game background and allows the host to start the game.
- * @returns JSX.Element
+/**
+ * This screen serves as the introductory background for multiplayer sessions in "Future of Memory."
+ * It is shown to the **host** before the game officially starts and allows them to initiate the session.
+ * For **non-host** players, it continuously polls the backend to check whether the game has begun.
+ *
+ * Features:
+ * - Displays a narrative "crawl" introduction setting the story context for 2035.
+ * - Host can start the multiplayer session once all players are ready.
+ * - Non-hosts automatically transition to the player room once the host starts the game.
+ * - Includes a modal alert if the host attempts to start the game with an empty room.
+ * - Integrates with `ExitExperience` for users to safely exit the session.
+ *
+ * Routing Parameters (from `useParams`):
+ * - `roomCode`: The unique identifier for the multiplayer room.
+ * - `playerName`: The current player's display name.
+ * - `host`: The designated host's name.
+ * - `mode`: Game mode (e.g., "host" or "player").
+ *
+ * Dependencies:
+ * - React hooks (`useState`, `useEffect`)
+ * - React Router (`useNavigate`, `useParams`)
+ * - React Query (`useQuery`) for backend polling
+ * - `BasePage` layout wrapper
+ * - `Button` and `ExitExperience` components
+ * - API calls: `checkGameStarted`, `startGame`
  */
 const HostBackgroundScreen = () => {
   const navigate = useNavigate();

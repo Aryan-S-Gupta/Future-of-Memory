@@ -6,6 +6,28 @@ import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
 const BACKEND_ORIGIN = api.defaults.baseURL.replace(/\/api\/?$/, "");
 const toAbs = (u) => (u && u.startsWith("/media/")) ? BACKEND_ORIGIN + u : u;
 
+/**
+ * The Gallery screen displays a visual record of a player's journey throughout the "Future of Memory" experience.
+ * It retrieves and renders all past decisions (scenarios, years, and choices) from the backend API for a given session.
+ *
+ * Features:
+ * - Fetches gallery items (year, scenario, option text, image, turn/option IDs) from the backend.
+ * - Allows players to review past decisions and view corresponding scenario images.
+ * - Displays images in a responsive grid layout with modal previews.
+ * - Handles loading states and empty session cases gracefully.
+ * - Integrates with `ExitExperience` to let users end or exit their experience.
+ *
+ * Props:
+ * - `sessionId` (optional): The session identifier for fetching gallery data.
+ *   If not provided, the component attempts to extract it from the URL or localStorage.
+ *
+ * Dependencies:
+ * - React (useState, useEffect)
+ * - API helper (`api.js`) for data fetching
+ * - `ExitExperience` component for exit navigation
+ * - CSS module: `Gallery.css` for layout and styling
+ */
+
 export default function Gallery({ sessionId: propSessionId }) {
     // sessionId can come from router params or props. For quick test, try localStorage fallback.
     const urlId = (() => {
