@@ -4,6 +4,12 @@ import { useBgm } from "../../audio/AudioProvider.jsx";
 
 const storageKey = "tts_enabled";
 
+/**
+ * 
+ * @param {defaultEnabled} defaultEnabled 
+ * @param {duckLevel} duckLevel 
+ * @returns 
+ */
 export default function useTTS(defaultEnabled = true, duckLevel = 0.25) {
     // browser speech synth (null if not supported)
     const synth = typeof window !== "undefined" ? window.speechSynthesis : null;

@@ -1,6 +1,10 @@
 import React from "react";
 import "../../styles/VotingDisplay.css";
 
+/**
+ * Component to display voting progress and player statuses.
+ * @param {*} param0 
+ */
 const VotingDisplay = ({ voters = [], totalPlayers }) => {
   const votedCount = voters.filter((v) => v.hasVoted).length;
   const progress = (votedCount / totalPlayers) * 100;

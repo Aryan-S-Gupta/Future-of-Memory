@@ -103,7 +103,12 @@ const MultiplayerLobby = () => {
           navigate(`/background-multi/${pendingRoom}/${name}&mode=${mode}`);
         }
       } else {
+        if (data.message == "Player " + name + " already in room " + pendingRoom) {
+          setAlertMsg("This name is already taken in the room. Please choose a different name.");
+          return null;
+        }
         setAlertMsg("Unable to join the room. Please try again.");
+        return null;
       }
     } catch (err) {
       console.error(err);
