@@ -4,11 +4,14 @@ import { useBgm } from "../../audio/AudioProvider.jsx";
 
 const storageKey = "tts_enabled";
 
+
 /**
- * 
- * @param {defaultEnabled} defaultEnabled 
- * @param {duckLevel} duckLevel 
- * @returns 
+ * Custom hook for text-to-speech (TTS) functionality.
+ * Manages TTS state, voice selection, volume ducking, and browser speech synthesis.
+ *
+ * @param {boolean} defaultEnabled - Whether TTS should be enabled by default
+ * @param {number} duckLevel - Fraction to reduce BGM volume while speaking (0-1)
+ * @returns {Object} { speak, cancel, enabled, setEnabled, isSpeaking, supported }
  */
 export default function useTTS(defaultEnabled = true, duckLevel = 0.25) {
     // browser speech synth (null if not supported)

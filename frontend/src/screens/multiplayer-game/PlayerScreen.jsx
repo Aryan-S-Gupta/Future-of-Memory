@@ -1,51 +1,49 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getQuestion, submitChoice } from "../../../api/multiplayer/GameFlowApi.js";
-import { getRoomState } from "../../../api/multiplayer/RoomManagementApi.js";
+import { getQuestion, submitChoice, getVotingInfo, submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 import Button from "../../components/Button/Button.jsx";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import "../../styles/GamePlay.css";
 import { useSession } from "../../../SessionContext.jsx";
 import background from "../../assets/fallback_first_turn.png";
 import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
-import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
-import { getVotingInfo } from "../../../api/multiplayer/GameFlowApi.js";
-import { getTiebreakStatus } from "../../../api/multiplayer/GameFlowApi.js";
 import MiniGame from "../MiniGame.jsx";
-import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
-
-
+/**
+ * PlayerScreen component for multiplayer gameplay.
+ * Handles:
+ *  - Fetching and displaying questions and scenarios
+ *  - Managing player choices and votes
+ *  - Handling tie-breaker mini-games
+ *  - Integrating background music and text-to-speech narration
+ *  - Displaying loading and destroyed room states
+ * 
+ * @component
+ * @returns {JSX.Element} The PlayerScreen view for the current player.
+ */
 const PlayerScreen = () => {
-  const navigate = useNavigate()
   const { roomCode, playerName } = useParams();
-  const prevQuestionRef = useRef(null);
   const { sessionId } = useSession(); // <-- get session from context
   const [year, setYear] = useState(2035);
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
   const [loadingFacts, setLoadingFacts] = useState([]);
-  const [isReady, setIsReady] = useState(false);
   const [option_id, setOptionId] = useState(null);
   const [turn, setTurn] = useState(-1);
-  const [votes, setVotes] = useState([]);
-  const [totalPlayers, setTotalPlayers] = useState(1);
   const [score, setScore] = useState(null);
   const [factsFecthed, setFactsFetched] = useState(false);
   const [miniWinner, setMiniWinner] = useState(null);
-
   const [miniGameDone, setMiniGameDone] = useState(false);
 
   // --- Staged reveal for multiplayer ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
-  const fadeDuration = 2000;
   const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
@@ -124,8 +122,7 @@ const PlayerScreen = () => {
       if (votesCount >= totalCount) {
         setAllVoted(true);
       }
-      setVotes(mappedVotes);
-      setTotalPlayers(data.total_players);
+
       console.log(
         `[VotingQuery] Vote Progress: ${votesCount}/${totalCount} | All voted? ${allVoted}`
       );
@@ -147,6 +144,7 @@ const PlayerScreen = () => {
             setFactsFetched(true);
           }
         } else {
+          setFactsFetched(false);
           console.log("Scenario ready → show scenario");
           setOptionId(data.final_option);
           setScreen("scenario");
@@ -199,6 +197,7 @@ const PlayerScreen = () => {
       };
       console.log("Submit choice response:", mapped);
       setScreen("scenario");
+      setFactsFetched(false);
       setScenarioData(mapped);
       setOptionId(null);
       return out;
@@ -226,7 +225,6 @@ const PlayerScreen = () => {
   useEffect(() => {
     if (screen === "question") {
       console.log("[Animation] Resetting staged animation for new question");
-      setHasAnimated(false);
       setStage(0);
     }
   }, [currentTurn, screen])
@@ -296,7 +294,6 @@ const PlayerScreen = () => {
       )}
       {screen === "loading" && (
         <LoadingScreen
-          isReady={isReady}
           funFacts={loadingFacts}
           onContinue={() => {
             setScreen({ loadingState });

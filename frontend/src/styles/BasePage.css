@@ -23,6 +23,20 @@ body,
   /* predictable overlay stacking */
 }
 
+.ai-disclaimer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #ccc;
+  opacity: 0.8;
+}
+
+.ai-disclaimer p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+
 /* Background container sits behind content */
 .bg-layer {
   position: absolute;

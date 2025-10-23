@@ -256,62 +256,6 @@ def leave_multiplayer_room(request):
 
 
 @csrf_exempt
-def submit_choice(request):
-    data = json.loads(request.body.decode("utf-8"))
-    mode = data.get("mode")
-    return get_multiplayer_result(request)
-
-
-def get_multiplayer_result(data):
-    room_code = data.get("room_code")
-    player_name = data.get("player_name")
-    choice = data.get("choice")
-
-    room = rm.get_rooms[room_code]
-    player = room["players"].get[player_name]
-    player.last_choice = choice
-    player.save()
-
-    # check if all players have submitted
-    all_answered = all(p.last_choice for p in room.players.all())
-    outcome = None
-    if all_answered:
-        from collections import Counter
-
-        votes = [p.last_choice for p in room.players.all()]
-        outcome = Counter(votes).most_common(1)[0][0]
-        room.current_year += 1
-        room.save()
-    return JsonResponse({"all_answered": all_answered, "outcome": outcome})
-
-
-@csrf_exempt
-@require_POST
-def get_story_result(request):
-    """
-    Retrieves the user's selected choice for a given question. This is a post method
-    which means this is directly retrived from the user input
-    """
-    try:
-        body = json.loads(request.body.decode("utf-8"))
-    except json.JSONDecodeError:
-        return HttpResponseBadRequest("Invalid JSON")
-
-    year = body.get("year")
-    choice = body.get("choice")
-
-    if not year or not choice:
-        return HttpResponseBadRequest("Missing 'year' or 'choice' parameter.")
-
-    return JsonResponse(
-        {
-            "year": year,
-            "choice": choice,
-        }
-    )
-
-
-@csrf_exempt
 @require_POST
 def rag_retrieve(request):
     """
@@ -345,7 +289,6 @@ def get_voting_status_with_options(request, room_code, turn_id):
     return JsonResponse(payload)
 
 
-# need to call this somewhere - as soon as the game is created
 def create_session(request):
     """
     Create a new Session and return its ID as JSON.
@@ -361,11 +304,6 @@ def create_session(request):
     return JsonResponse({"session_id": session.id}, status=201)
 
 
-# intro page
-
-# need a call in background page - it starts gebnerating question and options and images and scenario
-
-
 def start_prerendering(request):
     year = int(request.GET.get("year"))
     session_id = request.GET.get("session_id")
@@ -379,9 +317,6 @@ def start_prerendering(request):
     logger.debug("start_turn_pipeline.send() called: " + response)
     return JsonResponse({"status": "generation_started"})
 
-
-# send the existing work
-# everytime this is called update turn id
 def display_question_and_options(request, session_id, room_code, turn_id, year):
     """
     Display the question and options for the current turn.
@@ -405,32 +340,7 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     existing_session = get_object_or_404(Session, id=session_id)
     logger.info(f"Found session: {existing_session}")
     logger.info(f"turn_id received: {turn_id}")
-    # latest_stored = latest_turn = (
-    #         Turn.objects
-    #         .filter(session_id=existing_session.id)
-    #         .order_by('-year', '-id')
-    #         .first()
-    #     )
-    # logger.info(f'latest stored turn id ={latest_stored}')
 
-    # if not rm.room_exists(room_code):
-    #     return JsonResponse({'success': False, 'room_exists': False})
-    
-    # if int(turn_id) == -1:
-    #     logger.info("year:" + year)
-    #     latest_turn = (
-    #         Turn.objects.filter(session_id=existing_session.id)
-    #         .order_by("-year", "-id")
-    #         .first()
-    #     )
-    #     # if the turn is not rrady yet
-    #     if not latest_turn:
-    #         logger.warning("No turns found for this session")
-    #         return JsonResponse({"error": "No turn found for this session"}, status=404)
-
-    # else:
-    #     # get specific turn by ID
-    #     new_turn = int(turn_id) + 1
     latest_turn = get_object_or_404(Turn, year=int(year),  session_id=session_id)
     logger.info(f'latest turn is; {latest_turn}')
         
@@ -471,9 +381,6 @@ def display_question_and_options(request, session_id, room_code, turn_id, year):
     }
 
     return JsonResponse(response_payload)
- 
-
-# scenario and image display page
 
 
 def display_scenario_and_image(
@@ -517,7 +424,6 @@ def display_scenario_and_image(
     if final_option is None: 
         final_option = VotingSessions[(room_code, int(current))].get_final_option()
         logger.info(f"Voting result is {final_option}")
-
 
 
     # Prepare vote tracking info

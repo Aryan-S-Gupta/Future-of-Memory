@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getQuestion, submitChoice } from "../../../api/multiplayer/GameFlowApi.js";
+import { getQuestion, submitChoice, getVotingInfo, submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 import Button from "../../components/Button/Button.jsx";
 import {useParams } from "react-router-dom";
 import "../../styles/GamePlay.css";
@@ -10,13 +10,53 @@ import { getFunFacts } from "../../../api/single-player/GameApi.js";
 import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
 import BasePage from "../BasePage.jsx";
 import { useBgm } from "../../audio/AudioProvider.jsx"; 
-import { useMemo, useRef } from "react";
 import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
 import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDisplay.jsx";
 import VotingDisplay from "../../components/Voting Display/VotingDisplay.jsx";
-import { getVotingInfo } from "../../../api/multiplayer/GameFlowApi";
-import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
+/**
+ * HostScreen Component
+ * ---------------------
+ * This component manages the host’s view and control flow for the multiplayer game session.
+ * It handles:
+ *  - Displaying the current scenario, question, and voting states
+ *  - Managing screen transitions (scenario → question → mini-game → winner)
+ *  - Fetching and submitting data via React Query (questions, votes, tiebreakers)
+ *  - Handling mini-game tie-break rounds and winner resolution
+ *  - Integrating text-to-speech narration synced with background music (BGM)
+ *  - Displaying loading screens, destroyed-room notifications, and fun facts
+ * 
+ * Core States:
+ *  - `screen`: determines which section to display (scenario, question, miniGameWait, miniGameWinner, etc.)
+ *  - `currentTurn`: stores current question and options for the turn
+ *  - `votes`, `totalPlayers`, `allVoted`: manage voting progress
+ *  - `scenarioData`: holds text and image of the current scenario outcome
+ *  - `option_id`: the winning choice ID from votes
+ *  - `winnerInfo`: stores the mini-game winner’s result (if a tie occurs)
+ * 
+ * React Query Usage:
+ *  - Fetches new questions (`getQuestion`) when ready
+ *  - Polls vote results (`getVotingInfo`) until all votes are received
+ *  - Submits the winning option to get the next scenario (`submitChoice`)
+ *  - Checks for tie-breaker results (`submitTiebreakScore`)
+ * 
+ * Audio Features:
+ *  - Narrates questions and scenarios using SpeechSynthesis
+ *  - Dynamically ducks background music volume while speaking
+ *  - Reacts to “play” events from the audio toolbar
+ * 
+ * Visual Flow:
+ *  - Scenario → Continue → Question → Voting → Next Scenario or Tie → Mini-game → Winner → Next Scenario
+ * 
+ * Related Components:
+ *  - `ExitExperience` — handles exit UI for leaving the room
+ *  - `VotingDisplay` — shows live voting progress
+ *  - `LoadingScreen` — shows loading + fun facts
+ *  - `RoomDestroyedPopup` — shown when the room no longer exists
+ * 
+ * @component
+ * @returns {JSX.Element} The host interface for managing a multiplayer game session.
+ */
  const HostScreen = () => {
   const { roomCode, playerName } = useParams(); 
   const displayRoomCode = (roomCode && /^\d+$/.test(roomCode)) ? String(roomCode).padStart(4, "0") : roomCode;
@@ -25,7 +65,6 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
   const [loadingFacts, setLoadingFacts] = useState([]);
-  const [isReady, setIsReady] = useState(false);
   const [option_id, setOptionId] = useState(null);
   const [turn, setTurn] = useState(-1);
   const [votes, setVotes] = useState([]);
@@ -36,8 +75,6 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
   // --- Staged reveal for multiplayer ---
   // 0 = nothing, 1 = question, 2 = option1, 3 = option2, 4 = final all
   const [stage, setStage] = useState(0);
-
-  const [hasAnimated, setHasAnimated] = useState(false);
   const [allVoted, setAllVoted] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
@@ -54,7 +91,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
 
   // --- Question Query ---
   // Fetches the question whenever we are on the "question" screen.
-  const {data: questionData} = useQuery ({
+  const { } = useQuery ({
     queryKey: ["question", roomCode, sessionId, turn, year], 
     queryFn: async() => {
         console.log("queryFn running for", year);
@@ -143,6 +180,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
           console.log("Scenario ready → show scenario");
           setScreen("scenario");
           setLoadingState("none")
+          setFactsFetched(false);
         }
       }
       return result;
@@ -190,7 +228,7 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
         image: out.image.url
       };
       console.log("Submit choice response:", mapped);
-
+        setFactsFetched(false);
         setScreen("scenario");
         setLoadingState("none")
         setScenarioData(mapped);
@@ -298,7 +336,6 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
   useEffect(() => {
     if (screen === "question") {
       console.log("[Animation] Resetting staged animation for new question");
-      setHasAnimated(false);
       setStage(0);
     }
   }, [currentTurn, screen])
@@ -432,7 +469,10 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
           // after 10s, resume story
           setTimeout(() => {
             setScreen("loading");
-            fetchFunFacts();
+            if (!factsFecthed) {
+              fetchFunFacts();
+              setFactsFetched(true);
+            }
             setLoadingState("scenario");
           }, 10000);
         }
@@ -455,7 +495,6 @@ import { submitTiebreakScore } from "../../../api/multiplayer/GameFlowApi.js";
       )}
       {screen === "loading" && (
         <LoadingScreen
-          isReady={isReady}
           funFacts={loadingFacts}
           onContinue={() => {
             setScreen({ loadingState });

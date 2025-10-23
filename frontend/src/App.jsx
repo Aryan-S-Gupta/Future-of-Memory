@@ -1,19 +1,18 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainGameScreen from "./screens/MainGameScreen.jsx";
-import BackgroundScreen from "./screens/BackgroundScreen.jsx";
-import BackgroundScreenMulti from "./screens/BackgroundScreenMulti.jsx";
+import BackgroundScreen from "./screens/single-player/BackgroundScreen.jsx";
+import BackgroundScreenMulti from "./screens/extra-feature/BackgroundScreenMulti.jsx";
 import HowToScreen from "./screens/HowToScreen.jsx";
-import GamePlay from "./screens/GamePlay.jsx";
-import MultiplayerLobby from "./screens/MultiPlayerLobby.jsx";
+import GamePlay from "./screens/single-player/GamePlay.jsx";
+import MultiplayerLobby from "./screens/multiplayer-game/MultiPlayerLobby.jsx";
 import GalleryScreen from "./screens/GalleryScreen.jsx";
-
 import '@fontsource/kanit/400.css';
 import '@fontsource/kanit/500.css';
-import PeerGame from "./screens/PeerGame.jsx";
-import HostScreen from "./screens/HostGame/HostScreen.jsx";
+import PeerGame from "./screens/extra-feature/PeerGame.jsx";
+import HostScreen from "./screens/multiplayer-game/HostScreen.jsx";
 import FeedbackScreen from "./components/FeedbackScreen/FeedbackScreen.jsx";
-import '@fontsource/orbitron/500.css'; // NEW
+import '@fontsource/orbitron/500.css';
 
 import BackgroundWrapper from "./screens/BasePage.jsx";
 import AudioProvider from "./audio/AudioProvider.jsx";
@@ -23,8 +22,8 @@ import MiniGame from "./screens/MiniGame.jsx";
 import MiniGameResult from "./screens/MiniGameResult.jsx";
 import galleryTheme from "./assets/DeepMeditation_DavidFesliyan.mp3";
 import { SessionProvider } from "../SessionContext.jsx";
-import HostBackgroundScreen from "./screens/HostGame/HostBackgroundScreen.jsx";
-import PlayerScreen from "./screens/HostGame/PlayerScreen.jsx";
+import HostBackgroundScreen from "./screens/multiplayer-game/HostBackgroundScreen.jsx";
+import PlayerScreen from "./screens/multiplayer-game/PlayerScreen.jsx";
 import IdleHomeReset from "./components/IdleHomeReset.jsx";
 
 function App() {

@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { listRooms, createRoom, joinRoom } from "../../api/multiplayer/RoomManagementApi.js";
-import "../styles/MultiplayerLobby.css"; // Import CSS for styling
-import Button from "../components/Button/Button.jsx";
-import BasePage from "./BasePage.jsx";
-import { useSession } from "../../SessionContext.jsx";
-import { startPrerender } from "../../api/single-player/GameApi.js";
+import { listRooms, createRoom, joinRoom } from "../../../api/multiplayer/RoomManagementApi.js";
+import "../../styles/MultiplayerLobby.css"; // Import CSS for styling
+import Button from "../../components/Button/Button.jsx";
+import BasePage from "../BasePage.jsx";
+import { useSession } from "../../../SessionContext.jsx";
+import { startPrerender } from "../../../api/single-player/GameApi.js";
 
 /**
  * MultiplayerLobby Component

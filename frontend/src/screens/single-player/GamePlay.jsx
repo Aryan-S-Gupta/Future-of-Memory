@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getQuestion, submitChoice, } from "../../api/single-player/GameApi";
-import { useSession } from "../../SessionContext.jsx";
-import background from "../assets/fallback_first_turn.png";
-import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
-import Button from "../components/Button/Button.jsx";
-import LoadingScreen from "../components/Loading/LoadingScreen.jsx";
-import BasePage from "./BasePage.jsx";
-import { useBgm } from "../audio/AudioProvider.jsx"; // <-- use bgm state/controls
+import { getQuestion, submitChoice, } from "../../../api/single-player/GameApi.js";
+import { useSession } from "../../../SessionContext.jsx";
+import background from "../../assets/fallback_first_turn.png";
+import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
+import Button from "../../components/Button/Button.jsx";
+import LoadingScreen from "../../components/Loading/LoadingScreen.jsx";
+import BasePage from "../BasePage.jsx";
+import { useBgm } from "../../audio/AudioProvider.jsx"; // <-- use bgm state/controls
 import { useMemo, useRef } from "react";
-import "../styles/GamePlay.css";
-import { getFunFacts } from "../../api/single-player/GameApi.js";
-import { useNavigate } from "react-router-dom";
-
+import "../../styles/GamePlay.css";
+import { getFunFacts } from "../../../api/single-player/GameApi.js";
 
 /**
  * GamePlay component
@@ -35,9 +33,9 @@ const GamePlay = () => {
   const [screen, setScreen] = useState("scenario"); // "scenario" or "question"
   const [currentTurn, setCurrentTurn] = useState(null);
   const [turn, setTurn] = useState(-1)
+  const [factsFecthed, setFactsFetched] = useState(false);
   const [loadingFacts, setLoadingFacts] = useState([]);
   const [option_id, setOptionId] = useState(null);
-  const [isReady, setIsReady] = useState(false);
   const [loadingState, setLoadingState] = useState("none")
   const [scenarioData, setScenarioData] = useState({
     scenario:
@@ -47,8 +45,6 @@ const GamePlay = () => {
     " ownership, and the commercialization of consciousness.",
     image: background // no image for the first one
   });
-
-  const navigate = useNavigate();
 
   // --- Tie narration to BGM ---
   const { isPlaying, volume, setVolume } = useBgm();
@@ -67,12 +63,16 @@ const GamePlay = () => {
         if (!result ) {
           setScreen("loading");
           setLoadingState("question");
-          await fetchFunFacts();
+          if (!factsFecthed) {
+            await fetchFunFacts();
+            setFactsFetched(true);
+          }
           console.log("loading at the moment");
           return null;
         } else {
           setCurrentTurn(result);
           setTurn(result.turn_id);
+          setFactsFetched(false);
           setScreen("question");
           setLoadingState("none")
           console.log("recieved question data: " + result);
@@ -266,17 +266,13 @@ const GamePlay = () => {
     setLoadingState("scenario")
     setOptionId(option_id);
     console.log("handleChoice called with option_id:", option_id);
-    await fetchFunFacts();
-
-
+    if (!factsFecthed) {
+      await fetchFunFacts();
+      setFactsFetched(true);
+    }
   };
 
-  const {
-    data: out,
-    isLoading: isTurnLoading,
-    error: turnError,
-    status: turnStatus,
-  } = useQuery({
+  const { } = useQuery({
     queryKey: ["scenario", currentTurn, sessionId, year, option_id],
     queryFn: async () => {
       console.log("submitting option", option_id);
@@ -284,7 +280,6 @@ const GamePlay = () => {
 
       if (!out.scenario || !out.scenario.text || !out.image?.url) {
         console.log("Scenario/image not ready yet...");
-  
         return null;
       } else if (out.scenario.text === scenarioData?.scenario) {
         console.log("Scenario/image unchanged, waiting...");
@@ -295,6 +290,7 @@ const GamePlay = () => {
         image: out.image.url
       };
       setScreen("scenario");
+      setFactsFetched(false);
       console.log("Submit choice response:", mapped);
       setScenarioData(mapped);
       setYear(year + 1);
@@ -331,18 +327,11 @@ const GamePlay = () => {
       console.error("Error fetching fun facts:", error);
     }
   }  
-  useEffect(() => {
-    if (year >= 2035 + 50) {
-      navigate(`/gallery/${sessionId}`);
-    }
-  }, [year, navigate, sessionId]);
-
   return (
     <BasePage>
       <ExitExperience code="-1" player="single-player" />
       {screen === "loading" && (
         <LoadingScreen
-          isReady={isReady}
           funFacts={loadingFacts}
           onContinue={() => {
             setScreen({loadingState});

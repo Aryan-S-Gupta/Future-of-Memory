@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "../components/Button/Button.jsx";
-import { submitMemoryScore } from "../../api/multiplayer/GameFlowApi.js";
 import "../styles/MemoryMiniGame.css";
 
+/**
+ * MiniGameResult component
+ * Displays the result screen after the memory mini-game is completed.
+ * Shows the player's name and score, and provides navigation back to the main menu.
+ */
 const MiniGameResult = () => {
   const { state } = useLocation();
   const navigate = useNavigate();

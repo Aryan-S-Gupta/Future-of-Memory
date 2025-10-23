@@ -106,6 +106,12 @@ const MainGameScreen = () => {
           </div>
         </div>
       </div>
+                <footer className="ai-disclaimer">
+            <p>
+              ⚠️ This experience contains AI-generated content. Some responses or story elements
+              may be simulated for creative or research purposes.
+            </p>
+          </footer>
     </BasePage >
   );
 };

@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import BasePage from "./BasePage.jsx";
-import Button from "../components/Button/Button.jsx";
-import "../styles/tokens.css";
-import ExitExperience from "../components/ExitExperience/ExitExperience.jsx";
-import { startPrerender } from "../../api/single-player/GameApi.js";
-import { useSession } from "../../SessionContext.jsx";
+import BasePage from "../BasePage.jsx";
+import Button from "../../components/Button/Button.jsx";
+import "../../styles/tokens.css";
+import ExitExperience from "../../components/ExitExperience/ExitExperience.jsx";
+import { startPrerender } from "../../../api/single-player/GameApi.js";
+import { useSession } from "../../../SessionContext.jsx";
 
 /**
  * BackgroundScreen component
