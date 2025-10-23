@@ -15,10 +15,16 @@ import RoomDestroyedPopup from "../../components/RoomDestroy/RoomDestroyedDispla
 import MiniGame from "../MiniGame.jsx";
 
 /**
- *  PlayerScreen component for multiplayer gameplay
-  * This component manages the player's view during a multiplayer game session,
-  * including scenario display, question answering, mini-games, and loading states.
- * @returns 
+ * PlayerScreen component for multiplayer gameplay.
+ * Handles:
+ *  - Fetching and displaying questions and scenarios
+ *  - Managing player choices and votes
+ *  - Handling tie-breaker mini-games
+ *  - Integrating background music and text-to-speech narration
+ *  - Displaying loading and destroyed room states
+ * 
+ * @component
+ * @returns {JSX.Element} The PlayerScreen view for the current player.
  */
 const PlayerScreen = () => {
   const { roomCode, playerName } = useParams();
